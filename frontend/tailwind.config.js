@@ -5,9 +5,7 @@ export default {
     ],
     theme: {
       extend: {
-        screens: {
-          'lg-custom': '1000px',
-        },
+        screens: {},
       },
     },
     plugins: [],
