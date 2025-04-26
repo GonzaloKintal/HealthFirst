@@ -1,7 +1,8 @@
 from django.urls import path
-from .views import MetricList, ChartDataList
+from .views import prueba
 
 urlpatterns = [
-    path('metrics/', MetricList.as_view()),
-    path('chart-data/', ChartDataList.as_view()),
+
+    path('prueba', prueba, name='prueba'),
+ 
 ]
