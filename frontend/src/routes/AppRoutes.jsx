@@ -4,7 +4,6 @@ import LoginPage from '../pages/auth/LoginPage';
 import ProtectedRoute from './ProtectedRoute';
 import RoleBasedRedirect from '../components/common/RoleBasedRedirect';
 
-// Importa tus dashboards existentes
 import AdminDashboard from '../pages/admin/AdminDashboard';
 import SupervisorDashboard from '../pages/supervisor/SupervisorDashboard';
 import EmployeeDashboard from '../pages/employee/EmployeeDashboard';

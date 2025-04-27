@@ -1,22 +1,21 @@
+
 import { Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
 import useAuth from '../../hooks/useAuth';
 
-const RoleBasedRedirect = ({ toDashboard = false }) => {
-  const { user } = useAuth();
+// Componente para redirección condicional
+const ConditionalRedirect = ({ user }) => {
+  return <Navigate to={user ? '/dashboard' : '/login'} replace />;
+};
+
+// Componente para redirección con efecto
+const EffectRedirect = ({ user }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Redirección inmediata (sin useEffect)
-  if (!toDashboard) {
-    const path = user ? '/dashboard' : '/login';
-    return <Navigate to={path} replace />;
-  }
-
-  // Redirección con useEffect (solo cuando toDashboard es true)
   useEffect(() => {
     if (!user) {
-      navigate('/login');
+      navigate('/login', { state: { from: location }, replace: true });
       return;
     }
 
@@ -27,11 +26,19 @@ const RoleBasedRedirect = ({ toDashboard = false }) => {
       analyst: '/analyst'
     };
 
-    navigate(routes[user.role] || '/login');
+    navigate(routes[user.role] || '/login', { replace: true });
   }, [user, navigate, location]);
 
-  // Mientras se decide la redirección
   return null;
+};
+
+// Componente principal
+const RoleBasedRedirect = ({ toDashboard = false }) => {
+  const { user } = useAuth();
+  
+  return toDashboard 
+    ? <EffectRedirect user={user} />
+    : <ConditionalRedirect user={user} />;
 };
 
 export default RoleBasedRedirect;
