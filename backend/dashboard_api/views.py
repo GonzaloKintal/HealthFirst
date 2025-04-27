@@ -25,7 +25,7 @@ def register_user(request):
             date_of_birth=data.get('date_of_birth'),
             email=data.get('email'),   
             phone=data.get('phone'),
-            user_type=data.get('user_user_type'),
+            user_type=data.get('user_type'),
             dni=data.get('dni')
         )
         
@@ -83,13 +83,13 @@ def users_list(request):
 
 @csrf_exempt
 @require_http_methods(["DELETE"])
-def delete_user(request,dni):
+def delete_user(request,id):
 
-    if not dni:
-        return JsonResponse({'error': 'El DNI es requerido.'}, status=400)
+    if not id:
+        return JsonResponse({'error': 'El id es requerido.'}, status=400)
 
     try:
-        user = HealthFirstUser.objects.get(dni=dni,is_deleted=False)
+        user = HealthFirstUser.objects.get(id=id,is_deleted=False)
         user.delete()
 
     except HealthFirstUser.DoesNotExist:
@@ -100,10 +100,10 @@ def delete_user(request,dni):
 
 @csrf_exempt
 @require_http_methods(["PUT"])
-def update_user(request, dni):
+def update_user(request, id):
     data= json.loads(request.body)
-    if not dni:
-        return JsonResponse({'error': 'El DNI es requerido.'}, status=400)
+    if not id:
+        return JsonResponse({'error': 'El ID es requerido.'}, status=400)
 
     try:
         first_name = data.get('first_name', None)
@@ -111,7 +111,7 @@ def update_user(request, dni):
         email = data.get('email', None)
         user_type = data.get('user_type', None)
 
-        user = HealthFirstUser.objects.get(dni=dni,is_deleted=False)
+        user = HealthFirstUser.objects.get(id=id,is_deleted=False)
 
         if first_name:
             user.first_name = first_name
