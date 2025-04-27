@@ -1,14 +1,18 @@
 import { useState } from 'react';
-import { FiUser, FiMail, FiLock, FiBriefcase, FiSave, FiX } from 'react-icons/fi';
+import { FiUser, FiMail, FiLock, FiBriefcase, FiSave } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
 import Notification from '../common/Notification';
 
 const AddUser = () => {
   const [formData, setFormData] = useState({
-    name: '',
+    firstName: '',
+    lastName: '',
+    dni: '',
     email: '',
     password: '',
     confirmPassword: '',
+    department: '',
+    position: '',
     role: 'employee'
   });
 
@@ -19,6 +23,17 @@ const AddUser = () => {
     { value: 'supervisor', label: 'Supervisor' },
     { value: 'analyst', label: 'Analista' },
     { value: 'employee', label: 'Empleado' }
+  ];
+
+  const departments = [
+    'Administración',
+    'Recursos Humanos',
+    'Tecnología',
+    'Operaciones',
+    'Ventas',
+    'Marketing',
+    'Finanzas',
+    'Legal'
   ];
 
   const handleChange = (e) => {
@@ -49,6 +64,14 @@ const AddUser = () => {
       });
       return;
     }
+
+    if (!/^\d{7,8}$/.test(formData.dni)) {
+      setNotification({
+        type: 'error',
+        message: 'El DNI debe tener 7 u 8 dígitos'
+      });
+      return;
+    }
   
     setNotification({
       type: 'success',
@@ -57,21 +80,17 @@ const AddUser = () => {
   
     setTimeout(() => {
       setFormData({
-        name: '',
+        firstName: '',
+        lastName: '',
+        dni: '',
         email: '',
         password: '',
         confirmPassword: '',
+        department: '',
+        position: '',
         role: 'employee'
       });
     }, 2000);
-  };
-  
-  const startAutoClose = () => {
-    const timer = setTimeout(() => {
-      setNotification(null);
-    }, 3000);
-  
-    return () => clearTimeout(timer);
   };
 
   return (
@@ -82,7 +101,7 @@ const AddUser = () => {
           type={notification.type}
           message={notification.message}
           onClose={() => setNotification(null)}
-          duration={3000} // 3 segundos
+          duration={3000}
         />
       )}
       
@@ -91,23 +110,81 @@ const AddUser = () => {
       </div>
       
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Sección de Información Básica */}
+        {/* Sección de Información Personal */}
         <div className="bg-white p-6 rounded-lg shadow">
           <h2 className="text-xl font-semibold mb-4 flex items-center">
-            <FiUser className="mr-2" /> Información Básica
+            <FiUser className="mr-2" /> Información Personal
           </h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Nombre Completo *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Nombre *</label>
               <input
                 type="text"
-                name="name"
-                value={formData.name}
+                name="firstName"
+                value={formData.firstName}
                 onChange={handleChange}
                 required
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Ej: Juan Pérez"
+                placeholder="Ej: Sergio"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Apellido *</label>
+              <input
+                type="text"
+                name="lastName"
+                value={formData.lastName}
+                onChange={handleChange}
+                required
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Ej: Pérez"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                DNI *
+              </label>
+              <input
+                type="text"
+                name="dni"
+                value={formData.dni}
+                onChange={handleChange}
+                required
+                pattern="\d{7,8}"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Ej: 12345678"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Departamento/Área *</label>
+              <select
+                name="department"
+                value={formData.department}
+                onChange={handleChange}
+                required
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="">Seleccionar departamento</option>
+                {departments.map(dept => (
+                  <option key={dept} value={dept}>{dept}</option>
+                ))}
+              </select>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Cargo/Puesto *</label>
+              <input
+                type="text"
+                name="position"
+                value={formData.position}
+                onChange={handleChange}
+                required
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Ej: Desarrollador Frontend"
               />
             </div>
             
@@ -188,13 +265,12 @@ const AddUser = () => {
 
         {/* Botones de acción */}
         <div className="flex justify-end space-x-3">
-
-            <Link
-                to="/users"
-                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 cursor-pointer"
-                    >
-                Cancelar
-            </Link>
+          <Link
+            to="/users"
+            className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 cursor-pointer"
+          >
+            Cancelar
+          </Link>
 
           <button
             type="submit"
