@@ -13,7 +13,9 @@ import MetricsPage from '../pages/analyst/MetricsPage';
 import LicensesPage from '../pages/supervisor/LicensesPage';
 import MyLicensesPage from '../pages/employee/MyLicensesPage';
 import RequestLicense from '../components/employee/RequestLicense';
+import EditLicense from '../components/employee/EditLicense';
 import AddUser from '../components/admin/AddUser';
+import EditUser from '../components/admin/EditUser';
 
 const AppRoutes = () => {
   return (
@@ -60,7 +62,7 @@ const AppRoutes = () => {
           } 
         />
 
-      <Route 
+        <Route 
           path="/add-user" 
           element={
             <ProtectedRoute allowedRoles={['admin']}>
@@ -68,6 +70,15 @@ const AppRoutes = () => {
             </ProtectedRoute>
           } 
         />
+
+      <Route 
+          path="/edit-user/:id" 
+          element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <EditUser />
+            </ProtectedRoute>
+          } 
+      />
         
 
         <Route 
@@ -101,7 +112,7 @@ const AppRoutes = () => {
         <Route 
           path="/my-licenses" 
           element={
-            <ProtectedRoute allowedRoles={['employee']}>
+            <ProtectedRoute allowedRoles={['employee', 'analyst']}>
               <MyLicensesPage />
             </ProtectedRoute>
           } 
@@ -110,11 +121,20 @@ const AppRoutes = () => {
         <Route 
           path="/request-license" 
           element={
-            <ProtectedRoute allowedRoles={['employee']}>
+            <ProtectedRoute allowedRoles={['employee', 'admin', 'supervisor', 'analyst']}>
               <RequestLicense />
             </ProtectedRoute>
           } 
         />
+
+      <Route 
+          path="/edit-license/:id" 
+          element={
+            <ProtectedRoute allowedRoles={['employee', 'admin', 'supervisor', 'analyst']}>
+              <EditLicense />
+            </ProtectedRoute>
+          } 
+      />
         
 
         <Route 

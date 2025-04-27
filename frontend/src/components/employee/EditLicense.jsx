@@ -1,14 +1,13 @@
-
-
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { FiCalendar, FiUpload, FiUser, FiFileText } from 'react-icons/fi';
+import { FiCalendar, FiUpload, FiUser, FiFileText, FiSave, FiX } from 'react-icons/fi';
+import { useParams, useNavigate } from 'react-router-dom';
 import useAuth from '../../hooks/useAuth';
 import Notification from '../common/Notification';
 
-const RequestLicense = () => {
-  const { user } = useAuth();
+const EditLicense = () => {
+  const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [formData, setFormData] = useState({
     licenseType: '',
     startDate: '',
@@ -19,6 +18,39 @@ const RequestLicense = () => {
   });
   const [calculatedDays, setCalculatedDays] = useState(0);
   const [notification, setNotification] = useState(null);
+  const [existingDocument, setExistingDocument] = useState(null);
+
+  // Simulamos la carga de los datos de la licencia a editar
+  useEffect(() => {
+    // Aquí deberías hacer una llamada API para obtener los datos de la licencia con el id
+    // Esto es un mock de los datos
+    const mockLicenseData = {
+      id: id,
+      licenseType: 'Vacaciones',
+      startDate: '2025-07-10',
+      endDate: '2025-07-20',
+      reason: 'Vacaciones programadas con anticipación',
+      documents: 'plan_vacaciones.pdf',
+      declaration: true
+    };
+
+    setFormData({
+      licenseType: mockLicenseData.licenseType,
+      startDate: mockLicenseData.startDate,
+      endDate: mockLicenseData.endDate,
+      reason: mockLicenseData.reason,
+      documents: null,
+      declaration: mockLicenseData.declaration
+    });
+    setExistingDocument(mockLicenseData.documents);
+    
+    // Calcular días
+    const start = new Date(mockLicenseData.startDate);
+    const end = new Date(mockLicenseData.endDate);
+    const diffTime = Math.abs(end - start);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+    setCalculatedDays(diffDays);
+  }, [id]);
 
   useEffect(() => {
     if (notification) {
@@ -30,14 +62,13 @@ const RequestLicense = () => {
     }
   }, [notification]);
 
-  // Datos personales con nombre y apellido separados
   const employeeData = {
     firstName: user?.firstName || 'Nombre',
     lastName: user?.lastName || 'Apellido',
     dni: user?.dni || '12345678',
     department: user?.department || 'Departamento',
     position: user?.position || 'Cargo',
-    hireDate: user?.hireDate || '2023-01-15'
+    hireDate: user?.hireDate || '2025-06-15'
   };
 
   const licenseTypes = [
@@ -68,7 +99,6 @@ const RequestLicense = () => {
           const start = new Date(newData.startDate);
           const end = new Date(newData.endDate);
           
-          // Validar que la fecha de fin no sea anterior a la de inicio
           if (end < start) {
             setNotification({
               type: 'error',
@@ -92,7 +122,6 @@ const RequestLicense = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     
-    // Validación adicional antes de enviar
     if (!formData.declaration) {
       setNotification({
         type: 'error',
@@ -116,35 +145,22 @@ const RequestLicense = () => {
     
     setNotification(null);
     
-    const isSuccess = Math.random() > 0.3;
+    // Simulamos el éxito de la actualización
+    setNotification({
+      type: 'success',
+      message: 'Tu solicitud de licencia ha sido actualizada correctamente.'
+    });
     
-    if (isSuccess) {
-      setNotification({
-        type: 'success',
-        message: 'Tu solicitud de licencia ha sido enviada correctamente.'
-      });
-      setFormData({
-        licenseType: '',
-        startDate: '',
-        endDate: '',
-        reason: '',
-        documents: null,
-        declaration: false
-      });
-      setCalculatedDays(0);
-      
-      // Redirigir después de que la notificación desaparezca (3 segundos)
-      setTimeout(() => {
-        navigate('/my-licenses');
-      }, 3000);
-    } else {
-      setNotification({
-        type: 'error',
-        message: 'Ocurrió un error al enviar tu solicitud.'
-      });
-    }
+    // Redirigir después de 2 segundos
+    setTimeout(() => {
+      navigate('/my-licenses');
+    }, 2000);
   };
 
+  const handleRemoveDocument = () => {
+    setFormData(prev => ({ ...prev, documents: null }));
+    setExistingDocument(null);
+  };
 
   return (
     <div className="p-6 max-w-3xl mx-auto relative">
@@ -157,7 +173,9 @@ const RequestLicense = () => {
         />
       )}
       
-      <h1 className="text-2xl font-bold mb-6">Solicitar Licencia</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">Editar Solicitud de Licencia</h1>
+      </div>
       
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Sección de Datos Personales */}
@@ -315,10 +333,27 @@ const RequestLicense = () => {
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Adjuntar Documento (opcional)
             </label>
+            
+            {existingDocument && !formData.documents && (
+              <div className="mb-3 p-3 bg-gray-50 rounded-md flex justify-between items-center">
+                <div className="flex items-center">
+                  <FiFileText className="text-gray-500 mr-2" />
+                  <span className="text-sm">{existingDocument}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleRemoveDocument}
+                  className="text-red-600 hover:text-red-800"
+                >
+                  <FiX size={18} />
+                </button>
+              </div>
+            )}
+            
             <div className="mt-1 flex items-center">
               <label className="cursor-pointer bg-white py-2 px-3 border border-gray-300 rounded-md shadow-sm text-sm leading-4 font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                 <FiFileText className="inline mr-2 text-lg" />
-                Seleccionar archivo
+                {formData.documents || existingDocument ? 'Cambiar archivo' : 'Seleccionar archivo'}
                 <input
                   type="file"
                   name="documents"
@@ -328,7 +363,8 @@ const RequestLicense = () => {
                 />
               </label>
               <span className="ml-2 text-sm text-gray-500">
-                {formData.documents ? formData.documents.name : 'Ningún archivo seleccionado'}
+                {formData.documents ? formData.documents.name : 
+                 existingDocument ? 'Documento existente' : 'Ningún archivo seleccionado'}
               </span>
             </div>
             <p className="mt-1 text-xs text-gray-500">
@@ -356,13 +392,21 @@ const RequestLicense = () => {
           </div>
         </div>
 
-        {/* Botón de envío */}
-        <div className="flex justify-end">
+        {/* Botones de acción */}
+        <div className="flex justify-end space-x-3">
+          <button
+            type="button"
+            onClick={() => navigate('/my-licenses')}
+            className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 cursor-pointer"
+          >
+            Cancelar
+          </button>
           <button
             type="submit"
-            className="cursor-pointer px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center cursor-pointer"
           >
-            Enviar Solicitud
+            <FiSave className="mr-2" />
+            Guardar Cambios
           </button>
         </div>
       </form>
@@ -370,4 +414,4 @@ const RequestLicense = () => {
   );
 };
 
-export default RequestLicense;
+export default EditLicense;

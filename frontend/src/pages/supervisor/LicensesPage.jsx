@@ -1,9 +1,10 @@
 
 
 import { useState, useEffect } from 'react';
-import { FiSearch, FiFilter, FiDownload, FiCheck, FiX, FiEdit, FiTrash2, FiEye, FiUser, FiCalendar, FiFileText } from 'react-icons/fi';
+import { FiSearch, FiFilter, FiDownload, FiCheck, FiX, FiEdit, FiTrash2, FiEye, FiUser, FiCalendar, FiFileText, FiPlus } from 'react-icons/fi';
 import useAuth from '../../hooks/useAuth';
 import Confirmation from '../../components/common/Confirmation';
+import { Link } from 'react-router-dom';
 
 const LicensesPage = () => {
   const { user } = useAuth();
@@ -23,7 +24,7 @@ const LicensesPage = () => {
       {
         id: 1,
         employee: 'Juan Pérez',
-        employeeId: 'EMP-001',
+        DNI: '123456',
         department: 'Ventas',
         position: 'Ejecutivo',
         type: 'Enfermedad',
@@ -38,7 +39,7 @@ const LicensesPage = () => {
       {
         id: 2,
         employee: 'María Gómez',
-        employeeId: 'EMP-002',
+        DNI: '123456',
         department: 'TI',
         position: 'Desarrolladora',
         type: 'Vacaciones',
@@ -53,7 +54,7 @@ const LicensesPage = () => {
       {
         id: 3,
         employee: 'Carlos Ruiz',
-        employeeId: 'EMP-003',
+        DNI: '123456',
         department: 'RH',
         position: 'Reclutador',
         type: 'Maternidad',
@@ -68,7 +69,7 @@ const LicensesPage = () => {
       {
         id: 4,
         employee: 'Ana López',
-        employeeId: 'EMP-004',
+        DNI: '123456',
         department: 'Contabilidad',
         position: 'Contadora',
         type: 'Doctor',
@@ -144,9 +145,9 @@ const LicensesPage = () => {
       {/* Modal de Detalle */}
       {isModalOpen && (
         <>
-          <div className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40"></div>
+          <div className="fixed inset-0 bg-black/30 backdrop-blur-sm z-10500"></div>
           
-          <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
+          <div className="fixed inset-0 flex items-center justify-center z-11000 p-4">
             <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
               <div className="border-b border-gray-200 p-4 flex justify-between items-center">
                 <h2 className="text-xl font-bold">Detalle de Licencia</h2>
@@ -185,9 +186,8 @@ const LicensesPage = () => {
                               value={rejectionReason}
                               onChange={(e) => setRejectionReason(e.target.value)}
                               placeholder="Ingrese el motivo del rechazo..."
-                              className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                              className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 resize-none"
                               rows={3}
-                              style={{ resize: 'nonne' }}
                             />
                             <div className="flex space-x-2">
                               <button
@@ -208,44 +208,60 @@ const LicensesPage = () => {
                       </div>
                     )}
 
-                    {/* Información del Empleado */}
+                    {/* Sección de Información del Empleado */}
                     <div className="bg-gray-50 p-4 rounded-lg">
                       <h3 className="font-medium text-lg mb-3 flex items-center">
                         <FiUser className="mr-2" /> Información del Empleado
                       </h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                          <p className="text-sm text-gray-500">Nombre</p>
+                          <p className="text-sm text-gray-500">Nombre completo</p>
                           <p className="font-medium">{selectedLicense.employee}</p>
                         </div>
                         <div>
-                          <p className="text-sm text-gray-500">ID Empleado</p>
-                          <p className="font-medium">{selectedLicense.employeeId}</p>
+                          <p className="text-sm text-gray-500">DNI</p>
+                          <p className="font-medium">{selectedLicense.DNI}</p>
                         </div>
                         <div>
-                          <p className="text-sm text-gray-500">Departamento</p>
+                          <p className="text-sm text-gray-500">Departamento/Área</p>
                           <p className="font-medium">{selectedLicense.department}</p>
                         </div>
                         <div>
-                          <p className="text-sm text-gray-500">Cargo</p>
+                          <p className="text-sm text-gray-500">Cargo/Puesto</p>
                           <p className="font-medium">{selectedLicense.position}</p>
                         </div>
                       </div>
                     </div>
 
-                    {/* Detalles de la Licencia */}
+                    {/* Sección de Detalles de la Licencia */}
                     <div className="bg-gray-50 p-4 rounded-lg">
                       <h3 className="font-medium text-lg mb-3 flex items-center">
                         <FiCalendar className="mr-2" /> Detalles de la Licencia
                       </h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                          <p className="text-sm text-gray-500">Tipo</p>
+                          <p className="text-sm text-gray-500">Tipo de Licencia</p>
                           <p className="font-medium capitalize">{selectedLicense.type}</p>
                         </div>
                         <div>
-                          <p className="text-sm text-gray-500">Días</p>
-                          <p className="font-medium">{selectedLicense.days}</p>
+                          <p className="text-sm text-gray-500">Estado</p>
+                          <div className="flex items-center">
+                            {selectedLicense.status === 'approved' ? (
+                              <FiCheck className="text-green-500 mr-1" />
+                            ) : selectedLicense.status === 'rejected' ? (
+                              <FiX className="text-red-500 mr-1" />
+                            ) : null}
+                            <span className={`font-medium ${
+                              selectedLicense.status === 'approved' 
+                                ? 'text-green-700' 
+                                : selectedLicense.status === 'rejected' 
+                                  ? 'text-red-700' 
+                                  : 'text-yellow-600'
+                            }`}>
+                              {selectedLicense.status === 'approved' ? 'Aprobada' : 
+                              selectedLicense.status === 'rejected' ? 'Rechazada' : 'Pendiente'}
+                            </span>
+                          </div>
                         </div>
                         <div>
                           <p className="text-sm text-gray-500">Fecha de Inicio</p>
@@ -256,36 +272,32 @@ const LicensesPage = () => {
                           <p className="font-medium">{selectedLicense.endDate}</p>
                         </div>
                         <div>
-                          <p className="text-sm text-gray-500">Solicitado el</p>
-                          <p className="font-medium">{selectedLicense.requestedOn}</p>
+                          <p className="text-sm text-gray-500">Días solicitados</p>
+                          <p className="font-medium">{selectedLicense.days} día(s)</p>
                         </div>
                         <div>
-                          <p className="text-sm text-gray-500">Estado</p>
-                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                            selectedLicense.status === 'approved' 
-                              ? 'bg-green-100 text-green-800' 
-                              : selectedLicense.status === 'rejected' 
-                                ? 'bg-red-100 text-red-800' 
-                                : 'bg-yellow-100 text-yellow-800'
-                          }`}>
-                            {selectedLicense.status === 'approved' ? 'Aprobada' : 
-                             selectedLicense.status === 'rejected' ? 'Rechazada' : 'Pendiente'}
-                          </span>
+                          <p className="text-sm text-gray-500">Fecha de solicitud</p>
+                          <p className="font-medium">{selectedLicense.requestedOn}</p>
                         </div>
                       </div>
                     </div>
 
-                    {/* Motivo y Documentos */}
+                    {/* Sección de Motivo y Documentos */}
                     <div className="space-y-4">
                       <div>
                         <p className="text-sm text-gray-500">Motivo</p>
-                        <p className="font-medium">{selectedLicense.reason}</p>
+                        <p className="font-medium whitespace-pre-line">{selectedLicense.reason}</p>
                       </div>
                       
                       <div>
-                        <p className="text-sm text-gray-500">Documentos adjuntos</p>
+                        <p className="text-sm text-gray-500">Documentación adjunta</p>
                         {selectedLicense.documents ? (
-                          <a href="#" className="text-blue-600 hover:text-blue-800 flex items-center">
+                          <a 
+                            href="#" 
+                            className="text-blue-600 hover:text-blue-800 flex items-center"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
                             <FiFileText className="mr-2" /> {selectedLicense.documents}
                           </a>
                         ) : (
@@ -296,8 +308,26 @@ const LicensesPage = () => {
                       {selectedLicense.rejectionReason && (
                         <div className="bg-red-50 p-3 rounded-md">
                           <p className="text-sm text-gray-500">Motivo de rechazo</p>
-                          <p className="text-red-600">{selectedLicense.rejectionReason}</p>
+                          <p className="text-red-600 whitespace-pre-line">{selectedLicense.rejectionReason}</p>
                         </div>
+                      )}
+                    </div>
+
+                    {/* Botones de acción */}
+                    <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+                      <button
+                        onClick={closeModal}
+                        className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 cursor-pointer"
+                      >
+                        Cerrar
+                      </button>
+                      {(selectedLicense.status !== 'pending' || user.role === 'admin') && (
+                        <Link
+                          to={`/edit-license/${selectedLicense.id}`}
+                          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center"
+                        >
+                          <FiEdit className="mr-2" /> Editar
+                        </Link>
                       )}
                     </div>
                   </div>
@@ -312,6 +342,13 @@ const LicensesPage = () => {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Gestión de Licencias</h1>
         <div className="flex space-x-3">
+          <Link
+            to="/request-license"
+            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+          >
+            <FiPlus className="mr-2" />
+            Solicitar Nueva
+          </Link>
           <button className="flex items-center px-4 py-2 bg-blue-600 text-white font-medium rounded-md cursor-pointer hover:bg-blue-700 transition duration-200">
             <FiDownload className="mr-2" />
             Exportar
@@ -398,13 +435,13 @@ const LicensesPage = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex space-x-3 justify-center">
-                      <button
-                        onClick={() => handleEdit(license.id)}
+                      <Link
+                        to={`/edit-license/${license.id}`}
                         className="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-50 cursor-pointer"
-                        title="Editar"
                       >
                         <FiEdit size={18} />
-                      </button>
+                      </Link>
+
                       <button 
                         onClick={() => handleDelete(license.id)}
                         className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50 cursor-pointer"
