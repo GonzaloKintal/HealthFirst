@@ -1,6 +1,7 @@
 
+
 import { useState, useEffect } from 'react';
-import { FiCalendar, FiUpload, FiUser, FiFileText, FiX, FiCheck, FiAlertTriangle } from 'react-icons/fi';
+import { FiCalendar, FiUpload, FiUser, FiFileText } from 'react-icons/fi';
 import useAuth from '../../hooks/useAuth';
 import Notification from '../common/Notification';
 
@@ -11,7 +12,8 @@ const RequestLicense = () => {
     startDate: '',
     endDate: '',
     reason: '',
-    documents: null
+    documents: null,
+    declaration: false
   });
   const [calculatedDays, setCalculatedDays] = useState(0);
   const [notification, setNotification] = useState(null);
@@ -26,10 +28,11 @@ const RequestLicense = () => {
     }
   }, [notification]);
 
-  // Datos personales simulados
+  // Datos personales con nombre y apellido separados
   const employeeData = {
-    fullName: user?.name || 'Nombre del Empleado',
-    employeeId: user?.id || 'ID-00123',
+    firstName: user?.firstName || 'Nombre',
+    lastName: user?.lastName || 'Apellido',
+    dni: user?.dni || '12345678', // DNI autocompletado
     department: user?.department || 'Departamento',
     position: user?.position || 'Cargo',
     hireDate: user?.hireDate || '2023-01-15'
@@ -37,27 +40,41 @@ const RequestLicense = () => {
 
   const licenseTypes = [
     'Vacaciones',
+    'Razones personales',
+    'Días administrativos',
+    'Cumpleaños',
+    'Día de estudio',
+    'Accidente de trabajo',
+    'Participación en asambleas',
+    'Nacimiento de un hijo',
     'Enfermedad',
-    'Asuntos personales',
-    'Maternidad/Paternidad',
-    'Duelo',
-    'Doctor',
-    'Otro'
+    'Licencia por matrimonio',
+    'Duelo por un familiar cercano'
   ];
 
   const handleChange = (e) => {
-    const { name, value, files } = e.target;
+    const { name, value, files, type, checked } = e.target;
     
     setFormData(prev => {
       const newData = {
         ...prev,
-        [name]: files ? files[0] : value
+        [name]: type === 'checkbox' ? checked : (files ? files[0] : value)
       };
       
       if (name === 'startDate' || name === 'endDate') {
         if (newData.startDate && newData.endDate) {
           const start = new Date(newData.startDate);
           const end = new Date(newData.endDate);
+          
+          // Validar que la fecha de fin no sea anterior a la de inicio
+          if (end < start) {
+            setNotification({
+              type: 'error',
+              message: 'La fecha de fin no puede ser anterior a la fecha de inicio.'
+            });
+            return prev;
+          }
+          
           const diffTime = Math.abs(end - start);
           const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
           setCalculatedDays(diffDays);
@@ -73,6 +90,28 @@ const RequestLicense = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     
+    // Validación adicional antes de enviar
+    if (!formData.declaration) {
+      setNotification({
+        type: 'error',
+        message: 'Debe aceptar la declaración para enviar la solicitud.'
+      });
+      return;
+    }
+
+    if (formData.startDate && formData.endDate) {
+      const start = new Date(formData.startDate);
+      const end = new Date(formData.endDate);
+      
+      if (end < start) {
+        setNotification({
+          type: 'error',
+          message: 'La fecha de fin no puede ser anterior a la fecha de inicio.'
+        });
+        return;
+      }
+    }
+    
     setNotification(null);
     
     const isSuccess = Math.random() > 0.3;
@@ -87,10 +126,10 @@ const RequestLicense = () => {
         startDate: '',
         endDate: '',
         reason: '',
-        documents: null
+        documents: null,
+        declaration: false
       });
       setCalculatedDays(0);
-
     } else {
       setNotification({
         type: 'error',
@@ -101,7 +140,6 @@ const RequestLicense = () => {
 
   return (
     <div className="p-6 max-w-3xl mx-auto relative">
-      
       {notification && (
         <Notification
           type={notification.type}
@@ -122,20 +160,32 @@ const RequestLicense = () => {
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Nombre Completo</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
               <input
                 type="text"
-                value={employeeData.fullName}
+                value={employeeData.firstName}
                 readOnly
                 className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50"
               />
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Número de Identificación</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Apellido</label>
               <input
                 type="text"
-                value={employeeData.employeeId}
+                value={employeeData.lastName}
+                readOnly
+                className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1 items-center">
+                  DNI
+              </label>
+              <input
+                type="text"
+                value={employeeData.dni}
                 readOnly
                 className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50"
               />
@@ -156,6 +206,16 @@ const RequestLicense = () => {
               <input
                 type="text"
                 value={employeeData.position}
+                readOnly
+                className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de Ingreso</label>
+              <input
+                type="text"
+                value={new Date(employeeData.hireDate).toLocaleDateString()}
                 readOnly
                 className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50"
               />
@@ -231,7 +291,7 @@ const RequestLicense = () => {
               onChange={handleChange}
               required
               rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 resize-none"
               placeholder="Describa el motivo de su solicitud..."
             />
           </div>
@@ -267,13 +327,32 @@ const RequestLicense = () => {
               Formatos aceptados: PDF, JPG, PNG (Máx. 10MB)
             </p>
           </div>
+
+          {/* Declaración y Confirmación */}
+          <div className="mt-6 p-4 bg-gray-50 rounded-md">
+            <h3 className="text-lg font-medium mb-2">Declaración y Confirmación</h3>
+            <p className="text-sm mb-3">
+              "Declaro que la información proporcionada es correcta y entiendo que la aprobación de esta licencia está sujeta a las políticas de la empresa."
+            </p>
+            <label className="inline-flex items-center">
+              <input
+                type="checkbox"
+                name="declaration"
+                checked={formData.declaration}
+                onChange={handleChange}
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                required
+              />
+              <span className="ml-2 text-sm text-gray-700">Acepto la declaración</span>
+            </label>
+          </div>
         </div>
 
         {/* Botón de envío */}
         <div className="flex justify-end">
           <button
             type="submit"
-            className="px-4 py-2 cursor-pointer bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
           >
             Enviar Solicitud
           </button>
