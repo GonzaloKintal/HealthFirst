@@ -1,5 +1,6 @@
 from xmlrpc.client import NOT_WELLFORMED_ERROR
 from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_http_methods
 from .models import HealthFirstUser
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
@@ -81,7 +82,7 @@ def users_list(request):
 
 
 @csrf_exempt
-@require_POST
+@require_http_methods(["DELETE"])
 def delete_user(request,dni):
 
     if not dni:
@@ -98,7 +99,7 @@ def delete_user(request,dni):
 
 
 @csrf_exempt
-@require_POST
+@require_http_methods(["PUT"])
 def update_user(request, dni):
     data= json.loads(request.body)
     if not dni:
