@@ -1,6 +1,338 @@
 
+// import { useState, useEffect } from 'react';
+// import { FiCalendar, FiUpload, FiUser, FiFileText } from 'react-icons/fi';
+// import useAuth from '../../hooks/useAuth';
+// import Notification from '../common/Notification';
+
+// const RequestLicense = () => {
+//   const { user } = useAuth();
+//   const [formData, setFormData] = useState({
+//     licenseType: '',
+//     startDate: '',
+//     endDate: '',
+//     reason: '',
+//     documents: null
+//   });
+//   const [calculatedDays, setCalculatedDays] = useState(0);
+//   const [notification, setNotification] = useState(null);
+
+//   useEffect(() => {
+//     if (notification) {
+//       const timer = setTimeout(() => {
+//         setNotification(null);
+//       }, 3000);
+      
+//       return () => clearTimeout(timer);
+//     }
+//   }, [notification]);
+
+//   // Datos personales con nombre y apellido separados
+//   const employeeData = {
+//     firstName: user?.firstName || 'Nombre',
+//     lastName: user?.lastName || 'Apellido',
+//     dni: user?.dni || '12345678', // DNI autocompletado
+//     department: user?.department || 'Departamento',
+//     position: user?.position || 'Cargo',
+//     hireDate: user?.hireDate || '2023-01-15'
+//   };
+
+//   const licenseTypes = [
+//     'Vacaciones',
+//     'Enfermedad',
+//     'Asuntos personales',
+//     'Maternidad/Paternidad',
+//     'Duelo',
+//     'Doctor',
+//     'Otro'
+//   ];
+
+//   const handleChange = (e) => {
+//     const { name, value, files } = e.target;
+    
+//     setFormData(prev => {
+//       const newData = {
+//         ...prev,
+//         [name]: files ? files[0] : value
+//       };
+      
+//       if (name === 'startDate' || name === 'endDate') {
+//         if (newData.startDate && newData.endDate) {
+//           const start = new Date(newData.startDate);
+//           const end = new Date(newData.endDate);
+          
+//           // Validar que la fecha de fin no sea anterior a la de inicio
+//           if (end < start) {
+//             setNotification({
+//               type: 'error',
+//               message: 'La fecha de fin no puede ser anterior a la fecha de inicio.'
+//             });
+//             return prev;
+//           }
+          
+//           const diffTime = Math.abs(end - start);
+//           const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+//           setCalculatedDays(diffDays);
+//         } else {
+//           setCalculatedDays(0);
+//         }
+//       }
+      
+//       return newData;
+//     });
+//   };
+
+//   const handleSubmit = (e) => {
+//     e.preventDefault();
+    
+//     // Validación adicional antes de enviar
+//     if (formData.startDate && formData.endDate) {
+//       const start = new Date(formData.startDate);
+//       const end = new Date(formData.endDate);
+      
+//       if (end < start) {
+//         setNotification({
+//           type: 'error',
+//           message: 'La fecha de fin no puede ser anterior a la fecha de inicio.'
+//         });
+//         return;
+//       }
+//     }
+    
+//     setNotification(null);
+    
+//     const isSuccess = Math.random() > 0.3;
+    
+//     if (isSuccess) {
+//       setNotification({
+//         type: 'success',
+//         message: 'Tu solicitud de licencia ha sido enviada correctamente.'
+//       });
+//       setFormData({
+//         licenseType: '',
+//         startDate: '',
+//         endDate: '',
+//         reason: '',
+//         documents: null
+//       });
+//       setCalculatedDays(0);
+//     } else {
+//       setNotification({
+//         type: 'error',
+//         message: 'Ocurrió un error al enviar tu solicitud.'
+//       });
+//     }
+//   };
+
+//   return (
+//     <div className="p-6 max-w-3xl mx-auto relative">
+//       {notification && (
+//         <Notification
+//           type={notification.type}
+//           message={notification.message}
+//           onClose={() => setNotification(null)}
+//           duration={3000}
+//         />
+//       )}
+      
+//       <h1 className="text-2xl font-bold mb-6">Solicitar Licencia</h1>
+      
+//       <form onSubmit={handleSubmit} className="space-y-6">
+//         {/* Sección de Datos Personales */}
+//         <div className="bg-white p-6 rounded-lg shadow">
+//           <h2 className="text-xl font-semibold mb-4 flex items-center">
+//             <FiUser className="mr-2" /> Datos Personales
+//           </h2>
+          
+//           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+//             <div>
+//               <label className="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
+//               <input
+//                 type="text"
+//                 value={employeeData.firstName}
+//                 readOnly
+//                 className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50"
+//               />
+//             </div>
+            
+//             <div>
+//               <label className="block text-sm font-medium text-gray-700 mb-1">Apellido</label>
+//               <input
+//                 type="text"
+//                 value={employeeData.lastName}
+//                 readOnly
+//                 className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50"
+//               />
+//             </div>
+            
+//             <div>
+//               <label className="block text-sm font-medium text-gray-700 mb-1 items-center">
+//                   DNI
+//               </label>
+//               <input
+//                 type="text"
+//                 value={employeeData.dni}
+//                 readOnly
+//                 className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50"
+//               />
+//             </div>
+            
+//             <div>
+//               <label className="block text-sm font-medium text-gray-700 mb-1">Departamento/Área</label>
+//               <input
+//                 type="text"
+//                 value={employeeData.department}
+//                 readOnly
+//                 className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50"
+//               />
+//             </div>
+            
+//             <div>
+//               <label className="block text-sm font-medium text-gray-700 mb-1">Cargo/Puesto</label>
+//               <input
+//                 type="text"
+//                 value={employeeData.position}
+//                 readOnly
+//                 className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50"
+//               />
+//             </div>
+            
+//             <div>
+//               <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de Ingreso</label>
+//               <input
+//                 type="text"
+//                 value={new Date(employeeData.hireDate).toLocaleDateString()}
+//                 readOnly
+//                 className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50"
+//               />
+//             </div>
+//           </div>
+//         </div>
+
+//         {/* Sección de Detalles de la Licencia */}
+//         <div className="bg-white p-6 rounded-lg shadow">
+//           <h2 className="text-xl font-semibold mb-4 flex items-center">
+//             <FiCalendar className="mr-2" /> Detalles de la Licencia
+//           </h2>
+          
+//           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+//             <div>
+//               <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de Licencia *</label>
+//               <select
+//                 name="licenseType"
+//                 value={formData.licenseType}
+//                 onChange={handleChange}
+//                 required
+//                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+//               >
+//                 <option value="">Seleccionar tipo</option>
+//                 {licenseTypes.map(type => (
+//                   <option key={type} value={type}>{type}</option>
+//                 ))}
+//               </select>
+//             </div>
+            
+//             <div>
+//               <label className="block text-sm font-medium text-gray-700 mb-1">Días Solicitados</label>
+//               <input
+//                 type="text"
+//                 value={calculatedDays > 0 ? `${calculatedDays} día(s)` : 'Se calculará automáticamente'}
+//                 readOnly
+//                 className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50"
+//               />
+//             </div>
+            
+//             <div>
+//               <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de Inicio *</label>
+//               <input
+//                 type="date"
+//                 name="startDate"
+//                 value={formData.startDate}
+//                 onChange={handleChange}
+//                 required
+//                 min={new Date().toISOString().split('T')[0]}
+//                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+//               />
+//             </div>
+            
+//             <div>
+//               <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de Fin *</label>
+//               <input
+//                 type="date"
+//                 name="endDate"
+//                 value={formData.endDate}
+//                 onChange={handleChange}
+//                 required
+//                 min={formData.startDate || new Date().toISOString().split('T')[0]}
+//                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+//               />
+//             </div>
+//           </div>
+          
+//           <div className="mt-4">
+//             <label className="block text-sm font-medium text-gray-700 mb-1">Motivo *</label>
+//             <textarea
+//               name="reason"
+//               value={formData.reason}
+//               onChange={handleChange}
+//               required
+//               rows={3}
+//               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 resize-none"
+//               placeholder="Describa el motivo de su solicitud..."
+              
+//             />
+//           </div>
+//         </div>
+
+//         {/* Sección de Documentación */}
+//         <div className="bg-white p-6 rounded-lg shadow">
+//           <h2 className="text-xl font-semibold mb-4 flex items-center">
+//             <FiUpload className="mr-2" /> Documentación Adjunta
+//           </h2>
+          
+//           <div>
+//             <label className="block text-sm font-medium text-gray-700 mb-1">
+//               Adjuntar Documento (opcional)
+//             </label>
+//             <div className="mt-1 flex items-center">
+//               <label className="cursor-pointer bg-white py-2 px-3 border border-gray-300 rounded-md shadow-sm text-sm leading-4 font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+//                 <FiFileText className="inline mr-2 text-lg" />
+//                 Seleccionar archivo
+//                 <input
+//                   type="file"
+//                   name="documents"
+//                   onChange={handleChange}
+//                   className="hidden"
+//                   accept=".pdf,.jpg,.jpeg,.png"
+//                 />
+//               </label>
+//               <span className="ml-2 text-sm text-gray-500">
+//                 {formData.documents ? formData.documents.name : 'Ningún archivo seleccionado'}
+//               </span>
+//             </div>
+//             <p className="mt-1 text-xs text-gray-500">
+//               Formatos aceptados: PDF, JPG, PNG (Máx. 10MB)
+//             </p>
+//           </div>
+//         </div>
+
+//         {/* Botón de envío */}
+//         <div className="flex justify-end">
+//           <button
+//             type="submit"
+//             className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+//           >
+//             Enviar Solicitud
+//           </button>
+//         </div>
+//       </form>
+//     </div>
+//   );
+// };
+
+// export default RequestLicense;
+
 import { useState, useEffect } from 'react';
-import { FiCalendar, FiUpload, FiUser, FiFileText, FiX, FiCheck, FiAlertTriangle } from 'react-icons/fi';
+import { FiCalendar, FiUpload, FiUser, FiFileText, FiCheck } from 'react-icons/fi';
 import useAuth from '../../hooks/useAuth';
 import Notification from '../common/Notification';
 
@@ -11,7 +343,8 @@ const RequestLicense = () => {
     startDate: '',
     endDate: '',
     reason: '',
-    documents: null
+    documents: null,
+    declaration: false
   });
   const [calculatedDays, setCalculatedDays] = useState(0);
   const [notification, setNotification] = useState(null);
@@ -26,10 +359,11 @@ const RequestLicense = () => {
     }
   }, [notification]);
 
-  // Datos personales simulados
+  // Datos personales con nombre y apellido separados
   const employeeData = {
-    fullName: user?.name || 'Nombre del Empleado',
-    employeeId: user?.id || 'ID-00123',
+    firstName: user?.firstName || 'Nombre',
+    lastName: user?.lastName || 'Apellido',
+    dni: user?.dni || '12345678', // DNI autocompletado
     department: user?.department || 'Departamento',
     position: user?.position || 'Cargo',
     hireDate: user?.hireDate || '2023-01-15'
@@ -37,27 +371,41 @@ const RequestLicense = () => {
 
   const licenseTypes = [
     'Vacaciones',
+    'Razones personales',
+    'Días administrativos',
+    'Cumpleaños',
+    'Día de estudio',
+    'Accidente de trabajo',
+    'Participación en asambleas',
+    'Nacimiento de un hijo',
     'Enfermedad',
-    'Asuntos personales',
-    'Maternidad/Paternidad',
-    'Duelo',
-    'Doctor',
-    'Otro'
+    'Licencia por matrimonio',
+    'Duelo por un familiar cercano'
   ];
 
   const handleChange = (e) => {
-    const { name, value, files } = e.target;
+    const { name, value, files, type, checked } = e.target;
     
     setFormData(prev => {
       const newData = {
         ...prev,
-        [name]: files ? files[0] : value
+        [name]: type === 'checkbox' ? checked : (files ? files[0] : value)
       };
       
       if (name === 'startDate' || name === 'endDate') {
         if (newData.startDate && newData.endDate) {
           const start = new Date(newData.startDate);
           const end = new Date(newData.endDate);
+          
+          // Validar que la fecha de fin no sea anterior a la de inicio
+          if (end < start) {
+            setNotification({
+              type: 'error',
+              message: 'La fecha de fin no puede ser anterior a la fecha de inicio.'
+            });
+            return prev;
+          }
+          
           const diffTime = Math.abs(end - start);
           const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
           setCalculatedDays(diffDays);
@@ -73,6 +421,28 @@ const RequestLicense = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     
+    // Validación adicional antes de enviar
+    if (!formData.declaration) {
+      setNotification({
+        type: 'error',
+        message: 'Debe aceptar la declaración para enviar la solicitud.'
+      });
+      return;
+    }
+
+    if (formData.startDate && formData.endDate) {
+      const start = new Date(formData.startDate);
+      const end = new Date(formData.endDate);
+      
+      if (end < start) {
+        setNotification({
+          type: 'error',
+          message: 'La fecha de fin no puede ser anterior a la fecha de inicio.'
+        });
+        return;
+      }
+    }
+    
     setNotification(null);
     
     const isSuccess = Math.random() > 0.3;
@@ -87,10 +457,10 @@ const RequestLicense = () => {
         startDate: '',
         endDate: '',
         reason: '',
-        documents: null
+        documents: null,
+        declaration: false
       });
       setCalculatedDays(0);
-
     } else {
       setNotification({
         type: 'error',
@@ -101,7 +471,6 @@ const RequestLicense = () => {
 
   return (
     <div className="p-6 max-w-3xl mx-auto relative">
-      
       {notification && (
         <Notification
           type={notification.type}
@@ -122,20 +491,32 @@ const RequestLicense = () => {
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Nombre Completo</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
               <input
                 type="text"
-                value={employeeData.fullName}
+                value={employeeData.firstName}
                 readOnly
                 className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50"
               />
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Número de Identificación</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Apellido</label>
               <input
                 type="text"
-                value={employeeData.employeeId}
+                value={employeeData.lastName}
+                readOnly
+                className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1 items-center">
+                  DNI
+              </label>
+              <input
+                type="text"
+                value={employeeData.dni}
                 readOnly
                 className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50"
               />
@@ -156,6 +537,16 @@ const RequestLicense = () => {
               <input
                 type="text"
                 value={employeeData.position}
+                readOnly
+                className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de Ingreso</label>
+              <input
+                type="text"
+                value={new Date(employeeData.hireDate).toLocaleDateString()}
                 readOnly
                 className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50"
               />
@@ -231,7 +622,7 @@ const RequestLicense = () => {
               onChange={handleChange}
               required
               rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 resize-none"
               placeholder="Describa el motivo de su solicitud..."
             />
           </div>
@@ -267,13 +658,32 @@ const RequestLicense = () => {
               Formatos aceptados: PDF, JPG, PNG (Máx. 10MB)
             </p>
           </div>
+
+          {/* Declaración y Confirmación */}
+          <div className="mt-6 p-4 bg-gray-50 rounded-md">
+            <h3 className="text-lg font-medium mb-2">Declaración y Confirmación</h3>
+            <p className="text-sm mb-3">
+              "Declaro que la información proporcionada es correcta y entiendo que la aprobación de esta licencia está sujeta a las políticas de la empresa."
+            </p>
+            <label className="inline-flex items-center">
+              <input
+                type="checkbox"
+                name="declaration"
+                checked={formData.declaration}
+                onChange={handleChange}
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                required
+              />
+              <span className="ml-2 text-sm text-gray-700">Acepto la declaración</span>
+            </label>
+          </div>
         </div>
 
         {/* Botón de envío */}
         <div className="flex justify-end">
           <button
             type="submit"
-            className="px-4 py-2 cursor-pointer bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
           >
             Enviar Solicitud
           </button>
