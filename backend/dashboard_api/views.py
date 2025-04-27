@@ -55,7 +55,7 @@ def users_list(request):
     page_number = data.get('page', 1)
     page_size = data.get('page_size', 4) 
 
-    if user_type and user_type not in HealthFirstUser.user_user_types():
+    if user_type and user_type not in HealthFirstUser.user_types():
         return JsonResponse({'error': 'El tipo de usuario no es válido.'}, status=400)
 
     try:
