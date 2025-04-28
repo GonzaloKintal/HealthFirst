@@ -38,7 +38,8 @@ const Sidebar = ({ isOpen }) => {
     ],
     analyst: [
       { text: 'Dashboard', icon: <Dashboard className="h-5 w-5" />, path: '/dashboard' },
-      { text: 'Indicadores', icon: <BarChart className="h-5 w-5" />, path: '/metrics' }
+      { text: 'Indicadores', icon: <BarChart className="h-5 w-5" />, path: '/metrics' },
+      { text: 'Mis Licencias', icon: <FileText className="h-5 w-5" />, path: '/my-licenses' }
     ]
   };
 

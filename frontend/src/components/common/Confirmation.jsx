@@ -41,9 +41,9 @@ const Confirmation = ({
 
   return (
     <>
-      <div className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40"></div>
+      <div className="fixed inset-0 bg-black/30 backdrop-blur-sm z-10500"></div>
       
-      <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
+      <div className="fixed inset-0 flex items-center justify-center z-11000 p-4">
         <div className={`bg-white rounded-lg shadow-xl max-w-md w-full ${currentStyle.bg}`}>
           <div className="p-6">
             <div className="flex flex-col items-center text-center">
