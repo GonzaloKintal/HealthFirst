@@ -5,7 +5,7 @@ from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 from django.utils.timezone import now
 
-user_types=[
+user_roles=[
     ('supervisor', 'Supervisor'),
     ('employee', 'Empleado'),
     ('analyst', 'Analista'),
@@ -31,6 +31,14 @@ class Role(models.Model):
 
     def __str__(self):
         return self.name
+
+    @classmethod
+    def get_or_create(cls, name):
+        if name not in dict(user_roles).keys():
+            raise ValidationError("El tipo de usuario no es válido.")
+        role, created = cls.objects.get_or_create(name=name)
+        return role
+
     
 
 class License(models.Model):
@@ -107,17 +115,13 @@ class HealthFirstUser(AbstractUser):
     date_of_birth = models.DateField(null=True, blank=True)
     email = models.EmailField(unique=True)
     phone=models.CharField(max_length=15,null=False, blank=False)
-    user_type=models.CharField(max_length=15, choices=user_types, default='employee')
-    dni=models.IntegerField(unique=True,null=False, blank=False)
+    dni=models.IntegerField(null=False, blank=False)
     is_deleted=models.BooleanField(default=False)
     delete_at=models.DateTimeField(null=True, blank=True,default=None)
 
     def save(self, *args, **kwargs):
-        if not self.username and self.dni:
-            self.username = str(self.dni)
-        
-        if self.user_type not in dict(user_types).keys():
-            raise ValidationError("El tipo de usuario no es válido.")
+        if (not self.username and self.email) or (self.username != self.email):
+            self.username = str(self.email)
         self.clean()
         super().save(*args, **kwargs)
 
@@ -127,13 +131,13 @@ class HealthFirstUser(AbstractUser):
         self.save()
 
     @classmethod
-    def user_types(cls):
-        return dict(user_types).keys()
+    def user_roles(cls):
+        return dict(user_roles).keys()
 
     @classmethod
-    def get_users(cls, user_type=None):
-        if user_type:
-            users= cls.objects.filter(user_type=user_type, is_deleted=False)
+    def get_users(cls, role_name=None):
+        if role_name:
+            users= cls.objects.filter(role__name=role_name, is_deleted=False)
         else:
             users=cls.objects.filter(is_deleted=False)
 
