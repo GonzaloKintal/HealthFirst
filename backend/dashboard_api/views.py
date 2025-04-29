@@ -5,7 +5,7 @@ from .models import *
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 import json
-from .serializers import HealthFirstUserSerializer
+from .serializers import HealthFirstUserSerializer, LicenseSerializer
 from django.db import IntegrityError
 from django.core.paginator import Paginator
 
@@ -137,3 +137,57 @@ def update_user(request, id):
 
     except Exception as e:
         return JsonResponse({'error': 'Ocurrio un error inesperado'}, status=500)
+
+
+# LICENSES API
+@csrf_exempt
+@require_http_methods(["POST"])
+def licenses_list(request):
+    try:
+        data = json.loads(request.body)
+
+        status_filter = data.get('status')
+        employee_name = data.get('employee_name', '').strip()
+        page_number = data.get('page', 1)
+        page_size = data.get('page_size', 10)
+
+        user = request.user
+        queryset = License.objects.filter(is_deleted=False) # Para no traer registros elimiandos
+
+        # Filtro por nombre de empleado
+        if employee_name:
+            queryset = queryset.filter(user__first_name__icontains=employee_name)
+
+        # Filtro por estados
+        if status_filter:
+            status_filter = status_filter.lower()
+            if status_filter == "approved":
+                queryset = queryset.filter(justified=True)
+            elif status_filter == "pending":
+                queryset = queryset.filter(justified=False, closing_date__isnull=True)
+            elif status_filter == "rejected":
+                queryset = queryset.filter(justified=False, closing_date__isnull=False)
+
+        # Filtro por rol
+        if hasattr(user, 'role') and user.role:
+            if user.role.name in ['analyst', 'employee']:
+                queryset = queryset.filter(user=user)
+
+        queryset = queryset.order_by('-start_date')
+
+        paginator = Paginator(queryset, page_size)
+        page = paginator.get_page(page_number)
+
+        serializer = LicenseSerializer(page.object_list, many=True)
+
+        return JsonResponse({
+            'licenses': serializer.data,
+            'total_pages': paginator.num_pages,
+            'current_page': page.number,
+            'total_licenses': paginator.count,
+        }, status=200)
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)    
+
+
