@@ -1,7 +1,7 @@
 from xmlrpc.client import NOT_WELLFORMED_ERROR
 from django.views.decorators.http import require_POST
 from django.views.decorators.http import require_http_methods
-from .models import HealthFirstUser, License
+from .models import *
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 import json
@@ -18,15 +18,18 @@ def register_user(request):
 
     try:
         data = json.loads(request.body)
-
+        role= Role.get_or_create(name=data.get('role_name'))
+        department,_ = Department.objects.get_or_create(name=data.get('department_name'))
+        
         user = HealthFirstUser(
             first_name=data.get('first_name'),
             last_name=data.get('last_name'),
+            role=role,
+            department=department,
             date_of_birth=data.get('date_of_birth'),
             email=data.get('email'),   
             phone=data.get('phone'),
-            user_type=data.get('user_type'),
-            dni=data.get('dni')
+            dni=data.get('dni'),
         )
         
         user.set_password(data.get('password'))
@@ -34,7 +37,7 @@ def register_user(request):
         user.save()
 
     except IntegrityError:
-        error_messages.append("El email o el DNI ya están registrados.")
+        error_messages.append("El email ya esta registrado.")
 
     except KeyError as e:
         error_messages.append(f"Falta el campo: {str(e)}")
@@ -51,15 +54,15 @@ def register_user(request):
 @require_POST
 def users_list(request):
     data = json.loads(request.body)
-    user_type = data.get('user_type', None)
+    role_name = data.get('role_name', None)
     page_number = data.get('page', 1)
-    page_size = data.get('page_size', 4) 
+    page_size = data.get('page_size', 10) 
 
-    if user_type and user_type not in HealthFirstUser.user_types():
+    if role_name and role_name not in HealthFirstUser.user_roles():
         return JsonResponse({'error': 'El tipo de usuario no es válido.'}, status=400)
 
     try:
-        users = HealthFirstUser.get_users(user_type)
+        users = HealthFirstUser.get_users(role_name)
 
         paginator = Paginator(users, page_size) 
 
@@ -109,22 +112,25 @@ def update_user(request, id):
         first_name = data.get('first_name', None)
         last_name = data.get('last_name', None)
         email = data.get('email', None)
-        user_type = data.get('user_type', None)
+        user_role= data.get('role_name', None)
 
         user = HealthFirstUser.objects.get(id=id,is_deleted=False)
-
+    
         if first_name:
             user.first_name = first_name
         if last_name:
             user.last_name = last_name
         if email:
             user.email = email
-        if user_type:
-            user.user_type = user_type
+        if user_role:
+            role = Role.get_or_create(name=user_role)
+            user.role = role
 
         user.save()
 
-        return JsonResponse({'ok': True}, status=200)    
+        return JsonResponse({'ok': True}, status=200)
+    except ValidationError:
+        return JsonResponse({'error': 'El tipo de usuario no es válido.'}, status=400)    
 
     except HealthFirstUser.DoesNotExist:
         return JsonResponse({'error': 'El usuario no existe.'}, status=404)
