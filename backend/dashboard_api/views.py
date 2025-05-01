@@ -244,7 +244,6 @@ def create_license(request):
                 # Almacenamos el archivo en base64
                 Certificate.objects.create(
                     license=license,
-                    path=certificate_data.get('path', ''),
                     file=file_data,  # Aquí guardamos el string base64
                     validation=certificate_data.get('validation', False),
                     upload_date=datetime.now(),
