@@ -1,3 +1,6 @@
+from datetime import datetime
+from django.utils.timezone import get_current_timezone
+from django.contrib.auth import get_user_model
 from xmlrpc.client import NOT_WELLFORMED_ERROR
 from django.views.decorators.http import require_POST
 from django.views.decorators.http import require_http_methods
@@ -191,3 +194,58 @@ def licenses_list(request):
         return JsonResponse({'error': str(e)}, status=500)    
 
 
+@csrf_exempt
+@require_http_methods(["POST"])
+def create_license(request):
+    try:
+        data = json.loads(request.body)
+
+        user_id = data.get('user_id')
+        license_type = data.get('type')
+        start_date = data.get('start_date')
+        end_date = data.get('end_date')
+        information = data.get('information', '')
+        certificate_data = data.get('certificate', None)
+
+        if not all([user_id, license_type, start_date, end_date]):
+            return JsonResponse({'error': 'user_id, type, start_date, end_date son requeridos.'}, status=400)
+
+        User = get_user_model()
+        try:
+            user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return JsonResponse({'error': 'Usuario no encontrado.'}, status=404)
+
+        start_date_parsed = datetime.strptime(start_date, '%Y-%m-%d').date()
+        end_date_parsed = datetime.strptime(end_date, '%Y-%m-%d').date()
+
+        if end_date_parsed < start_date_parsed:
+            return JsonResponse({'error': 'end_date no puede ser anterior a la start_date.'}, status=400)
+
+        required_days = (end_date_parsed - start_date_parsed).days + 1
+
+        license = License.objects.create(
+            user=user,
+            type=license_type,
+            start_date=start_date_parsed,
+            end_date=end_date_parsed,
+            required_days=required_days,
+            information=information,
+            request_date=datetime.now(),
+            justified=False,
+        )
+
+        if certificate_data:
+            Certificate.objects.create(
+                license=license,
+                path=certificate_data.get('path', ''),
+                validation=certificate_data.get('validation', False),
+                upload_date=datetime.now(),
+                is_deleted=False,
+                deleted_at=None
+            )
+
+        return JsonResponse({'message': 'Licencia solicitada exitosamente.'}, status=200)
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
