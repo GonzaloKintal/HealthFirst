@@ -17,6 +17,7 @@ const LicensesPage = () => {
   const [showRejectionInput, setShowRejectionInput] = useState(false);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [licenseToDelete, setLicenseToDelete] = useState(null)
+  const canShowActions = ['admin', 'supervisor'].includes(user?.role);
 
   // Datos de ejemplo
   useEffect(() => {
@@ -163,7 +164,7 @@ const LicensesPage = () => {
                 {selectedLicense && (
                   <div className="space-y-6">
                     {/* Sección de Acciones */}
-                    {selectedLicense.status === 'pending' && (
+                    {selectedLicense.status === 'pending' && canShowActions && (
                       <div className="flex flex-col space-y-3 pb-4 border-b border-gray-200">
                         <div className="flex space-x-3">
                           <button
@@ -321,7 +322,7 @@ const LicensesPage = () => {
                       >
                         Cerrar
                       </button>
-                      {(selectedLicense.status !== 'pending' || user.role === 'admin') && (
+                      {(selectedLicense.status !== 'pending' || user.role === 'admin') && canShowActions && (
                         <Link
                           to={`/edit-license/${selectedLicense.id}`}
                           className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center"
@@ -396,7 +397,9 @@ const LicensesPage = () => {
                 <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Días</th>
                 <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
                 <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Detalle</th>
-                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                {canShowActions && (
+                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                )}
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -433,7 +436,7 @@ const LicensesPage = () => {
                       <span>Detalle</span>
                     </button>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  {/* <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex space-x-3 justify-center">
                       <Link
                         to={`/edit-license/${license.id}`}
@@ -450,7 +453,27 @@ const LicensesPage = () => {
                         <FiTrash2 size={18} />
                       </button>
                     </div>
-                  </td>
+                  </td> */}
+                   {canShowActions && (
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex space-x-3 justify-center">
+                        <Link
+                          to={`/edit-license/${license.id}`}
+                          className="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-50 cursor-pointer"
+                        >
+                          <FiEdit size={18} />
+                        </Link>
+
+                        <button 
+                          onClick={() => handleDelete(license.id)}
+                          className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50 cursor-pointer"
+                          title="Eliminar"
+                        >
+                          <FiTrash2 size={18} />
+                        </button>
+                      </div>
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>
