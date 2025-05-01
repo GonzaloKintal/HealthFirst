@@ -9,6 +9,6 @@ urlpatterns = [
 
     path('licenses', licenses_list,name='licenses_list'),
     path('licenses/request', create_license, name='create_license'),
-
+    path('licenses/<int:id>', delete_license, name='delete-license'),
      
 ]
