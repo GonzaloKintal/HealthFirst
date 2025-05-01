@@ -1,5 +1,6 @@
 import base64
 from django.core.files.base import ContentFile
+from django.utils import timezone
 from datetime import datetime
 from django.utils.timezone import get_current_timezone
 from django.contrib.auth import get_user_model
@@ -255,3 +256,20 @@ def create_license(request):
 
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+
+
+@csrf_exempt
+@require_http_methods(["DELETE"])
+def delete_license(request, id):
+    if not id:
+        return JsonResponse({'error': 'El ID es requerido.'}, status=400)
+
+    try:
+        license_obj = License.objects.get(license_id=id, is_deleted=False)
+        license_obj.is_deleted = True
+        license_obj.deleted_at = timezone.now()
+        license_obj.save()
+        return JsonResponse({'message': 'Licencia eliminada correctamente.'}, status=200)
+
+    except License.DoesNotExist:
+        return JsonResponse({'error': 'La licencia no existe.'}, status=404)
