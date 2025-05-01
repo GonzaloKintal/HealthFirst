@@ -126,7 +126,7 @@ const AddUser = () => {
                 onChange={handleChange}
                 required
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Ej: Sergio"
+                placeholder="Ej: Luis"
               />
             </div>
             

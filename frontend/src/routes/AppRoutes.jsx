@@ -10,8 +10,8 @@ import EmployeeDashboard from '../pages/employee/EmployeeDashboard';
 import AnalystDashboard from '../pages/analyst/AnalystDashboard';
 import UsersPage from '../pages/admin/UsersPage';
 import MetricsPage from '../pages/analyst/MetricsPage';
+import MachineLearningPage from '../pages/analyst/MachineLearningPage';
 import LicensesPage from '../pages/supervisor/LicensesPage';
-import MyLicensesPage from '../pages/employee/MyLicensesPage';
 import RequestLicense from '../components/employee/RequestLicense';
 import EditLicense from '../components/employee/EditLicense';
 import AddUser from '../components/admin/AddUser';
@@ -93,7 +93,7 @@ const AppRoutes = () => {
         <Route 
           path="/licenses" 
           element={
-            <ProtectedRoute allowedRoles={['supervisor', 'admin']}>
+            <ProtectedRoute allowedRoles={['supervisor', 'admin', 'analyst', 'employee']}>
               <LicensesPage />
             </ProtectedRoute>
           } 
@@ -109,14 +109,14 @@ const AppRoutes = () => {
           } 
         />
 
-        <Route 
+        {/* <Route 
           path="/my-licenses" 
           element={
             <ProtectedRoute allowedRoles={['employee', 'analyst']}>
               <MyLicensesPage />
             </ProtectedRoute>
           } 
-        />
+        /> */}
 
         <Route 
           path="/request-license" 
@@ -146,7 +146,6 @@ const AppRoutes = () => {
           } 
         />
         
-        {/* Rutas compartidas */}
         <Route 
           path="/metrics" 
           element={
@@ -155,7 +154,19 @@ const AppRoutes = () => {
             </ProtectedRoute>
           } 
         />
+
+        <Route 
+          path="/ml-model" 
+          element={
+            <ProtectedRoute allowedRoles={['admin', 'analyst']}>
+              <MachineLearningPage />
+            </ProtectedRoute>
+          } 
+        />
+
       </Route>
+
+        
       
       <Route path="*" element={<div>Página no encontrada</div>} />
     </Routes>

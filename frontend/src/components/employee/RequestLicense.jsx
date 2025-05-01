@@ -1,7 +1,7 @@
 
 
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { FiCalendar, FiUpload, FiUser, FiFileText } from 'react-icons/fi';
 import useAuth from '../../hooks/useAuth';
 import Notification from '../common/Notification';
@@ -357,7 +357,13 @@ const RequestLicense = () => {
         </div>
 
         {/* Botón de envío */}
-        <div className="flex justify-end">
+        <div className="flex justify-end space-x-3">
+          <Link
+            to={user?.role === 'admin' || user?.role === 'supervisor' ? '/licenses' : '/my-licenses'}
+            className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 cursor-pointer"
+          >
+            Cancelar
+          </Link>
           <button
             type="submit"
             className="cursor-pointer px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
