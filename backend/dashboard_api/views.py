@@ -1,3 +1,5 @@
+import base64
+from django.core.files.base import ContentFile
 from datetime import datetime
 from django.utils.timezone import get_current_timezone
 from django.contrib.auth import get_user_model
@@ -236,14 +238,19 @@ def create_license(request):
         )
 
         if certificate_data:
-            Certificate.objects.create(
-                license=license,
-                path=certificate_data.get('path', ''),
-                validation=certificate_data.get('validation', False),
-                upload_date=datetime.now(),
-                is_deleted=False,
-                deleted_at=None
-            )
+            # Obtención del archivo en base64
+            file_data = certificate_data.get('file', None)
+            if file_data:
+                # Almacenamos el archivo en base64
+                Certificate.objects.create(
+                    license=license,
+                    path=certificate_data.get('path', ''),
+                    file=file_data,  # Aquí guardamos el string base64
+                    validation=certificate_data.get('validation', False),
+                    upload_date=datetime.now(),
+                    is_deleted=False,
+                    deleted_at=None
+                )
 
         return JsonResponse({'message': 'Licencia solicitada exitosamente.'}, status=200)
 

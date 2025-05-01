@@ -75,22 +75,23 @@ class License(models.Model):
         # Si cambió el estado de is_deleted a True
         if not is_new and old_is_deleted is False and self.is_deleted is True:
             try:
-                certificado = self.certificado
-                certificado.is_deleted = True
-                certificado.deleted_at = timezone.now()
-                certificado.save()
+                certificate = self.certificate
+                certificate.is_deleted = True
+                certificate.deleted_at = timezone.now()
+                certificate.save()
             except Certificate.DoesNotExist:
                 pass  # No tiene certificado, no hacemos nada
 
 
 class Certificate(models.Model):
     certificate_id = models.AutoField(primary_key=True)
-    license = models.OneToOneField('License', on_delete=models.CASCADE, related_name='certificate')
-    path = models.CharField(max_length=255)
+    license = models.OneToOneField(License, on_delete=models.CASCADE, related_name='certificate')
+    path = models.CharField(max_length=255, blank=True, null=True)
+    file = models.TextField(blank=True, null=True)
     validation = models.BooleanField(default=False)
-    upload_date = models.DateField()
+    upload_date = models.DateTimeField(auto_now_add=True)
     is_deleted = models.BooleanField(default=False)
-    deleted_at = models.DateTimeField(blank=True, null=True)
+    deleted_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return f"Certificado {self.certificate_id} - Licencia {self.license.license_id}"
