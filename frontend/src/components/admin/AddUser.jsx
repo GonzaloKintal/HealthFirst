@@ -1,22 +1,27 @@
+
 import { useState } from 'react';
-import { FiUser, FiMail, FiLock, FiBriefcase, FiSave } from 'react-icons/fi';
-import { Link } from 'react-router-dom';
+import { FiUser, FiSave, FiBriefcase, FiLock } from 'react-icons/fi';
+import { Link, useNavigate } from 'react-router-dom';
 import Notification from '../common/Notification';
+import { addUser } from '../../services/userService';
 
 const AddUser = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
+    first_name: '',
+    last_name: '',
     dni: '',
-    email: '',
     password: '',
     confirmPassword: '',
-    department: '',
-    position: '',
-    role: 'employee'
+    email: '',
+    phone: '',
+    date_of_birth: '',
+    department_name: '',
+    role_name: 'employee'
   });
 
   const [notification, setNotification] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const roles = [
     { value: 'admin', label: 'Administrador' },
@@ -43,59 +48,87 @@ const AddUser = () => {
       [name]: value
     }));
   };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    
-    setNotification(null);
   
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setNotification(null);
+    setIsSubmitting(true);
+  
+    // Validación de contraseñas
     if (formData.password !== formData.confirmPassword) {
       setNotification({
         type: 'error',
         message: 'Las contraseñas no coinciden'
       });
+      setIsSubmitting(false);
       return;
     }
   
+    // Validación de longitud mínima de contraseña
     if (formData.password.length < 6) {
       setNotification({
         type: 'error',
         message: 'La contraseña debe tener al menos 6 caracteres'
       });
+      setIsSubmitting(false);
       return;
     }
-
-    if (!/^\d{7,8}$/.test(formData.dni)) {
+  
+    try {
+      // Preparamos los datos para enviar (sin confirmPassword)
+      const userData = {
+        ...formData,
+        confirmPassword: undefined // Eliminamos este campo del objeto a enviar
+      };
+      delete userData.confirmPassword;
+  
+      // Llamada al servicio para agregar usuario
+      await addUser(userData);
+      
+      setNotification({
+        type: 'success',
+        message: 'Usuario creado exitosamente'
+      });
+  
+      // Limpiar formulario después de 2 segundos y redirigir
+      setTimeout(() => {
+        setFormData({
+          first_name: '',
+          last_name: '',
+          dni: '',
+          password: '',
+          confirmPassword: '',
+          email: '',
+          phone: '',
+          date_of_birth: '',
+          department_name: '',
+          role_name: 'employee'
+        });
+        navigate('/users');
+      }, 2000);
+    } catch (error) {
+      console.error('Error al crear usuario:', error);
+      let errorMessage = 'Error al crear el usuario';
+      
+      if (error.response) {
+        if (error.response.data && error.response.data.message) {
+          errorMessage = error.response.data.message;
+        } else if (error.response.status === 409) {
+          errorMessage = 'El email o DNI ya están registrados';
+        }
+      }
+      
       setNotification({
         type: 'error',
-        message: 'El DNI debe tener 7 u 8 dígitos'
+        message: errorMessage
       });
-      return;
+    } finally {
+      setIsSubmitting(false);
     }
-  
-    setNotification({
-      type: 'success',
-      message: 'Usuario creado exitosamente'
-    });
-  
-    setTimeout(() => {
-      setFormData({
-        firstName: '',
-        lastName: '',
-        dni: '',
-        email: '',
-        password: '',
-        confirmPassword: '',
-        department: '',
-        position: '',
-        role: 'employee'
-      });
-    }, 2000);
   };
 
   return (
     <div className="p-6 max-w-3xl mx-auto relative">
-      
       {notification && (
         <Notification 
           type={notification.type}
@@ -121,8 +154,8 @@ const AddUser = () => {
               <label className="block text-sm font-medium text-gray-700 mb-1">Nombre *</label>
               <input
                 type="text"
-                name="firstName"
-                value={formData.firstName}
+                name="first_name"
+                value={formData.first_name}
                 onChange={handleChange}
                 required
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
@@ -134,8 +167,8 @@ const AddUser = () => {
               <label className="block text-sm font-medium text-gray-700 mb-1">Apellido *</label>
               <input
                 type="text"
-                name="lastName"
-                value={formData.lastName}
+                name="last_name"
+                value={formData.last_name}
                 onChange={handleChange}
                 required
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
@@ -160,31 +193,28 @@ const AddUser = () => {
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Departamento/Área *</label>
-              <select
-                name="department"
-                value={formData.department}
+              <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de Nacimiento *</label>
+              <input
+                type="date"
+                name="date_of_birth"
+                value={formData.date_of_birth}
                 onChange={handleChange}
                 required
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="">Seleccionar departamento</option>
-                {departments.map(dept => (
-                  <option key={dept} value={dept}>{dept}</option>
-                ))}
-              </select>
+              />
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Cargo/Puesto *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Teléfono *</label>
               <input
-                type="text"
-                name="position"
-                value={formData.position}
+                type="tel"
+                name="phone"
+                value={formData.phone}
                 onChange={handleChange}
                 required
+                pattern="\d{10,15}"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Ej: Desarrollador Frontend"
+                placeholder="Ej: 1123456789"
               />
             </div>
             
@@ -200,19 +230,35 @@ const AddUser = () => {
                 placeholder="Ej: usuario@empresa.com"
               />
             </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Departamento *</label>
+              <select
+                name="department_name"
+                value={formData.department_name}
+                onChange={handleChange}
+                required
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="">Seleccionar departamento</option>
+                {departments.map(dept => (
+                  <option key={dept} value={dept}>{dept}</option>
+                ))}
+              </select>
+            </div>
           </div>
         </div>
 
-        {/* Sección de Credenciales */}
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h2 className="text-xl font-semibold mb-4 flex items-center">
-            <FiLock className="mr-2" /> Credenciales de Acceso
-          </h2>
+         {/* Sección de Credenciales */}
+         <div className="bg-white p-6 rounded-lg shadow">
+           <h2 className="text-xl font-semibold mb-4 flex items-center">
+             <FiLock className="mr-2" /> Credenciales de Acceso
+           </h2>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Contraseña *</label>
-              <input
+           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+             <div>
+               <label className="block text-sm font-medium text-gray-700 mb-1">Contraseña *</label>
+               <input
                 type="password"
                 name="password"
                 value={formData.password}
@@ -247,8 +293,8 @@ const AddUser = () => {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Rol del Usuario *</label>
             <select
-              name="role"
-              value={formData.role}
+              name="role_name"
+              value={formData.role_name}
               onChange={handleChange}
               required
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
@@ -274,10 +320,13 @@ const AddUser = () => {
 
           <button
             type="submit"
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center cursor-pointer"
+            className={`px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center ${
+              isSubmitting ? 'opacity-70 cursor-not-allowed' : 'cursor-pointer'
+            }`}
+            disabled={isSubmitting}
           >
             <FiSave className="mr-2" />
-            Guardar Usuario
+            {isSubmitting ? 'Guardando...' : 'Guardar Usuario'}
           </button>
         </div>
       </form>

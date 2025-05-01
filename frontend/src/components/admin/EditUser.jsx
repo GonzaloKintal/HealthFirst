@@ -1,26 +1,27 @@
 import { useState, useEffect } from 'react';
-import { FiUser, FiMail, FiLock, FiBriefcase, FiSave, FiX } from 'react-icons/fi';
+import { FiUser, FiMail, FiLock, FiBriefcase, FiSave } from 'react-icons/fi';
 import { useParams, useNavigate } from 'react-router-dom';
 import Notification from '../common/Notification';
+import { editUser } from '../../services/userService';
 
 const EditUser = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
+    first_name: '',
+    last_name: '',
     dni: '',
     email: '',
     password: '',
     confirmPassword: '',
-    department: '',
+    department_name: '',
     position: '',
-    role: 'employee'
+    role_name: 'employee'
   });
   const [notification, setNotification] = useState(null);
   const [isEditingPassword, setIsEditingPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Datos de ejemplo para roles y departamentos
   const roles = [
     { value: 'admin', label: 'Administrador' },
     { value: 'supervisor', label: 'Supervisor' },
@@ -39,26 +40,39 @@ const EditUser = () => {
     'Legal'
   ];
 
-  // Simulamos la carga de datos del usuario a editar
   useEffect(() => {
-    // Aquí deberías hacer una llamada API para obtener los datos del usuario con el id
-    // Esto es un mock de los datos
-    const mockUserData = {
-      id: id,
-      firstName: 'Juan',
-      lastName: 'Pérez',
-      dni: '12345678',
-      email: 'juan.perez@empresa.com',
-      department: 'Tecnología',
-      position: 'Desarrollador Frontend',
-      role: 'employee'
+    const fetchUserData = async () => {
+      try {
+        // Aquí deberías hacer una llamada API real para obtener los datos del usuario
+        // Ejemplo: const response = await api.get(`/api/users/${id}`);
+        // const userData = response.data;
+        
+        // Mock de datos mientras tanto
+        const mockUserData = {
+          first_name: 'Juan',
+          last_name: 'Pérez',
+          dni: '12345678',
+          email: 'juan.perez@empresa.com',
+          department_name: 'Tecnología',
+          position: 'Desarrollador Frontend',
+          role_name: 'employee'
+        };
+
+        setFormData({
+          ...mockUserData,
+          password: '',
+          confirmPassword: ''
+        });
+      } catch (error) {
+        console.error('Error al cargar datos del usuario:', error);
+        setNotification({
+          type: 'error',
+          message: 'Error al cargar los datos del usuario'
+        });
+      }
     };
 
-    setFormData({
-      ...mockUserData,
-      password: '',
-      confirmPassword: ''
-    });
+    fetchUserData();
   }, [id]);
 
   useEffect(() => {
@@ -79,10 +93,21 @@ const EditUser = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const togglePasswordEdit = () => {
+    setIsEditingPassword(!isEditingPassword);
+    if (!isEditingPassword) {
+      setFormData(prev => ({
+        ...prev,
+        password: '',
+        confirmPassword: ''
+      }));
+    }
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    
     setNotification(null);
+    setIsSubmitting(true);
   
     // Validaciones solo si se está editando la contraseña
     if (isEditingPassword) {
@@ -91,6 +116,7 @@ const EditUser = () => {
           type: 'error',
           message: 'Las contraseñas no coinciden'
         });
+        setIsSubmitting(false);
         return;
       }
     
@@ -99,38 +125,62 @@ const EditUser = () => {
           type: 'error',
           message: 'La contraseña debe tener al menos 6 caracteres'
         });
+        setIsSubmitting(false);
         return;
       }
     }
-
+  
     if (!/^\d{7,8}$/.test(formData.dni)) {
       setNotification({
         type: 'error',
         message: 'El DNI debe tener 7 u 8 dígitos'
       });
+      setIsSubmitting(false);
       return;
     }
   
-    setNotification({
-      type: 'success',
-      message: 'Usuario actualizado exitosamente'
-    });
-    
-    // Redirigir después de 2 segundos
-    setTimeout(() => {
-      navigate('/users');
-    }, 2000);
-  };
-
-  const togglePasswordEdit = () => {
-    setIsEditingPassword(!isEditingPassword);
-    // Resetear campos de contraseña al desactivar la edición
-    if (isEditingPassword) {
-      setFormData(prev => ({
-        ...prev,
-        password: '',
-        confirmPassword: ''
-      }));
+    try {
+      // Preparamos los datos para enviar
+      const userData = {
+        first_name: formData.first_name,
+        last_name: formData.last_name,
+        email: formData.email,
+        user_type: formData.role_name
+      };
+  
+      // Solo incluimos la contraseña si se está editando
+      if (isEditingPassword && formData.password) {
+        userData.password = formData.password;
+      }
+  
+      await editUser(id, userData);
+      
+      setNotification({
+        type: 'success',
+        message: 'Usuario actualizado exitosamente'
+      });
+      
+      setTimeout(() => {
+        navigate('/users');
+      }, 2000);
+    } catch (error) {
+      console.error('Error al actualizar usuario:', error);
+      let errorMessage = 'Error al actualizar el usuario';
+      
+      if (error.response) {
+        if (error.response.data && error.response.data.message) {
+          errorMessage = error.response.data.message;
+        } else if (error.response.status === 404) {
+          errorMessage = 'Usuario no encontrado';
+        }
+      }
+      
+      setNotification({
+        type: 'error',
+        message: errorMessage
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -161,12 +211,12 @@ const EditUser = () => {
               <label className="block text-sm font-medium text-gray-700 mb-1">Nombre *</label>
               <input
                 type="text"
-                name="firstName"
-                value={formData.firstName}
+                name="first_name"
+                value={formData.first_name}
                 onChange={handleChange}
                 required
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Ej: Sergio"
+                placeholder="Ej: Juan"
               />
             </div>
             
@@ -174,8 +224,8 @@ const EditUser = () => {
               <label className="block text-sm font-medium text-gray-700 mb-1">Apellido *</label>
               <input
                 type="text"
-                name="lastName"
-                value={formData.lastName}
+                name="last_name"
+                value={formData.last_name}
                 onChange={handleChange}
                 required
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
@@ -202,8 +252,8 @@ const EditUser = () => {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Departamento/Área *</label>
               <select
-                name="department"
-                value={formData.department}
+                name="department_name"
+                value={formData.department_name}
                 onChange={handleChange}
                 required
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
@@ -303,8 +353,8 @@ const EditUser = () => {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Rol del Usuario *</label>
             <select
-              name="role"
-              value={formData.role}
+              name="role_name"
+              value={formData.role_name}
               onChange={handleChange}
               required
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
@@ -331,10 +381,13 @@ const EditUser = () => {
 
           <button
             type="submit"
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center cursor-pointer"
+            className={`px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center ${
+              isSubmitting ? 'opacity-70 cursor-not-allowed' : 'cursor-pointer'
+            }`}
+            disabled={isSubmitting}
           >
             <FiSave className="mr-2" />
-            Guardar Cambios
+            {isSubmitting ? 'Guardando...' : 'Guardar Cambios'}
           </button>
         </div>
       </form>

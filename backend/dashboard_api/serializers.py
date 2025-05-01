@@ -5,10 +5,11 @@ from .models import HealthFirstUser, License
 class HealthFirstUserSerializer(serializers.ModelSerializer):
     full_name = serializers.SerializerMethodField()
     role = serializers.SlugRelatedField(read_only=True, slug_field='name')
+    department = serializers.SlugRelatedField(read_only=True, slug_field='name')
 
     class Meta:
         model = HealthFirstUser
-        fields = ['id', 'full_name', 'role','email']
+        fields = ['id', 'full_name','dni', 'role', 'email', 'department']
 
     def get_full_name(self, obj):
         return f"{obj.first_name} {obj.last_name}"
