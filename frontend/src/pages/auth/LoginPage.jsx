@@ -15,11 +15,11 @@
 //   };
 
 //   return (
-//     <div className="min-h-screen bg-[#2b60e5] md:bg-gray-50">
+//     <div className="min-h-screen bg-[#2b60e5] lg:bg-gray-50">
 //       {/* Contenedor principal - Flex en desktop, bloque en mobile */}
-//       <div className="flex flex-col md:flex-row min-h-screen">
+//       <div className="flex flex-col lg:flex-row min-h-screen">
 //         {/* Sección izquierda - Solo visible en desktop */}
-//         <div className="hidden md:flex md:w-1/2 bg-[#2b60e5] text-white p-12 relative overflow-hidden">
+//         <div className="hidden lg:flex lg:w-1/2 bg-[#2b60e5] text-white p-12 relative overflow-hidden">
 //           <div className="z-10 relative w-full">
 //             <img
 //               src="/logo2.svg"
@@ -66,14 +66,14 @@
 //         </div>
 
 //         {/* Sección derecha - Formulario (siempre visible) */}
-//         <div className="flex-1 flex items-center justify-center p-4 pt-16 md:pt-0">
-//           <div className="w-full max-w-md bg-white p-8 rounded-lg shadow-md border border-gray-200 md:mx-12">
+//         <div className="flex-1 flex items-center justify-center p-4 pt-16 lg:pt-0">
+//           <div className="w-full max-w-lg bg-white p-8 rounded-lg shadow-lg border border-gray-200 lg:mx-12">
 //             <div className="mb-8 text-center">
 //               {/* Mostrar logo solo en mobile */}
 //               <img
 //                 src="/logo2.svg"
 //                 alt="Logo ProHealth"
-//                 className="h-20 w-auto mx-auto md:hidden mb-4"
+//                 className="h-20 w-auto mx-auto lg:hidden mb-4"
 //               />
 //               <h2 className="text-2xl font-bold text-gray-800">Iniciar sesión</h2>
 //               <p className="text-gray-600 mt-2">Ingresa tus credenciales para acceder al sistema</p>
@@ -84,7 +84,7 @@
 //                 <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
 //                   Usuario
 //                 </label>
-//                 <div className="relative rounded-md shadow-sm">
+//                 <div className="relative rounded-lg shadow-sm">
 //                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
 //                     <FiUser className="h-5 w-5 text-gray-400" />
 //                   </div>
@@ -95,7 +95,7 @@
 //                     required
 //                     value={username}
 //                     onChange={(e) => setUsername(e.target.value)}
-//                     className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2b60e5] focus:border-[#2b60e5]"
+//                     className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2b60e5] focus:border-[#2b60e5]"
 //                     placeholder="Ingrese su usuario"
 //                   />
 //                 </div>
@@ -105,7 +105,7 @@
 //                 <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
 //                   Contraseña
 //                 </label>
-//                 <div className="relative rounded-md shadow-sm">
+//                 <div className="relative rounded-lg shadow-sm">
 //                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
 //                     <FiLock className="h-5 w-5 text-gray-400" />
 //                   </div>
@@ -116,7 +116,7 @@
 //                     required
 //                     value={password}
 //                     onChange={(e) => setPassword(e.target.value)}
-//                     className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2b60e5] focus:border-[#2b60e5]"
+//                     className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2b60e5] focus:border-[#2b60e5]"
 //                     placeholder="Ingrese su contraseña"
 //                   />
 //                 </div>
@@ -125,7 +125,7 @@
 //               <div>
 //                 <button
 //                   type="submit"
-//                   className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#2b60e5] hover:bg-[#2b60e5c7] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#2b60e5] transition-colors duration-200"
+//                   className="w-full flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-[#2b60e5] hover:bg-[#2b60e5c7] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#2b60e5] transition-colors duration-200"
 //                 >
 //                   Ingresar
 //                 </button>
@@ -172,22 +172,64 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#2b60e5] md:bg-gray-50">
+    <div className="min-h-screen bg-[#2b60e5] lg:bg-gray-50">
       {/* Contenedor principal - Flex en desktop, bloque en mobile */}
-      <div className="flex flex-col md:flex-row min-h-screen">
+      <div className="flex flex-col lg:flex-row min-h-screen">
         {/* Sección izquierda - Solo visible en desktop (igual que antes) */}
-        <div className="hidden md:flex md:w-1/2 bg-[#2b60e5] text-white p-12 relative overflow-hidden">
-          {/* ... (Mantén todo el contenido decorativo igual) ... */}
+        <div className="hidden lg:flex lg:w-1/2 bg-[#2b60e5] text-white p-12 relative overflow-hidden">
+           <div className="z-10 relative w-full">
+             <img
+              src="/logo2.svg"
+              alt="Logo ProHealth"
+              className="h-30 w-auto mb-8 filter brightness-0 invert opacity-20" 
+            />
+            <div className="mt-20">
+              <h1 className="text-5xl font-bold mb-4">Bienvenido a</h1>
+              <h2 className="text-3xl font-semibold mb-6">HealthFirst</h2>
+              <p className="max-w-xl opacity-90 text-lg">
+                La plataforma integral que combina gestión de licencias médicas con inteligencia predictiva. 
+                Optimiza procesos, reduce tiempos de aprobación y ofrece dashboards inteligentes 
+                para una toma de decisiones estratégica en bienestar laboral.
+              </p>
+            </div>
+          </div>
+
+            {/* Elementos decorativos */}
+            <div className="absolute inset-0 overflow-hidden">
+                <div className="absolute right-0 top-1/3 transform translate-x-1/4">
+                    <div className="relative w-64 h-64">
+                    <div className="absolute top-1/2 left-1/2 transform -translate-x-20 -translate-y-1/2">
+                        <div className="relative w-40 h-40">
+                        <svg className="text-white/20 w-40 h-40 transform rotate-45" xmlns="http://www.w3.org/2000/svg" fill="none"
+                            stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                            viewBox="0 0 24 24">
+                            <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z" />
+                            <path
+                            d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z" />
+                            <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0" />
+                            <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5" />
+                        </svg>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+            </div>
+            <div className="absolute bottom-0 left-4 flex space-x-4 p-6">
+                <svg className="text-white/20 w-20 h-20" xmlns="http://www.w3.org/2000/svg" fill="none"
+                stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z" />
+                </svg>
+            </div>
         </div>
 
         {/* Sección derecha - Formulario (siempre visible) */}
-        <div className="flex-1 flex items-center justify-center p-4 pt-16 md:pt-0">
-          <div className="w-full max-w-md bg-white p-8 rounded-lg shadow-md border border-gray-200 md:mx-12">
+        <div className="flex-1 flex items-center justify-center p-4 pt-16 lg:pt-0">
+          <div className="w-full max-w-lg bg-white p-8 rounded-lg shadow-lg border border-gray-200 lg:mx-12">
             <div className="mb-8 text-center">
               <img
                 src="/logo2.svg"
                 alt="Logo ProHealth"
-                className="h-20 w-auto mx-auto md:hidden mb-4"
+                className="h-20 w-auto mx-auto lg:hidden mb-4"
               />
               <h2 className="text-2xl font-bold text-gray-800">Iniciar sesión</h2>
               <p className="text-gray-600 mt-2">Ingresa tus credenciales para acceder al sistema</p>
@@ -199,7 +241,7 @@ const LoginPage = () => {
                 <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
                   Usuario
                 </label>
-                <div className="relative rounded-md shadow-sm">
+                <div className="relative rounded-lg shadow-sm">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <FiUser className="h-5 w-5 text-gray-400" />
                   </div>
@@ -210,7 +252,7 @@ const LoginPage = () => {
                     required
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2b60e5] focus:border-[#2b60e5]"
+                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2b60e5] focus:border-[#2b60e5]"
                     placeholder="Ingrese su usuario"
                   />
                 </div>
@@ -220,7 +262,7 @@ const LoginPage = () => {
                 <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
                   Contraseña
                 </label>
-                <div className="relative rounded-md shadow-sm">
+                <div className="relative rounded-lg shadow-sm">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <FiLock className="h-5 w-5 text-gray-400" />
                   </div>
@@ -231,7 +273,7 @@ const LoginPage = () => {
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2b60e5] focus:border-[#2b60e5]"
+                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2b60e5] focus:border-[#2b60e5]"
                     placeholder="Ingrese su contraseña"
                   />
                 </div>
@@ -240,9 +282,9 @@ const LoginPage = () => {
               <div>
                 <button
                   type="submit"
-                  className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#2b60e5] hover:bg-[#2b60e5c7] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#2b60e5] transition-colors duration-200"
+                  className="w-full flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-[#2b60e5] hover:bg-[#2b60e5c7] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#2b60e5] transition-colors duration-200"
                 >
-                  Ingresar (Empleado)
+                  Ingresar
                 </button>
               </div>
             </form>
@@ -255,25 +297,25 @@ const LoginPage = () => {
               <div className="grid grid-cols-2 gap-3">
                 <button
                   onClick={() => handleMockLogin('admin')}
-                  className="px-4 py-2 bg-indigo-600 text-white rounded-md text-sm font-medium hover:bg-indigo-700"
+                  className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700"
                 >
                   Admin
                 </button>
                 <button
                   onClick={() => handleMockLogin('supervisor')}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700"
                 >
                   Supervisor
                 </button>
                 <button
                   onClick={() => handleMockLogin('employee')}
-                  className="px-4 py-2 bg-green-600 text-white rounded-md text-sm font-medium hover:bg-green-700"
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700"
                 >
                   Empleado
                 </button>
                 <button
                   onClick={() => handleMockLogin('analyst')}
-                  className="px-4 py-2 bg-purple-600 text-white rounded-md text-sm font-medium hover:bg-purple-700"
+                  className="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700"
                 >
                   Analista
                 </button>
