@@ -145,6 +145,26 @@ def update_user(request, id):
         return JsonResponse({'error': 'Ocurrio un error inesperado'}, status=500)
 
 
+@csrf_exempt
+@require_http_methods(["GET"])
+def get_user(request, email):
+    if not email:
+        response=JsonResponse({'error': 'El email es requerido.'}, status=400)
+    else:
+        try:
+            user = HealthFirstUser.get_user(email)
+            serializer = HealthFirstUserSerializer(user)
+            response= JsonResponse({'user': serializer.data}, status=200)
+
+        except HealthFirstUser.DoesNotExist:
+            response =JsonResponse({'error': 'El usuario no existe.'}, status=404)
+
+        except Exception as e:
+            response= JsonResponse({'error': 'Ocurrio un error inesperado'}, status=500)
+
+    return response
+
+
 # LICENSES API
 @csrf_exempt
 @require_http_methods(["POST"])
