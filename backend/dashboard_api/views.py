@@ -60,7 +60,7 @@ def register_user(request):
 @require_POST
 def users_list(request):
     data = json.loads(request.body)
-    role_name = data.get('role_name', None)
+    role_name = data.get('role', None)
     page_number = data.get('page', 1)
     page_size = data.get('page_size', 10) 
 
@@ -119,6 +119,7 @@ def update_user(request, id):
         last_name = data.get('last_name', None)
         email = data.get('email', None)
         user_role= data.get('role_name', None)
+        password = data.get('password', None)
 
         user = HealthFirstUser.objects.get(id=id,is_deleted=False)
     
@@ -131,6 +132,8 @@ def update_user(request, id):
         if user_role:
             role = Role.get_or_create(name=user_role)
             user.role = role
+        if password:
+            user.set_password(password)
 
         user.save()
 
