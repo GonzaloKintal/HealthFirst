@@ -1,74 +1,129 @@
 import { useState, useEffect } from 'react';
-import { FiEdit, FiTrash2, FiPlus, FiUser, FiSearch, FiFilter } from 'react-icons/fi';
+import { FiEdit, FiTrash2, FiPlus, FiUser, FiSearch, FiFilter, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
 import Confirmation from '../../components/common/Confirmation';
+import { getUsers, deleteUser } from '../../services/userService';
 
 const UsersPage = () => {
   const [users, setUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filter, setFilter] = useState('all'); // 'all', 'admin', 'supervisor', 'analyst', 'employee'
+  const [filter, setFilter] = useState('all');
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [userToDelete, setUserToDelete] = useState(null);
+  const [pagination, setPagination] = useState({
+    totalPages: 1,
+    currentPage: 1,
+    totalUsers: 0
+  });
+  const [error, setError] = useState(null);
 
-  // Simulación de datos
+
+  // Obtener usuarios del backend
   useEffect(() => {
-    const mockUsers = [
-      { 
-        id: 1, 
-        firstName: 'Admin', 
-        lastName: 'User', 
-        dni: '12345678',
-        email: 'admin@example.com', 
-        department: 'Administración',
-        position: 'Administrador General',
-        role: 'admin' 
-      },
-      { 
-        id: 2, 
-        firstName: 'Supervisor', 
-        lastName: 'One', 
-        dni: '23456789',
-        email: 'supervisor@example.com',
-        department: 'Operaciones',
-        position: 'Supervisor de Equipo',
-        role: 'supervisor' 
-      },
-      { 
-        id: 3, 
-        firstName: 'Analyst', 
-        lastName: 'One', 
-        dni: '34567890',
-        email: 'analyst@example.com',
-        department: 'Tecnología',
-        position: 'Analista de Datos',
-        role: 'analyst' 
-      },
-      { 
-        id: 4, 
-        firstName: 'Employee', 
-        lastName: 'One', 
-        dni: '45678901',
-        email: 'employee@example.com',
-        department: 'Ventas',
-        position: 'Representante Comercial',
-        role: 'employee' 
-      }
-    ];
-    
-    setUsers(mockUsers);
-  }, []);
+    const fetchUsers = async () => {
+      try {
+        setError(null);
+        // Siempre usa página 1 cuando cambian los filtros
+        const pageToFetch = (searchTerm !== '' || filter !== 'all') ? 1 : pagination.currentPage;
 
+        console.log('Fetching with:', {
+          page: pageToFetch,
+          search: searchTerm,
+          role: filter !== 'all' ? filter : undefined
+        });
+        
+        const response = await getUsers(
+          pageToFetch, 
+          searchTerm, 
+          filter !== 'all' ? filter : undefined
+        );
+
+        console.log('Response:', response);
+        
+        const transformedUsers = response.users.map(user => ({
+          id: user.id,
+          name: user.full_name,
+          dni: user.dni,
+          email: user.email,
+          department: user.department || '',
+          role: user.role
+        }));
+        
+        setUsers(transformedUsers);
+        setPagination({
+          totalPages: response.total_pages || 1,
+          currentPage: pageToFetch, // Mantén la página actual
+          totalUsers: response.total_users || 0
+        });
+      } catch (err) {
+        console.error('Error al cargar usuarios:', err);
+        setError('No se pudieron cargar los usuarios. Por favor intenta nuevamente.');
+        setUsers([]);
+        setPagination({
+          totalPages: 1,
+          currentPage: 1,
+          totalUsers: 0
+        });
+      }
+    };
+  
+    const debounceTimer = setTimeout(fetchUsers, 50);
+    return () => clearTimeout(debounceTimer);
+  }, [pagination.currentPage, searchTerm, filter]);
+
+  // Cambiar de página
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= pagination.totalPages && newPage !== pagination.currentPage) {
+      setPagination(prev => ({
+        ...prev,
+        currentPage: newPage
+      }));
+    }
+  };
+
+  // Manejar eliminación de usuario
   const handleDelete = (userId) => {
     setUserToDelete(userId);
     setShowDeleteConfirmation(true);
   };
   
-  const confirmDelete = () => {
-    setUsers(users.filter(user => user.id !== userToDelete));
-    setShowDeleteConfirmation(false);
-    setUserToDelete(null);
+  const confirmDelete = async () => {
+    try {
+      // Guarda el estado actual por si necesitamos revertir
+      const previousUsers = [...users];
+      const previousPagination = {...pagination};
+      
+      // Actualización optimista
+      setUsers(previousUsers.filter(user => user.id !== userToDelete));
+      setPagination(prev => ({
+        ...prev,
+        totalUsers: prev.totalUsers - 1
+      }));
+      
+      // Llama al servicio para eliminar el usuario en el backend
+      await deleteUser(userToDelete);
+      
+      // Manejo de paginación como antes
+      const usersLeftInPage = previousUsers.filter(user => user.id !== userToDelete).length;
+      if (usersLeftInPage === 0 && previousPagination.currentPage > 1) {
+        setPagination(prev => ({
+          ...prev,
+          currentPage: prev.currentPage - 1
+        }));
+      }
+      
+    } catch (error) {
+      console.error('Error al eliminar usuario:', error);
+      setUsers(previousUsers);
+      setPagination(previousPagination);
+      setError('No se pudo eliminar el usuario. Por favor intenta nuevamente.');
+    } finally {
+      setShowDeleteConfirmation(false);
+      setUserToDelete(null);
+    }
   };
 
+  // Colores según el rol
   const getRoleColors = (role) => {
     const colors = {
       admin: { bg: 'bg-red-100', text: 'text-red-800' },
@@ -77,41 +132,37 @@ const UsersPage = () => {
       employee: { bg: 'bg-green-100', text: 'text-green-800' },
       default: { bg: 'bg-gray-100', text: 'text-gray-800' }
     };
-    
     return colors[role] || colors.default;
   };
 
-  // Filtrar usuarios basado en búsqueda y filtro
-  const filteredUsers = users.filter(user => {
-    const matchesSearch = (
-      user.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.dni.includes(searchTerm) ||
-      user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.department.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.position.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-    
-    const matchesFilter = filter === 'all' || user.role === filter;
-    
-    return matchesSearch && matchesFilter;
-  });
-
   return (
     <div className="p-6">
+      {/* Encabezado y contador */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Gestión de Usuarios</h1>
-        <Link
-          to="/add-user"
-          className="bg-blue-600 text-white px-4 py-2 rounded-md flex items-center cursor-pointer hover:bg-blue-700 transition duration-200"
-        >
-          <FiPlus className="mr-2" />
-          Nuevo Usuario
-        </Link>
+        <div className="flex items-center space-x-4">
+          <span className="text-sm text-gray-600">
+            Mostrando {users.length} de {pagination.totalUsers} usuarios
+          </span>
+          <Link
+            to="/add-user"
+            className="bg-blue-600 text-white px-4 py-2 rounded-md flex items-center cursor-pointer hover:bg-blue-700 transition duration-200"
+          >
+            <FiPlus className="mr-2" />
+            Nuevo Usuario
+          </Link>
+        </div>
       </div>
 
+      {/* Mensaje de error */}
+      {error && (
+        <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+          {error}
+        </div>
+      )}
+
+      {/* Barra de búsqueda y filtro */}
       <div className="bg-white rounded-lg shadow overflow-hidden mb-6">
-        {/* Barra de búsqueda y filtro */}
         <div className="p-4 border-b border-gray-200 flex flex-col md:flex-row md:items-center space-y-3 md:space-y-0 md:space-x-4">
           <div className="relative flex-grow">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -142,6 +193,7 @@ const UsersPage = () => {
           </div>
         </div>
 
+        {/* Tabla de usuarios */}
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
@@ -156,7 +208,7 @@ const UsersPage = () => {
                   Email
                 </th>
                 <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Departamento/Cargo
+                  Departamento
                 </th>
                 <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Rol
@@ -167,8 +219,8 @@ const UsersPage = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredUsers.length > 0 ? (
-                filteredUsers.map((user) => (
+              {users.length > 0 ? (
+                users.map((user) => (
                   <tr key={user.id} className="hover:bg-gray-50 text-center">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
@@ -181,7 +233,7 @@ const UsersPage = () => {
                         </div>
                         <div className="ml-4">
                           <div className="text-sm font-medium text-gray-900">
-                            {user.firstName} {user.lastName}
+                            {user.name}
                           </div>
                         </div>
                       </div>
@@ -194,16 +246,15 @@ const UsersPage = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">{user.department}</div>
-                      <div className="text-sm text-gray-500">{user.position}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                      ${getRoleColors(user.role).bg} ${getRoleColors(user.role).text}`}>
-                      {user.role === 'admin' && 'Administrador'}
-                      {user.role === 'supervisor' && 'Supervisor'}
-                      {user.role === 'analyst' && 'Analista'}
-                      {user.role === 'employee' && 'Empleado'}
-                    </span>
+                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                        ${getRoleColors(user.role).bg} ${getRoleColors(user.role).text}`}>
+                        {user.role === 'admin' && 'Administrador'}
+                        {user.role === 'supervisor' && 'Supervisor'}
+                        {user.role === 'analyst' && 'Analista'}
+                        {user.role === 'employee' && 'Empleado'}
+                      </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
                       <div className="flex space-x-4 justify-center">
@@ -226,7 +277,9 @@ const UsersPage = () => {
               ) : (
                 <tr>
                   <td colSpan="6" className="px-6 py-4 text-center text-gray-500">
-                    No se encontraron usuarios que coincidan con los filtros
+                    {searchTerm || filter !== 'all' 
+                      ? 'No se encontraron usuarios que coincidan con los filtros'
+                      : 'No hay usuarios registrados'}
                   </td>
                 </tr>
               )}
@@ -235,17 +288,54 @@ const UsersPage = () => {
         </div>
       </div>
 
-        {/* Confirmación de Eliminación */}
-        <Confirmation
-          isOpen={showDeleteConfirmation}
-          onClose={() => setShowDeleteConfirmation(false)}
-          onConfirm={confirmDelete}
-          title="Eliminar Usuario"
-          message="¿Estás seguro que deseas eliminar este usuario? Esta acción no se puede deshacer."
-          confirmText="Eliminar"
-          cancelText="Cancelar"
-          type="danger"
-        />
+      {/* Paginación */}
+      {pagination.totalPages > 1 && (
+        <div className="flex justify-center mt-6">
+          <nav className="inline-flex rounded-md shadow">
+            <button
+              onClick={() => handlePageChange(pagination.currentPage - 1)}
+              disabled={pagination.currentPage === 1}
+              className="px-3 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 flex items-center"
+            >
+              <FiChevronLeft className="mr-1" /> Anterior
+            </button>
+            
+            {Array.from({ length: pagination.totalPages }, (_, i) => (
+              <button
+                key={i + 1}
+                onClick={() => handlePageChange(i + 1)}
+                className={`px-3 py-2 border-t border-b border-gray-300 text-sm font-medium ${
+                  pagination.currentPage === i + 1
+                    ? 'bg-blue-50 text-blue-600'
+                    : 'bg-white text-gray-500 hover:bg-gray-50'
+                }`}
+              >
+                {i + 1}
+              </button>
+            ))}
+            
+            <button
+              onClick={() => handlePageChange(pagination.currentPage + 1)}
+              disabled={pagination.currentPage === pagination.totalPages}
+              className="px-3 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 flex items-center"
+            >
+              Siguiente <FiChevronRight className="ml-1" />
+            </button>
+          </nav>
+        </div>
+      )}
+
+      {/* Confirmación de Eliminación */}
+      <Confirmation
+        isOpen={showDeleteConfirmation}
+        onClose={() => setShowDeleteConfirmation(false)}
+        onConfirm={confirmDelete}
+        title="Eliminar Usuario"
+        message="¿Estás seguro que deseas eliminar este usuario? Esta acción no se puede deshacer."
+        confirmText="Eliminar"
+        cancelText="Cancelar"
+        type="danger"
+      />
     </div>
   );
 };
