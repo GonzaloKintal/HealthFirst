@@ -60,7 +60,7 @@ def register_user(request):
 @require_POST
 def users_list(request):
     data = json.loads(request.body)
-    role_name = data.get('role_name', None)
+    role_name = data.get('role', None)
     page_number = data.get('page', 1)
     page_size = data.get('page_size', 10) 
 
