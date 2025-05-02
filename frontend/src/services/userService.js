@@ -41,34 +41,21 @@ export const deleteUser = async (userId) => {
     }
 };
 
-export const editUser = async (user) => {
+export const editUser = async (id, data) => {
     try {
-        await api.put(`/api/users/update/${user.id}`, user);
+        await api.put(`/api/users/update/${id}`, data);
     } catch (error) {
         console.error('Error editing user:', error);
         throw error;
     }
 };
 
-
-
-
-// // Obtener todos los repuestos
-// export const getRepuestos = () => {
-//     return axios.get(API_URL);
-// };
-
-// // Crear un nuevo repuesto
-// export const createRepuesto = (repuesto) => {
-//     return axios.post(API_URL, repuesto);
-// };
-
-// // Eliminar un repuesto por su código
-// export const deleteRepuesto = (cod) => {
-//     return axios.delete(`${API_URL}/${cod}`);
-// };
-
-// // Editar un repuesto
-// export const editRepuesto = (repuesto) => {
-//   return axios.put(`${API_URL}/${repuesto.cod}`, repuesto);
-// };
+export const getUser = async (email) => {
+    try {
+        const response = await api.get(`/api/get_user/${email}`);
+        return response.data.user;
+    } catch (error) {
+        console.error('Error fetching user:', error);
+        throw error;
+    }
+};

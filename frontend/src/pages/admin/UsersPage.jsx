@@ -259,7 +259,7 @@ const UsersPage = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
                       <div className="flex space-x-4 justify-center">
                         <Link
-                          to={`/edit-user/${user.id}`}
+                          to={`/edit-user/${user.email}`}
                           className="text-blue-600 hover:text-blue-900"
                         >
                           <FiEdit className="text-lg" />
