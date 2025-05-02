@@ -72,7 +72,7 @@ const AppRoutes = () => {
         />
 
       <Route 
-          path="/edit-user/:id" 
+          path="/edit-user/:email" 
           element={
             <ProtectedRoute allowedRoles={['admin']}>
               <EditUser />
@@ -108,15 +108,6 @@ const AppRoutes = () => {
             </ProtectedRoute>
           } 
         />
-
-        {/* <Route 
-          path="/my-licenses" 
-          element={
-            <ProtectedRoute allowedRoles={['employee', 'analyst']}>
-              <MyLicensesPage />
-            </ProtectedRoute>
-          } 
-        /> */}
 
         <Route 
           path="/request-license" 

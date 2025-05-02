@@ -1,21 +1,23 @@
 import { useState, useEffect } from 'react';
-import { FiUser, FiMail, FiLock, FiBriefcase, FiSave } from 'react-icons/fi';
+import { FiUser, FiMail, FiLock, FiBriefcase, FiSave, FiPhone, FiCalendar } from 'react-icons/fi';
 import { useParams, useNavigate } from 'react-router-dom';
 import Notification from '../common/Notification';
-import { editUser } from '../../services/userService';
+import { editUser, getUser } from '../../services/userService';
 
 const EditUser = () => {
-  const { id } = useParams();
+  const { email } = useParams();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
+    id: '',
     first_name: '',
     last_name: '',
     dni: '',
     email: '',
     password: '',
     confirmPassword: '',
+    phone: '',
+    date_of_birth: '',
     department_name: '',
-    position: '',
     role_name: 'employee'
   });
   const [notification, setNotification] = useState(null);
@@ -43,23 +45,22 @@ const EditUser = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        // Aquí deberías hacer una llamada API real para obtener los datos del usuario
-        // Ejemplo: const response = await api.get(`/api/users/${id}`);
-        // const userData = response.data;
-        
-        // Mock de datos mientras tanto
-        const mockUserData = {
-          first_name: 'Juan',
-          last_name: 'Pérez',
-          dni: '12345678',
-          email: 'juan.perez@empresa.com',
-          department_name: 'Tecnología',
-          position: 'Desarrollador Frontend',
-          role_name: 'employee'
-        };
+        const userData = await getUser(email);
+
+        // Separar el full_name en first_name y last_name
+        const [first_name, ...last_nameParts] = userData.full_name.split(' ');
+        const last_name = last_nameParts.join(' ');
 
         setFormData({
-          ...mockUserData,
+          id: userData.id,
+          first_name: first_name || '',
+          last_name: last_name || '',
+          dni: userData.dni || '',
+          email: userData.email || email,
+          phone: userData.phone || '',
+          date_of_birth: userData.date_of_birth || '',
+          department_name: userData.department || '',
+          role_name: userData.role || 'employee',
           password: '',
           confirmPassword: ''
         });
@@ -67,23 +68,15 @@ const EditUser = () => {
         console.error('Error al cargar datos del usuario:', error);
         setNotification({
           type: 'error',
-          message: 'Error al cargar los datos del usuario'
+          message: 'Error al cargar los datos del usuario: ' + (error.response?.data?.message || error.message)
         });
       }
     };
 
-    fetchUserData();
-  }, [id]);
-
-  useEffect(() => {
-    if (notification) {
-      const timer = setTimeout(() => {
-        setNotification(null);
-      }, 3000);
-      
-      return () => clearTimeout(timer);
+    if (email) {
+      fetchUserData();
     }
-  }, [notification]);
+  }, [email]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -138,14 +131,27 @@ const EditUser = () => {
       setIsSubmitting(false);
       return;
     }
+
+    if (!/^\d{10,15}$/.test(formData.phone)) {
+      setNotification({
+        type: 'error',
+        message: 'El teléfono debe tener entre 10 y 15 dígitos'
+      });
+      setIsSubmitting(false);
+      return;
+    }
   
     try {
       // Preparamos los datos para enviar
       const userData = {
         first_name: formData.first_name,
         last_name: formData.last_name,
+        dni: formData.dni,
         email: formData.email,
-        user_type: formData.role_name
+        phone: formData.phone,
+        date_of_birth: formData.date_of_birth,
+        department_name: formData.department_name,
+        role_name: formData.role_name
       };
   
       // Solo incluimos la contraseña si se está editando
@@ -153,7 +159,7 @@ const EditUser = () => {
         userData.password = formData.password;
       }
   
-      await editUser(id, userData);
+      await editUser(formData.id, userData);
       
       setNotification({
         type: 'success',
@@ -172,6 +178,8 @@ const EditUser = () => {
           errorMessage = error.response.data.message;
         } else if (error.response.status === 404) {
           errorMessage = 'Usuario no encontrado';
+        } else if (error.response.status === 409) {
+          errorMessage = 'El email o DNI ya están registrados';
         }
       }
       
@@ -250,7 +258,33 @@ const EditUser = () => {
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Departamento/Área *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de Nacimiento *</label>
+              <input
+                type="date"
+                name="date_of_birth"
+                value={formData.date_of_birth}
+                onChange={handleChange}
+                required
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Teléfono *</label>
+              <input
+                type="tel"
+                name="phone"
+                value={formData.phone}
+                onChange={handleChange}
+                required
+                pattern="\d{10,15}"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Ej: 1123456789"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Departamento *</label>
               <select
                 name="department_name"
                 value={formData.department_name}
@@ -263,19 +297,6 @@ const EditUser = () => {
                   <option key={dept} value={dept}>{dept}</option>
                 ))}
               </select>
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Cargo/Puesto *</label>
-              <input
-                type="text"
-                name="position"
-                value={formData.position}
-                onChange={handleChange}
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Ej: Desarrollador Frontend"
-              />
             </div>
             
             <div>
