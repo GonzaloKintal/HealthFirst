@@ -128,7 +128,7 @@ class HealthFirstUser(AbstractUser):
 
     def delete(self, *args, **kwargs):
         self.is_deleted = True
-        self.delet_at=now()
+        self.delet_at=timezone.now()
         self.save()
 
     @classmethod
@@ -143,3 +143,9 @@ class HealthFirstUser(AbstractUser):
             users=cls.objects.filter(is_deleted=False)
 
         return users
+
+    @classmethod
+    def get_user(cls, email):
+        user = cls.objects.get(email=email, is_deleted=False)
+        return user
+    
