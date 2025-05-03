@@ -16,7 +16,7 @@ const AddUser = () => {
     email: '',
     phone: '',
     date_of_birth: '',
-    department_name: '',
+    department: '',
     role_name: 'employee'
   });
 
@@ -101,7 +101,7 @@ const AddUser = () => {
           email: '',
           phone: '',
           date_of_birth: '',
-          department_name: '',
+          department: '',
           role_name: 'employee'
         });
         navigate('/users');
@@ -234,8 +234,8 @@ const AddUser = () => {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Departamento *</label>
               <select
-                name="department_name"
-                value={formData.department_name}
+                name="department"
+                value={formData.department}
                 onChange={handleChange}
                 required
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
