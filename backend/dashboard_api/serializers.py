@@ -24,7 +24,7 @@ class LicenseSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = License
-        fields = ['user', 'license_id', 'user_id', 'employee', 'type', 'start_date', 'end_date', 'days', 'status']
+        fields = ['user', 'license_id', 'user_id', 'employee', 'type', 'start_date', 'end_date', 'days', 'status', 'information']
 
     def get_days(self, obj):
         return (obj.end_date - obj.start_date).days + 1
