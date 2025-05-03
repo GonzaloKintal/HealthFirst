@@ -6,6 +6,7 @@ import {
   FiBarChart2 as BarChart,
   FiUsers as Users,
   FiCpu as Cpu,
+  FiUser
 } from 'react-icons/fi';
 import { useContext } from 'react';
 import { AuthContext } from '../../context/AuthContext';
@@ -23,11 +24,13 @@ const Sidebar = ({ isOpen }) => {
       { text: 'Licencias', icon: <FileText className="h-5 w-5" />, path: '/licenses' },
       { text: 'Indicadores', icon: <BarChart className="h-5 w-5" />, path: '/metrics' },
       { text: 'Modelo ML', icon: <Cpu className="h-5 w-5" />, path: '/ml-model' },
+      { text: 'Mis Datos', icon: <FiUser className="h-5 w-5" />, path: '/my-data' },
       { text: 'Configuración', icon: <Settings className="h-5 w-5" />, path: '/settings' },
     ],
     supervisor: [
       { text: 'Dashboard', icon: <Dashboard className="h-5 w-5" />, path: '/dashboard' },
-      { text: 'Licencias', icon: <FileText className="h-5 w-5" />, path: '/licenses' }
+      { text: 'Licencias', icon: <FileText className="h-5 w-5" />, path: '/licenses' },
+      { text: 'Mis Datos', icon: <FiUser className="h-5 w-5" />, path: '/my-data' },
     ],
     employee: [
       { text: 'Dashboard', icon: <Dashboard className="h-5 w-5" />, path: '/dashboard' },
@@ -37,13 +40,15 @@ const Sidebar = ({ isOpen }) => {
         icon: <FileText className="h-5 w-5" />, 
         path: '/request-license',
         isHighlighted: true
-      }
+      },
+      { text: 'Mis Datos', icon: <FiUser className="h-5 w-5" />, path: '/my-data' },
     ],
     analyst: [
       { text: 'Dashboard', icon: <Dashboard className="h-5 w-5" />, path: '/dashboard' },
       { text: 'Indicadores', icon: <BarChart className="h-5 w-5" />, path: '/metrics' },
       { text: 'Mis Licencias', icon: <FileText className="h-5 w-5" />, path: '/licenses' },
-      { text: 'Modelo ML', icon: <Cpu className="h-5 w-5" />, path: '/ml-model' }
+      { text: 'Modelo ML', icon: <Cpu className="h-5 w-5" />, path: '/ml-model' },
+      { text: 'Mis Datos', icon: <FiUser className="h-5 w-5" />, path: '/my-data' },
     ]
   };
 
