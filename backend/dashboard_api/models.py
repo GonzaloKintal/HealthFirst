@@ -98,14 +98,22 @@ class Certificate(models.Model):
     
 
 class Status(models.Model):
+    # Todos los estados validos posibles 
+    class StatusChoices(models.TextChoices):
+        MISSING_DOC = 'missing_doc', 'Documentacion faltante'
+        PENDING = 'pending', 'Pendiente de aprobacion'
+        REJECTED = 'rejected', 'Rechazada'
+        APPROVED = 'approved', 'Aprobada'
+        EXPIRED = 'expired', 'Expirada'
+
     status_id = models.AutoField(primary_key=True)
     license = models.OneToOneField('License', on_delete=models.CASCADE, related_name='status')
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, choices=StatusChoices.choices)
     evaluation_date = models.DateField(null=True, blank=True)
     evaluation_comment = models.TextField(null=True, blank=True)
 
     def __str__(self):
-        return f"Estado {self.name} - Licencia {self.license.license_id}"    
+        return f"Estado {self.name} - Licencia {self.license.license_id}"  
 
 
 class HealthFirstUser(AbstractUser):
