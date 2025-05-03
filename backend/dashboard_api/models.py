@@ -129,6 +129,23 @@ class HealthFirstUser(AbstractUser):
     delete_at=models.DateTimeField(null=True, blank=True,default=None)
 
     def save(self, *args, **kwargs):
+        if self.pk is None:
+            existing_user = HealthFirstUser.objects.filter(email=self.email, is_deleted=True).first()
+            if existing_user:
+                existing_user.is_deleted = False
+                existing_user.delete_at = None
+                existing_user.first_name = self.first_name
+                existing_user.last_name = self.last_name
+                existing_user.dni = self.dni
+                existing_user.date_of_birth = self.date_of_birth
+                existing_user.phone = self.phone
+                existing_user.role = self.role
+                existing_user.department = self.department
+                existing_user.set_password(self.password)
+                existing_user.save()
+                self.pk = existing_user.pk 
+                return 
+
         if (not self.username and self.email) or (self.username != self.email):
             self.username = str(self.email)
         self.clean()
