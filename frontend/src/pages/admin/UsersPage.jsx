@@ -42,7 +42,7 @@ const UsersPage = () => {
         
         const transformedUsers = response.users.map(user => ({
           id: user.id,
-          name: user.full_name,
+          name: user.first_name + ' ' + user.last_name,
           dni: user.dni,
           email: user.email,
           department: user.department || '',

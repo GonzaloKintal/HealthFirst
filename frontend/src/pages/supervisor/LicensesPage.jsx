@@ -24,7 +24,7 @@ const LicensesPage = () => {
         const response = await getLicenses();
         const formattedLicenses = response.licenses.map(license => ({
           id: license.license_id,
-          employee: license.user.full_name,
+          employee: license.user.first_name + ' ' + license.user.last_name,
           DNI: license.user.dni || 'No disponible',
           department: license.user.department || 'No disponible',
           type: license.type,
