@@ -14,7 +14,11 @@ import json
 from .serializers import HealthFirstUserSerializer, LicenseSerializer
 from django.db import IntegrityError
 from django.core.paginator import Paginator
+from rest_framework_simplejwt.views import TokenObtainPairView
+from dashboard_api.serializers import CustomTokenObtainPairSerializer
 
+class CustomTokenObtainPairView(TokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializer
 
 
 @csrf_exempt
