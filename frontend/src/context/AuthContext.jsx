@@ -3,63 +3,66 @@ import { createContext, useState, useEffect } from 'react';
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  // Cargar estado inicial desde localStorage
-  const [user, setUser] = useState(() => {
-    const savedUser = localStorage.getItem('auth_user');
-    return savedUser ? JSON.parse(savedUser) : null;
+  // Estado inicial cargado desde localStorage
+  const [authState, setAuthState] = useState(() => {
+    const savedAuth = localStorage.getItem('auth_data');
+    return savedAuth 
+      ? JSON.parse(savedAuth) 
+      : { user: null, token: null, refreshToken: null, isAuthenticated: false };
   });
 
-  const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    return localStorage.getItem('auth_token') !== null;
-  });
-
-  // Función para guardar en localStorage
-  const persistAuth = (userData) => {
-    localStorage.setItem('auth_user', JSON.stringify(userData));
-    localStorage.setItem('auth_token', 'mock_token'); // Puedes generar uno real si necesitas
-  };
-
-  // Función para limpiar localStorage
-  const clearPersistedAuth = () => {
-    localStorage.removeItem('auth_user');
-    localStorage.removeItem('auth_token');
-  };
-
-  const login = (role) => {
-    const userData = {
-      id: 1,
-      name: `Usuario ${role}`,
-      email: `${role}@example.com`,
-      role: role
+  // Función para persistir los datos de autenticación
+  const persistAuth = (token, refreshToken, userData) => {
+    const authData = {
+      user: userData,
+      token,
+      refreshToken,
+      isAuthenticated: true
     };
-    persistAuth(userData);
-    setUser(userData);
-    setIsAuthenticated(true);
+    localStorage.setItem('auth_data', JSON.stringify(authData));
+    setAuthState(authData);
   };
 
-  const mockLogin = (role) => {
-    login(role); // Reutilizamos la función login
+  // Función para limpiar la autenticación
+  const clearPersistedAuth = () => {
+    localStorage.removeItem('auth_data');
+    setAuthState({
+      user: null,
+      token: null,
+      refreshToken: null,
+      isAuthenticated: false
+    });
   };
 
+  // Función de login real
+  const login = (authResponse) => {
+    const { access, refresh, username, email, role } = authResponse;
+    
+    const userData = {
+      id: username, // o algún ID único si tu backend lo proporciona
+      username,
+      email,
+      role
+    };
+    
+    persistAuth(access, refresh, userData);
+  };
+
+  // Función de logout
   const logout = () => {
     clearPersistedAuth();
-    setUser(null);
-    setIsAuthenticated(false);
+    // Opcional: llamar a endpoint de logout en el backend si es necesario
   };
 
-  // Sincronizar entre pestañas
+  // Sincronización entre pestañas
   useEffect(() => {
     const handleStorageChange = (e) => {
-      if (e.key === 'auth_user' || e.key === 'auth_token') {
-        const user = localStorage.getItem('auth_user');
-        const token = localStorage.getItem('auth_token');
-        
-        if (user && token) {
-          setUser(JSON.parse(user));
-          setIsAuthenticated(true);
+      if (e.key === 'auth_data') {
+        const authData = localStorage.getItem('auth_data');
+        if (authData) {
+          setAuthState(JSON.parse(authData));
         } else {
-          setUser(null);
-          setIsAuthenticated(false);
+          clearPersistedAuth();
         }
       }
     };
@@ -70,11 +73,12 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider value={{ 
-      user, 
-      isAuthenticated, 
-      login, 
-      logout,
-      mockLogin 
+      user: authState.user,
+      token: authState.token,
+      refreshToken: authState.refreshToken,
+      isAuthenticated: authState.isAuthenticated,
+      login,
+      logout
     }}>
       {children}
     </AuthContext.Provider>
