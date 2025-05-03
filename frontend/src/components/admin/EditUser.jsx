@@ -5,7 +5,7 @@ import Notification from '../common/Notification';
 import { editUser, getUser } from '../../services/userService';
 
 const EditUser = () => {
-  const { email } = useParams();
+  const { id } = useParams();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     id: '',
@@ -45,7 +45,7 @@ const EditUser = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const userData = await getUser(email);
+        const userData = await getUser(id);
 
         // Separar el full_name en first_name y last_name
         const [first_name, ...last_nameParts] = userData.full_name.split(' ');
@@ -56,10 +56,10 @@ const EditUser = () => {
           first_name: first_name || '',
           last_name: last_name || '',
           dni: userData.dni || '',
-          email: userData.email || email,
+          email: userData.email || '',
           phone: userData.phone || '',
           date_of_birth: userData.date_of_birth || '',
-          department_name: userData.department || '',
+          department_name: userData.department_name || '',
           role_name: userData.role || 'employee',
           password: '',
           confirmPassword: ''
@@ -73,10 +73,10 @@ const EditUser = () => {
       }
     };
 
-    if (email) {
+    if (id) {
       fetchUserData();
     }
-  }, [email]);
+  }, [id]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
