@@ -1,27 +1,36 @@
 
 // import { FiLock, FiUser } from 'react-icons/fi';
-// import { useState } from 'react';
+// import { useState, useContext } from 'react';
 // import { useNavigate } from 'react-router-dom';
+// import {AuthContext} from '../../context/AuthContext';
 
 // const LoginPage = () => {
 //   const [username, setUsername] = useState('');
 //   const [password, setPassword] = useState('');
 //   const navigate = useNavigate();
+//   const { mockLogin } = useContext(AuthContext);
 
 //   const handleSubmit = (e) => {
 //     e.preventDefault();
-//     console.log('Login attempt:', { username, password });
+//     // Mock login con rol de empleado por defecto
+//     mockLogin('employee');
 //     navigate('/');
+//   };
+
+//   const handleMockLogin = (role) => {
+//     mockLogin(role);
+//     // Redirige al dashboard correspondiente
+//     navigate('/dashboard');
 //   };
 
 //   return (
 //     <div className="min-h-screen bg-[#2b60e5] lg:bg-gray-50">
 //       {/* Contenedor principal - Flex en desktop, bloque en mobile */}
 //       <div className="flex flex-col lg:flex-row min-h-screen">
-//         {/* Sección izquierda - Solo visible en desktop */}
+//         {/* Sección izquierda - Solo visible en desktop (igual que antes) */}
 //         <div className="hidden lg:flex lg:w-1/2 bg-[#2b60e5] text-white p-12 relative overflow-hidden">
-//           <div className="z-10 relative w-full">
-//             <img
+//            <div className="z-10 relative w-full">
+//              <img
 //               src="/logo2.svg"
 //               alt="Logo ProHealth"
 //               className="h-30 w-auto mb-8 filter brightness-0 invert opacity-20" 
@@ -69,7 +78,6 @@
 //         <div className="flex-1 flex items-center justify-center p-4 pt-16 lg:pt-0">
 //           <div className="w-full max-w-lg bg-white p-8 rounded-lg shadow-lg border border-gray-200 lg:mx-12">
 //             <div className="mb-8 text-center">
-//               {/* Mostrar logo solo en mobile */}
 //               <img
 //                 src="/logo2.svg"
 //                 alt="Logo ProHealth"
@@ -80,6 +88,7 @@
 //             </div>
 
 //             <form onSubmit={handleSubmit} className="space-y-6">
+//               {/* Campos de formulario (igual que antes) */}
 //               <div>
 //                 <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
 //                   Usuario
@@ -132,6 +141,39 @@
 //               </div>
 //             </form>
 
+//             {/* Sección de pruebas de roles */}
+//             <div className="mt-8 pt-6 border-t border-gray-200">
+//               <h3 className="text-sm font-medium text-gray-700 mb-3 text-center">
+//                 Pruebas rápidas (sin backend)
+//               </h3>
+//               <div className="grid grid-cols-2 gap-3">
+//                 <button
+//                   onClick={() => handleMockLogin('admin')}
+//                   className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700"
+//                 >
+//                   Admin
+//                 </button>
+//                 <button
+//                   onClick={() => handleMockLogin('supervisor')}
+//                   className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700"
+//                 >
+//                   Supervisor
+//                 </button>
+//                 <button
+//                   onClick={() => handleMockLogin('employee')}
+//                   className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700"
+//                 >
+//                   Empleado
+//                 </button>
+//                 <button
+//                   onClick={() => handleMockLogin('analyst')}
+//                   className="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700"
+//                 >
+//                   Analista
+//                 </button>
+//               </div>
+//             </div>
+
 //             <p className="text-gray-600 text-center mt-8">
 //               ¿No tienes una cuenta?<br />
 //               Contacta con el <strong className="text-[#2b60e5]">administrador</strong> para obtener acceso.
@@ -145,40 +187,86 @@
 
 // export default LoginPage;
 
-// QUEDA LO DE ARRIBA, ESTO ES SÓLAMENTE PARA PROBAR LO QUE VERÁ CADA ROL SIN TENER HECHO EL BACKEND
+
 
 import { FiLock, FiUser } from 'react-icons/fi';
 import { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {AuthContext} from '../../context/AuthContext';
+import { AuthContext } from '../../context/AuthContext';
+import { login } from '../../services/authService';
 
 const LoginPage = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  const { mockLogin } = useContext(AuthContext);
+  const { login: authLogin } = useContext(AuthContext);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Mock login con rol de empleado por defecto
-    mockLogin('employee');
-    navigate('/');
+    setError('');
+    setIsLoading(true);
+  
+    try {
+      const response = await login(username, password);
+      
+      // Pasar TODOS los datos relevantes al authLogin
+      authLogin({
+        access: response.access,
+        refresh: response.refresh,
+        username: response.username,
+        email: response.email,
+        role: response.role
+      });
+      
+      navigate('/dashboard');
+    } catch (err) {
+      console.error('Login error:', err);
+      setError('Credenciales incorrectas. Por favor, inténtelo de nuevo.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleMockLogin = (role) => {
-    mockLogin(role);
-    // Redirige al dashboard correspondiente
-    navigate('/dashboard');
+  const handleQuickAdminAccess = async () => {
+    setIsLoading(true);
+    setError('');
+    try {
+      // Credenciales hardcodeadas (SOLO PARA DESARROLLO)
+      const adminCredentials = {
+        username: 'admin@admin.com',
+        password: 'administrador'
+      };
+      
+      // Usar el mismo flujo de login pero con credenciales predefinidas
+      const response = await login(adminCredentials.username, adminCredentials.password);
+      
+      authLogin({
+        access: response.access,
+        refresh: response.refresh,
+        username: response.username,
+        email: response.email,
+        role: response.role
+      });
+      
+      navigate('/dashboard');
+    } catch (err) {
+      console.error('Admin login error:', err);
+      setError('Error en acceso rápido. Verifica que el usuario admin exista.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <div className="min-h-screen bg-[#2b60e5] lg:bg-gray-50">
       {/* Contenedor principal - Flex en desktop, bloque en mobile */}
       <div className="flex flex-col lg:flex-row min-h-screen">
-        {/* Sección izquierda - Solo visible en desktop (igual que antes) */}
+        {/* Sección izquierda - Solo visible en desktop */}
         <div className="hidden lg:flex lg:w-1/2 bg-[#2b60e5] text-white p-12 relative overflow-hidden">
-           <div className="z-10 relative w-full">
-             <img
+          <div className="z-10 relative w-full">
+            <img
               src="/logo2.svg"
               alt="Logo ProHealth"
               className="h-30 w-auto mb-8 filter brightness-0 invert opacity-20" 
@@ -194,32 +282,32 @@ const LoginPage = () => {
             </div>
           </div>
 
-            {/* Elementos decorativos */}
-            <div className="absolute inset-0 overflow-hidden">
-                <div className="absolute right-0 top-1/3 transform translate-x-1/4">
-                    <div className="relative w-64 h-64">
-                    <div className="absolute top-1/2 left-1/2 transform -translate-x-20 -translate-y-1/2">
-                        <div className="relative w-40 h-40">
-                        <svg className="text-white/20 w-40 h-40 transform rotate-45" xmlns="http://www.w3.org/2000/svg" fill="none"
-                            stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-                            viewBox="0 0 24 24">
-                            <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z" />
-                            <path
-                            d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z" />
-                            <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0" />
-                            <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5" />
-                        </svg>
-                        </div>
-                    </div>
-                    </div>
+          {/* Elementos decorativos */}
+          <div className="absolute inset-0 overflow-hidden">
+            <div className="absolute right-0 top-1/3 transform translate-x-1/4">
+              <div className="relative w-64 h-64">
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-20 -translate-y-1/2">
+                  <div className="relative w-40 h-40">
+                    <svg className="text-white/20 w-40 h-40 transform rotate-45" xmlns="http://www.w3.org/2000/svg" fill="none"
+                      stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                      viewBox="0 0 24 24">
+                      <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z" />
+                      <path
+                        d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z" />
+                      <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0" />
+                      <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5" />
+                    </svg>
+                  </div>
                 </div>
+              </div>
             </div>
-            <div className="absolute bottom-0 left-4 flex space-x-4 p-6">
-                <svg className="text-white/20 w-20 h-20" xmlns="http://www.w3.org/2000/svg" fill="none"
-                stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-                <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z" />
-                </svg>
-            </div>
+          </div>
+          <div className="absolute bottom-0 left-4 flex space-x-4 p-6">
+            <svg className="text-white/20 w-20 h-20" xmlns="http://www.w3.org/2000/svg" fill="none"
+              stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+              <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z" />
+            </svg>
+          </div>
         </div>
 
         {/* Sección derecha - Formulario (siempre visible) */}
@@ -235,8 +323,13 @@ const LoginPage = () => {
               <p className="text-gray-600 mt-2">Ingresa tus credenciales para acceder al sistema</p>
             </div>
 
+            {error && (
+              <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+                {error}
+              </div>
+            )}
+
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Campos de formulario (igual que antes) */}
               <div>
                 <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
                   Usuario
@@ -282,45 +375,28 @@ const LoginPage = () => {
               <div>
                 <button
                   type="submit"
-                  className="w-full flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-[#2b60e5] hover:bg-[#2b60e5c7] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#2b60e5] transition-colors duration-200"
+                  disabled={isLoading}
+                  className="w-full flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-[#2b60e5] hover:bg-[#2b60e5c7] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#2b60e5] transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Ingresar
+                  {isLoading ? 'Ingresando...' : 'Ingresar'}
                 </button>
               </div>
             </form>
 
-            {/* Sección de pruebas de roles */}
-            <div className="mt-8 pt-6 border-t border-gray-200">
-              <h3 className="text-sm font-medium text-gray-700 mb-3 text-center">
-                Pruebas rápidas (sin backend)
-              </h3>
-              <div className="grid grid-cols-2 gap-3">
+            {import.meta.env.DEV && (
+              <div className="mt-6 pt-6 border-t border-gray-200">
                 <button
-                  onClick={() => handleMockLogin('admin')}
-                  className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700"
+                  onClick={handleQuickAdminAccess}
+                  disabled={isLoading}
+                  className="w-full py-2 px-4 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition-colors disabled:opacity-50"
                 >
-                  Admin
+                  {isLoading ? 'Ingresando...' : 'Acceso Rápido Admin'}
                 </button>
-                <button
-                  onClick={() => handleMockLogin('supervisor')}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700"
-                >
-                  Supervisor
-                </button>
-                <button
-                  onClick={() => handleMockLogin('employee')}
-                  className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700"
-                >
-                  Empleado
-                </button>
-                <button
-                  onClick={() => handleMockLogin('analyst')}
-                  className="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700"
-                >
-                  Analista
-                </button>
+                <p className="text-xs text-gray-500 mt-2 text-center">
+                  Solo disponible en entorno de desarrollo
+                </p>
               </div>
-            </div>
+            )}
 
             <p className="text-gray-600 text-center mt-8">
               ¿No tienes una cuenta?<br />

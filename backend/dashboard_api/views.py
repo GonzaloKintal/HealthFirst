@@ -125,6 +125,8 @@ def update_user(request, id):
         user_role= data.get('role_name', None)
         password = data.get('password', None)
         department= data.get('department', None)
+        dni= data.get('dni', None)
+        phone= data.get('phone', None)
 
         user = HealthFirstUser.objects.get(id=id,is_deleted=False)
     
@@ -142,6 +144,10 @@ def update_user(request, id):
         if department:
             department,_ = Department.objects.get_or_create(name=department)
             user.department = department
+        if dni:
+            user.dni = dni
+        if phone:
+            user.phone = phone
 
         user.save()
 
