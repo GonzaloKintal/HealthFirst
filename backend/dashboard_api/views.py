@@ -246,10 +246,11 @@ def create_license(request):
         end_date_parsed = datetime.strptime(end_date, '%Y-%m-%d').date()
 
         if end_date_parsed < start_date_parsed:
-            return JsonResponse({'error': 'end_date no puede ser anterior a la start_date.'}, status=400)
+            return JsonResponse({'error': 'end_date no puede ser anterior a start_date.'}, status=400)
 
         required_days = (end_date_parsed - start_date_parsed).days + 1
 
+        # Crear la licencia
         license = License.objects.create(
             user=user,
             type=license_type,
@@ -261,24 +262,33 @@ def create_license(request):
             justified=False,
         )
 
+        # Crear certificado si viene incluido
         if certificate_data:
-            # Obtención del archivo en base64
             file_data = certificate_data.get('file', None)
             if file_data:
-                # Almacenamos el archivo en base64
                 Certificate.objects.create(
                     license=license,
-                    file=file_data,  # Aquí guardamos el string base64
+                    file=file_data, # guardamos el string base64
                     validation=certificate_data.get('validation', False),
                     upload_date=datetime.now(),
                     is_deleted=False,
                     deleted_at=None
                 )
 
+        # Crear estado inicial como "pending"
+        default_status = Status.StatusChoices.PENDING
+
+        Status.objects.create(
+            license=license,
+            name=default_status,
+            evaluation_comment='Nueva solicitud.'
+        )
+
         return JsonResponse({'message': 'Licencia solicitada exitosamente.'}, status=200)
 
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+
 
 
 @csrf_exempt
