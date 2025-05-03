@@ -136,7 +136,7 @@ class HealthFirstUser(AbstractUser):
 
     def delete(self, *args, **kwargs):
         self.is_deleted = True
-        self.delet_at=timezone.now()
+        self.delete_at=now()
         self.save()
 
     @classmethod
