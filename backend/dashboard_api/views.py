@@ -319,7 +319,7 @@ def evaluate_license(request, id):
         license_status = data.get("license_status")
         comment = data.get("evaluation_comment", "")
 
-        if license_status not in ["approved", "rejected"]:
+        if license_status not in ["approved", "rejected", "missing_doc"]:
             return JsonResponse({'error': 'Estado inválido. Debe ser "approved" o "rejected".'}, status=400)
 
         # Verificar existencia de la licencia
@@ -350,3 +350,70 @@ def evaluate_license(request, id):
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
+
+# Detalle de licencia
+@csrf_exempt
+@require_http_methods(["GET"])
+def get_license_detail(request, id):
+    try:
+        #User = get_user_model()
+
+        try:
+            license = License.objects.select_related("user", "status").get(license_id=id)
+        except License.DoesNotExist:
+            return JsonResponse({"error": "Licencia no encontrada."}, status=404)
+
+        user = request.user
+
+        # Validación de permisos. Descomentar cuando se implemente token.
+        #allowed_roles = ["supervisor", "admin"]
+        #if (license.user != user and user.role not in allowed_roles):
+        #    return JsonResponse({"error": "No tenés permisos para acceder a esta licencia."}, status=403)
+
+        # Datos del usuario solicitante
+        user_data = {
+            "first_name": license.user.first_name,
+            "last_name": license.user.last_name,
+            "email": license.user.email,
+            "department": getattr(license.user, "department", None),
+        }
+
+        # Datos de la licencia
+        license_data = {
+            "type": license.type,
+            "start_date": license.start_date,
+            "end_date": license.end_date,
+            "request_date": license.request_date,
+            "closing_date": license.closing_date,
+            "required_days": (license.end_date - license.start_date).days + 1,
+            "justified": license.justified,
+            "information": license.information,
+        }
+
+        # Estado actual de la licencia
+        status_data = None
+        if hasattr(license, "status"):
+            status_data = {
+                "name": license.status.name,
+                "evaluation_date": license.status.evaluation_date,
+                "evaluation_comment": license.status.evaluation_comment,
+            }
+
+        # Certificado relacionado
+        certificate = Certificate.objects.filter(license=license, is_deleted=False).first()
+        certificate_data = None
+        if certificate:
+            certificate_data = {
+                "validation": certificate.validation,
+                "upload_date": certificate.upload_date,
+            }
+
+        return JsonResponse({
+            "license": license_data,
+            "user": user_data,
+            "status": status_data,
+            "certificate": certificate_data
+        }, status=200)
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
