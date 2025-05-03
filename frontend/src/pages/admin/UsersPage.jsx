@@ -25,20 +25,12 @@ const UsersPage = () => {
         setError(null);
         // Siempre usa página 1 cuando cambian los filtros
         const pageToFetch = (searchTerm !== '' || filter !== 'all') ? 1 : pagination.currentPage;
-
-        console.log('Fetching with:', {
-          page: pageToFetch,
-          search: searchTerm,
-          role: filter !== 'all' ? filter : undefined
-        });
         
         const response = await getUsers(
           pageToFetch, 
           searchTerm, 
           filter !== 'all' ? filter : undefined
         );
-
-        console.log('Response:', response);
         
         const transformedUsers = response.users.map(user => ({
           id: user.id,
@@ -170,7 +162,7 @@ const UsersPage = () => {
             </div>
             <input
               type="text"
-              placeholder="Buscar usuarios por nombre, DNI, email, departamento o cargo..."
+              placeholder="Buscar usuarios por nombre, DNI, email o departamento..."
               className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
