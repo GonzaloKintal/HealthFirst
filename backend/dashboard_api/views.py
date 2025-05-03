@@ -306,3 +306,47 @@ def delete_license(request, id):
 
     except License.DoesNotExist:
         return JsonResponse({'error': 'La licencia no existe.'}, status=404)
+    
+
+
+ # Aprobación de licencias
+@csrf_exempt
+@require_http_methods(["PUT"])
+def evaluate_license(request, id):
+    try:
+        data = json.loads(request.body)
+
+        license_status = data.get("license_status")
+        comment = data.get("evaluation_comment", "")
+
+        if license_status not in ["approved", "rejected"]:
+            return JsonResponse({'error': 'Estado inválido. Debe ser "approved" o "rejected".'}, status=400)
+
+        # Verificar existencia de la licencia
+        try:
+            license = License.objects.get(license_id=id)
+        except License.DoesNotExist:
+            return JsonResponse({'error': 'Licencia no encontrada.'}, status=404)
+
+        # Obtener o crear el objeto Status
+        status_obj, created = Status.objects.get_or_create(license=license)
+
+        # Solo permitir evaluación si el estado actual es 'pending'
+        if not created and status_obj.name != Status.StatusChoices.PENDING:
+            return JsonResponse({
+                'error': f'La licencia no pudo ser evaluada. Estado actual: "{status_obj.name}".'
+            }, status=400)
+
+        # Actualizar estado, fecha y comentario
+        status_obj.name = license_status
+        status_obj.evaluation_date = now().date()
+        status_obj.evaluation_comment = comment
+        status_obj.save()
+
+        return JsonResponse({'message': f'Licencia evaluada correctamente.'}, status=200)
+
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'El cuerpo de la solicitud debe ser JSON válido.'}, status=400)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
