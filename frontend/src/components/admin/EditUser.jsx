@@ -17,7 +17,7 @@ const EditUser = () => {
     confirmPassword: '',
     phone: '',
     date_of_birth: '',
-    department_name: '',
+    department: '',
     role_name: 'employee'
   });
   const [notification, setNotification] = useState(null);
@@ -47,19 +47,16 @@ const EditUser = () => {
       try {
         const userData = await getUser(id);
 
-        // Separar el full_name en first_name y last_name
-        const [first_name, ...last_nameParts] = userData.full_name.split(' ');
-        const last_name = last_nameParts.join(' ');
 
         setFormData({
           id: userData.id,
-          first_name: first_name || '',
-          last_name: last_name || '',
+          first_name: userData.first_name || '',
+          last_name: userData.last_name || '',
           dni: userData.dni || '',
           email: userData.email || '',
           phone: userData.phone || '',
           date_of_birth: userData.date_of_birth || '',
-          department_name: userData.department_name || '',
+          department: userData.department || '',
           role_name: userData.role || 'employee',
           password: '',
           confirmPassword: ''
@@ -150,7 +147,7 @@ const EditUser = () => {
         email: formData.email,
         phone: formData.phone,
         date_of_birth: formData.date_of_birth,
-        department_name: formData.department_name,
+        department: formData.department,
         role_name: formData.role_name
       };
   
@@ -286,8 +283,8 @@ const EditUser = () => {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Departamento *</label>
               <select
-                name="department_name"
-                value={formData.department_name}
+                name="department"
+                value={formData.department}
                 onChange={handleChange}
                 required
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"

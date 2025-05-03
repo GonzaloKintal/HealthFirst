@@ -29,7 +29,7 @@ def register_user(request):
     try:
         data = json.loads(request.body)
         role= Role.get_or_create(name=data.get('role_name'))
-        department,_ = Department.objects.get_or_create(name=data.get('department_name'))
+        department,_ = Department.objects.get_or_create(name=data.get('department'))
         
         user = HealthFirstUser(
             first_name=data.get('first_name'),
@@ -124,6 +124,7 @@ def update_user(request, id):
         email = data.get('email', None)
         user_role= data.get('role_name', None)
         password = data.get('password', None)
+        department= data.get('department', None)
 
         user = HealthFirstUser.objects.get(id=id,is_deleted=False)
     
@@ -138,6 +139,9 @@ def update_user(request, id):
             user.role = role
         if password:
             user.set_password(password)
+        if department:
+            department,_ = Department.objects.get_or_create(name=department)
+            user.department = department
 
         user.save()
 
