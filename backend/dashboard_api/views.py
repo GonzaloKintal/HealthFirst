@@ -246,10 +246,11 @@ def create_license(request):
         end_date_parsed = datetime.strptime(end_date, '%Y-%m-%d').date()
 
         if end_date_parsed < start_date_parsed:
-            return JsonResponse({'error': 'end_date no puede ser anterior a la start_date.'}, status=400)
+            return JsonResponse({'error': 'end_date no puede ser anterior a start_date.'}, status=400)
 
         required_days = (end_date_parsed - start_date_parsed).days + 1
 
+        # Crear la licencia
         license = License.objects.create(
             user=user,
             type=license_type,
@@ -261,24 +262,33 @@ def create_license(request):
             justified=False,
         )
 
+        # Crear certificado si viene incluido
         if certificate_data:
-            # Obtención del archivo en base64
             file_data = certificate_data.get('file', None)
             if file_data:
-                # Almacenamos el archivo en base64
                 Certificate.objects.create(
                     license=license,
-                    file=file_data,  # Aquí guardamos el string base64
+                    file=file_data, # guardamos el string base64
                     validation=certificate_data.get('validation', False),
                     upload_date=datetime.now(),
                     is_deleted=False,
                     deleted_at=None
                 )
 
+        # Crear estado inicial como "pending"
+        default_status = Status.StatusChoices.PENDING
+
+        Status.objects.create(
+            license=license,
+            name=default_status,
+            evaluation_comment='Nueva solicitud.'
+        )
+
         return JsonResponse({'message': 'Licencia solicitada exitosamente.'}, status=200)
 
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+
 
 
 @csrf_exempt
@@ -296,3 +306,114 @@ def delete_license(request, id):
 
     except License.DoesNotExist:
         return JsonResponse({'error': 'La licencia no existe.'}, status=404)
+    
+
+
+ # Aprobación de licencias
+@csrf_exempt
+@require_http_methods(["PUT"])
+def evaluate_license(request, id):
+    try:
+        data = json.loads(request.body)
+
+        license_status = data.get("license_status")
+        comment = data.get("evaluation_comment", "")
+
+        if license_status not in ["approved", "rejected", "missing_doc"]:
+            return JsonResponse({'error': 'Estado inválido. Debe ser "approved" o "rejected".'}, status=400)
+
+        # Verificar existencia de la licencia
+        try:
+            license = License.objects.get(license_id=id)
+        except License.DoesNotExist:
+            return JsonResponse({'error': 'Licencia no encontrada.'}, status=404)
+
+        # Obtener o crear el objeto Status
+        status_obj, created = Status.objects.get_or_create(license=license)
+
+        # Solo permitir evaluación si el estado actual es 'pending'
+        if not created and status_obj.name != Status.StatusChoices.PENDING:
+            return JsonResponse({
+                'error': f'La licencia no pudo ser evaluada. Estado actual: "{status_obj.name}".'
+            }, status=400)
+
+        # Actualizar estado, fecha y comentario
+        status_obj.name = license_status
+        status_obj.evaluation_date = now().date()
+        status_obj.evaluation_comment = comment
+        status_obj.save()
+
+        return JsonResponse({'message': f'Licencia evaluada correctamente.'}, status=200)
+
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'El cuerpo de la solicitud debe ser JSON válido.'}, status=400)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+# Detalle de licencia
+@csrf_exempt
+@require_http_methods(["GET"])
+def get_license_detail(request, id):
+    try:
+        #User = get_user_model()
+
+        try:
+            license = License.objects.select_related("user", "status").get(license_id=id)
+        except License.DoesNotExist:
+            return JsonResponse({"error": "Licencia no encontrada."}, status=404)
+
+        user = request.user
+
+        # Validación de permisos. Descomentar cuando se implemente token.
+        #allowed_roles = ["supervisor", "admin"]
+        #if (license.user != user and user.role not in allowed_roles):
+        #    return JsonResponse({"error": "No tenés permisos para acceder a esta licencia."}, status=403)
+
+        # Datos del usuario solicitante
+        user_data = {
+            "first_name": license.user.first_name,
+            "last_name": license.user.last_name,
+            "email": license.user.email,
+            "department": getattr(license.user, "department", None),
+        }
+
+        # Datos de la licencia
+        license_data = {
+            "type": license.type,
+            "start_date": license.start_date,
+            "end_date": license.end_date,
+            "request_date": license.request_date,
+            "closing_date": license.closing_date,
+            "required_days": (license.end_date - license.start_date).days + 1,
+            "justified": license.justified,
+            "information": license.information,
+        }
+
+        # Estado actual de la licencia
+        status_data = None
+        if hasattr(license, "status"):
+            status_data = {
+                "name": license.status.name,
+                "evaluation_date": license.status.evaluation_date,
+                "evaluation_comment": license.status.evaluation_comment,
+            }
+
+        # Certificado relacionado
+        certificate = Certificate.objects.filter(license=license, is_deleted=False).first()
+        certificate_data = None
+        if certificate:
+            certificate_data = {
+                "validation": certificate.validation,
+                "upload_date": certificate.upload_date,
+            }
+
+        return JsonResponse({
+            "license": license_data,
+            "user": user_data,
+            "status": status_data,
+            "certificate": certificate_data
+        }, status=200)
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
