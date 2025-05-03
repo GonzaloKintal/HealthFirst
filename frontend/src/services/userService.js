@@ -9,8 +9,6 @@ export const getUsers = async (page = 1, search = '', role) => {
             page_size: 5,
         };
 
-        console.log('Request body:', body);
-
         if (search) body.search = search;
         if (role && role !== 'all') body.role = role;
 

@@ -36,10 +36,10 @@ export const AuthProvider = ({ children }) => {
 
   // Función de login real
   const login = (authResponse) => {
-    const { access, refresh, username, email, role } = authResponse;
+    const { access, refresh, id, username, email, role } = authResponse;
     
     const userData = {
-      id: username, // o algún ID único si tu backend lo proporciona
+      id,
       username,
       email,
       role
