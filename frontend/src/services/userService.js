@@ -50,9 +50,9 @@ export const editUser = async (id, data) => {
     }
 };
 
-export const getUser = async (email) => {
+export const getUser = async (id) => {
     try {
-        const response = await api.get(`/api/get_user/${email}`);
+        const response = await api.get(`/api/get_user/${id}`);
         return response.data.user;
     } catch (error) {
         console.error('Error fetching user:', error);

@@ -153,7 +153,7 @@ class HealthFirstUser(AbstractUser):
         return users
 
     @classmethod
-    def get_user(cls, email):
-        user = cls.objects.get(email=email, is_deleted=False)
+    def get_user(cls, id):
+        user = cls.objects.get(id=id, is_deleted=False)
         return user
     
