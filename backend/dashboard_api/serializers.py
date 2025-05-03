@@ -55,7 +55,8 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         data.update({
             'username': self.user.username,
             'email': self.user.email,
-            'role': self.user.role.name if hasattr(self.user, 'role') and self.user.role else 'user'
+            'role': self.user.role.name if hasattr(self.user, 'role') and self.user.role else 'user',
+            'id': self.user.id,
         })
         
         return data

@@ -16,6 +16,7 @@ import RequestLicense from '../components/employee/RequestLicense';
 import EditLicense from '../components/employee/EditLicense';
 import AddUser from '../components/admin/AddUser';
 import EditUser from '../components/admin/EditUser';
+import MyDataPage from '../pages/employee/MyDataPage';
 
 const AppRoutes = () => {
   return (
@@ -131,7 +132,7 @@ const AppRoutes = () => {
         <Route 
           path="/analyst/*" 
           element={
-            <ProtectedRoute allowedRoles={['analyst', 'admin']}> {/* Permitimos admin aquí */}
+            <ProtectedRoute allowedRoles={['analyst', 'admin']}>
               <AnalystDashboard />
             </ProtectedRoute>
           } 
@@ -151,6 +152,15 @@ const AppRoutes = () => {
           element={
             <ProtectedRoute allowedRoles={['admin', 'analyst']}>
               <MachineLearningPage />
+            </ProtectedRoute>
+          } 
+        />
+
+        <Route 
+          path="/my-data" 
+          element={
+            <ProtectedRoute allowedRoles={['admin', 'analyst', 'employee', 'supervisor']}>
+              <MyDataPage />
             </ProtectedRoute>
           } 
         />
