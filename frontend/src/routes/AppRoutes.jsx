@@ -72,7 +72,7 @@ const AppRoutes = () => {
         />
 
       <Route 
-          path="/edit-user/:email" 
+          path="/edit-user/:id" 
           element={
             <ProtectedRoute allowedRoles={['admin']}>
               <EditUser />

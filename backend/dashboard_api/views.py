@@ -154,12 +154,12 @@ def update_user(request, id):
 
 @csrf_exempt
 @require_http_methods(["GET"])
-def get_user(request, email):
-    if not email:
-        response=JsonResponse({'error': 'El email es requerido.'}, status=400)
+def get_user(request, id):
+    if not id:
+        response=JsonResponse({'error': 'El id es requerido.'}, status=400)
     else:
         try:
-            user = HealthFirstUser.get_user(email)
+            user = HealthFirstUser.get_user(id)
             serializer = HealthFirstUserSerializer(user)
             response= JsonResponse({'user': serializer.data}, status=200)
 

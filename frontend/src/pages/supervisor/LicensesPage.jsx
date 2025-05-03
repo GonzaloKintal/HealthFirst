@@ -1,10 +1,9 @@
-
-
 import { useState, useEffect } from 'react';
 import { FiSearch, FiFilter, FiDownload, FiCheck, FiX, FiEdit, FiTrash2, FiEye, FiUser, FiCalendar, FiFileText, FiPlus } from 'react-icons/fi';
 import useAuth from '../../hooks/useAuth';
 import Confirmation from '../../components/common/Confirmation';
 import { Link } from 'react-router-dom';
+import { getLicenses } from '../../services/licenseService';
 
 const LicensesPage = () => {
   const { user } = useAuth();
@@ -16,76 +15,38 @@ const LicensesPage = () => {
   const [rejectionReason, setRejectionReason] = useState('');
   const [showRejectionInput, setShowRejectionInput] = useState(false);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
-  const [licenseToDelete, setLicenseToDelete] = useState(null)
+  const [licenseToDelete, setLicenseToDelete] = useState(null);
   const canShowActions = ['admin', 'supervisor'].includes(user?.role);
 
-  // Datos de ejemplo
   useEffect(() => {
-    const mockLicenses = [
-      {
-        id: 1,
-        employee: 'Juan Pérez',
-        DNI: '123456',
-        department: 'Ventas',
-        position: 'Ejecutivo',
-        type: 'Enfermedad',
-        startDate: '2023-06-15',
-        endDate: '2023-06-20',
-        days: 5,
-        status: 'approved',
-        requestedOn: '2023-06-10',
-        reason: 'Gripe con fiebre alta',
-        documents: 'certificado_medico.pdf'
-      },
-      {
-        id: 2,
-        employee: 'María Gómez',
-        DNI: '123456',
-        department: 'TI',
-        position: 'Desarrolladora',
-        type: 'Vacaciones',
-        startDate: '2023-07-01',
-        endDate: '2023-07-15',
-        days: 14,
-        status: 'pending',
-        requestedOn: '2023-06-25',
-        reason: 'Vacaciones programadas',
-        documents: null
-      },
-      {
-        id: 3,
-        employee: 'Carlos Ruiz',
-        DNI: '123456',
-        department: 'RH',
-        position: 'Reclutador',
-        type: 'Maternidad',
-        startDate: '2023-08-01',
-        endDate: '2023-11-01',
-        days: 90,
-        status: 'approved',
-        requestedOn: '2023-07-20',
-        reason: 'Licencia por paternidad',
-        documents: 'documentos_paternidad.pdf'
-      },
-      {
-        id: 4,
-        employee: 'Ana López',
-        DNI: '123456',
-        department: 'Contabilidad',
-        position: 'Contadora',
-        type: 'Doctor',
-        startDate: '2023-06-18',
-        endDate: '2023-06-18',
-        days: 1,
-        status: 'rejected',
-        requestedOn: '2023-06-15',
-        reason: 'Consulta médica',
-        documents: null,
-        rejectionReason: 'Falta de documentación médica'
-      },
-    ];
+    const fetchLicenses = async () => {
+      try {
+        const response = await getLicenses();
+        const formattedLicenses = response.licenses.map(license => ({
+          id: license.license_id,
+          employee: license.user.full_name,
+          DNI: license.user.dni || 'No disponible',
+          department: license.user.department || 'No disponible',
+          type: license.type,
+          startDate: license.start_date,
+          endDate: license.end_date,
+          days: license.days,
+          status: license.status.toLowerCase(),
+          requestedOn: license.created_at || '',
+          information: license.information || '',
+          documents: license.documents || null,
+          email: license.user.email,
+          phone: license.user.phone,
+          dateOfBirth: license.user.date_of_birth
+        }));
+        
+        setLicenses(formattedLicenses);
+      } catch (error) {
+        console.error('Error fetching licenses:', error);
+      }
+    };
 
-    setLicenses(mockLicenses);
+    fetchLicenses();
   }, []);
 
   const filteredLicenses = licenses.filter(license => {
@@ -116,7 +77,6 @@ const LicensesPage = () => {
 
   const handleEdit = (id) => {
     console.log('Editar licencia con ID:', id);
-    // Aquí iría la lógica para editar
   };
 
   const handleDelete = (id) => {
@@ -228,8 +188,16 @@ const LicensesPage = () => {
                           <p className="font-medium">{selectedLicense.department}</p>
                         </div>
                         <div>
-                          <p className="text-sm text-gray-500">Cargo/Puesto</p>
-                          <p className="font-medium">{selectedLicense.position}</p>
+                          <p className="text-sm text-gray-500">Email</p>
+                          <p className="font-medium">{selectedLicense.email}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-500">Teléfono</p>
+                          <p className="font-medium">{selectedLicense.phone}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-500">Fecha de Nacimiento</p>
+                          <p className="font-medium">{selectedLicense.dateOfBirth}</p>
                         </div>
                       </div>
                     </div>
@@ -276,10 +244,6 @@ const LicensesPage = () => {
                           <p className="text-sm text-gray-500">Días solicitados</p>
                           <p className="font-medium">{selectedLicense.days} día(s)</p>
                         </div>
-                        <div>
-                          <p className="text-sm text-gray-500">Fecha de solicitud</p>
-                          <p className="font-medium">{selectedLicense.requestedOn}</p>
-                        </div>
                       </div>
                     </div>
 
@@ -287,7 +251,7 @@ const LicensesPage = () => {
                     <div className="space-y-4">
                       <div>
                         <p className="text-sm text-gray-500">Motivo</p>
-                        <p className="font-medium whitespace-pre-line">{selectedLicense.reason}</p>
+                        <p className="font-medium whitespace-pre-line">{selectedLicense.information || 'No disponible'}</p>
                       </div>
                       
                       <div>
@@ -407,7 +371,6 @@ const LicensesPage = () => {
                 <tr key={license.id} className='text-center'>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="font-medium text-gray-900">{license.employee}</div>
-                    <div className="text-sm text-gray-500">Solicitado: {license.requestedOn}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 capitalize">{license.type}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -436,25 +399,7 @@ const LicensesPage = () => {
                       <span>Detalle</span>
                     </button>
                   </td>
-                  {/* <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex space-x-3 justify-center">
-                      <Link
-                        to={`/edit-license/${license.id}`}
-                        className="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-50 cursor-pointer"
-                      >
-                        <FiEdit size={18} />
-                      </Link>
-
-                      <button 
-                        onClick={() => handleDelete(license.id)}
-                        className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50 cursor-pointer"
-                        title="Eliminar"
-                      >
-                        <FiTrash2 size={18} />
-                      </button>
-                    </div>
-                  </td> */}
-                   {canShowActions && (
+                  {canShowActions && (
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex space-x-3 justify-center">
                         <Link

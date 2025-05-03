@@ -20,10 +20,11 @@ class LicenseSerializer(serializers.ModelSerializer):
     employee = serializers.CharField(source='user.get_full_name')
     days = serializers.SerializerMethodField()
     status = serializers.SerializerMethodField()
+    user = HealthFirstUserSerializer(read_only=True)
 
     class Meta:
         model = License
-        fields = ['license_id', 'employee', 'type', 'start_date', 'end_date', 'days', 'status']
+        fields = ['user', 'license_id', 'user_id', 'employee', 'type', 'start_date', 'end_date', 'days', 'status']
 
     def get_days(self, obj):
         return (obj.end_date - obj.start_date).days + 1
