@@ -224,6 +224,8 @@ def licenses_list(request):
     try:
         data = json.loads(request.body)
 
+        user_id = data.get('user_id')
+        show_all_users = data.get('show_all_users', False)
         status_filter = data.get('status')
         employee_name = data.get('employee_name', '').strip()
         page_number = data.get('page', 1)
@@ -238,13 +240,13 @@ def licenses_list(request):
         except HealthFirstUser.DoesNotExist:
             return JsonResponse({'error': 'Usuario no encontradooo'}, status=404)
 
-        queryset = License.objects.filter(is_deleted=False)
+        queryset = License.objects.filter(is_deleted=False) # No se traen las licencias eliminadas
 
         # Filtro por nombre de empleado
         if employee_name:
-            queryset = queryset.filter(user__first__name__icontains=employee_name)
+            queryset = queryset.filter(user_first_name_icontains=employee_name)
 
-        # Filtro por estados
+        # Filtro por estado
         if status_filter:
             status_filter = status_filter.lower()
             if status_filter == "approved":
@@ -254,10 +256,19 @@ def licenses_list(request):
             elif status_filter == "rejected":
                 queryset = queryset.filter(justified=False, closing_date__isnull=False)
 
-        # Filtro por rol
-        if hasattr(user, 'role') and user.role:
-            if user.role.name in ['analyst', 'employee']:
-                queryset = queryset.filter(user=user)
+        role_name = current_user.role.name if current_user.role else None
+
+        if role_name in ['employee', 'analyst']:
+            if role_name in ['employee', 'analyst']:
+                # Solo sus licencias (usa user_id como filtro principal)
+                queryset = queryset.filter(user__id=user_id)
+
+        elif role_name in ['admin', 'supervisor']:
+            if not show_all_users:
+                queryset = queryset.filter(user=current_user)
+            # Si show_all_users es True, vemos licencias de todos los usuarios
+        else:
+            queryset = queryset.none()
 
         queryset = queryset.order_by('-start_date')
 
@@ -458,6 +469,7 @@ def get_license_detail(request, id):
             certificate_data = {
                 "validation": certificate.validation,
                 "upload_date": certificate.upload_date,
+                "file": certificate.file
             }
 
         return JsonResponse({
