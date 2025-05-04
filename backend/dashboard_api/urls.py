@@ -16,7 +16,7 @@ urlpatterns = [
     path('licenses', licenses_list,name='licenses_list'),
     path('licenses/request', create_license, name='create_license'),
     path('licenses/<int:id>', get_license_detail,name='get_license_detail'),
-    path('licenses/<int:id>', delete_license, name='delete-license'),
+    path('licenses/delete/<int:id>', delete_license, name='delete_license'),
     path('licenses/<int:id>/evaluation', evaluate_license, name='evaluate-license'),
      
 ]
