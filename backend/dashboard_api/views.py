@@ -229,12 +229,20 @@ def licenses_list(request):
         page_number = data.get('page', 1)
         page_size = data.get('page_size', 10)
 
-        user = request.user
-        queryset = License.objects.filter(is_deleted=False) # Para no traer registros elimiandos
+        if not user_id:
+            return JsonResponse({'error': 'El campo user_id es requerido.'}, status=400)
+
+        # Obtenemos el usuario que hace la consulta
+        try:
+            current_user = HealthFirstUser.objects.get(id=user_id, is_deleted=False)
+        except HealthFirstUser.DoesNotExist:
+            return JsonResponse({'error': 'Usuario no encontradooo'}, status=404)
+
+        queryset = License.objects.filter(is_deleted=False)
 
         # Filtro por nombre de empleado
         if employee_name:
-            queryset = queryset.filter(user__first_name__icontains=employee_name)
+            queryset = queryset.filter(user__first__name__icontains=employee_name)
 
         # Filtro por estados
         if status_filter:
@@ -266,7 +274,7 @@ def licenses_list(request):
         }, status=200)
 
     except Exception as e:
-        return JsonResponse({'error': str(e)}, status=500)    
+        return JsonResponse({'error': str(e)}, status=500)
 
 
 @csrf_exempt
@@ -420,12 +428,7 @@ def get_license_detail(request, id):
         #    return JsonResponse({"error": "No tenés permisos para acceder a esta licencia."}, status=403)
 
         # Datos del usuario solicitante
-        user_data = {
-            "first_name": license.user.first_name,
-            "last_name": license.user.last_name,
-            "email": license.user.email,
-            "department": getattr(license.user, "department", None),
-        }
+        user_data = HealthFirstUserSerializer(license.user).data
 
         # Datos de la licencia
         license_data = {
