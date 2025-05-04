@@ -389,7 +389,6 @@ def evaluate_license(request, id):
 @require_http_methods(["GET"])
 def get_license_detail(request, id):
     try:
-        # Try to fetch the license by ID
         try:
             license = License.objects.select_related("user", "status").get(license_id=id)
         except License.DoesNotExist:
@@ -397,7 +396,7 @@ def get_license_detail(request, id):
 
         user = request.user
 
-        # Serialize user data
+        
         user_data = HealthFirstUserSerializer(license.user).data
 
         # Datos de la licencia
