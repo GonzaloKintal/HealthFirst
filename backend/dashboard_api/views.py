@@ -385,12 +385,11 @@ def evaluate_license(request, id):
 
 
 # Detalle de licencia
-@csrf_exempt
+csrf_exempt
 @require_http_methods(["GET"])
 def get_license_detail(request, id):
     try:
-        #User = get_user_model()
-
+        # Try to fetch the license by ID
         try:
             license = License.objects.select_related("user", "status").get(license_id=id)
         except License.DoesNotExist:
@@ -398,18 +397,8 @@ def get_license_detail(request, id):
 
         user = request.user
 
-        # Validación de permisos. Descomentar cuando se implemente token.
-        #allowed_roles = ["supervisor", "admin"]
-        #if (license.user != user and user.role not in allowed_roles):
-        #    return JsonResponse({"error": "No tenés permisos para acceder a esta licencia."}, status=403)
-
-        # Datos del usuario solicitante
-        user_data = {
-            "first_name": license.user.first_name,
-            "last_name": license.user.last_name,
-            "email": license.user.email,
-            "department": getattr(license.user, "department", None),
-        }
+        # Serialize user data
+        user_data = HealthFirstUserSerializer(license.user).data
 
         # Datos de la licencia
         license_data = {
