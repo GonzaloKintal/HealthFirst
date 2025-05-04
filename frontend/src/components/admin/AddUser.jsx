@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { FiUser, FiSave, FiBriefcase, FiLock } from 'react-icons/fi';
 import { Link, useNavigate } from 'react-router-dom';
-import Notification from '../common/Notification';
+import Notification from '../utils/Notification';
 import { addUser } from '../../services/userService';
 
 const AddUser = () => {

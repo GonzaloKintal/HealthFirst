@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { FiUser, FiMail, FiLock, FiBriefcase, FiSave, FiPhone, FiCalendar } from 'react-icons/fi';
 import { useParams, useNavigate } from 'react-router-dom';
-import Notification from '../common/Notification';
+import Notification from '../utils/Notification';
 import { editUser, getUser } from '../../services/userService';
 
 const EditUser = () => {

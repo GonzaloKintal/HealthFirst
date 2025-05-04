@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { FiCalendar, FiUpload, FiUser, FiFileText } from 'react-icons/fi';
 import useAuth from '../../hooks/useAuth';
-import Notification from '../common/Notification';
+import Notification from '../utils/Notification';
+import { getUser, getUsers } from '../../services/userService';
 
 const RequestLicense = () => {
   const { user } = useAuth();
@@ -15,10 +16,15 @@ const RequestLicense = () => {
     endDate: '',
     reason: '',
     documents: null,
-    declaration: false
+    declaration: false,
+    selectedEmployee: ''
   });
   const [calculatedDays, setCalculatedDays] = useState(0);
   const [notification, setNotification] = useState(null);
+  const [employees, setEmployees] = useState([]);
+  const [selectedEmployeeData, setSelectedEmployeeData] = useState(null);
+  const [loadingEmployees, setLoadingEmployees] = useState(false);
+  const [currentUserData, setCurrentUserData] = useState(null);
 
   useEffect(() => {
     if (notification) {
@@ -30,15 +36,109 @@ const RequestLicense = () => {
     }
   }, [notification]);
 
-  // Datos personales con nombre y apellido separados
-  const employeeData = {
-    firstName: user?.firstName || 'Nombre',
-    lastName: user?.lastName || 'Apellido',
-    dni: user?.dni || '12345678',
-    department: user?.department || 'Departamento',
-    position: user?.position || 'Cargo',
-    hireDate: user?.hireDate || '2023-01-15'
+  // Cargar datos del usuario actual cuando el componente se monta
+  useEffect(() => {
+    const fetchCurrentUserData = async () => {
+      try {
+        // Solo si no es admin (para empleados y supervisores)
+        if (user?.role !== 'admin') {
+          const response = await getUser(user.id);
+          setCurrentUserData(response);
+        }
+      } catch (error) {
+        console.error("Error al cargar datos del usuario:", error);
+        setNotification({
+          type: 'error',
+          message: 'Error al cargar tus datos personales'
+        });
+      }
+    };
+    
+    fetchCurrentUserData();
+  }, [user]);
+
+  // Cargar lista de empleados si el usuario es admin o supervisor
+  useEffect(() => {
+    if (user?.role === 'admin' || user?.role === 'supervisor') {
+      const fetchEmployees = async () => {
+        setLoadingEmployees(true);
+        try {
+          const response = await getUsers();
+          // Filtrar solo empleados y analistas (excluyendo otros admins/supervisores)
+          const filteredEmployees = response.users.filter(u => 
+            u.role === 'employee' || u.role === 'analyst'
+          );
+          setEmployees(filteredEmployees);
+        } catch (error) {
+          setNotification({
+            type: 'error',
+            message: 'Error al cargar la lista de empleados'
+          });
+        } finally {
+          setLoadingEmployees(false);
+        }
+      };
+      
+      fetchEmployees();
+    }
+  }, [user?.role]);
+
+  // Cargar datos del empleado seleccionado (solo para admin/supervisor)
+  useEffect(() => {
+    if (formData.selectedEmployee && (user?.role === 'admin' || user?.role === 'supervisor')) {
+      const fetchEmployeeData = async () => {
+        try {
+          const response = await getUser(formData.selectedEmployee);
+          setSelectedEmployeeData(response);
+        } catch (error) {
+          console.error("Error al cargar empleado:", error);
+          setNotification({
+            type: 'error',
+            message: 'Error al cargar los datos del empleado'
+          });
+        }
+      };
+      
+      fetchEmployeeData();
+    }
+  }, [formData.selectedEmployee, user?.role]);
+
+  // Datos personales basados en el rol
+  const getEmployeeData = () => {
+    // Si es admin/supervisor y hay un empleado seleccionado
+    if ((user?.role === 'admin' || user?.role === 'supervisor') && selectedEmployeeData) {
+      return {
+        firstName: selectedEmployeeData.first_name || '',
+        lastName: selectedEmployeeData.last_name || '',
+        dni: selectedEmployeeData.dni || '',
+        department: selectedEmployeeData.department || '',
+        phone: selectedEmployeeData.phone || '',
+      };
+    }
+    
+    // Para empleados/analistas o cuando no hay empleado seleccionado
+    // Usamos currentUserData si está disponible (datos completos del usuario)
+    if (currentUserData) {
+      return {
+        firstName: currentUserData.first_name || '',
+        lastName: currentUserData.last_name || '',
+        dni: currentUserData.dni || '',
+        department: currentUserData.department || '',
+        phone: currentUserData.phone || '',
+      };
+    }
+    
+    // Fallback a los datos básicos del user de useAuth
+    return {
+      firstName: user?.first_name || '',
+      lastName: user?.last_name || '',
+      dni: user?.dni || '',
+      department: user?.department || '',
+      phone: user?.phone || '',
+    };
   };
+
+  const employeeData = getEmployeeData();
 
   const licenseTypes = [
     'Vacaciones',
@@ -113,6 +213,15 @@ const RequestLicense = () => {
         return;
       }
     }
+
+    // Validar que si es admin/supervisor, haya seleccionado un empleado
+    if ((user?.role === 'admin' || user?.role === 'supervisor') && !formData.selectedEmployee) {
+      setNotification({
+        type: 'error',
+        message: 'Debe seleccionar un empleado para continuar.'
+      });
+      return;
+    }
     
     setNotification(null);
     
@@ -129,9 +238,11 @@ const RequestLicense = () => {
         endDate: '',
         reason: '',
         documents: null,
-        declaration: false
+        declaration: false,
+        selectedEmployee: ''
       });
       setCalculatedDays(0);
+      setSelectedEmployeeData(null);
       
       // Redirigir después de que la notificación desaparezca (3 segundos)
       setTimeout(() => {
@@ -144,7 +255,6 @@ const RequestLicense = () => {
       });
     }
   };
-
 
   return (
     <div className="p-6 max-w-3xl mx-auto relative">
@@ -165,6 +275,29 @@ const RequestLicense = () => {
           <h2 className="text-xl font-semibold mb-4 flex items-center">
             <FiUser className="mr-2" /> Datos Personales
           </h2>
+          
+          {/* Selector de empleados para admin/supervisor */}
+          {(user?.role === 'admin' || user?.role === 'supervisor') && (
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Seleccionar Empleado *</label>
+              <select
+                name="selectedEmployee"
+                value={formData.selectedEmployee}
+                onChange={handleChange}
+                required
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                disabled={loadingEmployees}
+              >
+                <option value="">Seleccionar empleado</option>
+                {employees.map(employee => (
+                  <option key={employee.id} value={employee.id}>
+                    {employee.first_name} {employee.last_name} ({employee.dni})
+                  </option>
+                ))}
+              </select>
+              {loadingEmployees && <p className="text-sm text-gray-500 mt-1">Cargando empleados...</p>}
+            </div>
+          )}
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -210,20 +343,10 @@ const RequestLicense = () => {
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Cargo/Puesto</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Número</label>
               <input
                 type="text"
-                value={employeeData.position}
-                readOnly
-                className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50"
-              />
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de Ingreso</label>
-              <input
-                type="text"
-                value={new Date(employeeData.hireDate).toLocaleDateString()}
+                value={employeeData.phone}
                 readOnly
                 className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50"
               />
@@ -366,7 +489,8 @@ const RequestLicense = () => {
           </Link>
           <button
             type="submit"
-            className="cursor-pointer px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            className="cursor-pointer px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+            disabled={(user?.role === 'admin' || user?.role === 'supervisor') && !formData.selectedEmployee}
           >
             Enviar Solicitud
           </button>
