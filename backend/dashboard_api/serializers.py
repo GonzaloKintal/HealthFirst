@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import HealthFirstUser, License
+from .models import Department, HealthFirstUser, License
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 
@@ -7,7 +7,7 @@ class HealthFirstUserSerializer(serializers.ModelSerializer):
     full_name = serializers.SerializerMethodField()
     role = serializers.SlugRelatedField(read_only=True, slug_field='name')
     department = serializers.SlugRelatedField(read_only=True, slug_field='name')
-
+    
     class Meta:
         model = HealthFirstUser
         fields = ['id','full_name', 'first_name', 'last_name','dni', 'date_of_birth', 'phone', 'role', 'email', 'department']
@@ -60,3 +60,8 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         
         return data
 
+
+class DepartmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Department
+        fields = ['id', 'name'] 
