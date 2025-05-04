@@ -5,6 +5,8 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 from django.utils.timezone import now
+from backend.utils import file_utils
+
 
 user_roles=[
     ('supervisor', 'Supervisor'),
@@ -176,3 +178,9 @@ class Certificate(models.Model):
 
     def __str__(self):
         return f"Certificado {self.certificate_id} - Licencia {self.license.license_id}"
+    
+    def checkCertificateOwnershipAndDate(self):
+        certificate_text=file_utils.base64_to_string(self.file) #me queda en texto
+        keys=[self.license.user.first_name,self.license.user.last_name,str(self.license.user.dni)] #ojo con dni con punto, re
+        return file_utils.search(keys,certificate_text) and file_utils.date_in_range(certificate_text,self.license)
+    
