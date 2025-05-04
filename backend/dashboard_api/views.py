@@ -203,13 +203,13 @@ def licenses_list(request):
         try:
             current_user = HealthFirstUser.objects.get(id=user_id, is_deleted=False)
         except HealthFirstUser.DoesNotExist:
-            return JsonResponse({'error': 'Usuario no encontrado'}, status=404)
+            return JsonResponse({'error': 'Usuario no encontradooo'}, status=404)
 
         queryset = License.objects.filter(is_deleted=False) # No se traen las licencias eliminadas
 
         # Filtro por nombre de empleado
         if employee_name:
-            queryset = queryset.filter(user__first_name__icontains=employee_name)
+            queryset = queryset.filter(user_first_name_icontains=employee_name)
 
         # Filtro por estado
         if status_filter:
@@ -250,7 +250,7 @@ def licenses_list(request):
         }, status=200)
 
     except Exception as e:
-        return JsonResponse({'error': str(e)}, status=500)    
+        return JsonResponse({'error': str(e)}, status=500)
 
 
 @csrf_exempt
@@ -389,6 +389,8 @@ def evaluate_license(request, id):
 @require_http_methods(["GET"])
 def get_license_detail(request, id):
     try:
+        #User = get_user_model()
+
         try:
             license = License.objects.select_related("user", "status").get(license_id=id)
         except License.DoesNotExist:
@@ -396,7 +398,12 @@ def get_license_detail(request, id):
 
         user = request.user
 
-        
+        # Validación de permisos. Descomentar cuando se implemente token.
+        #allowed_roles = ["supervisor", "admin"]
+        #if (license.user != user and user.role not in allowed_roles):
+        #    return JsonResponse({"error": "No tenés permisos para acceder a esta licencia."}, status=403)
+
+        # Datos del usuario solicitante
         user_data = HealthFirstUserSerializer(license.user).data
 
         # Datos de la licencia
