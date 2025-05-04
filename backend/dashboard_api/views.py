@@ -209,7 +209,7 @@ def licenses_list(request):
 
         # Filtro por nombre de empleado
         if employee_name:
-            queryset = queryset.filter(user_first_name_icontains=employee_name)
+            queryset = queryset.filter(user__first__name__icontains=employee_name)
 
         # Filtro por estado
         if status_filter:
