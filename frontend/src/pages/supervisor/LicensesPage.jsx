@@ -1,9 +1,12 @@
 import { useState, useEffect } from 'react';
 import { FiSearch, FiFilter, FiDownload, FiCheck, FiX, FiEdit, FiTrash2, FiEye, FiUser, FiCalendar, FiFileText, FiPlus } from 'react-icons/fi';
 import useAuth from '../../hooks/useAuth';
-import Confirmation from '../../components/common/Confirmation';
+import Confirmation from '../../components/utils/Confirmation';
 import { Link } from 'react-router-dom';
-import { getLicenses } from '../../services/licenseService';
+import { getLicenses, getLicenseDetail } from '../../services/licenseService';
+import { FormattedDate } from '../../components/utils/FormattedDate';
+import { deleteLicense } from '../../services/licenseService';
+import Notification from '../../components/utils/Notification';
 
 const LicensesPage = () => {
   const { user } = useAuth();
@@ -17,37 +20,56 @@ const LicensesPage = () => {
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [licenseToDelete, setLicenseToDelete] = useState(null);
   const canShowActions = ['admin', 'supervisor'].includes(user?.role);
+  const [notification, setNotification] = useState({
+    show: false,
+    type: '',
+    message: ''
+  });
 
   useEffect(() => {
     const fetchLicenses = async () => {
       try {
-        const response = await getLicenses();
-        const formattedLicenses = response.licenses.map(license => ({
-          id: license.license_id,
-          employee: license.user.first_name + ' ' + license.user.last_name,
-          DNI: license.user.dni || 'No disponible',
-          department: license.user.department || 'No disponible',
-          type: license.type,
-          startDate: license.start_date,
-          endDate: license.end_date,
-          days: license.days,
-          status: license.status.toLowerCase(),
-          requestedOn: license.created_at || '',
-          information: license.information || '',
-          documents: license.documents || null,
-          email: license.user.email,
-          phone: license.user.phone,
-          dateOfBirth: license.user.date_of_birth
-        }));
+        // Determina si debe mostrar todas las licencias basado en el rol
+        const shouldShowAll = ['admin', 'supervisor'].includes(user?.role);
         
-        setLicenses(formattedLicenses);
+        const response = await getLicenses({ 
+          user_id: user?.id,
+          show_all_users: shouldShowAll // Envía true si es admin/supervisor
+        });
+        
+        if (response.success) {
+          const formattedLicenses = response.licenses.map(license => ({
+            id: license.license_id,
+            employee: license.user.first_name + ' ' + license.user.last_name,
+            DNI: license.user.dni || 'No disponible',
+            department: license.user.department || 'No disponible',
+            type: license.type,
+            startDate: license.start_date,
+            endDate: license.end_date,
+            days: license.days,
+            status: license.status.toLowerCase(),
+            requestedOn: license.created_at || '',
+            information: license.information || '',
+            documents: license.documents || null,
+            email: license.user.email,
+            phone: license.user.phone,
+            dateOfBirth: license.user.date_of_birth
+          }));
+          setLicenses(formattedLicenses);
+        } else {
+          console.error('Error fetching licenses:', response.error);
+          setLicenses([]);
+        }
       } catch (error) {
         console.error('Error fetching licenses:', error);
+        setLicenses([]);
       }
     };
-
-    fetchLicenses();
-  }, []);
+  
+    if (user?.id) {
+      fetchLicenses();
+    }
+  }, [user]);
 
   const filteredLicenses = licenses.filter(license => {
     const matchesSearch = license.employee.toLowerCase().includes(searchTerm.toLowerCase());
@@ -84,10 +106,66 @@ const LicensesPage = () => {
     setShowDeleteConfirmation(true);
   };
 
-  const handleViewDetails = (license) => {
-    setSelectedLicense(license);
-    setIsModalOpen(true);
-    resetRejectionForm();
+  const confirmDelete = async () => {
+    try {
+      // Guarda el estado actual por si necesitamos revertir
+      const previousLicenses = [...licenses];
+      
+      // Actualización optimista
+      setLicenses(previousLicenses.filter(license => license.id !== licenseToDelete));
+      
+      // Llama al servicio para eliminar la licencia en el backend
+      await deleteLicense(licenseToDelete);
+      
+      // Mostrar notificación de éxito
+      setNotification({
+        show: true,
+        type: 'success',
+        message: 'Licencia eliminada con éxito.'
+      });
+      
+    } catch (error) {
+      console.error('Error al eliminar licencia:', error);
+      // Revertir cambios si hay error
+      setLicenses(previousLicenses);
+      setNotification({
+        show: true,
+        type: 'error',
+        message: 'No se pudo eliminar la licencia. Por favor intenta nuevamente.'
+      });
+    } finally {
+      setShowDeleteConfirmation(false);
+      setLicenseToDelete(null);
+      
+      // Ocultar notificación después de 3 segundos
+      setTimeout(() => {
+        setNotification({ show: false, type: '', message: '' });
+      }, 3000);
+    }
+  };
+
+  const handleViewDetails = async (license) => {
+    try {
+      // Mostrar primero los datos básicos que ya tienes
+      setSelectedLicense(license);
+      setIsModalOpen(true);
+      resetRejectionForm();
+      
+      // Obtener y cargar los detalles completos
+      const response = await getLicenseDetail(license.id);
+      
+      if (response.success) {
+        setSelectedLicense(prev => ({
+          ...prev,
+          certificate: response.data.certificate,
+          statusDetails: response.data.status,
+        }));
+      } else {
+        console.error('Error loading license details:', response.error);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    }
   };
 
   const closeModal = () => {
@@ -99,6 +177,44 @@ const LicensesPage = () => {
   const resetRejectionForm = () => {
     setRejectionReason('');
     setShowRejectionInput(false);
+  };
+
+  const handleViewCertificate = () => {
+    try {
+      if (!selectedLicense.certificate?.file) {
+        console.error('No hay certificado disponible');
+        return;
+      }
+  
+      const base64Data = selectedLicense.certificate.file.includes(',') 
+        ? selectedLicense.certificate.file.split(',')[1]
+        : selectedLicense.certificate.file;
+  
+      const byteCharacters = atob(base64Data);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], {type: 'application/pdf'});
+      
+      const pdfUrl = URL.createObjectURL(blob);
+      const newWindow = window.open(pdfUrl, '_blank');
+      
+      if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
+        const downloadLink = document.createElement('a');
+        downloadLink.href = pdfUrl;
+        downloadLink.download = `certificado-${selectedLicense.id}.pdf`;
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+      }
+  
+      setTimeout(() => URL.revokeObjectURL(pdfUrl), 10000);
+    } catch (error) {
+      console.error('Error al visualizar el certificado:', error);
+      alert('No se pudo abrir el certificado');
+    }
   };
 
   return (
@@ -234,11 +350,15 @@ const LicensesPage = () => {
                         </div>
                         <div>
                           <p className="text-sm text-gray-500">Fecha de Inicio</p>
-                          <p className="font-medium">{selectedLicense.startDate}</p>
+                          <p className="font-medium">
+                            {FormattedDate({ dateString: selectedLicense.startDate }).date}
+                          </p>
                         </div>
                         <div>
                           <p className="text-sm text-gray-500">Fecha de Fin</p>
-                          <p className="font-medium">{selectedLicense.endDate}</p>
+                          <p className="font-medium">
+                            {FormattedDate({ dateString: selectedLicense.endDate }).date}
+                          </p>
                         </div>
                         <div>
                           <p className="text-sm text-gray-500">Días solicitados</p>
@@ -253,20 +373,37 @@ const LicensesPage = () => {
                         <p className="text-sm text-gray-500">Motivo</p>
                         <p className="font-medium whitespace-pre-line">{selectedLicense.information || 'No disponible'}</p>
                       </div>
-                      
+
+                      {/* Documentación adjunta */}
                       <div>
                         <p className="text-sm text-gray-500">Documentación adjunta</p>
-                        {selectedLicense.documents ? (
-                          <a 
-                            href="#" 
-                            className="text-blue-600 hover:text-blue-800 flex items-center"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            <FiFileText className="mr-2" /> {selectedLicense.documents}
-                          </a>
+                        {selectedLicense.certificate?.file ? (
+                          <div className="bg-blue-50 p-3 rounded-md">
+                            <h4 className="font-medium mb-2">Certificado Médico</h4>
+                            <div className="flex flex-col gap-1">
+                              <div className="flex items-center gap-1">
+                                <p className="text-sm text-gray-500">Cargado el:</p>
+                                <p className="font-medium">
+                                  {FormattedDate({ dateString: selectedLicense.certificate?.upload_date }).date}
+                                </p>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <p className="text-sm text-gray-500">A las:</p>
+                                <p className="font-medium">
+                                  {FormattedDate({ dateString: selectedLicense.certificate?.upload_date }).time}
+                                </p>
+                              </div>
+                            </div>
+                            <hr className="my-2 border-t border-gray-300"></hr>
+                            <button 
+                              onClick={handleViewCertificate}
+                              className="mt-2 inline-flex items-center text-blue-600 hover:text-blue-800 cursor-pointer"
+                            >
+                              <FiEye className="mr-1" /> Ver certificado
+                            </button>
+                          </div>
                         ) : (
-                          <p className="text-gray-400">No hay documentos adjuntos</p>
+                          <p className="text-gray-400">No hay documentación adjunta</p>
                         )}
                       </div>
 
@@ -433,19 +570,24 @@ const LicensesPage = () => {
       )}
 
       <Confirmation
-          isOpen={showDeleteConfirmation}
-          onClose={() => setShowDeleteConfirmation(false)}
-          onConfirm={() => {
-              setLicenses(licenses.filter(license => license.id !== licenseToDelete));
-              setShowDeleteConfirmation(false);
-              setLicenseToDelete(null);
-          }}
-          title="Eliminar Licencia"
-          message="¿Estás seguro que deseas eliminar esta licencia? Esta acción no se puede deshacer."
-          confirmText="Eliminar"
-          cancelText="Cancelar"
-          type="danger"
+        isOpen={showDeleteConfirmation}
+        onClose={() => setShowDeleteConfirmation(false)}
+        onConfirm={confirmDelete}
+        title="Eliminar Licencia"
+        message="¿Estás seguro que deseas eliminar esta licencia? Esta acción no se puede deshacer."
+        confirmText="Eliminar"
+        cancelText="Cancelar"
+        type="danger"
       />
+
+    {notification.show && (
+      <Notification
+        type={notification.type}
+        message={notification.message}
+        onClose={() => setNotification({ show: false, type: '', message: '' })}
+      />
+    )}
+
     </div>
   );
 };

@@ -18,7 +18,6 @@ const MyDataPage = () => {
         if (userId) {
           const response = await getUser(userId);
           setUserData(response);
-          console.log('User data:', response);
         } else {
           setError('No se pudo identificar al usuario');
         }

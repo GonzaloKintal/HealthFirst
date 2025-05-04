@@ -22,7 +22,6 @@ export const getUsers = async (page = 1, search = '', role) => {
 
 export const addUser = async (user) => {
     try {
-        console.log('User data:', user);
         await api.post(`/api/users/register`, user);
     } catch (error) {
         console.error('Error adding user:', error);
