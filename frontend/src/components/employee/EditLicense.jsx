@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { FiCalendar, FiUpload, FiUser, FiFileText, FiSave, FiX } from 'react-icons/fi';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import useAuth from '../../hooks/useAuth';
-import Notification from '../common/Notification';
+import Notification from '../utils/Notification';
 
 const EditLicense = () => {
   const { id } = useParams();

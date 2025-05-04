@@ -1,15 +1,38 @@
 
 import { FiMenu, FiChevronDown, FiLogOut } from 'react-icons/fi';
-import { useContext, useState } from 'react';
+import { useContext, useState, useEffect } from 'react';
 import { AuthContext } from '../../context/AuthContext';
+import { getUser } from '../../services/userService';
 
 const Header = ({ toggleDrawer }) => {
-  const { user, logout } = useContext(AuthContext);
+  const { user: authUser, logout } = useContext(AuthContext);
+  const [userData, setUserData] = useState(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        if (authUser?.id) {
+          const response = await getUser(authUser.id);
+          setUserData(response);
+        }
+      } catch (err) {
+        console.error('Error fetching user data:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserData();
+  }, [authUser]);
 
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
   };
+
+  // Datos combinados: los básicos del authContext + los completos de la API
+  const user = userData || authUser;
 
   return (
     <header className="z-10000 fixed top-0 left-0 right-0 bg-white shadow-sm border-b border-gray-200">
@@ -31,41 +54,53 @@ const Header = ({ toggleDrawer }) => {
         </div>
         
         {/* Right section - Área de usuario con dropdown */}
-        <div className="relative mr-10">
-          <button 
-            onClick={toggleDropdown}
-            className="flex items-center space-x-4 focus:outline-none cursor-pointer"
-          >
-            <div className="h-11 w-11 rounded-full bg-[#2b60e5] flex items-center justify-center text-white font-medium">
-              {user?.name?.charAt(0) || 'U'}
-            </div>
-            <div className="hidden md:flex flex-col items-start">
-              <span className="text-sm font-medium text-gray-800">{'Usuario'}</span>
-              <span className="text-xs text-gray-500 capitalize">{user?.role || 'Administrador'}</span>
-            </div>
-            <FiChevronDown className={`h-5 w-5 text-gray-500 hidden md:block transition-transform ${isDropdownOpen ? 'transform rotate-180' : ''}`} />
-          </button>
-
-          {/* Menú desplegable */}
-          {isDropdownOpen && (
-            <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
-              <div className="px-4 py-2 text-sm text-gray-700 border-b border-gray-100">
-                <p className="font-medium">{'Usuario'}</p>
-                <p className="text-xs text-gray-500 capitalize">{user?.role || 'Administrador'}</p>
+        {!loading && (
+          <div className="relative mr-10">
+            <button 
+              onClick={toggleDropdown}
+              className="flex items-center space-x-4 focus:outline-none cursor-pointer"
+            >
+              <div className="h-11 w-11 rounded-full bg-[#2b60e5] flex items-center justify-center text-white font-medium">
+                {user?.first_name?.charAt(0)?.toUpperCase() || 
+                 user?.username?.charAt(0)?.toUpperCase() || 
+                 'U'}
               </div>
-              <button
-                onClick={() => {
-                  logout();
-                  setIsDropdownOpen(false);
-                }}
-                className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
-              >
-                <FiLogOut className="mr-2" />
-                Cerrar sesión
-              </button>
-            </div>
-          )}
-        </div>
+              <div className="hidden md:flex flex-col items-start">
+                <span className="text-sm font-medium text-gray-800">
+                  {user?.first_name || user?.username || 'Usuario'}
+                </span>
+                <span className="text-xs text-gray-500 capitalize">
+                  {user?.role || 'Administrador'}
+                </span>
+              </div>
+              <FiChevronDown className={`h-5 w-5 text-gray-500 hidden md:block transition-transform ${isDropdownOpen ? 'transform rotate-180' : ''}`} />
+            </button>
+
+            {/* Menú desplegable */}
+            {isDropdownOpen && (
+              <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
+                <div className="px-4 py-2 text-sm text-gray-700 border-b border-gray-100">
+                  <p className="font-medium">
+                    {user?.first_name || user?.username || 'Usuario'}
+                  </p>
+                  <p className="text-xs text-gray-500 capitalize">
+                    {user?.role || 'Administrador'}
+                  </p>
+                </div>
+                <button
+                  onClick={() => {
+                    logout();
+                    setIsDropdownOpen(false);
+                  }}
+                  className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
+                >
+                  <FiLogOut className="mr-2" />
+                  Cerrar sesión
+                </button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {isDropdownOpen && (

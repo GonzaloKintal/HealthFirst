@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { FiEdit, FiTrash2, FiPlus, FiUser, FiSearch, FiFilter, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
-import Confirmation from '../../components/common/Confirmation';
+import Confirmation from '../../components/utils/Confirmation';
 import { getUsers, deleteUser } from '../../services/userService';
 
 const UsersPage = () => {
