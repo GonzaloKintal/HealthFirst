@@ -313,7 +313,9 @@ const LicensesPage = () => {
                         </div>
                         <div>
                           <p className="text-sm text-gray-500">Fecha de Nacimiento</p>
-                          <p className="font-medium">{selectedLicense.dateOfBirth}</p>
+                          <p className="font-medium">
+                            {FormattedDate({ dateString: selectedLicense.dateOfBirth }).date}
+                          </p>
                         </div>
                       </div>
                     </div>

@@ -49,6 +49,25 @@ export const getLicenseDetail = async (licenseId) => {
   }
 };
 
+// Solicitar una nueva licencia
+export const requestLicense = async (licenseData) => {
+  try {
+    const response = await api.post('api/licenses/request', licenseData, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error detallado:', {
+      message: error.message,
+      response: error.response?.data,
+      config: error.config
+    });
+    throw error;
+  }
+};
+
 // Eliminar una licencia
 export const deleteLicense = async (licenseId) => {
   try {

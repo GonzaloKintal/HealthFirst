@@ -6,6 +6,7 @@ import { FiCalendar, FiUpload, FiUser, FiFileText } from 'react-icons/fi';
 import useAuth from '../../hooks/useAuth';
 import Notification from '../utils/Notification';
 import { getUser, getUsers } from '../../services/userService';
+import { requestLicense } from '../../services/licenseService';
 
 const RequestLicense = () => {
   const { user } = useAuth();
@@ -189,10 +190,19 @@ const RequestLicense = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const readFileAsBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result.split(',')[1]); // Extrae solo el Base64
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Validación adicional antes de enviar
+    // Validaciones previas
     if (!formData.declaration) {
       setNotification({
         type: 'error',
@@ -200,7 +210,7 @@ const RequestLicense = () => {
       });
       return;
     }
-
+  
     if (formData.startDate && formData.endDate) {
       const start = new Date(formData.startDate);
       const end = new Date(formData.endDate);
@@ -213,8 +223,7 @@ const RequestLicense = () => {
         return;
       }
     }
-
-    // Validar que si es admin/supervisor, haya seleccionado un empleado
+  
     if ((user?.role === 'admin' || user?.role === 'supervisor') && !formData.selectedEmployee) {
       setNotification({
         type: 'error',
@@ -223,15 +232,57 @@ const RequestLicense = () => {
       return;
     }
     
-    setNotification(null);
-    
-    const isSuccess = Math.random() > 0.3;
-    
-    if (isSuccess) {
+    try {
+      // Obtener el user_id correcto según el rol
+      let userId;
+      if (user?.role === 'admin' || user?.role === 'supervisor') {
+        userId = formData.selectedEmployee;
+      } else {
+        const authData = localStorage.getItem('auth_data');
+        userId = authData ? JSON.parse(authData).user.id : user?.id;
+      }
+  
+      if (!userId) {
+        throw new Error('No se pudo determinar el usuario');
+      }
+
+      let certificateBase64 = '';
+      if (formData.documents) {
+        certificateBase64 = await readFileAsBase64(formData.documents);
+      }
+  
+      // Preparar los datos en el formato exacto que espera el backend
+      const certificate = formData.documents 
+        ? {
+            validation: true,
+            file: await readFileAsBase64(formData.documents)
+          }
+        : {
+            validation: false,
+            file: ""
+          };
+
+      const licenseData = {
+        user_id: Number(userId),
+        type: formData.licenseType,
+        start_date: formData.startDate,
+        end_date: formData.endDate,
+        information: formData.reason,
+        certificate
+      };
+  
+      console.log('Datos a enviar:', licenseData);
+      
+      // Enviar la solicitud
+      await requestLicense(licenseData);
+      
+      // Éxito
       setNotification({
         type: 'success',
         message: 'Tu solicitud de licencia ha sido enviada correctamente.'
       });
+      
+      // Resetear formulario
       setFormData({
         licenseType: '',
         startDate: '',
@@ -244,17 +295,26 @@ const RequestLicense = () => {
       setCalculatedDays(0);
       setSelectedEmployeeData(null);
       
-      // Redirigir después de que la notificación desaparezca (3 segundos)
+      // Redirigir después de 3 segundos
       setTimeout(() => {
-        navigate('/my-licenses');
+        navigate('/licenses');
       }, 3000);
-    } else {
+    } catch (error) {
+      console.error('Error completo:', {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message
+      });
+      
       setNotification({
         type: 'error',
-        message: 'Ocurrió un error al enviar tu solicitud.'
+        message: error.response?.data?.message || 
+                 error.response?.data?.error || 
+                 'Ocurrió un error al enviar tu solicitud.'
       });
     }
   };
+  
 
   return (
     <div className="p-6 max-w-3xl mx-auto relative">
@@ -447,7 +507,7 @@ const RequestLicense = () => {
                   name="documents"
                   onChange={handleChange}
                   className="hidden"
-                  accept=".pdf,.jpg,.jpeg,.png"
+                  accept=".pdf"
                 />
               </label>
               <span className="ml-2 text-sm text-gray-500">
@@ -455,7 +515,7 @@ const RequestLicense = () => {
               </span>
             </div>
             <p className="mt-1 text-xs text-gray-500">
-              Formatos aceptados: PDF, JPG, PNG (Máx. 10MB)
+              Formatos aceptados: PDF (Máx. 10MB)
             </p>
           </div>
 
