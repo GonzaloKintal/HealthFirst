@@ -385,7 +385,7 @@ def evaluate_license(request, id):
 
 
 # Detalle de licencia
-csrf_exempt
+@csrf_exempt
 @require_http_methods(["GET"])
 def get_license_detail(request, id):
     try:
@@ -428,6 +428,7 @@ def get_license_detail(request, id):
             certificate_data = {
                 "validation": certificate.validation,
                 "upload_date": certificate.upload_date,
+                "file": certificate.file
             }
 
         return JsonResponse({
