@@ -16,6 +16,8 @@ from django.db import IntegrityError
 from django.core.paginator import Paginator
 from rest_framework_simplejwt.views import TokenObtainPairView
 from dashboard_api.serializers import CustomTokenObtainPairSerializer
+from django.db.models import Q
+from urllib.parse import unquote
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
@@ -181,6 +183,39 @@ def get_user(request, id):
 
     return response
 
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
+from django.db.models import Q
+from django.http import JsonResponse
+from urllib.parse import unquote
+
+@csrf_exempt
+@require_http_methods(["GET"])
+def get_users_by_filter(request, filter):
+    decoded_filter = unquote(filter)
+    keywords = decoded_filter.strip().split()  
+
+    try:
+        query = Q()
+        for word in keywords:
+            subquery = (
+                Q(first_name__icontains=word) |
+                Q(last_name__icontains=word) |
+                Q(email__icontains=word) |
+                Q(dni__icontains=word) |
+                Q(department__name__icontains=word)
+            )
+            query &= subquery 
+
+        users = HealthFirstUser.objects.filter(query).distinct()
+        serializer = HealthFirstUserSerializer(users, many=True)
+        return JsonResponse({'users': serializer.data}, status=200)
+
+    except Exception as e:
+        return JsonResponse({'error': 'Ocurrió un error inesperado'}, status=500)
+
+
+
 
 # LICENSES API
 @csrf_exempt
@@ -189,29 +224,19 @@ def licenses_list(request):
     try:
         data = json.loads(request.body)
 
-        user_id = data.get('user_id')
-        show_all_users = data.get('show_all_users', False)
         status_filter = data.get('status')
         employee_name = data.get('employee_name', '').strip()
         page_number = data.get('page', 1)
         page_size = data.get('page_size', 10)
 
-        if not user_id:
-            return JsonResponse({'error': 'El campo user_id es requerido.'}, status=400)
-
-        # Obtenemos el usuario que hace la consulta
-        try:
-            current_user = HealthFirstUser.objects.get(id=user_id, is_deleted=False)
-        except HealthFirstUser.DoesNotExist:
-            return JsonResponse({'error': 'Usuario no encontrado'}, status=404)
-
-        queryset = License.objects.filter(is_deleted=False) # No se traen las licencias eliminadas
+        user = request.user
+        queryset = License.objects.filter(is_deleted=False) # Para no traer registros elimiandos
 
         # Filtro por nombre de empleado
         if employee_name:
             queryset = queryset.filter(user__first_name__icontains=employee_name)
 
-        # Filtro por estado
+        # Filtro por estados
         if status_filter:
             status_filter = status_filter.lower()
             if status_filter == "approved":
@@ -221,19 +246,10 @@ def licenses_list(request):
             elif status_filter == "rejected":
                 queryset = queryset.filter(justified=False, closing_date__isnull=False)
 
-        role_name = current_user.role.name if current_user.role else None
-
-        if role_name in ['employee', 'analyst']:
-            if role_name in ['employee', 'analyst']:
-                # Solo sus licencias (usa user_id como filtro principal)
-                queryset = queryset.filter(user__id=user_id)
-
-        elif role_name in ['admin', 'supervisor']:
-            if not show_all_users:
-                queryset = queryset.filter(user=current_user)
-            # Si show_all_users es True, vemos licencias de todos los usuarios
-        else:
-            queryset = queryset.none()
+        # Filtro por rol
+        if hasattr(user, 'role') and user.role:
+            if user.role.name in ['analyst', 'employee']:
+                queryset = queryset.filter(user=user)
 
         queryset = queryset.order_by('-start_date')
 
@@ -389,6 +405,8 @@ def evaluate_license(request, id):
 @require_http_methods(["GET"])
 def get_license_detail(request, id):
     try:
+        #User = get_user_model()
+
         try:
             license = License.objects.select_related("user", "status").get(license_id=id)
         except License.DoesNotExist:
@@ -396,8 +414,18 @@ def get_license_detail(request, id):
 
         user = request.user
 
-        
-        user_data = HealthFirstUserSerializer(license.user).data
+        # Validación de permisos. Descomentar cuando se implemente token.
+        #allowed_roles = ["supervisor", "admin"]
+        #if (license.user != user and user.role not in allowed_roles):
+        #    return JsonResponse({"error": "No tenés permisos para acceder a esta licencia."}, status=403)
+
+        # Datos del usuario solicitante
+        user_data = {
+            "first_name": license.user.first_name,
+            "last_name": license.user.last_name,
+            "email": license.user.email,
+            "department": getattr(license.user, "department", None),
+        }
 
         # Datos de la licencia
         license_data = {
@@ -427,7 +455,6 @@ def get_license_detail(request, id):
             certificate_data = {
                 "validation": certificate.validation,
                 "upload_date": certificate.upload_date,
-                "file": certificate.file
             }
 
         return JsonResponse({
