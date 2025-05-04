@@ -56,3 +56,22 @@ export const getUser = async (id) => {
         throw error;
     }
 };
+
+export const getUsersByFilter = async (filter, page = 1, pageSize = 5) => {
+    try {
+      // Codificar el filtro para la URL
+      const encodedFilter = encodeURIComponent(filter);
+      
+      const response = await api.get(`/api/get_users_by_filter/${encodedFilter}`, {
+        params: {
+          page,
+          page_size: pageSize
+        }
+      });
+  
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching filtered users:', error);
+      throw error;
+    }
+};
