@@ -42,59 +42,7 @@ class Role(models.Model):
 
     
 
-class License(models.Model):
-    license_id = models.AutoField(primary_key=True)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='licenses')
-    type = models.CharField(max_length=50)
-    start_date = models.DateField()
-    end_date = models.DateField()
-    required_days = models.PositiveIntegerField()
-    information = models.TextField(blank=True, null=True)
-    request_date = models.DateField()
-    closing_date = models.DateField(blank=True, null=True)
-    justified = models.BooleanField(default=False)
-    certificate_need = models.BooleanField(default=False)
-    certificate_immediate = models.BooleanField(default=False)
-    deleted_at = models.DateTimeField(blank=True, null=True)
-    is_deleted = models.BooleanField(default=False)
 
-    def __str__(self):
-        return f"Licencia {self.license_id} - {self.user}"
-    
-    def save(self, *args, **kwargs):
-        # Guardamos una copia para comparar luego si cambió
-        is_new = self.pk is None
-        old_is_deleted = None
-
-        if not is_new:
-            old_instance = License.objects.filter(pk=self.pk).first()
-            if old_instance:
-                old_is_deleted = old_instance.is_deleted
-
-        super().save(*args, **kwargs)
-
-        # Si cambió el estado de is_deleted a True
-        if not is_new and old_is_deleted is False and self.is_deleted is True:
-            try:
-                certificate = self.certificate
-                certificate.is_deleted = True
-                certificate.deleted_at = timezone.now()
-                certificate.save()
-            except Certificate.DoesNotExist:
-                pass  # No tiene certificado, no hacemos nada
-
-
-class Certificate(models.Model):
-    certificate_id = models.AutoField(primary_key=True)
-    license = models.OneToOneField(License, on_delete=models.CASCADE, related_name='certificate')
-    file = models.TextField(blank=True, null=True)
-    validation = models.BooleanField(default=False)
-    upload_date = models.DateTimeField(auto_now_add=True)
-    is_deleted = models.BooleanField(default=False)
-    deleted_at = models.DateTimeField(null=True, blank=True)
-
-    def __str__(self):
-        return f"Certificado {self.certificate_id} - Licencia {self.license.license_id}"
     
 
 class Status(models.Model):
@@ -173,4 +121,58 @@ class HealthFirstUser(AbstractUser):
     def get_user(cls, id):
         user = cls.objects.get(id=id, is_deleted=False)
         return user
+
+
+class License(models.Model):
+    license_id = models.AutoField(primary_key=True)
+    user = models.ForeignKey(HealthFirstUser, on_delete=models.CASCADE, related_name='licenses')
+    type = models.CharField(max_length=50)
+    start_date = models.DateField()
+    end_date = models.DateField()
+    required_days = models.PositiveIntegerField()
+    information = models.TextField(blank=True, null=True)
+    request_date = models.DateField()
+    closing_date = models.DateField(blank=True, null=True)
+    justified = models.BooleanField(default=False)
+    certificate_need = models.BooleanField(default=False)
+    certificate_immediate = models.BooleanField(default=False)
+    deleted_at = models.DateTimeField(blank=True, null=True)
+    is_deleted = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"Licencia {self.license_id} - {self.user}"
     
+    def save(self, *args, **kwargs):
+        # Guardamos una copia para comparar luego si cambió
+        is_new = self.pk is None
+        old_is_deleted = None
+
+        if not is_new:
+            old_instance = License.objects.filter(pk=self.pk).first()
+            if old_instance:
+                old_is_deleted = old_instance.is_deleted
+
+        super().save(*args, **kwargs)
+
+        # Si cambió el estado de is_deleted a True
+        if not is_new and old_is_deleted is False and self.is_deleted is True:
+            try:
+                certificate = self.certificate
+                certificate.is_deleted = True
+                certificate.deleted_at = timezone.now()
+                certificate.save()
+            except Certificate.DoesNotExist:
+                pass  # No tiene certificado, no hacemos nada
+
+
+class Certificate(models.Model):
+    certificate_id = models.AutoField(primary_key=True)
+    license = models.OneToOneField(License, on_delete=models.CASCADE, related_name='certificate')
+    file = models.TextField(blank=True, null=True)
+    validation = models.BooleanField(default=False)
+    upload_date = models.DateTimeField(auto_now_add=True)
+    is_deleted = models.BooleanField(default=False)
+    deleted_at = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        return f"Certificado {self.certificate_id} - Licencia {self.license.license_id}"
