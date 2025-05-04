@@ -203,7 +203,7 @@ def licenses_list(request):
         try:
             current_user = HealthFirstUser.objects.get(id=user_id, is_deleted=False)
         except HealthFirstUser.DoesNotExist:
-            return JsonResponse({'error': 'Usuario no encontradooo'}, status=404)
+            return JsonResponse({'error': 'Usuario no encontrado'}, status=404)
 
         queryset = License.objects.filter(is_deleted=False) # No se traen las licencias eliminadas
 
