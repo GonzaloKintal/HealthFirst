@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import Department, HealthFirstUser, License
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework_simplejwt.exceptions import AuthenticationFailed
 
 
 class HealthFirstUserSerializer(serializers.ModelSerializer):
@@ -42,6 +43,9 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):
         token = super().get_token(user)
+
+        if user.is_deleted:
+            raise AuthenticationFailed('El usuario no existe.')
         
         token['id'] = user.id
         token['email'] = user.email
@@ -52,6 +56,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 
     def validate(self, attrs):
         data = super().validate(attrs)
+
         data.update({
             'username': self.user.username,
             'email': self.user.email,
