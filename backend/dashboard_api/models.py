@@ -73,6 +73,7 @@ class HealthFirstUser(AbstractUser):
     department = models.ForeignKey(Department, on_delete=models.CASCADE, null=True, blank=True, related_name='users')
     date_of_birth = models.DateField(null=True, blank=True)
     email = models.EmailField(unique=True)
+    employment_start_date=models.DateField(null=False, blank=False)
     phone=models.CharField(max_length=15,null=False, blank=False)
     dni=models.IntegerField(null=False, blank=False)
     is_deleted=models.BooleanField(default=False)
@@ -123,12 +124,25 @@ class HealthFirstUser(AbstractUser):
     def get_user(cls, id):
         user = cls.objects.get(id=id, is_deleted=False)
         return user
+    
+class Type_License(models.model):
+    type_license_id=models.AutoField(primary_key=True)
+    name=models.CharField(max_length=15,null=False, blank=False)
+    description=models.CharField(max_length=50,null=False, blank=False)
+    min_advance_notice_days=models.IntegerField(null=False, blank=False)
+    certificate_require= models.BooleanField(default=True)
+    tolerance_days_certificate_submission=models.IntegerField(null=True, blank=True)
+    total_days_granted=models.IntegerField(null=True, blank=True)
+    max_consecutive_days=models.IntegerField(null=True, blank=True)
+    yearly_approved_requests=models.IntegerField(null=True, blank=True)
+    is_deleted = models.BooleanField(default=False)
+    deleted_at = models.DateTimeField(blank=True, null=True)
 
 
 class License(models.Model):
     license_id = models.AutoField(primary_key=True)
     user = models.ForeignKey(HealthFirstUser, on_delete=models.CASCADE, related_name='licenses')
-    type = models.CharField(max_length=50)
+    type = models.ForeignKey(Type_License,on_delete=models.CASCADE,related_name='licenses')
     start_date = models.DateField()
     end_date = models.DateField()
     required_days = models.PositiveIntegerField()
@@ -180,7 +194,10 @@ class Certificate(models.Model):
         return f"Certificado {self.certificate_id} - Licencia {self.license.license_id}"
     
     def checkCertificateOwnershipAndDate(self):
-        certificate_text=file_utils.base64_to_string(self.file) #me queda en texto
-        keys=[self.license.user.first_name,self.license.user.last_name,str(self.license.user.dni)] #ojo con dni con punto, re
-        return file_utils.search(keys,certificate_text) and file_utils.date_in_range(certificate_text,self.license)
-    
+        if self.file is not None and self.file.strip() != "": #si no esta vacio o es un text de espacios blancos
+            certificate_text=file_utils.base64_to_string(self.file) #me traigo el certificado  en texto
+            keys=[self.license.user.first_name,self.license.user.last_name,str(self.license.user.dni)] #ojo con dni con punto, se queda con las palabras claves para ownership
+            return file_utils.search(keys,certificate_text) and file_utils.date_in_range(certificate_text,self.license) #si encontró las palabras claves y una fecha que en el certificado que entra en rango
+        return False
+
+
