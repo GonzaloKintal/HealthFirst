@@ -1,8 +1,9 @@
+
 import { useState, useEffect } from 'react';
 import { FiEdit, FiTrash2, FiPlus, FiUser, FiSearch, FiFilter, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
 import Confirmation from '../../components/utils/Confirmation';
-import { getUsers, deleteUser } from '../../services/userService';
+import { deleteUser, getUsersByFilter } from '../../services/userService';
 
 const UsersPage = () => {
   const [users, setUsers] = useState([]);
@@ -17,19 +18,17 @@ const UsersPage = () => {
   });
   const [error, setError] = useState(null);
 
-
   // Obtener usuarios del backend
   useEffect(() => {
     const fetchUsers = async () => {
       try {
         setError(null);
-        // Siempre usa página 1 cuando cambian los filtros
-        const pageToFetch = (searchTerm !== '' || filter !== 'all') ? 1 : pagination.currentPage;
+        const filterToSend = filter !== 'all' ? `${filter}` : '';
         
-        const response = await getUsers(
-          pageToFetch, 
-          searchTerm, 
-          filter !== 'all' ? filter : undefined
+        const response = await getUsersByFilter(
+          pagination.currentPage, 
+          filterToSend,
+          5
         );
         
         const transformedUsers = response.users.map(user => ({
@@ -44,7 +43,7 @@ const UsersPage = () => {
         setUsers(transformedUsers);
         setPagination({
           totalPages: response.total_pages || 1,
-          currentPage: pageToFetch, // Mantén la página actual
+          currentPage: response.current_page,
           totalUsers: response.total_users || 0
         });
       } catch (err) {
@@ -59,10 +58,49 @@ const UsersPage = () => {
       }
     };
   
-    const debounceTimer = setTimeout(fetchUsers, 50);
-    return () => clearTimeout(debounceTimer);
-  }, [pagination.currentPage, searchTerm, filter]);
-
+    fetchUsers();
+  }, [pagination.currentPage, filter]); // Solo depende de filter, no de searchTerm
+  
+  // Función para búsqueda manual (con Enter o botón)
+  const handleSearch = async () => {
+    try {
+      setError(null);
+      setPagination(prev => ({ ...prev, currentPage: 1 }));
+      
+      const response = await getUsersByFilter(
+        1, // Siempre va a la página 1 en nueva búsqueda
+        searchTerm, // Solo envía el texto de búsqueda
+        5
+      );
+      
+      const transformedUsers = response.users.map(user => ({
+        id: user.id,
+        name: user.first_name + ' ' + user.last_name,
+        dni: user.dni,
+        email: user.email,
+        department: user.department || '',
+        role: user.role
+      }));
+      
+      setUsers(transformedUsers);
+      setPagination({
+        totalPages: response.total_pages || 1,
+        currentPage: 1,
+        totalUsers: response.total_users || 0
+      });
+    } catch (err) {
+      console.error('Error en búsqueda:', err);
+      setError('Error al realizar la búsqueda');
+    }
+  };
+  
+  // Manejar la tecla Enter
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
+  };
+  
   // Cambiar de página
   const handlePageChange = (newPage) => {
     if (newPage >= 1 && newPage <= pagination.totalPages && newPage !== pagination.currentPage) {
@@ -156,17 +194,24 @@ const UsersPage = () => {
       {/* Barra de búsqueda y filtro */}
       <div className="bg-white rounded-lg shadow overflow-hidden mb-6">
         <div className="p-4 border-b border-gray-200 flex flex-col md:flex-row md:items-center space-y-3 md:space-y-0 md:space-x-4">
-          <div className="relative flex-grow">
+          <div className="relative flex-grow flex">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <FiSearch className="text-gray-400" />
             </div>
             <input
               type="text"
               placeholder="Buscar usuarios por nombre, DNI, email o departamento..."
-              className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-l-md focus:outline-none"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
+              onKeyDown={handleKeyDown}
             />
+            <button
+              onClick={handleSearch}
+              className="px-4 py-2 border border-l-0 border-gray-300 rounded-r-md bg-blue-600 text-white hover:bg-blue-700 transition duration-200 cursor-pointer"
+            >
+              Buscar
+            </button>
           </div>
           
           <div className="flex items-center space-x-2">
@@ -174,7 +219,10 @@ const UsersPage = () => {
             <select 
               className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               value={filter}
-              onChange={(e) => setFilter(e.target.value)}
+              onChange={(e) => {
+                setFilter(e.target.value);
+                setPagination(prev => ({ ...prev, currentPage: 1 }));
+              }}
             >
               <option value="all">Todos</option>
               <option value="admin">Administrador</option>

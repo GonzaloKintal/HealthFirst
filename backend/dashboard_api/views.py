@@ -201,7 +201,8 @@ def get_users_by_filter(request):
                 Q(last_name__icontains=word) |
                 Q(email__icontains=word) |
                 Q(dni__icontains=word) |
-                Q(department__name__icontains=word)
+                Q(department__name__icontains=word) |
+                Q(role__name__icontains=word)
             )
             query &= subquery 
 
