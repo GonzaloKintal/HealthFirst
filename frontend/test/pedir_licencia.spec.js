@@ -1,15 +1,10 @@
 // test/licencia.spec.js
 import { test, expect } from '@playwright/test';
+import { login } from './utils/login.js';  // Asegúrate de que la ruta sea correcta
 
 test('Usuario solicita una licencia correctamente', async ({ page }) => {
-  // Paso 1: Loguearse usando la función login importada
-  await page.goto('http://localhost:5173/login');
-
-  // Ingresar credenciales válidas
-  await page.fill('#username', 'cliente@gmail.com');
-  await page.fill('#password', '1234');
-  await page.click('button[type="submit"]');
-
+  
+  await login(page, 'cliente@gmail.com', '1234');  // Iniciar sesión como empleado
   await expect(page).toHaveURL('http://localhost:5173/employee', { timeout: 10000 });
 
 
@@ -27,5 +22,10 @@ test('Usuario solicita una licencia correctamente', async ({ page }) => {
 
   // Paso 4: Enviar el formulario
   await page.click('button[type="submit"]');
+
+  // quiero que el supervisor se loguee y verifique que la licencia fue solicitada
+  await page.waitForTimeout(2000); // Esperar un momento para que la solicitud se procese
+  await login(page, 'supervisor@gmail.com', '1234');  // Iniciar sesión como empleado
+  await expect(page).toHaveURL('http://localhost:5173/supervisor', { timeout: 10000 });
 
 });
