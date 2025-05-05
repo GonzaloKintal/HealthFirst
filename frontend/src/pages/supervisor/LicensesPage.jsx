@@ -20,6 +20,7 @@ const LicensesPage = () => {
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [licenseToDelete, setLicenseToDelete] = useState(null);
   const canShowActions = ['admin', 'supervisor'].includes(user?.role);
+  const [error, setError] = useState(null);
   const [notification, setNotification] = useState({
     show: false,
     type: '',
@@ -59,10 +60,12 @@ const LicensesPage = () => {
         } else {
           console.error('Error fetching licenses:', response.error);
           setLicenses([]);
+          setError('No se pudieron cargar las licencias. Por favor intenta nuevamente.');
         }
       } catch (error) {
         console.error('Error fetching licenses:', error);
         setLicenses([]);
+        setError('No se pudieron cargar las licencias. Por favor intenta nuevamente.');
       }
     };
   
@@ -460,6 +463,13 @@ const LicensesPage = () => {
         </div>
       </div>
 
+      {/* Mensaje de error */}
+      {error && (
+        <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+          {error}
+        </div>
+      )}
+
       <div className="bg-white rounded-lg shadow overflow-hidden mb-6">
         <div className="p-4 border-b border-gray-200 flex flex-col md:flex-row md:items-center space-y-3 md:space-y-0 md:space-x-4">
           <div className="relative flex-grow">
@@ -469,7 +479,7 @@ const LicensesPage = () => {
             <input
               type="text"
               placeholder="Buscar empleado..."
-              className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
