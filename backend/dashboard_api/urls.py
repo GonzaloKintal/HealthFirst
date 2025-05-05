@@ -12,7 +12,7 @@ urlpatterns = [
     path('users/delete/<int:id>', delete_user, name='delete_user'),
     path('users/update/<int:id>', update_user, name='update_user'),
     path('get_user/<int:id>', get_user, name='get_user'),
-    path('get_users_by_filter/<str:filter>', get_users_by_filter, name='get_user_by_filter'),
+    path('get_users_by_filter', get_users_by_filter, name='get_user_by_filter'),
 
     path('licenses', licenses_list,name='licenses_list'),
     path('licenses/request', create_license, name='create_license'),

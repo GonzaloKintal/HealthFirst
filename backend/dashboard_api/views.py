@@ -165,8 +165,8 @@ def update_user(request, id):
 
 
 @csrf_exempt
-@require_http_methods(["GET"])
-def get_user(request, id):
+@require_http_methods(["POST"])
+def get_user(request):
     if not id:
         response=JsonResponse({'error': 'El id es requerido.'}, status=400)
     else:
@@ -183,20 +183,18 @@ def get_user(request, id):
 
     return response
 
-from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_http_methods
-from django.db.models import Q
-from django.http import JsonResponse
-from urllib.parse import unquote
-
 @csrf_exempt
-@require_http_methods(["GET"])
-def get_users_by_filter(request, filter):
+@require_http_methods(["POST"])
+def get_users_by_filter(request):
+    data = json.loads(request.body)
+    page_number = data.get('page', 1)
+    page_size = data.get('page_size', 10) 
+    filter = data.get('filter', None)
     decoded_filter = unquote(filter)
     keywords = decoded_filter.strip().split()  
 
     try:
-        query = Q()
+        query = Q(is_deleted=False)
         for word in keywords:
             subquery = (
                 Q(first_name__icontains=word) |
@@ -208,8 +206,20 @@ def get_users_by_filter(request, filter):
             query &= subquery 
 
         users = HealthFirstUser.objects.filter(query).distinct()
-        serializer = HealthFirstUserSerializer(users, many=True)
-        return JsonResponse({'users': serializer.data}, status=200)
+        paginator= Paginator(users, page_size)
+
+        try:
+            page=paginator.page(page_number)
+        except Exception:
+            return JsonResponse({'error': 'Número de página inválido.'}, status=400)
+
+        serializer = HealthFirstUserSerializer(page.object_list, many=True)
+        return JsonResponse({
+            'users': serializer.data,
+            'total_pages': paginator.num_pages,
+            'current_page': page.number,
+            'total_users': paginator.count
+        })
 
     except Exception as e:
         return JsonResponse({'error': 'Ocurrió un error inesperado'}, status=500)
