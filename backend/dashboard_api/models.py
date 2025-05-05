@@ -75,6 +75,8 @@ class HealthFirstUser(AbstractUser):
     dni=models.IntegerField(null=False, blank=False)
     is_deleted=models.BooleanField(default=False)
     delete_at=models.DateTimeField(null=True, blank=True,default=None)
+    employment_start_date=models.DateField(null=True, blank=True)
+
 
     def save(self, *args, **kwargs):
         if self.pk is None:
@@ -123,10 +125,23 @@ class HealthFirstUser(AbstractUser):
         return user
 
 
+class LicenseType(models.Model):
+    name=models.CharField(max_length=40,null=False, blank=False)
+    description=models.CharField(max_length=100,null=False, blank=False)
+    min_advance_notice_days=models.IntegerField(null=False, blank=False)
+    certificate_require= models.BooleanField(default=True)
+    tolerance_days_certificate_submission=models.IntegerField(null=True, blank=True)
+    total_days_granted=models.IntegerField(null=True, blank=True)
+    max_consecutive_days=models.IntegerField(null=True, blank=True)
+    yearly_approved_requests=models.IntegerField(null=True, blank=True)
+    is_deleted = models.BooleanField(default=False)
+    deleted_at = models.DateTimeField(blank=True, null=True)
+
+
 class License(models.Model):
     license_id = models.AutoField(primary_key=True)
     user = models.ForeignKey(HealthFirstUser, on_delete=models.CASCADE, related_name='licenses')
-    type = models.CharField(max_length=50)
+    type = models.ForeignKey(LicenseType, on_delete=models.CASCADE, null=True, blank=True)
     start_date = models.DateField()
     end_date = models.DateField()
     required_days = models.PositiveIntegerField()

@@ -454,7 +454,7 @@ def get_license_detail(request, id):
 
         # Datos de la licencia
         license_data = {
-            "type": license.type,
+            "type": license.type.name,
             "start_date": license.start_date,
             "end_date": license.end_date,
             "request_date": license.request_date,

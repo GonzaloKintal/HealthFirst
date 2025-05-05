@@ -22,6 +22,7 @@ class LicenseSerializer(serializers.ModelSerializer):
     days = serializers.SerializerMethodField()
     status = serializers.SerializerMethodField()
     user = HealthFirstUserSerializer(read_only=True)
+    type=serializers.SlugRelatedField(read_only=True, slug_field='name')
 
     class Meta:
         model = License
