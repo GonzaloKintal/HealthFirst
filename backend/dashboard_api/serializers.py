@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Department, HealthFirstUser, License
+from .models import Department, HealthFirstUser, License, LicenseType
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.exceptions import AuthenticationFailed
 
@@ -72,3 +72,9 @@ class DepartmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Department
         fields = ['id', 'name'] 
+
+
+class LicenseTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LicenseType
+        fields = ['id', 'name', 'description', 'min_advance_notice_days', 'certificate_require', 'tolerance_days_certificate_submission', 'total_days_granted', 'max_consecutive_days', 'yearly_approved_requests']
