@@ -165,8 +165,8 @@ def update_user(request, id):
 
 
 @csrf_exempt
-@require_http_methods(["POST"])
-def get_user(request):
+@require_http_methods(["GET"])
+def get_user(request, id):
     if not id:
         response=JsonResponse({'error': 'El id es requerido.'}, status=400)
     else:
