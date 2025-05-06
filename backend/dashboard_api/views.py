@@ -306,14 +306,19 @@ def create_license(request):
         data = json.loads(request.body)
 
         user_id = data.get('user_id')
-        license_type = data.get('type')
+        license_type_id = data.get('type_id')
         start_date = data.get('start_date')
         end_date = data.get('end_date')
         information = data.get('information', '')
         certificate_data = data.get('certificate', None)
 
-        if not all([user_id, license_type, start_date, end_date]):
+        if not all([user_id, license_type_id, start_date, end_date]):
             return JsonResponse({'error': 'user_id, type, start_date, end_date son requeridos.'}, status=400)
+
+        try:
+            license_type = LicenseType.objects.get(id=license_type_id)
+        except LicenseType.DoesNotExist:
+                return JsonResponse({'error': f'LicenseType con id "{license_type_id}" no encontrado.'}, status=404)
 
         User = get_user_model()
         try:
