@@ -11,7 +11,7 @@ from .models import *
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 import json
-from .serializers import HealthFirstUserSerializer, LicenseSerializer
+from .serializers import HealthFirstUserSerializer, LicenseSerializer, LicenseTypeSerializer
 from django.db import IntegrityError
 from django.core.paginator import Paginator
 from rest_framework_simplejwt.views import TokenObtainPairView
@@ -454,7 +454,7 @@ def get_license_detail(request, id):
 
         # Datos de la licencia
         license_data = {
-            "type": license.type,
+            "type": license.type.name,
             "start_date": license.start_date,
             "end_date": license.end_date,
             "request_date": license.request_date,
@@ -489,6 +489,18 @@ def get_license_detail(request, id):
             "status": status_data,
             "certificate": certificate_data
         }, status=200)
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+
+@csrf_exempt
+@require_http_methods(["GET"])
+def get_licenses_types(request):
+    try:
+        types = LicenseType.objects.filter(is_deleted=False)
+        types_data = LicenseTypeSerializer(types, many=True).data
+        return JsonResponse({"types": types_data}, status=200)
 
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
