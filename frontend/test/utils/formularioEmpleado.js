@@ -1,9 +1,4 @@
-import { test, expect } from '@playwright/test';
-import { login } from './utils/login.js';  // Asegúrate de que la ruta sea correcta
-import { agregarUsuario } from './utils/formularioEmpleado.js'; // Asegúrate de que la ruta sea correcta
-
-test('Se agrega empleado nuevo al sistema', async ({ page }) => {
-    await login(page, 'juansaltiva2000@gmail.com', '1234');
+export async function agregarUsuario(page,nombre,apellido,fechaNacimiento,departamento,dni,telefono,email,password) {
     await expect(page).toHaveURL('http://localhost:5173/admin', { timeout: 10000 });
     await page.getByRole('link', { name: 'Usuarios' }).click();
     await page.click('text=Nuevo Usuario');
@@ -23,12 +18,4 @@ test('Se agrega empleado nuevo al sistema', async ({ page }) => {
     await page.fill('input[name="confirmPassword"]', '123456');
     await page.click('text=Guardar');
     await page.waitForTimeout(1000); // Espera 2 segundos para que se procese la solicitud  
-
-    await page.getByRole('button', { name: 'Guardar Usuario' }).click();
-    await page.waitForTimeout(1000); // Espera 2 segundos para que se procese la solicitud
-
-    const successMessage = await page.locator('text=Error al crear el usuario').first();
-    await expect(successMessage).toBeVisible();
-    
-
-  });
+    }
