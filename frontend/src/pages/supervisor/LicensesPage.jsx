@@ -384,7 +384,7 @@ const LicensesPage = () => {
                         <p className="text-sm text-gray-500">Documentación adjunta</p>
                         {selectedLicense.certificate?.file ? (
                           <div className="bg-blue-50 p-3 rounded-md">
-                            <h4 className="font-medium mb-2">Certificado Médico</h4>
+                            <h4 className="font-medium mb-2">Certificado</h4>
                             <div className="flex flex-col gap-1">
                               <div className="flex items-center gap-1">
                                 <p className="text-sm text-gray-500">Cargado el:</p>
