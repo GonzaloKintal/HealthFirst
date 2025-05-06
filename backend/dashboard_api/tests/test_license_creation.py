@@ -8,7 +8,6 @@ from dashboard_api.models import HealthFirstUser, Role, Department
 class HealthFirstUserTests(TestCase):
 
     def setUp(self):
-        """Create a test user and related entities before each test."""
         self.role = Role.objects.create(name='Admin')
         self.department = Department.objects.create(name='IT')
         
@@ -38,7 +37,6 @@ class HealthFirstUserTests(TestCase):
         self.client.login(username=self.username, password=self.password)
 
     def test_create_user_successfully(self):
-        """Test that a user is created successfully"""
         url = reverse('register_user')
         data = {
             "username": "user",
@@ -62,7 +60,6 @@ class HealthFirstUserTests(TestCase):
 
 
     def test_get_user_success(self):
-        """Test that user details can be fetched successfully"""
         url = reverse('get_user', args=[self.user.id])
         response = self.client.get(url)
 
@@ -71,7 +68,6 @@ class HealthFirstUserTests(TestCase):
         self.assertEqual(response.json()['user']['email'], self.email)
 
     def test_delete_user_successfully(self):
-        """Test that user can be soft deleted"""
         url = reverse('delete_user', args=[self.user.id])
         response = self.client.delete(url)
 
@@ -81,7 +77,6 @@ class HealthFirstUserTests(TestCase):
         self.assertIsNotNone(self.user.delete_at)
 
     def test_create_user_with_missing_fields(self):
-        """Test that user creation fails with missing required fields"""
         url = reverse('register_user')
         data = {
             'first_name': 'MissingLastName',
@@ -95,13 +90,11 @@ class HealthFirstUserTests(TestCase):
         self.assertGreater(len(errors), 0)
 
     def test_soft_delete_user(self):
-        """Test that a user can be soft deleted and not removed from the database"""
         self.user.delete()
         self.assertTrue(self.user.is_deleted)
         self.assertIsNotNone(self.user.delete_at)
 
     def test_retrieve_deleted_user(self):
-        """Test that deleted users can still be retrieved if needed"""
         self.user.delete() 
         url = reverse('get_user', args=[self.user.id]) 
         response = self.client.get(url)
