@@ -193,11 +193,11 @@ class Certificate(models.Model):
     def __str__(self):
         return f"Certificado {self.certificate_id} - Licencia {self.license.license_id}"
     
-    def checkCertificateOwnershipAndDate(self):
+    def check_CertificateOwnership_And_Date(self):
         if self.file is not None and self.file.strip() != "": #si no esta vacio o es un text de espacios blancos
-            certificate_text=file_utils.base64_to_string(self.file) #me traigo el certificado  en texto
+            certificate_text=file_utils.base64_to_text(self.file,es_imagen=file_utils.es_pdf_imagen(self.file)) #me traigo el certificado  en texto
             keys=[self.license.user.first_name,self.license.user.last_name,str(self.license.user.dni)] #ojo con dni con punto, se queda con las palabras claves para ownership
-            return file_utils.search(keys,certificate_text) and file_utils.date_in_range(certificate_text,self.license) #si encontró las palabras claves y una fecha que en el certificado que entra en rango
+            return file_utils.search_in_pdf_text(keys,certificate_text) and file_utils.date_in_range(certificate_text,self.license) #si encontró las palabras claves y una fecha que en el certificado que entra en rango
         return False
 
 
