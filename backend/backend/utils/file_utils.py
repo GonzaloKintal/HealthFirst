@@ -2,6 +2,7 @@ import base64
 import re
 import os
 import pytesseract
+import unicodedata
 
 from PIL import Image
 from pdfminer.high_level import extract_text
@@ -41,7 +42,23 @@ def base64_to_text(base64_pdf, is_image=False):
             os.remove("temp.pdf")
 
 
-import re
+
+
+def remove_accents(text): #REVISAR
+    """Saca las tildes del texto pero mantiene ñ y Ñ"""
+    normalized_text = unicodedata.normalize('NFD', text)
+    clean_text = []
+    for char in normalized_text:
+        # Keep ñ/Ñ and non-accented characters
+        if char in ['ñ', 'Ñ']:
+            clean_text.append(char)
+        else:
+            # Saca los acentos pero mantiene la letra base
+            if unicodedata.category(char) != 'Mn':
+                clean_text.append(char)
+    return ''.join(clean_text)
+
+
 
 def search_dni_in_text(text, dni):
     """Busca un DNI (sin puntos) en un texto que puede tenerlo con/sin puntos/espacios.  """
