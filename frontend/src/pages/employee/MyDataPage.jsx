@@ -111,14 +111,24 @@ const formattedBirthDate = userData?.date_of_birth
     })
   : null;
 
-const formattedJoinedDate = userData?.date_joined
-  ? new Date(userData.date_joined).toLocaleDateString('es-AR', { 
+const formattedJoinedDate = userData?.employment_start_date
+  ? new Date(userData.employment_start_date).toLocaleDateString('es-AR', { 
       timeZone: 'UTC',
       day: '2-digit',
       month: '2-digit',
       year: 'numeric'
     })
   : null;
+
+  const getRoleInSpanish = (role) => {
+    const roleMap = {
+      'employee': 'Empleado',
+      'supervisor': 'Supervisor',
+      'analyst': 'Analista',
+      'admin': 'Administrador'
+    };
+    return roleMap[role] || role;
+  }
 
   const dataFields = [
     { label: 'Nombre', value: userData?.first_name, icon: <FiUser className="mr-2" /> },
@@ -128,11 +138,11 @@ const formattedJoinedDate = userData?.date_joined
 
     { label: 'Correo electrónico', value: userData?.email, icon: <FiMail className="mr-2" /> },
     { label: 'Teléfono', value: '+54 ' + userData?.phone, icon: <FiPhone className="mr-2" /> },
-    { label: 'Rol', value: userData?.role, icon: <FiUser className="mr-2" /> },
+    { label: 'Rol', value: getRoleInSpanish(userData?.role), icon: <FiUser className="mr-2" /> },
     { label: 'Departamento', value: userData?.department, icon: <FiBriefcase className="mr-2" /> },
     { label: 'Fecha de ingreso a la empresa', value: formattedJoinedDate, icon: <FiCalendar className="mr-2" /> },
     
-    { label: 'Antigüedad', value: userData?.date_joined ? calculateAntiquity(userData.date_joined) : null, icon: <FiClock className="mr-2" /> }
+    { label: 'Antigüedad', value: userData?.employment_start_date ? calculateAntiquity(userData.employment_start_date) : null, icon: <FiClock className="mr-2" /> }
   ].filter(field => field.value !== null && field.value !== undefined);
 
   // Verificar si se debe mostrar el mensaje
