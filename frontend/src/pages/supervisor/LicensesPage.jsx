@@ -26,6 +26,9 @@ const LicensesPage = () => {
     type: '',
     message: ''
   });
+  const [showApproveConfirmation, setShowApproveConfirmation] = useState(false);
+  const [showRejectConfirmation, setShowRejectConfirmation] = useState(false);
+  const [licenseToAction, setLicenseToAction] = useState(null);
 
   useEffect(() => {
     const fetchLicenses = async () => {
@@ -81,23 +84,45 @@ const LicensesPage = () => {
   });
 
   const handleApprove = (id) => {
-    setLicenses(licenses.map(license => 
-      license.id === id ? {...license, status: 'approved'} : license
-    ));
-    setIsModalOpen(false);
-    resetRejectionForm();
+    setLicenseToAction(id);
+    setShowApproveConfirmation(true);
   };
-
+  
   const handleReject = (id) => {
     if (!rejectionReason.trim()) {
       alert('Por favor ingrese un motivo de rechazo');
       return;
     }
+    setLicenseToAction(id);
+    setShowRejectConfirmation(true);
+  };
+
+  const confirmApprove = () => {
     setLicenses(licenses.map(license => 
-      license.id === id ? {...license, status: 'rejected', rejectionReason} : license
+      license.id === licenseToAction ? {...license, status: 'approved'} : license
     ));
+    setShowApproveConfirmation(false);
     setIsModalOpen(false);
     resetRejectionForm();
+    setNotification({
+      show: true,
+      type: 'success',
+      message: 'Licencia aprobada con éxito.'
+    });
+  };
+  
+  const confirmReject = () => {
+    setLicenses(licenses.map(license => 
+      license.id === licenseToAction ? {...license, status: 'rejected', rejectionReason} : license
+    ));
+    setShowRejectConfirmation(false);
+    setIsModalOpen(false);
+    resetRejectionForm();
+    setNotification({
+      show: true,
+      type: 'success',
+      message: 'Licencia rechazada con éxito.'
+    });
   };
 
   const handleEdit = (id) => {
@@ -313,7 +338,7 @@ const LicensesPage = () => {
                           </div>
                           <div>
                             <p className="text-sm text-gray-500">Teléfono</p>
-                            <p className="font-medium">{selectedLicense.phone}</p>
+                            <p className="font-medium">+54 {selectedLicense.phone}</p>
                           </div>
                           <div>
                             <p className="text-sm text-gray-500">Fecha de Nacimiento</p>
@@ -381,52 +406,57 @@ const LicensesPage = () => {
                       </div>
                     </div>
 
-                    {/* Sección de Motivo y Documentos */}
-                    <div className="space-y-4">
-                      <div>
-                        <p className="text-sm text-gray-500">Motivo</p>
-                        <p className="font-medium whitespace-pre-line">{selectedLicense.information || 'No disponible'}</p>
-                      </div>
+                    {/* Sección de Justificación y Documentos */}
+                    <div className="bg-gray-50 p-4 rounded-lg shadow">
+                      <h3 className="font-medium text-lg mb-3 flex items-center">
+                        <FiFileText className="mr-2" /> Justificación
+                      </h3>
+                      
+                      <div className="space-y-4">
+                        <div>
+                          <p className="text-sm text-gray-500">Motivo</p>
+                          <p className="font-medium whitespace-pre-line">{selectedLicense.information || 'No disponible'}</p>
+                        </div>
 
-                      {/* Documentación adjunta */}
-                      <div>
-                        <p className="text-sm text-gray-500">Documentación adjunta</p>
-                        {selectedLicense.certificate?.file ? (
-                          <div className="bg-blue-50 p-3 rounded-md">
-                            <h4 className="font-medium mb-2">Certificado</h4>
-                            <div className="flex flex-col gap-1">
-                              <div className="flex items-center gap-1">
-                                <p className="text-sm text-gray-500">Cargado el:</p>
-                                <p className="font-medium">
-                                  {FormattedDate({ dateString: selectedLicense.certificate?.upload_date }).date}
-                                </p>
+                        {/* Documentación adjunta */}
+                        <div>
+                          <p className="text-sm text-gray-500">Documentación adjunta</p>
+                          {selectedLicense.certificate?.file ? (
+                            <div className="bg-blue-100 p-3 rounded-md">
+                              <h4 className="font-medium mb-2">Certificado</h4>
+                              <div className="flex flex-col gap-1">
+                                <div className="flex items-center gap-1">
+                                  <p className="text-sm text-gray-500">Cargado el:</p>
+                                  <p className="font-medium">
+                                    {FormattedDate({ dateString: selectedLicense.certificate?.upload_date }).date}
+                                  </p>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <p className="text-sm text-gray-500">A las:</p>
+                                  <p className="font-medium">
+                                    {FormattedDate({ dateString: selectedLicense.certificate?.upload_date }).time}
+                                  </p>
+                                </div>
                               </div>
-                              <div className="flex items-center gap-1">
-                                <p className="text-sm text-gray-500">A las:</p>
-                                <p className="font-medium">
-                                  {FormattedDate({ dateString: selectedLicense.certificate?.upload_date }).time}
-                                </p>
-                              </div>
+                              <button 
+                                onClick={handleViewCertificate}
+                                className="mt-2 inline-flex items-center text-blue-600 hover:text-blue-800 cursor-pointer"
+                              >
+                                <FiEye className="mr-1" /> Ver certificado
+                              </button>
                             </div>
-                            <hr className="my-2 border-t border-gray-300"></hr>
-                            <button 
-                              onClick={handleViewCertificate}
-                              className="mt-2 inline-flex items-center text-blue-600 hover:text-blue-800 cursor-pointer"
-                            >
-                              <FiEye className="mr-1" /> Ver certificado
-                            </button>
+                          ) : (
+                            <p className="text-gray-400">No hay documentación adjunta</p>
+                          )}
+                        </div>
+
+                        {selectedLicense.rejectionReason && (
+                          <div className="bg-red-50 p-3 rounded-md">
+                            <p className="text-sm text-gray-500">Motivo de rechazo</p>
+                            <p className="text-red-600 whitespace-pre-line">{selectedLicense.rejectionReason}</p>
                           </div>
-                        ) : (
-                          <p className="text-gray-400">No hay documentación adjunta</p>
                         )}
                       </div>
-
-                      {selectedLicense.rejectionReason && (
-                        <div className="bg-red-50 p-3 rounded-md">
-                          <p className="text-sm text-gray-500">Motivo de rechazo</p>
-                          <p className="text-red-600 whitespace-pre-line">{selectedLicense.rejectionReason}</p>
-                        </div>
-                      )}
                     </div>
 
                     {/* Botones de acción */}
@@ -597,6 +627,28 @@ const LicensesPage = () => {
         title="Eliminar Licencia"
         message="¿Estás seguro que deseas eliminar esta licencia? Esta acción no se puede deshacer."
         confirmText="Eliminar"
+        cancelText="Cancelar"
+        type="danger"
+      />
+
+      <Confirmation
+        isOpen={showApproveConfirmation}
+        onClose={() => setShowApproveConfirmation(false)}
+        onConfirm={confirmApprove}
+        title="Aprobar Licencia"
+        message="¿Estás seguro que deseas aprobar esta licencia?"
+        confirmText="Aprobar"
+        cancelText="Cancelar"
+        type="info"
+      />
+
+      <Confirmation
+        isOpen={showRejectConfirmation}
+        onClose={() => setShowRejectConfirmation(false)}
+        onConfirm={confirmReject}
+        title="Rechazar Licencia"
+        message={`¿Estás seguro que deseas rechazar esta licencia con el siguiente motivo?\n\n"${rejectionReason}"`}
+        confirmText="Confirmar Rechazo"
         cancelText="Cancelar"
         type="danger"
       />

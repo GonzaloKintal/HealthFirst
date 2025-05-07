@@ -18,6 +18,7 @@ const EditUser = () => {
     phone: '',
     date_of_birth: '',
     department: '',
+    employment_start_date: '',
     role_name: 'employee'
   });
   const [notification, setNotification] = useState(null);
@@ -58,6 +59,7 @@ const EditUser = () => {
           date_of_birth: userData.date_of_birth || '',
           department: userData.department || '',
           role_name: userData.role || 'employee',
+          employment_start_date: userData.employment_start_date || '',
           password: '',
           confirmPassword: ''
         });
@@ -148,7 +150,8 @@ const EditUser = () => {
         phone: formData.phone,
         date_of_birth: formData.date_of_birth,
         department: formData.department,
-        role_name: formData.role_name
+        role_name: formData.role_name,
+        employment_start_date: formData.employment_start_date,
       };
   
       // Solo incluimos la contraseña si se está editando
@@ -279,6 +282,19 @@ const EditUser = () => {
                 placeholder="Ej: 1123456789"
               />
             </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Correo Electrónico *</label>
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                required
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Ej: usuario@empresa.com"
+              />
+            </div>
             
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Departamento *</label>
@@ -295,19 +311,19 @@ const EditUser = () => {
                 ))}
               </select>
             </div>
-            
+
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Correo Electrónico *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de Ingreso a la Empresa *</label>
               <input
-                type="email"
-                name="email"
-                value={formData.email}
+                type="date"
+                name="employment_start_date"
+                value={formData.employment_start_date}
                 onChange={handleChange}
                 required
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Ej: usuario@empresa.com"
               />
             </div>
+          
           </div>
         </div>
 

@@ -133,7 +133,7 @@ const UsersPage = () => {
       // Llama al servicio para eliminar el usuario en el backend
       await deleteUser(userToDelete);
       
-      // Manejo de paginación como antes
+      // Manejo de paginación
       const usersLeftInPage = previousUsers.filter(user => user.id !== userToDelete).length;
       if (usersLeftInPage === 0 && previousPagination.currentPage > 1) {
         setPagination(prev => ({
