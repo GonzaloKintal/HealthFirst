@@ -42,6 +42,7 @@ def register_user(request):
             email=data.get('email'),   
             phone=data.get('phone'),
             dni=data.get('dni'),
+            employment_start_date=data.get('employment_start_date'),
         )
         
         user.set_password(data.get('password'))
@@ -129,6 +130,7 @@ def update_user(request, id):
         department= data.get('department', None)
         dni= data.get('dni', None)
         phone= data.get('phone', None)
+        employment_start_date = data.get('employment_start_date', None)
 
         user = HealthFirstUser.objects.get(id=id,is_deleted=False)
     
@@ -150,6 +152,8 @@ def update_user(request, id):
             user.dni = dni
         if phone:
             user.phone = phone
+        if employment_start_date:
+            user.employment_start_date = employment_start_date
 
         user.save()
 
