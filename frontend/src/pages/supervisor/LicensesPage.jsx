@@ -287,41 +287,50 @@ const LicensesPage = () => {
                         )}
                       </div>
                     )}
-
+                    
                     {/* Sección de Información del Empleado */}
-                    <div className="bg-gray-50 p-4 rounded-lg">
-                      <h3 className="font-medium text-lg mb-3 flex items-center">
-                        <FiUser className="mr-2" /> Información del Empleado
-                      </h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <p className="text-sm text-gray-500">Nombre completo</p>
-                          <p className="font-medium">{selectedLicense.employee}</p>
-                        </div>
-                        <div>
-                          <p className="text-sm text-gray-500">DNI</p>
-                          <p className="font-medium">{selectedLicense.DNI}</p>
-                        </div>
-                        <div>
-                          <p className="text-sm text-gray-500">Departamento/Área</p>
-                          <p className="font-medium">{selectedLicense.department}</p>
-                        </div>
-                        <div>
-                          <p className="text-sm text-gray-500">Email</p>
-                          <p className="font-medium">{selectedLicense.email}</p>
-                        </div>
-                        <div>
-                          <p className="text-sm text-gray-500">Teléfono</p>
-                          <p className="font-medium">{selectedLicense.phone}</p>
-                        </div>
-                        <div>
-                          <p className="text-sm text-gray-500">Fecha de Nacimiento</p>
-                          <p className="font-medium">
-                            {FormattedDate({ dateString: selectedLicense.dateOfBirth }).date}
-                          </p>
+                    {(user?.role === 'admin' || user?.role === 'supervisor') && (
+                      <div className="bg-gray-50 p-4 rounded-lg">
+                        <h3 className="font-medium text-lg mb-3 flex items-center">
+                          <FiUser className="mr-2" /> Información del Empleado
+                        </h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <p className="text-sm text-gray-500">Nombre completo</p>
+                            <p className="font-medium">{selectedLicense.employee}</p>
+                          </div>
+                          <div>
+                            <p className="text-sm text-gray-500">DNI</p>
+                            <p className="font-medium">{selectedLicense.DNI}</p>
+                          </div>
+                          <div>
+                            <p className="text-sm text-gray-500">Departamento/Área</p>
+                            <p className="font-medium">{selectedLicense.department}</p>
+                          </div>
+                          <div>
+                            <p className="text-sm text-gray-500">Email</p>
+                            <p className="font-medium">{selectedLicense.email}</p>
+                          </div>
+                          <div>
+                            <p className="text-sm text-gray-500">Teléfono</p>
+                            <p className="font-medium">{selectedLicense.phone}</p>
+                          </div>
+                          <div>
+                            <p className="text-sm text-gray-500">Fecha de Nacimiento</p>
+                            <p className="font-medium">
+                              {selectedLicense.dateOfBirth 
+                                ? new Date(selectedLicense.dateOfBirth).toLocaleDateString('es-AR', { 
+                                    timeZone: 'UTC',
+                                    day: '2-digit',
+                                    month: '2-digit',
+                                    year: 'numeric'
+                                  })
+                                : 'No disponible'}
+                            </p>
+                          </div>
                         </div>
                       </div>
-                    </div>
+                    )}
 
                     {/* Sección de Detalles de la Licencia */}
                     <div className="bg-gray-50 p-4 rounded-lg">
