@@ -57,7 +57,7 @@ const Confirmation = ({
             </div>
           </div>
           
-          <div className="px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse gap-3">
+          <div className="px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse gap-1">
             <button
               type="button"
               className={`w-full cursor-pointer inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 text-white text-base font-medium focus:outline-none sm:ml-3 sm:w-auto sm:text-sm ${currentStyle.button}`}
