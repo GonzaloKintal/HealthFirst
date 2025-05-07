@@ -11,7 +11,7 @@ class HealthFirstUserSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = HealthFirstUser
-        fields = ['id','full_name', 'first_name', 'last_name','dni', 'date_of_birth', 'phone', 'role', 'email', 'department', 'date_joined']
+        fields = ['id','full_name', 'first_name', 'last_name','dni', 'date_of_birth', 'phone', 'role', 'email','department','employment_start_date']
 
     def get_full_name(self, obj):
         return f"{obj.first_name} {obj.last_name}"
