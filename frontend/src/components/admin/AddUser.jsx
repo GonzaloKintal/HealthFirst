@@ -17,7 +17,7 @@ const AddUser = () => {
     phone: '',
     date_of_birth: '',
     department: '',
-    date_joined: '',
+    employment_start_date: '',
     role_name: 'employee'
   });
 
@@ -103,7 +103,7 @@ const AddUser = () => {
           phone: '',
           date_of_birth: '',
           department: '',
-          date_joined: '',
+          employment_start_date: '',
           role_name: 'employee'
         });
         navigate('/users');
@@ -251,15 +251,15 @@ const AddUser = () => {
 
             <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de Ingreso a la Empresa *</label>
-            <input
-              type="date"
-              name="hire_date"
-              value={formData.date_joined}
-              onChange={handleChange}
-              required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
+              <input
+                type="date"
+                name="employment_start_date"
+                value={formData.employment_start_date}
+                onChange={handleChange}
+                required
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
           </div>
         </div>
 
