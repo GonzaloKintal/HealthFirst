@@ -317,7 +317,14 @@ const LicensesPage = () => {
                         <div>
                           <p className="text-sm text-gray-500">Fecha de Nacimiento</p>
                           <p className="font-medium">
-                            {FormattedDate({ dateString: selectedLicense.dateOfBirth }).date}
+                            {selectedLicense.dateOfBirth 
+                              ? new Date(selectedLicense.dateOfBirth).toLocaleDateString('es-AR', { 
+                                  timeZone: 'UTC',
+                                  day: '2-digit',
+                                  month: '2-digit',
+                                  year: 'numeric'
+                                })
+                              : 'No disponible'}
                           </p>
                         </div>
                       </div>
