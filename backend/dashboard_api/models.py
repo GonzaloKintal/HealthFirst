@@ -91,6 +91,7 @@ class HealthFirstUser(AbstractUser):
                 existing_user.phone = self.phone
                 existing_user.role = self.role
                 existing_user.department = self.department
+                existing_user.employment_start_date = self.employment_start_date
                 existing_user.set_password(self.password)
                 existing_user.save()
                 self.pk = existing_user.pk 
