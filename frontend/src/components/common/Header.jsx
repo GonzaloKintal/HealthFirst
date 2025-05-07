@@ -42,6 +42,16 @@ const Header = ({ toggleDrawer }) => {
     setIsLoggingOut(false);
   };
 
+  const translateRole = (role) => {
+    const rolesMap = {
+      'admin': 'Administrador',
+      'supervisor': 'Supervisor',
+      'employee': 'Empleado',
+      'analyst': 'Analista'
+    };
+    return rolesMap[role] || role;
+  };
+
   // Datos combinados: los básicos del authContext + los completos de la API
   const user = userData || authUser;
 
@@ -81,7 +91,7 @@ const Header = ({ toggleDrawer }) => {
                   {user?.first_name || user?.username || 'Usuario'}
                 </span>
                 <span className="text-xs text-gray-500 capitalize">
-                  {user?.role || 'Administrador'}
+                  {translateRole(user?.role)}
                 </span>
               </div>
               <FiChevronDown className={`h-5 w-5 text-gray-500 hidden md:block transition-transform ${isDropdownOpen ? 'transform rotate-180' : ''}`} />
@@ -95,7 +105,7 @@ const Header = ({ toggleDrawer }) => {
                     {user?.first_name || user?.username || 'Usuario'}
                   </p>
                   <p className="text-xs text-gray-500 capitalize">
-                    {user?.role || 'Administrador'}
+                    {translateRole(user?.role)}
                   </p>
                 </div>
                 <button
