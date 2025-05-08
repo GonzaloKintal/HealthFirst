@@ -9,6 +9,7 @@ const Header = ({ toggleDrawer }) => {
   const [userData, setUserData] = useState(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -29,6 +30,26 @@ const Header = ({ toggleDrawer }) => {
 
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
+  };
+
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    
+    await new Promise(resolve => setTimeout(resolve, 3000));
+    
+    logout();
+    setIsDropdownOpen(false);
+    setIsLoggingOut(false);
+  };
+
+  const translateRole = (role) => {
+    const rolesMap = {
+      'admin': 'Administrador',
+      'supervisor': 'Supervisor',
+      'employee': 'Empleado',
+      'analyst': 'Analista'
+    };
+    return rolesMap[role] || role;
   };
 
   // Datos combinados: los básicos del authContext + los completos de la API
@@ -70,7 +91,7 @@ const Header = ({ toggleDrawer }) => {
                   {user?.first_name || user?.username || 'Usuario'}
                 </span>
                 <span className="text-xs text-gray-500 capitalize">
-                  {user?.role || 'Administrador'}
+                  {translateRole(user?.role)}
                 </span>
               </div>
               <FiChevronDown className={`h-5 w-5 text-gray-500 hidden md:block transition-transform ${isDropdownOpen ? 'transform rotate-180' : ''}`} />
@@ -84,18 +105,28 @@ const Header = ({ toggleDrawer }) => {
                     {user?.first_name || user?.username || 'Usuario'}
                   </p>
                   <p className="text-xs text-gray-500 capitalize">
-                    {user?.role || 'Administrador'}
+                    {translateRole(user?.role)}
                   </p>
                 </div>
                 <button
-                  onClick={() => {
-                    logout();
-                    setIsDropdownOpen(false);
-                  }}
-                  className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
+                  onClick={handleLogout}
+                  disabled={isLoggingOut} // Deshabilitar el botón durante el logout
+                  className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer disabled:opacity-75"
                 >
-                  <FiLogOut className="mr-2" />
-                  Cerrar sesión
+                  {isLoggingOut ? (
+                    <>
+                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Cerrando sesión...
+                    </>
+                  ) : (
+                    <>
+                      <FiLogOut className="mr-2" />
+                      Cerrar sesión
+                    </>
+                  )}
                 </button>
               </div>
             )}

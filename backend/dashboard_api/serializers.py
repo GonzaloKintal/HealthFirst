@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Department, HealthFirstUser, License
+from .models import Department, HealthFirstUser, License, LicenseType
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.exceptions import AuthenticationFailed
 
@@ -11,7 +11,7 @@ class HealthFirstUserSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = HealthFirstUser
-        fields = ['id','full_name', 'first_name', 'last_name','dni', 'date_of_birth', 'phone', 'role', 'email', 'department']
+        fields = ['id','full_name', 'first_name', 'last_name','dni', 'date_of_birth', 'phone', 'role', 'email','department','employment_start_date']
 
     def get_full_name(self, obj):
         return f"{obj.first_name} {obj.last_name}"
@@ -22,6 +22,7 @@ class LicenseSerializer(serializers.ModelSerializer):
     days = serializers.SerializerMethodField()
     status = serializers.SerializerMethodField()
     user = HealthFirstUserSerializer(read_only=True)
+    type=serializers.SlugRelatedField(read_only=True, slug_field='name')
 
     class Meta:
         model = License
@@ -71,3 +72,9 @@ class DepartmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Department
         fields = ['id', 'name'] 
+
+
+class LicenseTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LicenseType
+        fields = ['id', 'name', 'description', 'min_advance_notice_days', 'certificate_require', 'tolerance_days_certificate_submission', 'total_days_granted', 'max_consecutive_days', 'yearly_approved_requests']
