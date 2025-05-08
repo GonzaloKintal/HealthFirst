@@ -283,8 +283,6 @@ useEffect(() => {
         information: formData.reason,
         certificate
       };
-  
-      console.log('Datos a enviar:', licenseData);
       
       // Enviar la solicitud
       await requestLicense(licenseData);
