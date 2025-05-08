@@ -5,6 +5,7 @@ import { login } from './utils/login.js';  // Asegúrate de que la ruta sea corr
 test('Login exitoso del supervisor', async ({ page }) => {
   await login(page, 'supervisor@gmail.com', '1234');
   await expect(page).toHaveURL('http://localhost:5173/supervisor', { timeout: 10000 });
-  await page.click('text=Licencias');
+  await page.click('text=Licencias'),{timeout: 10000};
+  await expect(page).toHaveURL('http://localhost:5173/supervisor/licencias', { timeout: 10000 });
 
 });
