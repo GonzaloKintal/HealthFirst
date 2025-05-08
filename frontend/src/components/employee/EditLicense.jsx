@@ -3,7 +3,7 @@ import { FiCalendar, FiUpload, FiUser, FiFileText, FiSave, FiX } from 'react-ico
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import Notification from '../utils/Notification';
 import { getLicenseDetail,
-  // updateLicense,
+  updateLicense,
   getLicenseTypes } from '../../services/licenseService';
 
 const EditLicense = () => {
@@ -13,7 +13,7 @@ const EditLicense = () => {
     licenseTypeId: '',
     startDate: '',
     endDate: '',
-    reason: '',
+    information: '',
     documents: null,
     declaration: false
   });
@@ -63,42 +63,44 @@ const EditLicense = () => {
     fetchLicenseTypes();
   }, []);
 
-  // Cargar datos de la licencia a editar
-  useEffect(() => {
-    const fetchLicenseData = async () => {
-      setIsLoading(true);
-      try {
-        const response = await getLicenseDetail(id);
-        if (response.success) {
-          const { license, user, certificate } = response.data;
-          
-          // Establecer datos del solicitante (no editables)
-          setApplicantData({
-            firstName: user.first_name,
-            lastName: user.last_name,
-            dni: user.dni,
-            department: user.department,
-            phone: user.phone
-          });
+ // Cargar datos de la licencia a editar
+useEffect(() => {
+  const fetchLicenseData = async () => {
+    setIsLoading(true);
+    try {
+      // Espera a que los tipos de licencia estén cargados
+      if (licenseTypes.length === 0) return;
+      
+      const response = await getLicenseDetail(id);
+      if (response.success) {
+        const { license, user, certificate } = response.data;
+        
+        setApplicantData({
+          firstName: user.first_name,
+          lastName: user.last_name,
+          dni: user.dni,
+          department: user.department,
+          phone: user.phone
+        });
 
-          // Establecer datos editables de la licencia
-          setFormData(prev => ({
-            ...prev,
-            licenseType: license.type, // Usamos el nombre del tipo directamente
-            startDate: license.start_date,
-            endDate: license.end_date,
-            reason: license.information,
-            documents: null,
-            declaration: true
-          }));
+        // Encuentra el tipo de licencia correspondiente
+        const licenseType = licenseTypes.find(t => t.name === license.type);
+        
+        setFormData(prev => ({
+          ...prev,
+          licenseTypeId: licenseType?.id || '',
+          startDate: license.start_date,
+          endDate: license.end_date,
+          information: license.information,
+          documents: null,
+          declaration: true
+        }));
 
-          // Usar los días calculados del backend
-          setCalculatedDays(license.required_days);
+        setCalculatedDays(license.required_days);
 
-          // Establecer documento existente si hay uno
-          if (certificate) {
-            setExistingDocument(certificate.file_name || 'documento_adjunto.pdf');
-          }
+        if (certificate) {
+          setExistingDocument(certificate.file_name || 'documento_adjunto.pdf');
+        }
         } else {
           setNotification({
             type: 'error',
@@ -117,7 +119,7 @@ const EditLicense = () => {
     };
 
     fetchLicenseData();
-  }, [id]);
+  }, [id, licenseTypes]);
 
   const handleChange = (e) => {
     const { name, value, files, type, checked } = e.target;
@@ -215,23 +217,23 @@ const EditLicense = () => {
       };
 
       console.log('Datos de la licencia a actualizar:', licenseData);
-      // DESCOMENTAR ESTO
+
       // Enviar la actualización
-      // const response = await updateLicense(id, licenseData);
+      const response = await updateLicense(id, licenseData);
       
-      // if (response.success) {
-      //   setNotification({
-      //     type: 'success',
-      //     message: 'La licencia ha sido actualizada correctamente.'
-      //   });
+      if (response.success) {
+        setNotification({
+          type: 'success',
+          message: 'La licencia ha sido actualizada correctamente.'
+        });
         
-      //   // Redirigir después de 3 segundos
-      //   setTimeout(() => {
-      //     navigate(-1); // Volver a la página anterior
-      //   }, 3000);
-      // } else {
-      //   throw new Error(response.error || 'Error al actualizar la licencia');
-      // }
+        // Redirigir después de 3 segundos
+        setTimeout(() => {
+          navigate(-1); // Volver a la página anterior
+        }, 3000);
+      } else {
+        throw new Error(response.error || 'Error al actualizar la licencia');
+      }
     } catch (error) {
       setNotification({
         type: 'error',
@@ -393,8 +395,8 @@ const EditLicense = () => {
           <div className="mt-4">
             <label className="block text-sm font-medium text-gray-700 mb-1">Motivo *</label>
             <textarea
-              name="reason"
-              value={formData.reason}
+              name="information"
+              value={formData.information}
               onChange={handleChange}
               required
               rows={3}
