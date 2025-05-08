@@ -396,6 +396,76 @@ def delete_license(request, id):
         return JsonResponse({'error': 'La licencia no existe.'}, status=404)
     
 
+@csrf_exempt
+@require_http_methods(["PUT"])
+def update_license(request, id):
+    try:
+        data = json.loads(request.body)
+
+        license_type_id = data.get('type_id')
+        start_date = data.get('start_date')
+        end_date = data.get('end_date')
+        information = data.get('information', '')
+        certificate_data = data.get('certificate', None)
+
+        try:
+            license = License.objects.get(pk=id, is_deleted=False)
+        except License.DoesNotExist:
+            return JsonResponse({'error': f'Licencia con id "{id}" no encontrada.'}, status=404)
+
+        # Validar y actualizar tipo de licencia
+        if license_type_id:
+            try:
+                license_type = LicenseType.objects.get(id=license_type_id)
+                license.type = license_type
+            except LicenseType.DoesNotExist:
+                return JsonResponse({'error': f'Tipo de licencia con id "{license_type_id}" no encontrado.'}, status=404)
+
+        # Validar y actualizar fechas
+        if start_date and end_date:
+            start_date_parsed = datetime.strptime(start_date, '%Y-%m-%d').date()
+            end_date_parsed = datetime.strptime(end_date, '%Y-%m-%d').date()
+            if end_date_parsed < start_date_parsed:
+                return JsonResponse({'error': 'end_date no puede ser anterior a start_date.'}, status=400)
+            license.start_date = start_date_parsed
+            license.end_date = end_date_parsed
+            license.required_days = (end_date_parsed - start_date_parsed).days + 1
+
+        # Actualizar información/motivo
+        license.information = information
+
+        license.save()
+
+        # Actualizar certificado
+        if certificate_data:
+            file_data = certificate_data.get('file', None)
+            validation = certificate_data.get('validation', False)
+
+            if file_data:
+                if hasattr(license, 'certificate'):
+                    cert = license.certificate
+                    cert.file = file_data
+                    cert.validation = validation
+                    cert.upload_date = datetime.now()
+                    cert.is_deleted = False
+                    cert.deleted_at = None
+                    cert.save()
+                else:
+                    Certificate.objects.create(
+                        license=license,
+                        file=file_data,
+                        validation=validation,
+                        upload_date=datetime.now(),
+                        is_deleted=False,
+                        deleted_at=None
+                    )
+
+        return JsonResponse({'message': 'Licencia actualizada exitosamente.'}, status=200)
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+    
+
 
  # Aprobación de licencias
 @csrf_exempt
