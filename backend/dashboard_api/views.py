@@ -11,7 +11,7 @@ from .models import *
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 import json
-from .serializers import HealthFirstUserSerializer, LicenseSerializer
+from .serializers import HealthFirstUserSerializer, LicenseSerializer, LicenseTypeSerializer
 from django.db import IntegrityError
 from django.core.paginator import Paginator
 from rest_framework_simplejwt.views import TokenObtainPairView
@@ -42,6 +42,7 @@ def register_user(request):
             email=data.get('email'),   
             phone=data.get('phone'),
             dni=data.get('dni'),
+            employment_start_date=data.get('employment_start_date'),
         )
         
         user.set_password(data.get('password'))
@@ -129,6 +130,7 @@ def update_user(request, id):
         department= data.get('department', None)
         dni= data.get('dni', None)
         phone= data.get('phone', None)
+        employment_start_date = data.get('employment_start_date', None)
 
         user = HealthFirstUser.objects.get(id=id,is_deleted=False)
     
@@ -150,6 +152,8 @@ def update_user(request, id):
             user.dni = dni
         if phone:
             user.phone = phone
+        if employment_start_date:
+            user.employment_start_date = employment_start_date
 
         user.save()
 
@@ -201,7 +205,8 @@ def get_users_by_filter(request):
                 Q(last_name__icontains=word) |
                 Q(email__icontains=word) |
                 Q(dni__icontains=word) |
-                Q(department__name__icontains=word)
+                Q(department__name__icontains=word) |
+                Q(role__name__icontains=word)
             )
             query &= subquery 
 
@@ -305,14 +310,19 @@ def create_license(request):
         data = json.loads(request.body)
 
         user_id = data.get('user_id')
-        license_type = data.get('type')
+        license_type_id = data.get('type_id')
         start_date = data.get('start_date')
         end_date = data.get('end_date')
         information = data.get('information', '')
         certificate_data = data.get('certificate', None)
 
-        if not all([user_id, license_type, start_date, end_date]):
+        if not all([user_id, license_type_id, start_date, end_date]):
             return JsonResponse({'error': 'user_id, type, start_date, end_date son requeridos.'}, status=400)
+
+        try:
+            license_type = LicenseType.objects.get(id=license_type_id)
+        except LicenseType.DoesNotExist:
+                return JsonResponse({'error': f'LicenseType con id "{license_type_id}" no encontrado.'}, status=404)
 
         User = get_user_model()
         try:
@@ -386,6 +396,76 @@ def delete_license(request, id):
         return JsonResponse({'error': 'La licencia no existe.'}, status=404)
     
 
+@csrf_exempt
+@require_http_methods(["PUT"])
+def update_license(request, id):
+    try:
+        data = json.loads(request.body)
+
+        license_type_id = data.get('type_id')
+        start_date = data.get('start_date')
+        end_date = data.get('end_date')
+        information = data.get('information', '')
+        certificate_data = data.get('certificate', None)
+
+        try:
+            license = License.objects.get(pk=id, is_deleted=False)
+        except License.DoesNotExist:
+            return JsonResponse({'error': f'Licencia con id "{id}" no encontrada.'}, status=404)
+
+        # Validar y actualizar tipo de licencia
+        if license_type_id:
+            try:
+                license_type = LicenseType.objects.get(id=license_type_id)
+                license.type = license_type
+            except LicenseType.DoesNotExist:
+                return JsonResponse({'error': f'Tipo de licencia con id "{license_type_id}" no encontrado.'}, status=404)
+
+        # Validar y actualizar fechas
+        if start_date and end_date:
+            start_date_parsed = datetime.strptime(start_date, '%Y-%m-%d').date()
+            end_date_parsed = datetime.strptime(end_date, '%Y-%m-%d').date()
+            if end_date_parsed < start_date_parsed:
+                return JsonResponse({'error': 'end_date no puede ser anterior a start_date.'}, status=400)
+            license.start_date = start_date_parsed
+            license.end_date = end_date_parsed
+            license.required_days = (end_date_parsed - start_date_parsed).days + 1
+
+        # Actualizar información/motivo
+        license.information = information
+
+        license.save()
+
+        # Actualizar certificado
+        if certificate_data:
+            file_data = certificate_data.get('file', None)
+            validation = certificate_data.get('validation', False)
+
+            if file_data:
+                if hasattr(license, 'certificate'):
+                    cert = license.certificate
+                    cert.file = file_data
+                    cert.validation = validation
+                    cert.upload_date = datetime.now()
+                    cert.is_deleted = False
+                    cert.deleted_at = None
+                    cert.save()
+                else:
+                    Certificate.objects.create(
+                        license=license,
+                        file=file_data,
+                        validation=validation,
+                        upload_date=datetime.now(),
+                        is_deleted=False,
+                        deleted_at=None
+                    )
+
+        return JsonResponse({'message': 'Licencia actualizada exitosamente.'}, status=200)
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+    
+
 
  # Aprobación de licencias
 @csrf_exempt
@@ -453,7 +533,7 @@ def get_license_detail(request, id):
 
         # Datos de la licencia
         license_data = {
-            "type": license.type,
+            "type": license.type.name,
             "start_date": license.start_date,
             "end_date": license.end_date,
             "request_date": license.request_date,
@@ -488,6 +568,18 @@ def get_license_detail(request, id):
             "status": status_data,
             "certificate": certificate_data
         }, status=200)
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+
+@csrf_exempt
+@require_http_methods(["GET"])
+def get_licenses_types(request):
+    try:
+        types = LicenseType.objects.filter(is_deleted=False)
+        types_data = LicenseTypeSerializer(types, many=True).data
+        return JsonResponse({"types": types_data}, status=200)
 
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)

@@ -6,13 +6,13 @@ import { FiCalendar, FiUpload, FiUser, FiFileText } from 'react-icons/fi';
 import useAuth from '../../hooks/useAuth';
 import Notification from '../utils/Notification';
 import { getUser, getUsers } from '../../services/userService';
-import { requestLicense } from '../../services/licenseService';
+import { requestLicense, getLicenseTypes } from '../../services/licenseService';
 
 const RequestLicense = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    licenseType: '',
+    licenseTypeId: '',
     startDate: '',
     endDate: '',
     reason: '',
@@ -26,6 +26,7 @@ const RequestLicense = () => {
   const [selectedEmployeeData, setSelectedEmployeeData] = useState(null);
   const [loadingEmployees, setLoadingEmployees] = useState(false);
   const [currentUserData, setCurrentUserData] = useState(null);
+  const [licenseTypes, setLicenseTypes] = useState([]);
 
   useEffect(() => {
     if (notification) {
@@ -104,6 +105,32 @@ const RequestLicense = () => {
     }
   }, [formData.selectedEmployee, user?.role]);
 
+// Cargar tipos de licencia cuando el componente se monta
+useEffect(() => {
+  const fetchLicenseTypes = async () => {
+    try {
+      const response = await getLicenseTypes();
+      if (response.success) {
+        setLicenseTypes(response.data.types);
+      } else {
+        console.error('Error al obtener tipos de licencia:', response.error);
+        setNotification({
+          type: 'error',
+          message: 'Error al cargar los tipos de licencia disponibles'
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching license types:', error);
+      setNotification({
+        type: 'error',
+        message: 'Error al cargar los tipos de licencia'
+      });
+    }
+  };
+  
+  fetchLicenseTypes();
+}, []);
+
   // Datos personales basados en el rol
   const getEmployeeData = () => {
     // Si es admin/supervisor y hay un empleado seleccionado
@@ -140,20 +167,6 @@ const RequestLicense = () => {
   };
 
   const employeeData = getEmployeeData();
-
-  const licenseTypes = [
-    'Vacaciones',
-    'Razones personales',
-    'Días administrativos',
-    'Cumpleaños',
-    'Día de estudio',
-    'Accidente de trabajo',
-    'Participación en asambleas',
-    'Nacimiento de un hijo',
-    'Enfermedad',
-    'Licencia por matrimonio',
-    'Duelo por un familiar cercano'
-  ];
 
   const handleChange = (e) => {
     const { name, value, files, type, checked } = e.target;
@@ -264,14 +277,12 @@ const RequestLicense = () => {
 
       const licenseData = {
         user_id: Number(userId),
-        type: formData.licenseType,
+        type_id: Number(formData.licenseTypeId),
         start_date: formData.startDate,
         end_date: formData.endDate,
         information: formData.reason,
         certificate
       };
-  
-      console.log('Datos a enviar:', licenseData);
       
       // Enviar la solicitud
       await requestLicense(licenseData);
@@ -284,7 +295,7 @@ const RequestLicense = () => {
       
       // Resetear formulario
       setFormData({
-        licenseType: '',
+        licenseTypeId: '',
         startDate: '',
         endDate: '',
         reason: '',
@@ -421,21 +432,21 @@ const RequestLicense = () => {
           </h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de Licencia *</label>
-              <select
-                name="licenseType"
-                value={formData.licenseType}
-                onChange={handleChange}
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="">Seleccionar tipo</option>
-                {licenseTypes.map(type => (
-                  <option key={type} value={type}>{type}</option>
-                ))}
-              </select>
-            </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de Licencia *</label>
+            <select
+              name="licenseTypeId"
+              value={formData.licenseTypeId}
+              onChange={handleChange}
+              required
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="">Seleccionar tipo</option>
+              {licenseTypes.map(type => (
+                <option key={type.id} value={type.id}>{type.name}</option>
+              ))}
+            </select>
+          </div>
             
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Días Solicitados</label>
@@ -542,7 +553,7 @@ const RequestLicense = () => {
         {/* Botón de envío */}
         <div className="flex justify-end space-x-3">
           <Link
-            to={user?.role === 'admin' || user?.role === 'supervisor' ? '/licenses' : '/my-licenses'}
+            to={'/licenses'}
             className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 cursor-pointer"
           >
             Cancelar
