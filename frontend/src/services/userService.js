@@ -57,21 +57,24 @@ export const getUser = async (id) => {
     }
 };
 
-export const getUsersByFilter = async (filter, page = 1, pageSize = 5) => {
+export const getUsersByFilter = async (page = 1, filter = '', pageSize = 5) => {
     try {
-      // Codificar el filtro para la URL
-      const encodedFilter = encodeURIComponent(filter);
-      
-      const response = await api.get(`/api/get_users_by_filter/${encodedFilter}`, {
-        params: {
-          page,
-          page_size: pageSize
-        }
-      });
-  
-      return response.data;
+        const body = {
+            page,
+            page_size: pageSize,
+            filter: filter
+        };
+
+        const response = await api.post('/api/get_users_by_filter', body);
+
+        return {
+            users: response.data.users,
+            total_pages: response.data.total_pages,
+            current_page: response.data.current_page,
+            total_users: response.data.total_users
+        };
     } catch (error) {
-      console.error('Error fetching filtered users:', error);
-      throw error;
+        console.error('Error fetching filtered users:', error);
+        throw error;
     }
 };

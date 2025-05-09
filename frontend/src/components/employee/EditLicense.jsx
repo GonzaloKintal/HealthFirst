@@ -1,89 +1,125 @@
 import { useState, useEffect } from 'react';
 import { FiCalendar, FiUpload, FiUser, FiFileText, FiSave, FiX } from 'react-icons/fi';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import useAuth from '../../hooks/useAuth';
 import Notification from '../utils/Notification';
+import { getLicenseDetail,
+  updateLicense,
+  getLicenseTypes } from '../../services/licenseService';
 
 const EditLicense = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
   const [formData, setFormData] = useState({
-    licenseType: '',
+    licenseTypeId: '',
     startDate: '',
     endDate: '',
-    reason: '',
+    information: '',
     documents: null,
     declaration: false
   });
   const [calculatedDays, setCalculatedDays] = useState(0);
   const [notification, setNotification] = useState(null);
   const [existingDocument, setExistingDocument] = useState(null);
-
-  // Simulamos la carga de los datos de la licencia a editar
-  useEffect(() => {
-    // Aquí deberías hacer una llamada API para obtener los datos de la licencia con el id
-    // Esto es un mock de los datos
-    const mockLicenseData = {
-      id: id,
-      licenseType: 'Vacaciones',
-      startDate: '2025-07-10',
-      endDate: '2025-07-20',
-      reason: 'Vacaciones programadas con anticipación',
-      documents: 'plan_vacaciones.pdf',
-      declaration: true
-    };
-
-    setFormData({
-      licenseType: mockLicenseData.licenseType,
-      startDate: mockLicenseData.startDate,
-      endDate: mockLicenseData.endDate,
-      reason: mockLicenseData.reason,
-      documents: null,
-      declaration: mockLicenseData.declaration
-    });
-    setExistingDocument(mockLicenseData.documents);
-    
-    // Calcular días
-    const start = new Date(mockLicenseData.startDate);
-    const end = new Date(mockLicenseData.endDate);
-    const diffTime = Math.abs(end - start);
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
-    setCalculatedDays(diffDays);
-  }, [id]);
+  const [licenseTypes, setLicenseTypes] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [applicantData, setApplicantData] = useState({
+    firstName: '',
+    lastName: '',
+    dni: '',
+    department: '',
+    phone: ''
+  });
 
   useEffect(() => {
     if (notification) {
       const timer = setTimeout(() => {
         setNotification(null);
       }, 3000);
-      
       return () => clearTimeout(timer);
     }
   }, [notification]);
 
-  const employeeData = {
-    firstName: user?.firstName || 'Nombre',
-    lastName: user?.lastName || 'Apellido',
-    dni: user?.dni || '12345678',
-    department: user?.department || 'Departamento',
-    position: user?.position || 'Cargo',
-    hireDate: user?.hireDate || '2025-06-15'
-  };
+  // Cargar tipos de licencia
+  useEffect(() => {
+    const fetchLicenseTypes = async () => {
+      try {
+        const response = await getLicenseTypes();
+        if (response.success) {
+          setLicenseTypes(response.data.types);
+        } else {
+          setNotification({
+            type: 'error',
+            message: 'Error al cargar los tipos de licencia disponibles'
+          });
+        }
+      } catch (error) {
+        setNotification({
+          type: 'error',
+          message: 'Error al cargar los tipos de licencia'
+        });
+      }
+    };
+    
+    fetchLicenseTypes();
+  }, []);
 
-  const licenseTypes = [
-    'Vacaciones',
-    'Razones personales',
-    'Días administrativos',
-    'Cumpleaños',
-    'Día de estudio',
-    'Accidente de trabajo',
-    'Participación en asambleas',
-    'Nacimiento de un hijo',
-    'Enfermedad',
-    'Licencia por matrimonio',
-    'Duelo por un familiar cercano'
-  ];
+ // Cargar datos de la licencia a editar
+useEffect(() => {
+  const fetchLicenseData = async () => {
+    setIsLoading(true);
+    try {
+      // Espera a que los tipos de licencia estén cargados
+      if (licenseTypes.length === 0) return;
+      
+      const response = await getLicenseDetail(id);
+      if (response.success) {
+        const { license, user, certificate } = response.data;
+        
+        setApplicantData({
+          firstName: user.first_name,
+          lastName: user.last_name,
+          dni: user.dni,
+          department: user.department,
+          phone: user.phone
+        });
+
+        // Encuentra el tipo de licencia correspondiente
+        const licenseType = licenseTypes.find(t => t.name === license.type);
+        
+        setFormData(prev => ({
+          ...prev,
+          licenseTypeId: licenseType?.id || '',
+          startDate: license.start_date,
+          endDate: license.end_date,
+          information: license.information,
+          documents: null,
+          declaration: true
+        }));
+
+        setCalculatedDays(license.required_days);
+
+        if (certificate) {
+          setExistingDocument(certificate.file_name || 'documento_adjunto.pdf');
+        }
+        } else {
+          setNotification({
+            type: 'error',
+            message: response.error || 'Error al cargar los datos de la licencia'
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching license details:', error);
+        setNotification({
+          type: 'error',
+          message: 'Error al cargar los datos de la licencia'
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchLicenseData();
+  }, [id, licenseTypes]);
 
   const handleChange = (e) => {
     const { name, value, files, type, checked } = e.target;
@@ -119,7 +155,16 @@ const EditLicense = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const readFileAsBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result.split(',')[1]);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
     if (!formData.declaration) {
@@ -143,24 +188,75 @@ const EditLicense = () => {
       }
     }
     
-    setNotification(null);
-    
-    // Simulamos el éxito de la actualización
-    setNotification({
-      type: 'success',
-      message: 'Tu solicitud de licencia ha sido actualizada correctamente.'
-    });
-    
-    // Redirigir después de 2 segundos
-    setTimeout(() => {
-      navigate('/my-licenses');
-    }, 2000);
+    try {
+      // Preparar los datos para actualizar
+      const certificate = formData.documents 
+        ? {
+            validation: true,
+            file: await readFileAsBase64(formData.documents),
+            file_name: formData.documents.name
+          }
+        : existingDocument
+          ? {
+              validation: true,
+              file: "",
+              file_name: existingDocument
+            }
+          : {
+              validation: false,
+              file: "",
+              file_name: ""
+            };
+
+      const licenseData = {
+        type_id: Number(formData.licenseTypeId),
+        start_date: formData.startDate,
+        end_date: formData.endDate,
+        information: formData.reason,
+        certificate
+      };
+
+      console.log('Datos de la licencia a actualizar:', licenseData);
+
+      // Enviar la actualización
+      const response = await updateLicense(id, licenseData);
+      
+      if (response.success) {
+        setNotification({
+          type: 'success',
+          message: 'La licencia ha sido actualizada correctamente.'
+        });
+        
+        // Redirigir después de 3 segundos
+        setTimeout(() => {
+          navigate(-1); // Volver a la página anterior
+        }, 3000);
+      } else {
+        throw new Error(response.error || 'Error al actualizar la licencia');
+      }
+    } catch (error) {
+      setNotification({
+        type: 'error',
+        message: error.response?.data?.message || 
+               'Ocurrió un error al actualizar la licencia.'
+      });
+    }
   };
 
   const handleRemoveDocument = () => {
     setFormData(prev => ({ ...prev, documents: null }));
     setExistingDocument(null);
   };
+
+  if (isLoading) {
+    return (
+      <div className="p-6 max-w-3xl mx-auto">
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 max-w-3xl mx-auto relative">
@@ -174,14 +270,14 @@ const EditLicense = () => {
       )}
       
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Editar Solicitud de Licencia</h1>
+        <h1 className="text-2xl font-bold">Editar Licencia</h1>
       </div>
       
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Sección de Datos Personales */}
+        {/* Sección de Datos Personales (solo lectura) */}
         <div className="bg-white p-6 rounded-lg shadow">
           <h2 className="text-xl font-semibold mb-4 flex items-center">
-            <FiUser className="mr-2" /> Datos Personales
+            <FiUser className="mr-2" /> Datos del Solicitante
           </h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -189,7 +285,7 @@ const EditLicense = () => {
               <label className="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
               <input
                 type="text"
-                value={employeeData.firstName}
+                value={applicantData.firstName}
                 readOnly
                 className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50"
               />
@@ -199,19 +295,17 @@ const EditLicense = () => {
               <label className="block text-sm font-medium text-gray-700 mb-1">Apellido</label>
               <input
                 type="text"
-                value={employeeData.lastName}
+                value={applicantData.lastName}
                 readOnly
                 className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50"
               />
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1 items-center">
-                  DNI
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">DNI</label>
               <input
                 type="text"
-                value={employeeData.dni}
+                value={applicantData.dni}
                 readOnly
                 className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50"
               />
@@ -221,27 +315,17 @@ const EditLicense = () => {
               <label className="block text-sm font-medium text-gray-700 mb-1">Departamento/Área</label>
               <input
                 type="text"
-                value={employeeData.department}
+                value={applicantData.department}
                 readOnly
                 className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50"
               />
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Cargo/Puesto</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
               <input
                 type="text"
-                value={employeeData.position}
-                readOnly
-                className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50"
-              />
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de Ingreso</label>
-              <input
-                type="text"
-                value={new Date(employeeData.hireDate).toLocaleDateString()}
+                value={applicantData.phone}
                 readOnly
                 className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50"
               />
@@ -249,7 +333,7 @@ const EditLicense = () => {
           </div>
         </div>
 
-        {/* Sección de Detalles de la Licencia */}
+        {/* Sección de Detalles de la Licencia (editable) */}
         <div className="bg-white p-6 rounded-lg shadow">
           <h2 className="text-xl font-semibold mb-4 flex items-center">
             <FiCalendar className="mr-2" /> Detalles de la Licencia
@@ -259,15 +343,15 @@ const EditLicense = () => {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de Licencia *</label>
               <select
-                name="licenseType"
-                value={formData.licenseType}
+                name="licenseTypeId"
+                value={formData.licenseTypeId}
                 onChange={handleChange}
                 required
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="">Seleccionar tipo</option>
                 {licenseTypes.map(type => (
-                  <option key={type} value={type}>{type}</option>
+                  <option key={type.id} value={type.id}>{type.name}</option>
                 ))}
               </select>
             </div>
@@ -290,7 +374,6 @@ const EditLicense = () => {
                 value={formData.startDate}
                 onChange={handleChange}
                 required
-                min={new Date().toISOString().split('T')[0]}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
@@ -303,7 +386,7 @@ const EditLicense = () => {
                 value={formData.endDate}
                 onChange={handleChange}
                 required
-                min={formData.startDate || new Date().toISOString().split('T')[0]}
+                min={formData.startDate}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
@@ -312,18 +395,18 @@ const EditLicense = () => {
           <div className="mt-4">
             <label className="block text-sm font-medium text-gray-700 mb-1">Motivo *</label>
             <textarea
-              name="reason"
-              value={formData.reason}
+              name="information"
+              value={formData.information}
               onChange={handleChange}
               required
               rows={3}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 resize-none"
-              placeholder="Describa el motivo de su solicitud..."
+              placeholder="Describa el motivo de la licencia..."
             />
           </div>
         </div>
 
-        {/* Sección de Documentación */}
+        {/* Sección de Documentación (editable) */}
         <div className="bg-white p-6 rounded-lg shadow">
           <h2 className="text-xl font-semibold mb-4 flex items-center">
             <FiUpload className="mr-2" /> Documentación Adjunta
@@ -394,15 +477,8 @@ const EditLicense = () => {
 
         {/* Botones de acción */}
         <div className="flex justify-end space-x-3">
-          {/* <button
-            type="button"
-            onClick={() => navigate('/my-licenses')}
-            className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 cursor-pointer"
-          >
-            Cancelar
-          </button> */}
           <Link
-            to={user?.role === 'admin' || user?.role === 'supervisor' ? '/licenses' : '/my-licenses'}
+            to={-1}
             className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 cursor-pointer"
           >
             Cancelar
