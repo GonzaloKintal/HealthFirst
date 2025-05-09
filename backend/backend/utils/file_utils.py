@@ -44,8 +44,8 @@ def base64_to_text(base64_pdf, is_image=False):
 
 
 
-def remove_accents(text): #REVISAR
-    """Saca las tildes del texto pero mantiene ñ y Ñ"""
+def normalize_text(text): #REVISAR
+    """Saca las tildes del texto pero mantiene ñ y Ñ, y lo manda todo en minuscula"""
     normalized_text = unicodedata.normalize('NFD', text)
     clean_text = []
     for char in normalized_text:
@@ -56,7 +56,7 @@ def remove_accents(text): #REVISAR
             # Saca los acentos pero mantiene la letra base
             if unicodedata.category(char) != 'Mn':
                 clean_text.append(char)
-    return ''.join(clean_text)
+    return (''.join(clean_text)).lower()
 
 
 
