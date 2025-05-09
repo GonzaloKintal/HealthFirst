@@ -123,7 +123,7 @@ def pdf_to_base64_and_save(pdf_path, output_txt_path):
     except Exception as e:
         print(f" Error inesperado: {str(e)}")
 
-#PRUEBAS
+"""#PRUEBAS
 
 #Para quedarme con el base64 de pdfs y tenerlo en .txt para el dataset 
 pdf_to_base64_and_save(
@@ -143,3 +143,4 @@ print(texto_final)
 # Aviso si encontre lo que buscaba
 #found = search_in_pdf_base64(texto, search_term)
 #print(f"¿Se encontró '{search_term}' en el PDF? {found}")
+"""
