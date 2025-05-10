@@ -44,8 +44,8 @@ def license_analysis(id): #se le pasa el id de la solicitud
         return "Se han completado el maximo de pedidos por año"
     
     #Dias corridos
-    if get_max_days_cons(id) >= licencia.type.max_consecutive_days :
-        return "Se han completado el maximo de dias corridos"
+    if licencia.type.max_consecutive_days is not None and licencia.required_days > licencia.type.max_consecutive_days :
+        return "Excede los dias corridos para este tipo de licencia"
     
     #Minimo de preaviso
     dias_hasta_licencia = (fecha_inicio - fecha_solicitud).days
@@ -105,9 +105,6 @@ def get_res_lim(user_id, license_id): # se obtienen los pedidos que ya realizó,
         ).count()
     
     return cant_pedidos_aprobados
-
-def get_max_days_cons(user_id): # se obtienen la cantidad de dias corridos que se tomaron
-    return 0
 
 
 
