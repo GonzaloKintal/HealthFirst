@@ -72,40 +72,35 @@ def define_types(): #Faltan agregar los demas tipos
     }
     print("asd")
 
-def license_analysis(licencia):
-    tipo = licencia["tipo_licencia"]
-    datos = politicas_tipos.get(tipo)
-    user_id = licencia["user_id"]
+def license_analysis(id): #se le pasa el id de la solicitud
+    licencia = License.objects.get(license_id=id)
 
     fecha_actual = date.today()
-    fecha_inicio = datetime.strptime(licencia["fecha_inicio"], "%Y-%m-%d").date() # convierto el string de la fecha atipo date
-    fecha_solicitud = datetime.strptime(licencia["fecha_solicitud"], "%Y-%m-%d").date() # convierto el string de la fecha a tipo date
-    
-    if not datos:
-        return "Este tipo de licencia no se encuentra en la base de datos"
+    fecha_inicio = licencia.start_date
+    fecha_solicitud = licencia.request_date
     
     if fecha_inicio < fecha_actual:
         return "La fecha del inicio de licencia es anterior a la actual"
     
-    if licencia["dias_totales"]> get_total_days_res(licencia["id"]) :
+    if licencia.required_days > get_total_days_res(licencia.user) :
         return "Los dias solicitados exceden los dias restantes que le quedan al empleado"
 
     #Limite en pedidos por año
-    if get_res_lim(user_id) >= datos["limite_anual_pedidos"] :
+    if get_res_lim(id) >= licencia.type.yearly_approved_requests :
         return "Se han completado el maximo de pedidos por año"
     
     #Dias corridos
-    if get_max_days_cons(user_id) >= datos["max_dias_corridos"] :
+    if get_max_days_cons(id) >= licencia.type.max_consecutive_days :
         return "Se han completado el maximo de dias corridos"
     
     #Total de dias anual
-    if get_days_year(user_id) >= datos["total_dias_anual"] :
+    if get_days_year(id) >= licencia.type.total_days_granted:
         return "Se han completado el maximo de dias por año"
     
     #Minimo de preaviso
     dias_hasta_licencia = (fecha_inicio - fecha_solicitud).days
 
-    if dias_hasta_licencia < datos["min_preaviso"] :
+    if dias_hasta_licencia < licencia.type.min_advance_notice_days :
         return "No cumple con el minimo de dias de preaviso para solicitar la licencia"
     
 
@@ -142,22 +137,5 @@ def get_max_days_cons(user_id): # se obtienen la cantidad de dias corridos que s
 def get_days_year(user_id): # se obtienen la cantidad de licencias de cierto tipo por año que se tomaron
     return 0
 
-
-
-
-
-
-#Las solicitudes que recibiremos seran del tipo-----------------------------------------------------------------
-'''
-solicitud = {
-    "user_id":"",
-    "tipo_licencia" : "Enfermedad",
-    "fecha_inicio": "",
-    "fecha_fin": "",
-    "dias_totales":"",
-    "fecha_solicitud":""
-}
-'''
-#los campos faltates: debes ser calculados u obtenidos aparte
 #la fecha de la licencia debe ser posterior a la fecha actual
 
