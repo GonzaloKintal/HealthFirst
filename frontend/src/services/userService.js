@@ -56,26 +56,6 @@ export const getUser = async (id) => {
         throw error;
     }
 };
-// export const getUser = async (id) => {
-//     try {
-//         // Obtener el token del localStorage
-//         const authData = JSON.parse(localStorage.getItem('auth_data'));
-//         const token = authData.token;
-
-//         // Configurar los headers con el token
-//         const config = {
-//             headers: {
-//                 'Authorization': `Bearer ${token}`
-//             }
-//         };
-
-//         const response = await api.get(`/api/get_user/${id}`, config);
-//         return response.data.user;
-//     } catch (error) {
-//         console.error('Error fetching user:', error);
-//         throw error;
-//     }
-// };
 
 export const getUsersByFilter = async (page = 1, filter = '', pageSize = 5) => {
     try {
