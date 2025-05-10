@@ -1,9 +1,11 @@
 import pandas as pd
 import re
-import file_utils
+import joblib
 
 from sklearn.linear_model import LogisticRegression
-
+from file_utils import is_pdf_image
+from file_utils import normalize_text
+from file_utils import base64_to_text
 TYPE_CONFIG = {
     "NACIMIENTO": {
         "NAME": "NACIMIENTO_HIJO",
@@ -193,7 +195,7 @@ TYPE_CONFIG = {
         "NAME":"TRAMITES_PREMATRIMONIALES",
         "MUST":[["turno"],["fecha"],["hora"],["direccion","ubicacion"],
                 ["dni"],["original"],["copia"],["contrayente"],
-                ["casamiento","matrimonio","matrimonial"],["testigo","testigos"]
+                ["casamiento","matrimonio","matrimonial"],["testigo","testigos"],
                 ["partida de nacimiento","acta de nacimiento"]],
         "COULD":["sede","certificado de nacimiento","partida de nacimiento",
                  "casamiento","registro provincial","registro civil","oficina",
@@ -231,13 +233,12 @@ def create_strict_feature(text, must_find, could_find, n_minimum):
     """Se encarga de juzgar si un atributo se cumple o no por: palabras que tienen que aparecer, palabras que podrian
     aparecer(y el minimo de estas)"""
 
-    normalized_text =file_utils.normalize_text(text) 
-    print(normalized_text)
+    normalized_text =normalize_text(text) 
+
 
     for word_group in must_find: #chequeamos palabras claves
         pattern = r'\b(?:' + '|'.join([re.escape(w) for w in word_group]) + r')(?:[.:]\S*|\s+)?\b' #buscamos cualquier palabra del grupo sinonimo
         if not re.search(pattern, normalized_text):
-            print("falla por clave")
             return 0  #no encontró una palabra clave, se descarta
         
     count = 0 #vemos cuantas palabras secundarias se encontraron para ver si llegamos al minimo (aca no trabajamos sinonimos).Si no llegamos, se descarta
@@ -247,11 +248,11 @@ def create_strict_feature(text, must_find, could_find, n_minimum):
             count += 1 
             if count >= n_minimum:
                 return 1
-    print("falla por minimo")
+    
     return 0
 
-#Cargar el dataset basicu
-df=pd.read_csv("tipo_licencias_dataset.csv")
+#Cargar el dataset basico
+df=pd.read_csv("HealthFirst/backend/backend/utils/tipo_licencias_dataset.csv")
 
 #Generanding los atributos del dataframe
 
@@ -270,16 +271,16 @@ for type in TYPES:
 
 
 #Toca entrenar el modelo~ revisar fijo de aca
-
 X=df.filter(like="justify_")
 y=df["real_license_type"]
 
-model = LogisticRegression( multi_class="multinomial",solver="lbfgs", C=0.1, max_iter=1000)
-model.fit(X, y) 
+model = LogisticRegression(solver="lbfgs", C=0.1, max_iter=1000)
+model.fit(X, y)
+joblib.dump(model,"prediction_type_model.pkl")
 
 #funcion para mostrar el top-3 de predicciones
 
-def predict_top_3(text):
+def predict_top_3(text,model):
     features={}
     for type in TYPES:
         features[f"justify_{type['NAME']}"] = create_strict_feature(
@@ -295,20 +296,24 @@ def predict_top_3(text):
     # Predecir probabilidades
     probas = model.predict_proba(input_df)[0]
     clases = model.classes_
-    
+
     # Top-3
     top_3 = sorted(zip(clases, probas), key=lambda x: -x[1])[:3]
-    for i, (clase, prob) in enumerate(top_3):
-        print(f"{i+1}. {clase}: {prob:.2%}")
+    return [(clase, f"{prob * 100:.0f} %") for clase, prob in top_3] 
 
-
+#me la tengo que llevar a predicciones
+def predict_license_type(base64_text):
+    "Toma un base64 y predice a que 3 tipos de licencia puede pertenecer"
+    model=joblib.load("prediction_type_model.pkl") #cargamos el modelo
+    license_text=normalize_text(base64_to_text(base64_text,is_pdf_image(base64_text))) #tenemos el texto del certificado normalizado
+    return predict_top_3(license_text) #lista de tupla como "("enfermedad",85)"
 
 
 """Configuración para "nacimiento_hijo" rapida pruebaaa
 NACIMIENTO_must = [["nacimiento"], ["acta"], ["sexo"]]
 NACIMIENTO_could = ["madre", "padre", "hospital"]
 N_MINIMUM = 1
-
+""""""
 texto = "Certificado de NACIMIENTO: Acta 123, sexo masculino. Madre: María Pérez."
 result = create_strict_feature(texto, NACIMIENTO_must, NACIMIENTO_could, N_MINIMUM)
 print(result)  # Output: 1 (cumple todas las obligatorias y 1 secundarias)
