@@ -128,7 +128,7 @@ class HealthFirstUser(AbstractUser):
         user = cls.objects.get(id=id, is_deleted=False)
         return user
     
-class Type_License(models.model):
+class Type_License(models.Model):
     type_license_id=models.AutoField(primary_key=True)
     name=models.CharField(max_length=15,null=False, blank=False)
     description=models.CharField(max_length=50,null=False, blank=False)
