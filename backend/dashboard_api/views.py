@@ -18,6 +18,9 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from dashboard_api.serializers import CustomTokenObtainPairSerializer
 from django.db.models import Q
 from urllib.parse import unquote
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
@@ -170,6 +173,9 @@ def update_user(request, id):
 
 @csrf_exempt
 @require_http_methods(["GET"])
+# @api_view(['GET'])
+# @authentication_classes([JWTAuthentication])
+# @permission_classes([IsAuthenticated])
 def get_user(request, id):
     if not id:
         response=JsonResponse({'error': 'El id es requerido.'}, status=400)
@@ -500,6 +506,10 @@ def evaluate_license(request, id):
         status_obj.evaluation_date = now().date()
         status_obj.evaluation_comment = comment
         status_obj.save()
+
+        # Actualizar fecha de cierre de la licencia
+        license.closing_date = now().date()
+        license.save()
 
         return JsonResponse({'message': f'Licencia evaluada correctamente.'}, status=200)
 
