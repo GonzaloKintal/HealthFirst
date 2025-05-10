@@ -1,7 +1,8 @@
 from rest_framework import serializers
-from .models import Department, HealthFirstUser, License, LicenseType
+from .models import Department, HealthFirstUser, License, LicenseType, Status
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.exceptions import AuthenticationFailed
+
 
 
 class HealthFirstUserSerializer(serializers.ModelSerializer):
@@ -32,12 +33,13 @@ class LicenseSerializer(serializers.ModelSerializer):
         return (obj.end_date - obj.start_date).days + 1
 
     def get_status(self, obj):
-        if obj.justified:
-            return 'Approved'
-        elif obj.closing_date:
-            return 'Rejected'
-        else:
-            return 'Pending'    
+        # if obj.justified:
+        #     return 'approved'
+        # elif obj.closing_date:
+        #     return 'rejected'
+        # else:
+        #     return 'pending'   
+        return Status.objects.get(license=obj).name
 
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
