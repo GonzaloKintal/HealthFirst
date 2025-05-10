@@ -75,6 +75,9 @@ def define_types(): #Faltan agregar los demas tipos
 def license_analysis(id): #se le pasa el id de la solicitud
     licencia = License.objects.get(license_id=id)
 
+    if licencia.type== "Vacaciones":
+        total_days_vac(licencia.user,id) #actualizo la cantidad de dias que tiene por vacaciones
+    
     fecha_actual = date.today()
     fecha_inicio = licencia.start_date
     fecha_solicitud = licencia.request_date
@@ -93,10 +96,6 @@ def license_analysis(id): #se le pasa el id de la solicitud
     if get_max_days_cons(id) >= licencia.type.max_consecutive_days :
         return "Se han completado el maximo de dias corridos"
     
-    #Total de dias anual
-    if get_days_year(id) >= licencia.type.total_days_granted:
-        return "Se han completado el maximo de dias por año"
-    
     #Minimo de preaviso
     dias_hasta_licencia = (fecha_inicio - fecha_solicitud).days
 
@@ -108,24 +107,34 @@ def license_analysis(id): #se le pasa el id de la solicitud
 def get_total_days(): #para refactorizar las funciones, se le pasa el id del empleado y la vaiable que se quiere solicitar,siempre retorna numeros
     return 0
 '''
-def get_total_days_vac(user_id): # se obtienen el total de dias para las vacaciones
+def total_days_vac(user_id, license_id): # se obtienen el total de dias para las vacaciones
+
     anio_actual = datetime.now().year # obtengo el año actual
     fecha_ultima = datetime(anio_actual, 12, 31) #se usa para calcular la antiguedad
-    try:
-        usuario = HealthFirstUser.objects.get(id=user_id)
+    
+    usuario = HealthFirstUser.objects.get(id=user_id)
 
-        if usuario.employment_start_date is None:
-            return "El usuario no tiene una fecha de ingreso registrada"
+    if usuario.employment_start_date is None:
+        return "El usuario no tiene una fecha de ingreso registrada"
 
-        antiguedad_dias = fecha_ultima - usuario.employment_start_date
-        antiguedad_anios = antiguedad_dias.days // 365 
-        return antiguedad_anios
+    antiguedad_dias = fecha_ultima - usuario.employment_start_date
+    antiguedad_anios = antiguedad_dias.days // 365  # obtengo la antiguedad del empleado
 
-    except HealthFirstUser.DoesNotExist:
-        return f"No existe un usuario con ID {user_id}"
-    return 0
+    days = 0
+    if antiguedad_anios <= 5:
+        days = 14
+    elif 5 < antiguedad_anios <= 10:
+        days = 21
+    elif 10 < antiguedad_anios <= 20:
+        days = 28
+    else:
+        days = 35
+
+    licencia = License.objects.get(license_id=license_id)
+    licencia.type.total_days_granted = days
 
 def get_total_days_res(user_id): # se obtienen el total de dias restantes que le quedan por tipo y empleado
+
     return 0
 
 def get_res_lim(user_id): # se obtienen los pedidos que ya realizó, retorna 0 si no hay limite
@@ -134,8 +143,6 @@ def get_res_lim(user_id): # se obtienen los pedidos que ya realizó, retorna 0 s
 def get_max_days_cons(user_id): # se obtienen la cantidad de dias corridos que se tomaron
     return 0
 
-def get_days_year(user_id): # se obtienen la cantidad de licencias de cierto tipo por año que se tomaron
-    return 0
 
 #la fecha de la licencia debe ser posterior a la fecha actual
 
