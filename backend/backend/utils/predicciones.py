@@ -4,87 +4,228 @@ import file_utils
 
 from sklearn.linear_model import LogisticRegression
 
+TYPE_CONFIG = {
+    "NACIMIENTO": {
+        "NAME": "NACIMIENTO_HIJO",
+        "MUST": [
+            ["nacimiento"],
+            ["lugar", "domicilio"],
+            ["padre", "conyuge", "padre/conyuge"],
+            ["matricula", "mn", "mp", "me"],
+            ["registro civil"],
+            ["sexo"],
+            ["acta"],
+            ["clinica", "hospital", "centro medico", "salita", "centro de salud"],
+            ["dr", "dra"],
+            ["libro"],
+            ["folio"]
+        ],
+        "COULD": ["madre", "registro", "inscripcion", "tramite", "testigo", "testigos"],
+        "N_MIN": 2
+    },
+    "ESTUDIOS": {
+        "NAME": "ESTUDIOS",
+        "MUST": [
+            ["alumno", "alumna", "alumno/a", "estudiante"],
+            ["facultad", "universidad", "instituto"],
+            ["examen", "final", "evaluacion"],
+            ["asignatura", "materia", "actividad"],
+            ["carrera", "propuesta"],
+            ["docente", "profesor", "profesora"]
+        ],
+        "COULD": ["regional", "modalidad", "ubicacion", "sede", "turno", "rendir", "realizar"],
+        "N_MIN": 1
+    },
+    "CONTROL_PRENATAL": {
+        "NAME": "CONTROL_PRENATAL",
+        "MUST": [
+            ["control", "consulta"],
+            ["embarazo", "prenatal"],
+            ["dr", "dra"],
+            ["matricula", "mn", "mp", "me"]
+        ],
+        "COULD": ["clinica", "consultorio", "obstetra", "ginecologo", "hospital", "centro de salud", "centro medico", "ecografia", "laboratorio", "gestacion", "parto", "semana"],
+        "N_MIN": 1
+    },
+    "ACCIDENTE_TRABAJO": {
+        "NAME": "ACCIDENTE_TRABAJO",
+        "MUST": [
+            ["dr", "dra"],
+            ["matricula", "mn", "mp", "me"],
+            ["clinica", "hospital", "centro medico", "salita", "centro de salud"],
+            ["art"],
+            ["poliza"],
+            ["accidente", "incidente", "lesion"],
+            ["legajo"]
+        ],
+        "COULD": ["servicio", "empresa", "diagnostico", "tratamiento", "incapacidad", "laboral", "reposo", "licencia", "control", "reincorporacion", "alta", "junta medica"],
+        "N_MIN": 1
+    },
+    "ENFERMEDAD": {
+        "NAME": "ENFERMEDAD",
+        "MUST": [
+            ["dr", "dra"],
+            ["matricula", "mn", "mp", "me"],
+            ["reposo", "licencia", "descanso"]
+        ],
+        "COULD": ["clinica", "hospital", "centro medico", "salita", "centro de salud", "sintomas", "tratamiento", "control", "estudios", "gripe", "viral", "paciente", "dolor", "consultorio", "diagnostico"],
+        "N_MIN": 1
+    },
+    "CASAMIENTO": {
+        "NAME": "CASAMIENTO",
+        "MUST": [
+            ["acta"],
+            ["matrimonio"],
+            ["registro civil"],
+            ["libro"],
+            ["folio"],
+            ["testigo", "testigos"],
+            ["dr", "dra"],
+            ["matricula", "mn", "mp", "me"]
+        ],
+        "COULD": ["juez de paz", "jueza de paz"],
+        "N_MIN": 1
+    },
+    "DUELO": {
+        "NAME": "DUELO",
+        "MUST": [
+            ["registro civil"],
+            ["sexo"],
+            ["nacionalidad"],
+            ["causa", "diagnostico", "consecuencia"],
+            ["dr", "dra"],
+            ["matricula", "mn", "mp", "me"],
+            ["defuncion"],
+            ["tomo"],
+            ["libro"],
+            ["estado civil"],
+            ["acta"]
+        ],
+        "COULD": ["deceso"],
+        "N_MIN": 1
+    },
+    "DONACION_SANGRE": {
+        "NAME": "DONACION_SANGRE",
+        "MUST": [
+            ["hospital", "instituto de hemoterapia", "banco de sangre", "clinica", "centro medico"],
+            ["donar", "donacion"],
+            ["sangre"],
+            ["matricula", "mn", "mp", "me"]
+        ],
+        "COULD": ["donante", "receptor", "tecnico responsable"],
+        "N_MIN": 1
+    },
+    "MUDANZA": {
+        "NAME": "MUDANZA",
+        "MUST": [
+            ["boleto de compraventa", "contrato de locacion", "cambio de domicilio", "servicio de mudanza", "contrato de alquiler"],
+            ["inmueble", "residencia", "vivienda", "propiedad"],
+            ["inquilino", "locatorio", "comprador", "propietario"],
+            ["locador", "vendedor"],
+            ["domicilio", "direccion"]
+        ],
+        "COULD": ["nueva residencia", "renaper", "inmobiliaria", "traslado", "mudanza", "encargado de logistica", "plazo", "escrituracion", "certificado de domicilio", "fecha de desocupacion", "testigo", "notificacion de mudanza", "escribano", "esc", "matricula", "mn", "mp", "me", "dr", "dra", "registro nacional de las personas"],
+        "N_MIN": 1
+    },
+    "REUNION_EXT": {
+        "NAME": "REUNION_EXT",
+        "MUST": [
+            ["reunion"],
+            ["extraordinario", "extraordinaria"],
+            ["acta"],
+            ["lugar"],
+            ["sindicato", "gremio", "gremial"],
+            ["afiliado", "empleado", "trabajador"]
+        ],
+        "COULD": ["comision", "dependencia", "union",
+                "operarios", "convocada", "comercio",
+                "convoctoria", "medidas", "urgente"],
+        "N_MIN": 1
+    },
+    "OBLIGACION_PUBLICA": {
+        "NAME": "OBLIGACION_PUBLICA",
+        "MUST": [
+            ["citacion", "notificacion"],["expediente"],
+            ["obligatoria", "obligatorio"], ["matricula"]
+        ],
+        "COULD": ["jurado", "juicio", "sede",
+                  "tribunal", "juez", "testigo",
+                  "causa penal", "entrevista",
+                  "inspector", "ley", "articulo",
+                  "requerimiento", "expediente",
+                  "ciudadano", "audiencia", "reclamo",
+                  "funcionario", "elecciones"],
+        "N_MIN": 1
+    },
+    "REPRESENTANTE_GREMIAL": {
+        "NAME": "REPRESENTANTE_GREMIAL",
+        "MUST": [
+            ["gremial", "gremio", "sindicato"],
+            ["reunion", "junta"],
+            ["delegado", "miembro"],
+            ["lugar"],
+            ["motivo", "asunto", "actividad"]
+        ],
+        "COULD": ["empleados", "legajo", "orden del dia", 
+                  "paritarias", "condiciones", "comision", 
+                  "articulo", "credencial", "secretario",
+                  "directora", "convocatoria", "urgente",
+                  "despedido", "laboral", "conflictos", 
+                  "asamblea", "informativa", "estrategias", 
+                  "denuncia", "pago", "citacion", "jornada",
+                  "capacitacion", "derechos", "seguridad"],
+        "N_MIN": 1
+    },
+    "MATERNIDAD":{
+        "NAME":"MATERNIDAD",
+        "MUST":[
+            ["semanas"],["gestacion"],["parto"],
+            ["embarazo","embarazada"], ["dr", "dra"],
+            ["matricula", "mn", "mp", "me"],["multiple","unico"]
+            ],
+        "COULD":["control","consulta","prenatal","pre-natal",
+                 "pre natal", "hospital", "paciente","clinica",
+                 "licencia","obstetricia","controles","prenatales",
+                 "evolucion","gestacional"],
+        "N_MIN":1
+    },
+    "TRAMITES_PREMATRIMONIALES":{
+        "NAME":"TRAMITES_PREMATRIMONIALES",
+        "MUST":[["turno"],["fecha"],["hora"],["direccion","ubicacion"],
+                ["dni"],["original"],["copia"],["contrayente"],
+                ["casamiento","matrimonio","matrimonial"],["testigo","testigos"]
+                ["partida de nacimiento","acta de nacimiento"]],
+        "COULD":["sede","certificado de nacimiento","partida de nacimiento",
+                 "casamiento","registro provincial","registro civil","oficina",
+                 "confirmado","numero de confirmacion","instrucciones",
+                 "prematrimonial","libro","folio","capacidad legal",
+                 "codigo civil","impedimentos legales","consentimiento",
+                 "ceremonia","estado civil"],
+        "N_MIN":1
+    },
+    "ASISTENCIA_FAMILIARES":{
+        "NAME":"ASISTENCIA_FAMILIARES",
+        "MUST":[["asistencia","cuidado","soporte","supervision"],
+                ["familiar","responsable"],["dr", "dra"],["matricula", "mn", "mp", "me"]],
+        "COULD":["paciente","permanente","condicion medica",
+                 "autonoma","soporte","bienestar","continua",
+                 "recuperacion","presencia","supervision",
+                 "cronica","movilidad","aislamiento","complicacion",
+                 "autonomia","rehabilitacion","especial","especiales",
+                 "domicilio"],
+        "N_MIN":1
+    },
+    "REUNION_GREMIAL":{
+        "NAME":"REUNION_GREMIAL",
+        "MUST":[["reunion",],["gremial","gremio","sindicato"]],
+        "COULD":["empleados","comercio","trabajo","horario","secretario","delegado","participar","sindical","representante","convenio"],
+        "N_MIN":1
+    }
+}
 
-NACIMIENTO_must=[["nacimiento"],["lugar","domicilio"],["padre","conyuge","padre/conyuge"],["matricula","mn","mp","me"],["registro civil"],["sexo"],
-                 ["acta"],["clinica","hospital","centro medico","salita","centro de salud"],["dr","dra"],["libro"],["folio"]]
-NACIMIENTO_could=["madre","registro","inscripcion","tramite","testigo","testigos"],
-NACIMIENTO_N_MINIMUM=2
- 
-ESTUDIOS_must=[["alumno","alumna","alumno/a","estudiante"],["facultad","universidad","instituto"],["examen","final","evaluacion"],
-               ["asignatura","materia","actividad"],["carrera","propuesta"],["docente","profesor","profesora"]]
-ESTUDIOS_could=["regional","modalidad","ubicacion","sede","turno","rendir","realizar"]
-ESTUDIOS_N_MINIMUM=1
-
-CONTROL_PRENATAL_must=[["control","consulta"],["embarazo","prenatal"],["dr","dra"],["matricula","mn","mp","me"]]
-CONTROL_PRENATAL_could=["clinica","consultorio","obstetra","ginecologo","hospital","centro de salud","centro medico","ecografia","laboratorio","gestacion","parto","semana"]
-CONTROL_PRENATAL_N_MINIMUM=1
-
-ACCIDENTE_TRABAJO_must=[["dr","dra"],["matricula","mn","mp","me"],["clinica","hospital","centro medico","salita","centro de salud"],
-                        ["art"],["poliza"],["accidente","incidente","lesion"],["legajo"]]
-ACCIDENTE_TRABAJO_could=["servicio","empresa","diagnostico","tratamiento","incapacidad","laboral","reposo","licencia","control",
-                         "reincorporacion","alta","junta medica"]
-ACCIDENTE_TRABAJO__N_MINIMUM=1
-
-ENFERMEDAD_must=[["dr","dra"],["matricula","mn","mp","me"],["reposo","licencia","descanso"]]
-ENFERMEDAD_could=["clinica","hospital","centro medico","salita","centro de salud","sintomas","tratamiento","control","clinica",
-                  "hospital","estudios","gripe","viral","paciente","dolor","consultorio","diagnostico"]
-ENFERMEDAD_N_MINIMUM=1
-
-CASAMIENTO_must=[["acta"],["matrimonio"],["registro civil"],["libro"],["folio"],["testigo","testigos"],["dr","dra"],
-                 ["matricula","mn","mp","me"]]
-CASAMIENTO_could=["juez de paz","jueza de paz"]
-CASAMIENTO_N_MINIMUM=1
-
-DUELO_must=[["registro civil"],["sexo"],["nacionalidad"],["causa","diagnostico","consecuencia"],["dr","dra"],
-            ["matricula","mn","mp","me"],["defuncion"],["tomo"],["libro"],["estado civil"],["acta"]]
-DUELO_could=["deceso"] #capaz esta demas 
-DUELO_N_MINIMUM=1
-
-DONACION_SANGRE_must=[["hospital","instituto de hemoterapia","banco de sangre","clinica","centro medico"],["donar","donacion"],
-                      ["sangre"],["matricula","mn","mp","me"]]
-DONACION_SANGRE_could=["donante","receptor","tecnico responsable"]
-DONACION_SANGRE_N_MINIMUM=1
-
-MUDANZA_must=[["boleto de compraventa","contrato de locacion","cambio de domicilio","servicio de mudanza","contrato de alquiler"]
-              ,["inmueble","residencia","vivienda","propiedad","residencia"],["inquilino","locatorio","comprador","propietario"],
-              ["locador","vendedor"],["domicilio","direccion"]]
-MUDANZA_could=["nueva residencia","renaper","inmobiliaria","traslado","mudanza","encargado de logistica","plazo","escrituracion",
-               "certificado de domicilio","fecha de desocupacion","testigo","notificacion de mudanza","escribano","esc", "matricula",
-               "mn","mp","me","dr","dra","registro nacional de las personas"]
-MUDANZA_N_MINIMUM=1
-
-REUNION_EXT_must=[["reunion"],["extraordinario","extraordinaria"],["acta"],["lugar"],["sindicato","gremio","gremial"],["afiliado","empleado","trabajador"]]
-REUNION_EXT_could=["comision","dependencia","union","operarios","convocada","comercio","convoctoria","medidas","urgente"]
-REUNION_EXT_N_MINIMUM=1
-
-OBLIGACION_PUBLICA_must=[["citacion","notificacion"],["expediente"],["obligatoria","obligatorio"],["matricula"]]
-OBLIGACION_PUBLICA_could=["jurado","juicio","sede","tribunal","juez","testigo","causa penal","entrevista","inspector","ley",
-                          "articulo","requerimiento","expediente","ciudadano","audiencia","reclamo","funcionario","elecciones"]
-OBLIGACION_PUBLICA_N_MINIMUM=1
-
-REPRESENTANTE_GREMIAL_must=[["gremial","gremio","sindicato"],["reunion","junta"],["delegado","miembro"],["lugar"],["motivo","asunto","actividad"]]
-REPRESENTANTE_GREMIAL_could=["empleados","legajo","orden del dia","paritarias","condiciones","comision","articulo","credencial","secretario",
-                             "directora","convocatoria","urgente","despedido","laboral","conflictos","asamblea","informativa","estrategias",
-                             "denuncia","pago","citacion","jornada","capacitacion","derechos","seguridad"]
-REPRESENTANTE_GREMIAL_N_MINIMUM=1
-
-
-
-MATERNIDAD_must=[[""]]
-MATERNIDAD_could=[""]
+TYPES = list(TYPE_CONFIG.values())
 
 #Lista de tipos por licencia, con esto + funcion rapida creamos todos los atributos del dataframe automatico
-
-TYPES=[
-    {
-        "NAME": "NACIMIENTO_HIJO",
-        "MUST": NACIMIENTO_must,
-        "COULD": NACIMIENTO_could,
-        "N_MIN": NACIMIENTO_N_MINIMUM
-    },    
-
-]
-
 
 def create_strict_feature(text, must_find, could_find, n_minimum):
     """Se encarga de juzgar si un atributo se cumple o no por: palabras que tienen que aparecer, palabras que podrian
@@ -108,17 +249,6 @@ def create_strict_feature(text, must_find, could_find, n_minimum):
                 return 1
     print("falla por minimo")
     return 0
-
-
-"""Configuración para "nacimiento_hijo" rapida pruebaaa
-NACIMIENTO_must = [["nacimiento"], ["acta"], ["sexo"]]
-NACIMIENTO_could = ["madre", "padre", "hospital"]
-N_MINIMUM = 1
-
-texto = "Certificado de NACIMIENTO: Acta 123, sexo masculino. Madre: María Pérez."
-result = create_strict_feature(texto, NACIMIENTO_must, NACIMIENTO_could, N_MINIMUM)
-print(result)  # Output: 1 (cumple todas las obligatorias y 1 secundarias)
-"""
 
 #Cargar el dataset basicu
 df=pd.read_csv("tipo_licencias_dataset.csv")
@@ -174,28 +304,12 @@ def predict_top_3(text):
 
 
 
-"""
-MATERNIDAD=["parto","gestacion","semana","prenatal","embarazo",
-"medico","hospital","paciente","embarazada","gestacion","control","dr",
-"matricula","prenatal","reposo",]
-#NO PUEDEN FALTAR: parto, gestacion, semana, embarazo, (hospital/centro medico/clinica/salita), (paciente/embarazada),
-#                  (dr/dra), (matricula,mp,mn,me)
+"""Configuración para "nacimiento_hijo" rapida pruebaaa
+NACIMIENTO_must = [["nacimiento"], ["acta"], ["sexo"]]
+NACIMIENTO_could = ["madre", "padre", "hospital"]
+N_MINIMUM = 1
 
-#PUEDEN FALTAR: prenatal, medico, control, prenatal, reposo, licencia
-
-
-
-
-
-
-TRAMITES_PREMATRIMONIALES=[""] #sacar turno, y ese comprobante ¿que info tiene?
-
-
-
-ASISTENCIA_A_FAMILIARES=[""] #FALTAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-
-
-REUNION_GREMIAL=["certificado","asistencia","reunion","gremial",""] #FALTAAAAAAAAAAAAAAAAAAA
-
-
+texto = "Certificado de NACIMIENTO: Acta 123, sexo masculino. Madre: María Pérez."
+result = create_strict_feature(texto, NACIMIENTO_must, NACIMIENTO_could, N_MINIMUM)
+print(result)  # Output: 1 (cumple todas las obligatorias y 1 secundarias)
 """
