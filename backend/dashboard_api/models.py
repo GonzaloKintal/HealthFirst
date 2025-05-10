@@ -170,6 +170,7 @@ class License(models.Model):
     certificate_immediate = models.BooleanField(default=False)
     deleted_at = models.DateTimeField(blank=True, null=True)
     is_deleted = models.BooleanField(default=False)
+    evaluator=models.ForeignKey(HealthFirstUser, on_delete=models.SET_NULL, null=True, blank=True, related_name='evaluator')
 
     def __str__(self):
         return f"Licencia {self.license_id} - {self.user}"

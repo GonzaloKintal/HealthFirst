@@ -516,6 +516,7 @@ def evaluate_license(request, id):
         status_obj.save()
 
         # Actualizar fecha de cierre de la licencia
+        license.evaluator= request.user if request.user else None
         license.closing_date = now().date()
         license.save()
 
