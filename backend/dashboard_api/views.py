@@ -26,8 +26,9 @@ class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
 
 
-@csrf_exempt
-@require_POST
+@api_view(['POST'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
 def register_user(request):
     error_messages = [] 
 
@@ -66,8 +67,9 @@ def register_user(request):
 
     return JsonResponse({'ok': True}, status=201)
 
-@csrf_exempt
-@require_POST
+@api_view(['POST'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
 def users_list(request):
     data = json.loads(request.body)
     role_name = data.get('role', None)
@@ -100,8 +102,9 @@ def users_list(request):
         return JsonResponse({'error': "Ocurrió un error inesperado"}, status=500)
 
 
-@csrf_exempt
-@require_http_methods(["DELETE"])
+@api_view(['DELETE'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
 def delete_user(request,id):
 
     if not id:
@@ -117,8 +120,9 @@ def delete_user(request,id):
     return JsonResponse({'ok': True}, status=200)
 
 
-@csrf_exempt
-@require_http_methods(["PUT"])
+@api_view(['PUT'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
 def update_user(request, id):
     data= json.loads(request.body)
     if not id:
@@ -171,11 +175,9 @@ def update_user(request, id):
         return JsonResponse({'error': 'Ocurrio un error inesperado'}, status=500)
 
 
-@csrf_exempt
-@require_http_methods(["GET"])
-# @api_view(['GET'])
-# @authentication_classes([JWTAuthentication])
-# @permission_classes([IsAuthenticated])
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
 def get_user(request, id):
     if not id:
         response=JsonResponse({'error': 'El id es requerido.'}, status=400)
@@ -193,8 +195,9 @@ def get_user(request, id):
 
     return response
 
-@csrf_exempt
-@require_http_methods(["POST"])
+@api_view(['POST'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
 def get_users_by_filter(request):
     data = json.loads(request.body)
     page_number = data.get('page', 1)
@@ -239,8 +242,9 @@ def get_users_by_filter(request):
 
 
 # LICENSES API
-@csrf_exempt
-@require_http_methods(["POST"])
+@api_view(['POST'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
 def licenses_list(request):
     try:
         data = json.loads(request.body)
@@ -309,8 +313,9 @@ def licenses_list(request):
         return JsonResponse({'error': str(e)}, status=500)
 
 
-@csrf_exempt
-@require_http_methods(["POST"])
+@api_view(['POST'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
 def create_license(request):
     try:
         data = json.loads(request.body)
@@ -385,8 +390,9 @@ def create_license(request):
 
 
 
-@csrf_exempt
-@require_http_methods(["DELETE"])
+@api_view(['DELETE'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
 def delete_license(request, id):
     if not id:
         return JsonResponse({'error': 'El ID es requerido.'}, status=400)
@@ -402,8 +408,9 @@ def delete_license(request, id):
         return JsonResponse({'error': 'La licencia no existe.'}, status=404)
     
 
-@csrf_exempt
-@require_http_methods(["PUT"])
+@api_view(['PUT'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
 def update_license(request, id):
     try:
         data = json.loads(request.body)
@@ -474,8 +481,9 @@ def update_license(request, id):
 
 
  # Aprobación de licencias
-@csrf_exempt
-@require_http_methods(["PUT"])
+@api_view(['PUT'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
 def evaluate_license(request, id):
     try:
         data = json.loads(request.body)
@@ -520,8 +528,9 @@ def evaluate_license(request, id):
 
 
 # Detalle de licencia
-@csrf_exempt
-@require_http_methods(["GET"])
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
 def get_license_detail(request, id):
     try:
         #User = get_user_model()
@@ -583,8 +592,9 @@ def get_license_detail(request, id):
         return JsonResponse({"error": str(e)}, status=500)
 
 
-@csrf_exempt
-@require_http_methods(["GET"])
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
 def get_licenses_types(request):
     try:
         types = LicenseType.objects.filter(is_deleted=False)
