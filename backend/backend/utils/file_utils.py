@@ -3,6 +3,7 @@ import re
 import os
 import pytesseract
 import unicodedata
+import joblib
 
 from PIL import Image
 from pdfminer.high_level import extract_text
@@ -10,6 +11,10 @@ from datetime import datetime
 from io import BytesIO
 from PyPDF2 import PdfReader
 from pdf2image import convert_from_path
+
+
+
+
 
 
 def is_pdf_image(base64_pdf):
@@ -98,6 +103,9 @@ def date_in_range(certificate_text,license):
     certificate_date = datetime(year,month,day).date()
     
     return license.start_date <= certificate_date <= license.end_date
+
+
+
 
 #Ya no sirve, solo para prueba
 def pdf_to_base64_and_save(pdf_path, output_txt_path):
