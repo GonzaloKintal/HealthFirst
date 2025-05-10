@@ -43,7 +43,7 @@ const LicensesPage = () => {
             startDate: license.start_date,
             endDate: license.end_date,
             days: license.days,
-            status: license.status.toLowerCase(),
+            status: license.status,
             requestedOn: license.created_at || '',
           }));
           setLicenses(formattedLicenses);

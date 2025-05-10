@@ -113,3 +113,24 @@ export const updateLicense = async (id, licenseData) => {
     throw error;
   }
 };
+
+// Evaluar una licencia (aprobar/rechazar)
+export const evaluateLicense = async (licenseId, status, comment = '') => {
+  try {
+    const response = await api.put(`/api/licenses/${licenseId}/evaluation`, {
+      license_status: status,
+      evaluation_comment: comment
+    });
+    
+    return {
+      success: true,
+      data: response.data
+    };
+  } catch (error) {
+    console.error('Error evaluating license:', error);
+    return {
+      success: false,
+      error: error.response?.data?.error || 'Error al evaluar la licencia'
+    };
+  }
+};
