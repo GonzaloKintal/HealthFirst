@@ -33,13 +33,7 @@ class LicenseSerializer(serializers.ModelSerializer):
         return (obj.end_date - obj.start_date).days + 1
 
     def get_status(self, obj):
-        # if obj.justified:
-        #     return 'approved'
-        # elif obj.closing_date:
-        #     return 'rejected'
-        # else:
-        #     return 'pending'   
-        return Status.objects.get(license=obj).name
+        return obj.status.name
 
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
