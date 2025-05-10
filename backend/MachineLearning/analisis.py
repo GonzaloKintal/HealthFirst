@@ -40,7 +40,7 @@ def license_analysis(id): #se le pasa el id de la solicitud
         return "Los dias solicitados exceden los dias restantes que le quedan al empleado"
 
     #Limite en pedidos por año
-    if get_res_lim(id) >= licencia.type.yearly_approved_requests :
+    if licencia.type.yearly_approved_requests is not None and get_res_lim(licencia.user,id) >= licencia.type.yearly_approved_requests :
         return "Se han completado el maximo de pedidos por año"
     
     #Dias corridos
@@ -54,10 +54,6 @@ def license_analysis(id): #se le pasa el id de la solicitud
         return "No cumple con el minimo de dias de preaviso para solicitar la licencia"
     
 
-'''  
-def get_total_days(): #para refactorizar las funciones, se le pasa el id del empleado y la vaiable que se quiere solicitar,siempre retorna numeros
-    return 0
-'''
 def total_days_vac(user_id, license_id): # se obtienen el total de dias para las vacaciones
 
     anio_actual = datetime.now().year # obtengo el año actual
@@ -99,12 +95,19 @@ def get_total_days_res(user_id, license_id): # se obtienen el total de dias rest
 
     return dias_totales
 
-def get_res_lim(user_id): # se obtienen los pedidos que ya realizó, retorna 0 si no hay limite
-    return 0
+def get_res_lim(user_id, license_id): # se obtienen los pedidos que ya realizó, retorna 0 si no hay limite
+    licencia = License.objects.get(license_id=license_id)
+    cant_pedidos_aprobados = License.objects.filter(
+            user_id=user_id,
+            type=licencia.type,  # Mismo tipo que la licencia referenciada
+            status__name="approved",  # Asegúrate que coincida con tu modelo Status
+            is_deleted=False
+        ).count()
+    
+    return cant_pedidos_aprobados
 
 def get_max_days_cons(user_id): # se obtienen la cantidad de dias corridos que se tomaron
     return 0
 
 
-#la fecha de la licencia debe ser posterior a la fecha actual
 
