@@ -67,6 +67,7 @@ def pdf_to_base64(pdf_path):
     except Exception as e:
         print(f" Error inesperado: {str(e)}")
 
+#-------------------------------------------------
 
 #vamo a ver si sirve
 def date_in_range(certificate_text,license):
