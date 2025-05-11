@@ -5,7 +5,7 @@ const FileValidator = ({ children, onValidation }) => {
     const [error, setError] = useState(null);
   
     const validateFile = (file) => {
-      setError(null); // Resetear error previo
+      setError(null);
       
       const validTypes = ['application/pdf', 'image/png', 'image/jpeg', 'image/jpg'];
       const maxSize = 10 * 1024 * 1024; // 10MB

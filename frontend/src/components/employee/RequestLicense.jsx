@@ -215,7 +215,6 @@ useEffect(() => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Validaciones previas (sin las de archivo)
     if (!formData.declaration) {
       setNotification({
         type: 'error',
