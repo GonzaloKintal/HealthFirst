@@ -562,7 +562,7 @@ def get_license_detail(request, id):
             "justified": license.justified,
             "information": license.information,
             "evaluator": (license.evaluator.first_name + ' ' + license.evaluator.last_name) if license.evaluator else "",
-            "evaluator_role": license.evaluator.role if license.evaluator else "",
+            "evaluator_role": license.evaluator.role.name if license.evaluator else "",
         }
 
         # Estado actual de la licencia

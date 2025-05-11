@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { FiCheck, FiX, FiEdit, FiTrash2, FiEye, FiUser, FiCalendar, FiFileText, FiArrowLeft } from 'react-icons/fi';
+import { FiCheck, FiX, FiEdit, FiTrash2, FiEye, FiUser, FiCalendar, FiFileText, FiArrowLeft, FiClock } from 'react-icons/fi';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { FormattedDate } from '../../components/utils/FormattedDate';
 import Confirmation from '../../components/utils/Confirmation';
@@ -50,7 +50,10 @@ const LicenseDetail = () => {
             email: response.data.user?.email || '',
             phone: response.data.user?.phone || '',
             dateOfBirth: response.data.user?.date_of_birth || '',
-            rejectionReason: status === 'rejected' ? response.data.status?.evaluation_comment || '' : ''
+            rejectionReason: status === 'rejected' ? response.data.status?.evaluation_comment || '' : '',
+            evaluator: response.data.license?.evaluator || '',
+            evaluatorRole: response.data.license?.evaluator_role || '',
+            evaluationDate: response.data.status?.evaluation_date || ''
           };
           setLicense(licenseData);
         } else {
@@ -65,6 +68,7 @@ const LicenseDetail = () => {
     fetchLicense();
   }, [id]);
 
+
   const handleApprove = async () => {
     try {
       const response = await evaluateLicense(id, 'approved');
@@ -75,8 +79,13 @@ const LicenseDetail = () => {
           type: 'success',
           message: 'Licencia aprobada correctamente'
         });
-        // Actualizar el estado local de la licencia
-        setLicense(prev => ({ ...prev, status: 'approved' }));
+        setLicense(prev => ({ 
+          ...prev, 
+          status: 'approved',
+          evaluator: `${user.first_name} ${user.last_name}`,
+          evaluatorRole: user.role,
+          evaluationDate: new Date().toISOString().split('T')[0]
+        }));
       } else {
         setNotification({
           show: true,
@@ -95,7 +104,7 @@ const LicenseDetail = () => {
       setShowApproveConfirmation(false);
     }
   };
-
+  
   const handleReject = async () => {
     try {
       const response = await evaluateLicense(id, 'rejected', rejectionReason);
@@ -106,11 +115,13 @@ const LicenseDetail = () => {
           type: 'success',
           message: 'Licencia rechazada correctamente'
         });
-        // Actualizar el estado local de la licencia
         setLicense(prev => ({
           ...prev,
           status: 'rejected',
-          rejectionReason: rejectionReason
+          rejectionReason: rejectionReason,
+          evaluator: `${user.first_name} ${user.last_name}`,
+          evaluatorRole: user.role,
+          evaluationDate: new Date().toISOString().split('T')[0]
         }));
         resetRejectionForm();
       } else {
@@ -130,11 +141,6 @@ const LicenseDetail = () => {
     } finally {
       setShowRejectConfirmation(false);
     }
-  };
-
-  const resetRejectionForm = () => {
-    setRejectionReason('');
-    setShowRejectionInput(false);
   };
 
   const handleViewCertificate = () => {
@@ -336,7 +342,9 @@ const LicenseDetail = () => {
                     <FiCheck className="text-green-500 mr-1" />
                   ) : license.status === 'rejected' ? (
                     <FiX className="text-red-500 mr-1" />
-                  ) : null}
+                  ) : (
+                    <FiClock className="text-yellow-600 mr-1" />
+                  )}
                   <span className={`font-medium ${
                     license.status === 'approved' 
                       ? 'text-green-700' 
@@ -346,9 +354,16 @@ const LicenseDetail = () => {
                   }`}>
                     {license.status === 'approved' ? 'Aprobada' : 
                     license.status === 'rejected' ? 'Rechazada' : 'Pendiente'}
+                    {(license.status === 'approved' || license.status === 'rejected') && 
+                    ['admin', 'supervisor'].includes(user?.role) && (
+                      <span className="text-gray-600 text-sm font-normal ml-2">
+                        por el {license.evaluatorRole === 'admin' ? 'administrador' : license.evaluatorRole} {license.evaluator} el {FormattedDate({ dateString: license.evaluationDate }).date}
+                      </span>
+                    )}
                   </span>
                 </div>
               </div>
+
               <div>
                 <p className="text-sm text-gray-500">Fecha de Inicio</p>
                 <p className="font-medium">
