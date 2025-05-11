@@ -266,7 +266,6 @@ useEffect(() => {
     }
     
     try {
-      // Obtener el user_id correcto según el rol
       let userId;
       if (user?.role === 'admin' || user?.role === 'supervisor') {
         userId = formData.selectedEmployee;
@@ -279,25 +278,22 @@ useEffect(() => {
         throw new Error('No se pudo determinar el usuario');
       }
   
-      // Preparar los datos en el formato exacto que espera el backend
-      const certificate = formData.documents 
-        ? {
-            validation: true,
-            file: await readFileAsBase64(formData.documents)
-          }
-        : {
-            validation: false,
-            file: ""
-          };
-  
+      // Preparar los datos para el backend
       const licenseData = {
         user_id: Number(userId),
         type_id: Number(formData.licenseTypeId),
         start_date: formData.startDate,
         end_date: formData.endDate,
-        information: formData.reason,
-        certificate
+        information: formData.reason
       };
+  
+      // Solo agregar certificado si hay documento
+      if (formData.documents) {
+        licenseData.certificate = {
+          validation: false,
+          file: await readFileAsBase64(formData.documents)
+        };
+      }
       
       // Enviar la solicitud
       await requestLicense(licenseData);
