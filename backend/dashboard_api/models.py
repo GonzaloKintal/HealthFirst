@@ -5,6 +5,8 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 from django.utils.timezone import now
+from backend.utils import file_utils
+
 
 user_roles=[
     ('supervisor', 'Supervisor'),
@@ -71,6 +73,7 @@ class HealthFirstUser(AbstractUser):
     department = models.ForeignKey(Department, on_delete=models.CASCADE, null=True, blank=True, related_name='users')
     date_of_birth = models.DateField(null=True, blank=True)
     email = models.EmailField(unique=True)
+    employment_start_date=models.DateField(null=False, blank=False)
     phone=models.CharField(max_length=15,null=False, blank=False)
     dni=models.IntegerField(null=False, blank=False)
     is_deleted=models.BooleanField(default=False)
@@ -124,6 +127,19 @@ class HealthFirstUser(AbstractUser):
     def get_user(cls, id):
         user = cls.objects.get(id=id, is_deleted=False)
         return user
+    
+class Type_License(models.Model):
+    type_license_id=models.AutoField(primary_key=True)
+    name=models.CharField(max_length=15,null=False, blank=False)
+    description=models.CharField(max_length=50,null=False, blank=False)
+    min_advance_notice_days=models.IntegerField(null=False, blank=False)
+    certificate_require= models.BooleanField(default=True)
+    tolerance_days_certificate_submission=models.IntegerField(null=True, blank=True)
+    total_days_granted=models.IntegerField(null=True, blank=True)
+    max_consecutive_days=models.IntegerField(null=True, blank=True)
+    yearly_approved_requests=models.IntegerField(null=True, blank=True)
+    is_deleted = models.BooleanField(default=False)
+    deleted_at = models.DateTimeField(blank=True, null=True)
 
 
 class LicenseType(models.Model):
@@ -154,6 +170,7 @@ class License(models.Model):
     certificate_immediate = models.BooleanField(default=False)
     deleted_at = models.DateTimeField(blank=True, null=True)
     is_deleted = models.BooleanField(default=False)
+    evaluator=models.ForeignKey(HealthFirstUser, on_delete=models.SET_NULL, null=True, blank=True, related_name='evaluator')
 
     def __str__(self):
         return f"Licencia {self.license_id} - {self.user}"
@@ -192,3 +209,12 @@ class Certificate(models.Model):
 
     def __str__(self):
         return f"Certificado {self.certificate_id} - Licencia {self.license.license_id}"
+    
+    def check_CertificateOwnership_And_Date(self):
+        if self.file is not None and self.file.strip() != "": #si no esta vacio o es un text de espacios blancos
+            certificate_text=file_utils.base64_to_text(self.file,es_imagen=file_utils.es_pdf_imagen(self.file)) #me traigo el certificado  en texto
+            keys=[self.license.user.first_name,self.license.user.last_name,str(self.license.user.dni)] #ojo con dni con punto, se queda con las palabras claves para ownership
+            return file_utils.search_in_pdf_text(keys,certificate_text) and file_utils.date_in_range(certificate_text,self.license) #si encontró las palabras claves y una fecha que en el certificado que entra en rango
+        return False
+
+

@@ -6,6 +6,7 @@ import Confirmation from '../../components/utils/Confirmation';
 import { getLicenseDetail } from '../../services/licenseService';
 import useAuth from '../../hooks/useAuth';
 import Notification from '../../components/utils/Notification';
+import { evaluateLicense } from '../../services/licenseService';
 
 const LicenseDetail = () => {
   const { id } = useParams();
@@ -65,22 +66,70 @@ const LicenseDetail = () => {
   }, [id]);
 
   const handleApprove = async () => {
-    console.log('Aprobar licencia');
-    setShowApproveConfirmation(false);
-  };
-
-  const handleReject = async () => {
-    if (!rejectionReason.trim()) {
+    try {
+      const response = await evaluateLicense(id, 'approved');
+      
+      if (response.success) {
+        setNotification({
+          show: true,
+          type: 'success',
+          message: 'Licencia aprobada correctamente'
+        });
+        // Actualizar el estado local de la licencia
+        setLicense(prev => ({ ...prev, status: 'approved' }));
+      } else {
+        setNotification({
+          show: true,
+          type: 'error',
+          message: response.error || 'Error al aprobar la licencia'
+        });
+      }
+    } catch (error) {
+      console.error('Error approving license:', error);
       setNotification({
         show: true,
         type: 'error',
-        message: 'Por favor ingrese un motivo de rechazo'
+        message: 'Error al aprobar la licencia'
       });
-      return;
+    } finally {
+      setShowApproveConfirmation(false);
     }
-    
-    console.log('Rechazar licencia');
-    setShowRejectConfirmation(false);
+  };
+
+  const handleReject = async () => {
+    try {
+      const response = await evaluateLicense(id, 'rejected', rejectionReason);
+      
+      if (response.success) {
+        setNotification({
+          show: true,
+          type: 'success',
+          message: 'Licencia rechazada correctamente'
+        });
+        // Actualizar el estado local de la licencia
+        setLicense(prev => ({
+          ...prev,
+          status: 'rejected',
+          rejectionReason: rejectionReason
+        }));
+        resetRejectionForm();
+      } else {
+        setNotification({
+          show: true,
+          type: 'error',
+          message: response.error || 'Error al rechazar la licencia'
+        });
+      }
+    } catch (error) {
+      console.error('Error rejecting license:', error);
+      setNotification({
+        show: true,
+        type: 'error',
+        message: 'Error al rechazar la licencia'
+      });
+    } finally {
+      setShowRejectConfirmation(false);
+    }
   };
 
   const resetRejectionForm = () => {
@@ -187,30 +236,42 @@ const LicenseDetail = () => {
               </div>
 
               {showRejectionInput && (
-                <div className="space-y-2">
-                  <textarea
-                    value={rejectionReason}
-                    onChange={(e) => setRejectionReason(e.target.value)}
-                    placeholder="Ingrese el motivo del rechazo..."
-                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 resize-none"
-                    rows={3}
-                  />
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={() => setShowRejectConfirmation(true)}
-                      className="px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 text-sm cursor-pointer"
-                    >
-                      Confirmar Rechazo
-                    </button>
-                    <button
-                      onClick={resetRejectionForm}
-                      className="px-3 py-1 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 text-sm cursor-pointer"
-                    >
-                      Cancelar
-                    </button>
-                  </div>
+              <div className="space-y-2">
+                <textarea
+                  value={rejectionReason}
+                  onChange={(e) => setRejectionReason(e.target.value)}
+                  placeholder="Ingrese el motivo del rechazo..."
+                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 resize-none"
+                  rows={3}
+                  required
+                />
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => {
+                      if (!rejectionReason.trim()) {
+                        setNotification({
+                          show: true,
+                          type: 'error',
+                          message: 'Por favor ingrese un motivo de rechazo'
+                        });
+                        return;
+                      }
+                      setShowRejectConfirmation(true);
+                    }}
+                    className="px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 text-sm cursor-pointer"
+                  >
+                    Confirmar Rechazo
+                  </button>
+                  <button
+                    onClick={resetRejectionForm}
+                    className="px-3 py-1 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 text-sm cursor-pointer"
+                  >
+                    Cancelar
+                  </button>
                 </div>
-              )}
+              </div>
+            )}
+
             </div>
           )}
           
