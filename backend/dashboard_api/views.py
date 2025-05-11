@@ -561,6 +561,8 @@ def get_license_detail(request, id):
             "required_days": (license.end_date - license.start_date).days + 1,
             "justified": license.justified,
             "information": license.information,
+            "evaluator": (license.evaluator.first_name + ' ' + license.evaluator.last_name) if license.evaluator else "",
+            "evaluator_role": license.evaluator.role if license.evaluator else "",
         }
 
         # Estado actual de la licencia
