@@ -22,6 +22,10 @@ from rest_framework.decorators import api_view, authentication_classes, permissi
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
+from backend.utils.predictions import predict_license_type;
+from backend.utils.file_utils import *
+
+
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
 
@@ -601,6 +605,31 @@ def get_licenses_types(request):
         types = LicenseType.objects.filter(is_deleted=False)
         types_data = LicenseTypeSerializer(types, many=True).data
         return JsonResponse({"types": types_data}, status=200)
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+
+@api_view(['POST'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def upload_base64_file(request):
+    try:
+        body_unicode = request.body.decode('utf-8')
+        body = json.loads(body_unicode)
+        base64_string = body.get("file_base64")
+
+        if not base64_string:
+            return JsonResponse({"error": "El campo 'file_base64' es obligatorio"}, status=400)
+
+        result = predict_license_type(base64_string)
+        parsed_result = {item[0]: item[1] for item in result}
+
+
+        if "error" in result:
+            return JsonResponse(parsed_result, status=500)
+
+        return JsonResponse(parsed_result, status=200)
 
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
