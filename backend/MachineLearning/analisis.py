@@ -9,7 +9,7 @@ django.setup()
 from dashboard_api.models import License, HealthFirstUser
 
 
-class LicenseValidationError(Exception):
+class LicenseValidationError(Exception): # para las excepiones
     pass
 
 
@@ -17,7 +17,7 @@ def license_analysis(id): #se le pasa el id de la solicitud
     licencia = License.objects.get(license_id=id)
 
     if licencia.type.name== "Vacaciones":
-        total_days_vac(licencia.user.id,id) #actualizo la cantidad de dias que tiene por vacaciones
+        calculate_total_vacation_days(licencia.user.id,id) #actualizo la cantidad de dias que tiene por vacaciones
     
     fecha_actual = date.today()
     fecha_inicio = licencia.start_date
@@ -44,7 +44,7 @@ def license_analysis(id): #se le pasa el id de la solicitud
         raise LicenseValidationError ("No cumple con el minimo de dias de preaviso para solicitar la licencia")
     
 
-def total_days_vac(user_id, license_id): # se obtienen el total de dias para las vacaciones
+def calculate_total_vacation_days(user_id, license_id): # se obtienen el total de dias para las vacaciones
 
     anio_actual = datetime.now().year # obtengo el año actual
     fecha_ultima = date(anio_actual, 12, 31) #se usa para calcular la antiguedad
@@ -52,7 +52,7 @@ def total_days_vac(user_id, license_id): # se obtienen el total de dias para las
     usuario = HealthFirstUser.objects.get(id=user_id)
 
     if usuario.employment_start_date is None:
-        return "El usuario no tiene una fecha de ingreso registrada"
+         raise LicenseValidationError("El usuario no tiene una fecha de ingreso registrada")
 
     antiguedad_dias = fecha_ultima - usuario.employment_start_date
     antiguedad_anios = antiguedad_dias.days // 365  # obtengo la antiguedad del empleado
@@ -80,9 +80,9 @@ def get_total_days_res(user_id, license_id): # se obtienen el total de dias rest
     dias_utilizados = License.objects.filter(
         user=licencia.user,
         type=licencia.type,
-        status__name="approved",  # Asumiendo que usas el modelo Status
+        status__name="approved",
         is_deleted=False
-    ).aggregate(total=Sum('required_days'))['total'] or 0  # Si no hay registros, devuelve 0
+    ).aggregate(total=Sum('required_days'))['total'] or 0  # si no hay registros, devuelve 0
 
     dias_totales = licencia.type.total_days_granted - dias_utilizados
 
@@ -92,8 +92,8 @@ def get_res_lim(user_id, license_id): # se obtienen los pedidos que ya realizó,
     licencia = License.objects.get(license_id=license_id)
     cant_pedidos_aprobados = License.objects.filter(
             user_id=user_id,
-            type=licencia.type,  # Mismo tipo que la licencia referenciada
-            status__name="approved",  # Asegúrate que coincida con tu modelo Status
+            type=licencia.type,
+            status__name="approved",
             is_deleted=False
         ).count()
     
