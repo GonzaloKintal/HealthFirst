@@ -38,10 +38,10 @@ class LicenseSerializer(serializers.ModelSerializer):
         return obj.status.name
     
     def get_evaluator(self, obj):
-        return obj.evaluator.first_name + ' ' + obj.evaluator.last_name
+        return (obj.evaluator.first_name + ' ' + obj.evaluator.last_name) if obj.evaluator else ""
     
     def get_evaluator_role(self, obj):
-        return obj.evaluator.role.name
+        return obj.evaluator.role.name if obj.evaluator else ""
 
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
