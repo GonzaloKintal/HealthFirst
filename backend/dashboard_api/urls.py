@@ -22,5 +22,6 @@ urlpatterns = [
     path('licenses/<int:id>/evaluation', evaluate_license, name='evaluate-license'),
 
     path('get_licenses_types', get_licenses_types, name='get_licenses_types'),
-     
+
+    path('licenses/certificate/coherence', upload_base64_file,name='upload_base64_file'),     
 ]
