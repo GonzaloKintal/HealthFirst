@@ -1,7 +1,7 @@
 import pandas as pd
 import re
 import joblib
-from backend.utils import file_utils as f_u
+import file_utils as f_u
 
 import os
 
@@ -117,15 +117,16 @@ TYPE_CONFIG = {
     "ESTUDIOS": {
         "NAME": "ESTUDIOS",
         "MUST": [
-            ["alumno", "alumna", "alumno/a", "estudiante"],
             ["facultad", "universidad", "instituto"],
-            ["examen", "final", "evaluacion"],
+            ["examen", "final", "evaluacion","rendimiento"],
             ["asignatura", "materia", "actividad"],
             ["carrera", "propuesta"],
-            ["docente", "profesor", "profesora"]
         ],
-        "COULD": ["regional", "modalidad", "ubicacion", "sede", "turno", "rendir", "realizar"],
-        "N_MIN": 1
+        "COULD": ["regional", "modalidad", "ubicacion", "sede",
+                  "turno", "rendir", "realizar","hora","alumno",
+                  "alumna", "alumno/a", "estudiante",
+],
+        "N_MIN": 0
     },
     "MATERNIDAD": {
         "NAME": "MATERNIDAD",
@@ -161,7 +162,7 @@ TYPE_CONFIG = {
         "N_MIN": 1
     },
     "NACIMIENTO": {
-        "NAME": "NACIMIENTO_HIJO",
+        "NAME": "NACIMIENTO",
         "MUST": [
             ["nacimiento"],
             ["lugar", "domicilio"],
@@ -263,62 +264,62 @@ TYPE_CONFIG = {
     }
 }
 
-TYPES = list(TYPE_CONFIG.values())
+def pruebaRapida(): #borrar despues
+    return TYPE_CONFIG
 
 def predict_license_type(base64_text):
     "Toma un pdf en formato base64 y predice a que 3 tipos de licencia puede pertenecer"
-    model=joblib.load("prediction_type_model.pkl") #cargamos el modelo
+    model=joblib.load("prediction_type_model.pkl") #why? si no lo uso
     license_text=f_u.normalize_text(f_u.base64_to_text(base64_text,f_u.is_pdf_image(base64_text))) #Tenemos el texto del certificado normalizado
     return predict_top_3(license_text, model) #Lista de tupla como "("enfermedad",85%)"
 
-#Lista de tipos por licencia, con esto + funcion rapida creamos todos los atributos del dataframe automatico
+#a_predecir="HealthFirst/backend/backend/utils/pdf_imagen.pdf"
+#print(predict_license_type(f_u.pdf_to_base64(a_predecir)))
 
-def create_strict_feature(text, must_find, could_find, n_minimum):
-    """Se encarga de juzgar si un atributo se cumple o no por: palabras que tienen que aparecer, palabras que podrian
-    aparecer(y el minimo de estas)"""
-
-    normalized_text =f_u.normalize_text(text) 
-
-    for word_group in must_find: #Chequeamos palabras claves
-        pattern = r'\b(?:' + '|'.join([re.escape(w) for w in word_group]) + r')(?:[.:]\S*|\s+)?\b' #Buscamos cualquier palabra del grupo sinonimo
+def create_strict_feature(normalized_text, must_find, could_find, n_minimum):
+    """Recorre cada grupo de palabras claves y finalmente avisa si se encontraron en el texto normalizado de entrada """
+    for word_group in must_find:
+        pattern = r'(?<!\w)(?:' + '|'.join([re.escape(w) for w in word_group]) + r')(?:[.:-]\S*|\s+)?'
         if not re.search(pattern, normalized_text):
-            return 0  #No encontró una palabra clave, se descarta
-        
-    count = 0 #Vemos cuantas palabras secundarias se encontraron para ver si llegamos al minimo (aca no trabajamos sinonimos).Si no llegamos, se descarta
+            return 0
+    count = 0
     for word in could_find:
-        pattern = r'\b' + re.escape(word) + r'(?:[.:]\S*|\s+)?\b'
+        pattern = r'(?<!\w)' + re.escape(word) + r'(?!\w)'
         if re.search(pattern, normalized_text):
-            count += 1 
+            count += 1
             if count >= n_minimum:
                 return 1
-    
     return 0
+
+must_estudios = TYPE_CONFIG["ESTUDIOS"]["MUST"]
+could_estudios = TYPE_CONFIG["ESTUDIOS"]["COULD"]
+texto=f_u.normalize_text("Universidad Nacional de Córdoba - Facultad de Ciencias Económicas CERTIFICADO DE RENDIMIENTO Alumno: Lucía M. Fernández DNI 34.123.876 Carrera: Contador Público Materia: Impuestos II (Código: CP-410) Fecha: 10/07/2024 Nota: 8 (ocho) Tipo: Recuperatorio Sello UNC: 2024-ECON-345 Justificación: 2 días hábiles por examen Firma: Dr. Pablo Herrera")
+print(create_strict_feature(texto,must_estudios,could_estudios,1))
 
 #Cargar el dataset basico
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
-csv_path = os.path.join(CURRENT_DIR, "dataset_coherence_license_type.csv")
+csv_path = os.path.join(CURRENT_DIR, "coherence_license_type_dataset.csv")
 df = pd.read_csv(csv_path)
 
 #Generanding los atributos del dataframe
 
-for type in TYPES:
-    df[f"justify_{type['NAME']}"] = df["text_license"].apply(
+for type_name, type_data in TYPE_CONFIG.items():
+    df[f"justify_{type_name}"] = df["text_license"].apply(
         lambda x: create_strict_feature(
-            x,
-            type["MUST"],
-            type["COULD"],
-            type["N_MIN"]
+            f_u.normalize_text(x),
+            type_data["MUST"],
+            type_data["COULD"],
+            type_data["N_MIN"]
         )
     )
 
-
+  
 # Para verificar los primeros textos
 #print(df.filter(like="justify_").head())
 
 #Entrenar el modelo
 X=df.filter(like="justify_")
 y=df["real_license_type"]
-#print(df["real_license_type"].value_counts())
 #Divido el dataset para poder ver la exactitud de la prediccion
 X_train, X_test, y_train, y_test=train_test_split(
     X,y,

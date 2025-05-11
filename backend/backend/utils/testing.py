@@ -33,9 +33,9 @@ print(f"{extraction_text4}\n")"""
 
 #3. PRUEBA: normalizar texto del certificado : FUNCIONA 
 text1=f_u.normalize_text(extraction_text1)
-text2=f_u.normalize_text(extraction_text2)
-text3=f_u.normalize_text(extraction_text3)
-text4=f_u.normalize_text(extraction_text4)
+#text2=f_u.normalize_text(extraction_text2)
+#text3=f_u.normalize_text(extraction_text3)
+#text4=f_u.normalize_text(extraction_text4)
 """
 print(f"{text1}\n")
 print("-----------------------------------------------------")
@@ -43,5 +43,5 @@ print(f"{text2}\n")
 print("-----------------------------------------------------")
 print(f"{text3}\n")
 print("-----------------------------------------------------")
-print(f"{text4}\n")"""
-
+print(f"{text4}\n")
+"""
