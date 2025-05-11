@@ -189,6 +189,11 @@ const LicenseDetail = () => {
     }
   };
 
+  const resetRejectionForm = () => {
+    setRejectionReason('');
+    setShowRejectionInput(false);
+  };
+
   if (error) {
     return (
       <div className="p-6">
@@ -338,13 +343,13 @@ const LicenseDetail = () => {
               <div>
                 <p className="text-sm text-gray-500">Estado</p>
                 <div className="flex items-center">
-                  {license.status === 'approved' ? (
+                  {/* {license.status === 'approved' ? (
                     <FiCheck className="text-green-500 mr-1" />
                   ) : license.status === 'rejected' ? (
                     <FiX className="text-red-500 mr-1" />
                   ) : (
                     <FiClock className="text-yellow-600 mr-1" />
-                  )}
+                  )} */}
                   <span className={`font-medium ${
                     license.status === 'approved' 
                       ? 'text-green-700' 
