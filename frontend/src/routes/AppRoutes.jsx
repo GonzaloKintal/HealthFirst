@@ -17,6 +17,7 @@ import EditLicense from '../components/employee/EditLicense';
 import AddUser from '../components/admin/AddUser';
 import EditUser from '../components/admin/EditUser';
 import MyDataPage from '../pages/employee/MyDataPage';
+import LicenseDetail from '../components/supervisor/LicenseDetail';
 
 const AppRoutes = () => {
   return (
@@ -96,6 +97,15 @@ const AppRoutes = () => {
           element={
             <ProtectedRoute allowedRoles={['supervisor', 'admin', 'analyst', 'employee']}>
               <LicensesPage />
+            </ProtectedRoute>
+          } 
+        />
+
+        <Route 
+          path="/license-detail/:id" 
+          element={
+            <ProtectedRoute allowedRoles={['supervisor', 'admin', 'analyst', 'employee']}>
+              <LicenseDetail />
             </ProtectedRoute>
           } 
         />

@@ -88,7 +88,7 @@ const Header = ({ toggleDrawer }) => {
               </div>
               <div className="hidden md:flex flex-col items-start">
                 <span className="text-sm font-medium text-gray-800">
-                  {user?.first_name || user?.username || 'Usuario'}
+                  {user?.first_name || 'Usuario'}
                 </span>
                 <span className="text-xs text-gray-500 capitalize">
                   {translateRole(user?.role)}
@@ -102,7 +102,7 @@ const Header = ({ toggleDrawer }) => {
               <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
                 <div className="px-4 py-2 text-sm text-gray-700 border-b border-gray-100">
                   <p className="font-medium">
-                    {user?.first_name || user?.username || 'Usuario'}
+                    {user?.first_name || 'Usuario'}
                   </p>
                   <p className="text-xs text-gray-500 capitalize">
                     {translateRole(user?.role)}
