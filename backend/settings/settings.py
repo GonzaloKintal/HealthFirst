@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-$ahyu_#9ahc$wftk66w=w$f$scqo@0@)gwot(*n#(c+kk2&ly)
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
 DATABASES = {
 
@@ -135,15 +135,19 @@ CORS_ALLOWED_ORIGINS = [
      "http://localhost:3000",
     "http://localhost:5173",
 ]
+CORS_ALLOW_CREDENTIALS = True
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
     )
 }
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=10),
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
     'ALGORITHM': 'HS256',
     'SIGNING_KEY': SECRET_KEY, 

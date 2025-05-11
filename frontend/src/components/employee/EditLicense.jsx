@@ -216,8 +216,6 @@ useEffect(() => {
         certificate
       };
 
-      console.log('Datos de la licencia a actualizar:', licenseData);
-
       // Enviar la actualización
       const response = await updateLicense(id, licenseData);
       
