@@ -296,7 +296,7 @@ could_estudios = TYPE_CONFIG["ESTUDIOS"]["COULD"]
 
 texto=f_u.normalize_text("Instituto Superior de Técnicas Bancarias (ISTB) CERTIFICADO DE EXAMEN ESPECIAL Nombre: Diego A. Ríos DNI 32.456.321 Carrera: Tec. en Finanzas Materia: Análisis de Riesgo Crediticio Fecha: 28/08/2024 Horario: 09:00 a 12:00 hs Calificación: 9 (nueve) Validez: Para presentación ante empleadores según Convenio 543/2024 Firma: Lic. Silvana Castro (Reg. ISTB-2024)")
 
-(create_strict_feature(texto,must_estudios,could_estudios,1))
+print(create_strict_feature(texto,must_estudios,could_estudios,0))
 
 #a_buscar=["instituto","examen","materia:","carrera:"]
 #print(f"a ver si encontramos:{f_u.search_in_pdf_text(texto,a_buscar)}")
@@ -308,37 +308,37 @@ df = pd.read_csv(csv_path)
 
 #Generanding los atributos del dataframe
 
-for type_name, type_data in TYPE_CONFIG.items():
-    df[f"justify_{type_name}"] = df["text_license"].apply(
-        lambda x: create_strict_feature(
-            f_u.normalize_text(x),
-            type_data["MUST"],
-            type_data["COULD"],
-            type_data["N_MIN"]
-        )
-    )
+# for type_name, type_data in TYPE_CONFIG.items():
+#     df[f"justify_{type_name}"] = df["text_license"].apply(
+#         lambda x: create_strict_feature(
+#             f_u.normalize_text(x),
+#             type_data["MUST"],
+#             type_data["COULD"],
+#             type_data["N_MIN"]
+#         )
+#     )
 
   
-# Para verificar los primeros textos
-#print(df.filter(like="justify_").head())
+# # Para verificar los primeros textos
+# #print(df.filter(like="justify_").head())
 
-#Entrenar el modelo
-X=df.filter(like="justify_")
-y=df["real_license_type"]
-#Divido el dataset para poder ver la exactitud de la prediccion
-X_train, X_test, y_train, y_test=train_test_split(
-    X,y,
-    test_size=0.2,
-    random_state=42,
-    shuffle=True, #Mezcla datos antes de dividir
-    stratify=y #Para mantener proporcion de clases
-)
-#print("Distribución en y_train:\n", y_train.value_counts())
-#print("Distribución en y_test:\n", y_test.value_counts())
+# #Entrenar el modelo
+# X=df.filter(like="justify_")
+# y=df["real_license_type"]
+# #Divido el dataset para poder ver la exactitud de la prediccion
+# X_train, X_test, y_train, y_test=train_test_split(
+#     X,y,
+#     test_size=0.2,
+#     random_state=42,
+#     shuffle=True, #Mezcla datos antes de dividir
+#     stratify=y #Para mantener proporcion de clases
+# )
+# #print("Distribución en y_train:\n", y_train.value_counts())
+# #print("Distribución en y_test:\n", y_test.value_counts())
 
-model = LogisticRegression(solver="lbfgs", C=0.1, max_iter=1000)
-model.fit(X_train,y_train)
-joblib.dump(model,"prediction_type_model.pkl")
+# model = LogisticRegression(solver="lbfgs", C=0.1, max_iter=1000)
+# model.fit(X_train,y_train)
+# joblib.dump(model,"prediction_type_model.pkl")
 
 def predict_top_3(certificate_text,model):
     """Toma el texto del certificado y el modelo de ml para predecir a que 3 tipos podria pertenecer el certificado"""
@@ -365,7 +365,7 @@ def predict_top_3(certificate_text,model):
 #Ver la precision del modelo
 
 #Predecir etiquetas para el test
-y_pred=model.predict(X_test)
+# y_pred=model.predict(X_test)
 #Mostramos el reporte de clasificacion
 #print(classification_report(y_test,y_pred))
 #Matriz de confusion para ver que clases se confunden
