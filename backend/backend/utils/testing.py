@@ -9,6 +9,7 @@ os.chdir("HealthFirst/backend/backend/utils")
 base64_1=f_u.pdf_to_base64("certificado_medico.pdf")
 base64_2=f_u.pdf_to_base64("pdf_imagen_lq.pdf")
 base64_3=f_u.pdf_to_base64("pdf_imagen.pdf")
+
 base64_4=f_u.pdf_to_base64("pdf_texto.pdf")
 """
 print(f"Este PDF ES imagen. Se analizó y se concluyó: {f_u.is_pdf_image(base64_1)}\n")

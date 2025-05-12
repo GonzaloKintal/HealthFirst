@@ -267,9 +267,6 @@ TYPE_CONFIG = {
     }
 }
 
-def pruebaRapida():
-    return TYPE_CONFIG;
-
 def create_strict_feature(normalized_text, must_find, could_find, must_weight, could_weight):
     """Recorre cada grupo de palabras clave y evalúa si se encuentran en el texto normalizado de entrada.
     Calcula un puntaje basado en las palabras encontradas y sus respectivos pesos, devolviendo un porcentaje."""
@@ -299,84 +296,77 @@ def create_strict_feature(normalized_text, must_find, could_find, must_weight, c
     
     return percentage
 
-must_estudios = TYPE_CONFIG["ESTUDIOS"]["MUST"]
-could_estudios = TYPE_CONFIG["ESTUDIOS"]["COULD"]
-texto=f_u.normalize_text("Constancia de Examen Final: Apellido y Nombre: JIMENEZ FERRER CARLOS ALBERTO Identificacion: DNI 95879762 por la presente se certifica que la persona cuyos datos se citan anteriormente se presento a rendir el siguiente examen: Propuesta (R) Ingenieria Electronica Actividad: Ingenieria y Sociedad Fecha de examen: 12/01/2021 Ubicacion: campus. Se extiende  la presente constancia a pedido del interesado para ser presentada ante JEFE DE DEPARTAMENTO en CABA- Ciudad Autonoma de Buenos Aires., Ciudad Autonoma de Buenos Aires a los 14 dias del mes de enero de 2021. ")
-print(create_strict_feature(texto,must_estudios,could_estudios,3,1))
+must=TYPE_CONFIG["DONACION_SANGRE"]["MUST"]
+could=TYPE_CONFIG["DONACION_SANGRE"]["COULD"]
+texto=f_u.normalize_text("Hospital de Hemoterapia Buenos Aires Fecha: 15 de octubre de 2024 Certifico que el Sr. Luis Fernández, DNI 20.345.678, realizó una donación voluntaria de sangre en nuestra institución el día 14 de octubre de 2024. Según el artículo 82° del Convenio Colectivo de Trabajo de Comercio, el Sr. Fernández tiene derecho a un día de licencia laboral por esta donación. Firma: Dra. Verónica Pérez Matrícula: 7896543 Sello del Hospital: Hospital de Hemoterapia Buenos Aires - Tel. 4551-2345")
+#print(create_strict_feature(texto,must,could,2,1))
 
-#Cargar el dataset basico
-CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
-csv_path = os.path.join(CURRENT_DIR, "coherence_license_type_dataset.csv")
-df = pd.read_csv(csv_path)
+def generate_coherence_model(cvs_path, TYPES):
+    """Genera el modelo de coherencia tomando el dataset.csv y el diccionario de los tipos de licencia"""
+    # Cargar el dataset básico a un dataframe
+    df = pd.read_csv(cvs_path, encoding="utf-8")
+    df['text_license'] = df['text_license'].apply(f_u.normalize_text)
 
-#Generanding los atributos del dataframe
-
-# for type_name, type_data in TYPE_CONFIG.items():
-#     df[f"justify_{type_name}"] = df["text_license"].apply(
-#         lambda x: create_strict_feature(
-#             f_u.normalize_text(x),
-#             type_data["MUST"],
-#             type_data["COULD"],
-#             type_data["N_MIN"]
-#         )
-#     )
-
-  
-# # Para verificar los primeros textos
-# #print(df.filter(like="justify_").head())
-
-# #Entrenar el modelo
-# X=df.filter(like="justify_")
-# y=df["real_license_type"]
-# #Divido el dataset para poder ver la exactitud de la prediccion
-# X_train, X_test, y_train, y_test=train_test_split(
-#     X,y,
-#     test_size=0.2,
-#     random_state=42,
-#     shuffle=True, #Mezcla datos antes de dividir
-#     stratify=y #Para mantener proporcion de clases
-# )
-# #print("Distribución en y_train:\n", y_train.value_counts())
-# #print("Distribución en y_test:\n", y_test.value_counts())
-
-# model = LogisticRegression(solver="lbfgs", C=0.1, max_iter=1000)
-# model.fit(X_train,y_train)
-# joblib.dump(model,"prediction_type_model.pkl")
-
-def predict_top_3(certificate_text,model):
-    """Toma el texto del certificado y el modelo de ml para predecir a que 3 tipos podria pertenecer el certificado"""
-    features={}
-    for type in TYPES:
-        features[f"justify_{type['NAME']}"] = create_strict_feature(
-            certificate_text,
-            type["MUST"],
-            type["COULD"],
-            type["N_MIN"]
+    # Generar los atributos del modelo según el diccionario
+    for type_name, type_data in TYPES.items():
+        df[f"justify_{type_name}"] = df["text_license"].apply(
+            lambda x: create_strict_feature(
+                x,
+                type_data["MUST"],
+                type_data["COULD"],
+                2,
+                1
+            )
         )
+        
     
-    # Convertir a DataFrame (una fila)
-    input_df = pd.DataFrame([features])
+    # 1. Definir features (X) y target (y)
+    X = df.filter(like="justify_")  # Columnas justify_*
+    y = df["real_license_type"]      # Etiquetas reales
+
+    # 2. Dividir en train y test (80% entrenamiento, 20% evaluación)    
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, random_state=42, stratify=y
+    )
+
+    # 3. Entrenar el modelo
+    model = LogisticRegression( solver="lbfgs", max_iter=1000)
+    model.fit(X_train, y_train)
+    joblib.dump(model, "license_type_model.joblib")
+
+    # 4. Evaluar el modelo con el conjunto de TEST
+ #   y_pred = model.predict(X_test)
+
+    # Reporte de clasificación (¡ESTE ES EL JUICIO AL MODELO!) 
+#    print("Viene el reporte:") 
+#    print(classification_report(y_test, y_pred))
+
+    return  df 
+generate_coherence_model("C:/Users/Usuario/Documents/GitHub/Tp_Principal_Labo/HealthFirst/backend/backend/utils/coherence_license_type_dataset.csv",TYPE_CONFIG)
+
+#df= generate_coherence_model("HealthFirst/backend/backend/utils/coherence_license_type_dataset.csv",TYPE_CONFIG)
+def predict_top_3(certificate_text):
+    """Devuelve los 3 tipos de licencia con mayor porcentaje de coincidencia."""
+    # 1. Normalizar texto
+    normalized_text = f_u.normalize_text(certificate_text)
     
-    # Predecir probabilidades
-    probas = model.predict_proba(input_df)[0]
-    clases = model.classes_
-
-    # Top-3
-    top_3 = sorted(zip(clases, probas), key=lambda x: -x[1])[:3]
-    return [(clase, f"{prob * 100:.0f} %") for clase, prob in top_3] 
-
-#Ver la precision del modelo
-
-#Predecir etiquetas para el test
-# y_pred=model.predict(X_test)
-#Mostramos el reporte de clasificacion
-#print(classification_report(y_test,y_pred))
-#Matriz de confusion para ver que clases se confunden
-#print(confusion_matrix(y_test, y_pred, labels=model.classes_))
-
-
-def predict_license_type(base64_text):
-    "Toma un pdf en formato base64 y predice a que 3 tipos de licencia puede pertenecer"
-    model=joblib.load("prediction_type_model.pkl") #why? si no lo uso
-    license_text=f_u.normalize_text(f_u.base64_to_text(base64_text,f_u.is_pdf_image(base64_text))) #Tenemos el texto del certificado normalizado
-    return predict_top_3(license_text, model) #Lista de tupla como "("enfermedad",85%)"
+    # 2. Calcular puntajes para cada tipo
+    scores = []
+    for type_name, type_data in TYPE_CONFIG.items():
+        percentage = create_strict_feature(
+            normalized_text,
+            type_data["MUST"],
+            type_data["COULD"],
+            2,  # must_weight
+            1   # could_weight
+        )
+        scores.append((type_name, percentage))
+    
+    # 3. Ordenar de mayor a menor y tomar top 3
+    scores.sort(key=lambda x: -x[1])
+    top_3 = scores[:3]
+    
+    # 4. Formatear resultado (ej: [("ENFERMEDAD", "85%"), ...])
+    return [(tipo, f"{pct}%") for tipo, pct in top_3]
+    
+print(predict_top_3("Instituto Superior de Gastronomía Gato Dumas CERTIFICADO DE EXAMEN PRÁCTICO Nombre: Sofía R. Vega DNI 39.876.543 Carrera: Tec. en Cocina Profesional Materia: Pastelería Avanzada Fecha: 25/11/2024 Hora: 14:00 hs Duración: 5 horas Calificación: 8 (ocho) Validez laboral: Según Ley 26.206 Art. 12 Firma: Chef Martín B. Ríos (Reg. ISGD-4567"))

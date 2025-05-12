@@ -12,11 +12,11 @@ from sklearn.metrics import classification_report, confusion_matrix
 
 def generate_coherence_model(cvs_path, TYPES):
     """Genera el modelo de coherencia tomando el dataset.csv y el diccionario de los tipos de licencia"""
-    # Cargar el dataset basico a un dataframe
+    # Cargar el dataset básico a un dataframe
     df = pd.read_csv(cvs_path, encoding="utf-8")
     df['text_license'] = df['text_license'].apply(f_u.normalize_text)
 
-    # Generar los atributos del modelo segun el diccionario
+    # Generar los atributos del modelo según el diccionario
     for type_name, type_data in TYPES.items():
         df[f"justify_{type_name}"] = df["text_license"].apply(
             lambda x: pr.create_strict_feature(
@@ -26,37 +26,30 @@ def generate_coherence_model(cvs_path, TYPES):
                 2,
                 1
             )
-     )
-        
-    #Entrenar el modelo
-    X=df.filter(like="justify_")
-    y=df["real_license_type"]
-    #Divido el dataset para poder ver la exactitud de la prediccion
-    X_train, X_test, y_train, y_test=train_test_split(
-        X,y,
-        test_size=0.2,
-        random_state=42,
-        shuffle=True, #Mezcla datos antes de dividir
-        stratify=y #Para mantener proporcion de clases
+        )
+    
+    # 1. Definir features (X) y target (y)
+    X = df.filter(like="justify_")  # Columnas justify_*
+    y = df["real_license_type"]      # Etiquetas reales
+
+    # 2. Dividir en train y test (80% entrenamiento, 20% evaluación)    
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, random_state=42, stratify=y
     )
-    model = LogisticRegression(solver="lbfgs", C=0.1, max_iter=1000)
-    model.fit(X_train,y_train)
-    joblib.dump(model,"prediction_type_model.pkl")
-    #Predecir etiquetas para el test
-    y_pred=model.predict(X_test)
-    #Mostramos el reporte de clasificacion
-    print(classification_report(y_test,y_pred))
-    #Matriz de confusion para ver que clases se confunden
-    #print(confusion_matrix(y_test, y_pred, labels=model.classes_))
 
-        
+    # 3. Entrenar el modelo
+    model = LogisticRegression( solver="lbfgs", max_iter=1000)
+    model.fit(X_train, y_train)
 
+    # 4. Evaluar el modelo con el conjunto de TEST
+    y_pred = model.predict(X_test)
+
+    # Reporte de clasificación (¡ESTE ES EL JUICIO AL MODELO!) 
+    print("Viene el reporte:") 
+    print(classification_report(y_test, y_pred))
+
+    return model, df 
+
+
+    
 print(generate_coherence_model("HealthFirst/backend/backend/utils/coherence_license_type_dataset.csv",pr.pruebaRapida()))
-
-"""
-    
-
-    #Ver la precision del modelo
-
-    
-"""
