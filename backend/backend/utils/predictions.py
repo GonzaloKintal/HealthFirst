@@ -13,19 +13,19 @@ TYPE_CONFIG = {
     "ACCIDENTE_TRABAJO": {
         "NAME": "ACCIDENTE_TRABAJO",
         "MUST": [
-            ["dr", "dra"],
+            ["dr", "dra","junta medica"],
             ["matricula", "mn", "mp", "me"],
             ["clinica", "hospital", "centro medico", "salita", "centro de salud"],
             ["art"],
             ["poliza"],
-            ["accidente", "incidente", "lesion"],
-            ["legajo"]
+            ["accidente", "incidente", "lesion",""],
         ],
         "COULD": [
-            "servicio", "empresa", "diagnostico", "tratamiento", "incapacidad", "laboral",
-            "reposo", "licencia", "control", "reincorporacion", "alta", "junta medica"
+            ["empresa","legajo","servicio"],
+            ["diagnostico", "tratamiento"],
+            ["reposo", "licencia","incapacidad laboral"],
+            ["control", "reincorporacion", "alta"], 
         ],
-        "N_MIN":2
     },
     "ASISTENCIA_FAMILIAR": {
         "NAME": "ASISTENCIA_FAMILIAR",
@@ -36,11 +36,11 @@ TYPE_CONFIG = {
             ["matricula", "mn", "mp", "me"]
         ],
         "COULD": [
-            "paciente", "permanente", "condicion medica", "autonoma", "soporte", "bienestar", "continua",
-            "recuperacion", "presencia", "supervision", "cronica", "movilidad", "aislamiento", "complicacion",
-            "autonomia", "rehabilitacion", "especial", "especiales", "domicilio"
+            ["autonomia","autonoma","supervision","presencia","soporte"],
+            ["permanente","continua","especial","cronica","recuperacion"],
+            ["condicion medica", "bienestar","movilidad", "aislamiento", "complicacion",
+            "rehabilitacion", "especiales", "domicilio"]
         ],
-        "N_MIN": 2
     },
     "CASAMIENTO": {
         "NAME": "CASAMIENTO",
@@ -55,7 +55,6 @@ TYPE_CONFIG = {
             ["matricula", "mn", "mp", "me"]
         ],
         "COULD": ["juez de paz", "jueza de paz"],
-        "N_MIN": 1
     },
     "CONTROL_PRENATAL": {
         "NAME": "CONTROL_PRENATAL",
@@ -66,10 +65,11 @@ TYPE_CONFIG = {
             ["matricula", "mn", "mp", "me"]
         ],
         "COULD": [
-            "clinica", "consultorio", "obstetra", "ginecologo", "hospital", "centro de salud",
-            "centro medico", "ecografia", "laboratorio", "gestacion", "parto", "semana"
+            ["clinica", "consultorio","hospital", "centro de salud","centro medico"],
+            ["obstetra", "ginecologo"],
+            ["ecografia", "laboratorio","hierro"],
+            ["gestacion", "parto", "semana"]
         ],
-        "N_MIN": 2
     },
     "DONACION_SANGRE": {
         "NAME": "DONACION_SANGRE",
@@ -79,8 +79,9 @@ TYPE_CONFIG = {
             ["sangre"],
             ["matricula", "mn", "mp", "me"]
         ],
-        "COULD": ["donante", "receptor", "tecnico responsable"],
-        "N_MIN": 1
+        "COULD": [
+            ["donante", "receptor", "tecnico responsable"]
+        ],
     },
     "DUELO": {
         "NAME": "DUELO",
@@ -97,8 +98,9 @@ TYPE_CONFIG = {
             ["estado civil"],
             ["acta"]
         ],
-        "COULD": ["deceso"],
-        "N_MIN": 1
+        "COULD": [
+            ["deceso"]
+        ],
     },
     "ENFERMEDAD": {
         "NAME": "ENFERMEDAD",
@@ -108,11 +110,10 @@ TYPE_CONFIG = {
             ["reposo", "licencia", "descanso"]
         ],
         "COULD": [
-            "clinica", "hospital", "centro medico", "salita", "centro de salud", "sintomas",
-            "tratamiento", "control", "estudios", "gripe", "viral", "paciente", "dolor", "consultorio",
-            "diagnostico"
+            ["clinica", "hospital", "centro medico", "salita", "centro de salud","consultorio"],
+            ["sintomas","tratamiento","diagnostico", "control", "estudios"],
+            ["gripe", "viral", "paciente", "dolor","pulmonia","bronquitis","covid","gastroenteritis","intoxicacion"]
         ],
-        "N_MIN": 1
     },
     "ESTUDIOS": {
         "NAME": "ESTUDIOS",
@@ -129,14 +130,13 @@ TYPE_CONFIG = {
             ["rendir","realizar"],
             ["hora"],
             ["alumno","alumna", "alumno/a"]
-],
-        "N_MIN": 0
+        ],
     },
     "MATERNIDAD": {
         "NAME": "MATERNIDAD",
         "MUST": [
             ["semanas"],
-            ["gestacion"],
+            ["gestacion","gestacional"],
             ["parto"],
             ["embarazo", "embarazada"],
             ["dr", "dra"],
@@ -144,10 +144,11 @@ TYPE_CONFIG = {
             ["multiple", "unico"]
         ],
         "COULD": [
-            "control", "consulta", "prenatal", "pre-natal", "pre natal", "hospital", "paciente", "clinica",
-            "licencia", "obstetricia", "controles", "prenatales", "evolucion", "gestacional"
+            ["control", "consulta"],
+            ["prenatal", "pre-natal", "pre natal","prenatales"],
+            ["clinica", "hospital", "centro medico", "salita", "centro de salud","consultorio"],
+            ["licencia","descanso"]
         ],
-        "N_MIN": 2
     },
     "MUDANZA": {
         "NAME": "MUDANZA",
@@ -159,11 +160,12 @@ TYPE_CONFIG = {
             ["domicilio", "direccion"]
         ],
         "COULD": [
-            "nueva residencia", "renaper", "inmobiliaria", "traslado", "mudanza", "encargado de logistica", "plazo",
-            "escrituracion", "certificado de domicilio", "fecha de desocupacion", "testigo", "notificacion de mudanza",
-            "escribano", "esc", "matricula", "mn", "mp", "me", "dr", "dra", "registro nacional de las personas"
+            ["matricula", "mn", "mp", "me"],
+            ["registro nacional de las personas","renaper","inmobiliaria",
+             "escribano", "esc","dr", "dra","encargado de logistica","testigo"],
+            ["traslado","mudanza","nueva residencia"],
+            ["escrituracion", "certificado de domicilio","fecha de desocupacion","notificacion de mudanza"]
         ],
-        "N_MIN": 1
     },
     "NACIMIENTO": {
         "NAME": "NACIMIENTO",
@@ -180,8 +182,10 @@ TYPE_CONFIG = {
             ["libro"],
             ["folio"]
         ],
-        "COULD": ["madre", "registro", "inscripcion", "tramite", "testigo", "testigos"],
-        "N_MIN": 2
+        "COULD": [
+            ["madre"],
+            ["registro", "inscripcion", "tramite", "testigo", "testigos"]
+        ],
     },
     "OBLIGACION_PUBLICA": {
         "NAME": "OBLIGACION_PUBLICA",
@@ -192,11 +196,10 @@ TYPE_CONFIG = {
             ["matricula"]
         ],
         "COULD": [
-            "jurado", "juicio", "sede", "tribunal", "juez", "testigo", "causa penal", "entrevista",
-            "inspector", "ley", "articulo", "requerimiento", "expediente", "ciudadano", "audiencia",
-            "reclamo", "funcionario", "elecciones"
+            ["juicio","causa penal","entrevista","audiencia","reclamo","elecciones","testigo"],
+            ["jurado","tribunal","juez","funcionario","inspector"],
+            ["articulo","ley","requerimiento"]
         ],
-        "N_MIN": 1
     },
     "REPRESENTANTE_GREMIAL": {
         "NAME": "REPRESENTANTE_GREMIAL",
@@ -208,12 +211,12 @@ TYPE_CONFIG = {
             ["motivo", "asunto", "actividad"]
         ],
         "COULD": [
-            "empleados", "legajo", "orden del dia", "paritarias", "condiciones", "comision",
-            "articulo", "credencial", "secretario", "directora", "convocatoria", "urgente",
-            "despedido", "laboral", "conflictos", "asamblea", "informativa", "estrategias",
-            "denuncia", "pago", "citacion", "jornada", "capacitacion", "derechos", "seguridad"
+            ["asamblea","citacion","convocatoria"],
+            ["secretario", "directora"],
+            ["denuncia", "pago","capacitacion","seguridad","conflictos","estrategias","derechos","despido","paritarias","condiciones",
+             "orden del dia"],
+             ["legajo", "comision","articulo", "credencial", "urgente","laboral","informativa","citacion", "jornada" ]
         ],
-        "N_MIN": 2
     },
     "REUNION_EXT": {
         "NAME": "REUNION_EXT",
@@ -226,10 +229,9 @@ TYPE_CONFIG = {
             ["afiliado", "empleado", "trabajador"]
         ],
         "COULD": [
-            "comision", "dependencia", "union", "operarios", "convocada", "comercio",
-            "convoctoria", "medidas", "urgente"
+            ["comision", "dependencia", "union", "operarios", "convocada", "comercio",
+            "convoctoria", "medidas", "urgente"]
         ],
-        "N_MIN": 1
     },
     "REUNION_GREMIAL": {
         "NAME": "REUNION_GREMIAL",
@@ -238,47 +240,39 @@ TYPE_CONFIG = {
             ["gremial", "gremio", "sindicato"]
         ],
         "COULD": [
-            "empleados", "comercio", "trabajo", "horario", "secretario", "delegado",
-            "participar", "sindical", "representante", "convenio"
-        ],
-        "N_MIN": 1
+            ["secretario","delegado","sindical","representante"],
+            ["horario, hora"],
+            ["lugar, sede"],
+            ["empleados","comercio","trabajo","laboral","convenio"]
+        ]
     },
     "TRAMITE_PREMATRIMONIAL": {
         "NAME": "TRAMITE_PREMATRIMONIAL",
         "MUST": [
-            ["turno"],
             ["fecha"],
             ["hora"],
             ["direccion", "ubicacion"],
             ["dni"],
-            ["original"],
-            ["copia"],
             ["contrayente"],
             ["casamiento", "matrimonio", "matrimonial"],
             ["testigo", "testigos"],
-            ["partida de nacimiento", "acta de nacimiento"]
         ],
         "COULD": [
-            "sede", "certificado de nacimiento", "partida de nacimiento", "casamiento",
-            "registro provincial", "registro civil", "oficina", "confirmado", "numero de confirmacion",
-            "instrucciones", "prematrimonial", "libro", "folio", "capacidad legal", "codigo civil",
-            "impedimentos legales", "consentimiento", "ceremonia", "estado civil"
+            ["original","copia"],
+            ["partida de nacimiento", "acta de nacimiento","certificado de nacimiento"],
+            ["registro civil", "oficina","registro provincial"],
+            ["instrucciones","libro","folio","ceremonia","estado civil"],
+            ["capacidad legal","codigo civil","impedimentos legales","consentimiento","prematrimonial"]
         ],
-        "N_MIN": 3
     }
 }
 
-def pruebaRapida(): #borrar despues
-    return TYPE_CONFIG
-
-#a_predecir="HealthFirst/backend/backend/utils/pdf_imagen.pdf"
-#print(predict_license_type(f_u.pdf_to_base64(a_predecir)))
+def pruebaRapida():
+    return TYPE_CONFIG;
 
 def create_strict_feature(normalized_text, must_find, could_find, must_weight, could_weight):
-    """
-    Recorre cada grupo de palabras clave y evalúa si se encuentran en el texto normalizado de entrada.
-    Calcula un puntaje basado en las palabras encontradas y sus respectivos pesos, devolviendo un porcentaje.
-    """
+    """Recorre cada grupo de palabras clave y evalúa si se encuentran en el texto normalizado de entrada.
+    Calcula un puntaje basado en las palabras encontradas y sus respectivos pesos, devolviendo un porcentaje."""
     must_found = 0
     could_found = 0
     
@@ -303,15 +297,12 @@ def create_strict_feature(normalized_text, must_find, could_find, must_weight, c
     else:
         percentage = 0  # Si no hay palabras clave, el puntaje es 0
     
-    return str(percentage)+"%"
+    return percentage
 
 must_estudios = TYPE_CONFIG["ESTUDIOS"]["MUST"]
 could_estudios = TYPE_CONFIG["ESTUDIOS"]["COULD"]
 texto=f_u.normalize_text("Constancia de Examen Final: Apellido y Nombre: JIMENEZ FERRER CARLOS ALBERTO Identificacion: DNI 95879762 por la presente se certifica que la persona cuyos datos se citan anteriormente se presento a rendir el siguiente examen: Propuesta (R) Ingenieria Electronica Actividad: Ingenieria y Sociedad Fecha de examen: 12/01/2021 Ubicacion: campus. Se extiende  la presente constancia a pedido del interesado para ser presentada ante JEFE DE DEPARTAMENTO en CABA- Ciudad Autonoma de Buenos Aires., Ciudad Autonoma de Buenos Aires a los 14 dias del mes de enero de 2021. ")
-print(create_strict_feature(texto,must_estudios,could_estudios,2,1))
-
-#a_buscar=["instituto","examen","materia:","carrera:"]
-#print(f"a ver si encontramos:{f_u.search_in_pdf_text(texto,a_buscar)}")
+print(create_strict_feature(texto,must_estudios,could_estudios,3,1))
 
 #Cargar el dataset basico
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
