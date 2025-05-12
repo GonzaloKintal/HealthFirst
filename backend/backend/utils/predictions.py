@@ -117,14 +117,14 @@ TYPE_CONFIG = {
     "ESTUDIOS": {
         "NAME": "ESTUDIOS",
         "MUST": [
-            ["facultad", "universidad", "instituto"],
-            ["examen", "final", "evaluacion","rendimiento"],
+            
+            ["examen", "final", "evaluacion","rendimiento","parcial/final"],
             ["asignatura", "materia", "actividad"],
             ["carrera", "propuesta"],
         ],
         "COULD": ["regional", "modalidad", "ubicacion", "sede",
                   "turno", "rendir", "realizar","hora","alumno",
-                  "alumna", "alumno/a", "estudiante",
+                  "alumna", "alumno/a", "estudiante","facultad", "universidad", "instituto","escuela",
 ],
         "N_MIN": 0
     },
@@ -277,15 +277,16 @@ def predict_license_type(base64_text):
 #print(predict_license_type(f_u.pdf_to_base64(a_predecir)))
 
 def create_strict_feature(normalized_text, must_find, could_find, n_minimum):
-    print(must_find)
     """Recorre cada grupo de palabras claves y finalmente avisa si se encontraron en el texto normalizado de entrada """
     for word_group in must_find:
         pattern = r'(?<!\w)(?:' + '|'.join([re.escape(w) for w in word_group]) + r')(?:[.:-]\S*|\s+)?'
         if not re.search(pattern, normalized_text):
             return 0
+    if n_minimum==0: ##no hace falta chequear palabras que podrian estar
+        return 1
     count = 0
     for word in could_find:
-        pattern = r'(?<!\w)' + re.escape(word) + r'(?!\w)'
+        pattern = r'(?<!\w)' + re.escape(word) + r'(?:[.:-]\S*|\s+)?'
         if re.search(pattern, normalized_text):
             count += 1
             if count >= n_minimum:
@@ -294,8 +295,8 @@ def create_strict_feature(normalized_text, must_find, could_find, n_minimum):
 must_estudios = TYPE_CONFIG["ESTUDIOS"]["MUST"]
 could_estudios = TYPE_CONFIG["ESTUDIOS"]["COULD"]
 
-texto=f_u.normalize_text("Instituto Superior de Técnicas Bancarias (ISTB) CERTIFICADO DE EXAMEN ESPECIAL Nombre: Diego A. Ríos DNI 32.456.321 Carrera: Tec. en Finanzas Materia: Análisis de Riesgo Crediticio Fecha: 28/08/2024 Horario: 09:00 a 12:00 hs Calificación: 9 (nueve) Validez: Para presentación ante empleadores según Convenio 543/2024 Firma: Lic. Silvana Castro (Reg. ISTB-2024)")
-
+texto=f_u.normalize_text("Constancia de Examen Final: Apellido y Nombre: JIMENEZ FERRER CARLOS ALBERTO Identificacion: DNI 95879762 por la presente se certifica que la persona cuyos datos se citan anteriormente se presento a rendir el siguiente examen: Propuesta (R) Ingenieria Electronica Actividad: Ingenieria y Sociedad Fecha de examen: 12/01/2021 Ubicacion: campus. Se extiende  la presente constancia a pedido del interesado para ser presentada ante JEFE DE DEPARTAMENTO en CABA- Ciudad Autonoma de Buenos Aires., Ciudad Autonoma de Buenos Aires a los 14 dias del mes de enero de 2021. ")
+print(texto)
 print(create_strict_feature(texto,must_estudios,could_estudios,0))
 
 #a_buscar=["instituto","examen","materia:","carrera:"]
