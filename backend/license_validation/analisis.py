@@ -34,8 +34,8 @@ def license_analysis(id): #se le pasa el id de la solicitud
         raise LicenseValidationError ("Se han completado el maximo de pedidos por año")
     
     #Dias corridos
-    #if licencia.type.max_consecutive_days is not None and licencia.required_days > licencia.type.max_consecutive_days :
-        #raise LicenseValidationError ("Excede los dias corridos para este tipo de licencia")
+    if licencia.type.max_consecutive_days is not None and licencia.required_days > licencia.type.max_consecutive_days :
+        raise LicenseValidationError ("Excede los dias corridos para este tipo de licencia")
     
     #Minimo de preaviso
     dias_hasta_licencia = (fecha_inicio - fecha_solicitud).days
