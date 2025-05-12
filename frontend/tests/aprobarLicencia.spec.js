@@ -1,46 +1,59 @@
-// test/pedir_loginSupervisor.spec.js
 import { test, expect } from '@playwright/test';
 import { login } from './utils/login.js';
 
-test('Login exitoso del supervisor', async ({ page }) => {
-  // Realiza el login
+test('Aprobación de licencia con estado Pendiente', async ({ page }) => {
+  // 1. Login y navegación
   await login(page, 'supervisor@gmail.com', '123456');
+  await expect(page).toHaveURL('http://localhost:5173/supervisor');
+  
+  await page.getByText('Licencias', { exact: true }).click();
+  await expect(page).toHaveURL('http://localhost:5173/licenses');
 
-  // Verifica que la URL sea la del supervisor después de loguearse
-  await expect(page).toHaveURL('http://localhost:5173/supervisor', { timeout: 10000 });
+  // 2. Buscar filas con estado "Pendiente"
+  const filasPendientes = page.locator('tbody tr:has(td:text("Pendiente"))');
+  const countPendientes = await filasPendientes.count();
 
-  // Ir a la página de licencias
-  await page.click('text=Licencias', { timeout: 10000 });
-  await expect(page).toHaveURL('http://localhost:5173/licenses', { timeout: 10000 });
-
-  console.log('Login exitoso y redirección a Licencias confirmada.');
-
-  // Buscar el botón "Ver detalle" en una fila con estado "Pendiente"
-  const licenciasPendientes = page.locator('tr:has(span:text("Pendiente")) button[title="Ver detalle"]');
-
-  // Verificar si hay al menos una licencia pendiente
-  if (await licenciasPendientes.count() > 0) {
-    console.log('Se encontró al menos una licencia pendiente.');
-    await licenciasPendientes.first().click();
-
-    // Hacer clic en el botón "Aprobar"
-    await page.click('button:has-text("Aprobar")');
-    console.log('Botón "Aprobar" clickeado.');
-
-    // Esperar y hacer clic en el botón de confirmación si aparece
-    const botonConfirmar = page.locator('button:has-text("Confirmar")');
-    if (await botonConfirmar.isVisible()) {
-      await botonConfirmar.click();
-      console.log('Botón "Confirmar" clickeado.');
-    }
-
-    // Esperar que el estado cambie a "Aprobada"
-    await page.waitForSelector('span:text("Aprobada")', { timeout: 10000 });
-    console.log('El estado cambió a "Aprobada" correctamente.');
-  } else {
-    console.log('No hay licencias pendientes para aprobar.');
+  // 3. Manejo cuando no hay pendientes
+  if (countPendientes === 0) {
+    console.log('No hay licencias pendientes para aprobar');
+    await page.screenshot({ path: 'no-pendientes.png' });
+    return; // Finaliza el test exitosamente
   }
 
-  // Asegurarse de que el test pase incluso si no hay licencias pendientes
-  expect(true).toBeTruthy();
+  // 4. Seleccionar la primera licencia pendiente
+  const filaPendiente = filasPendientes.first();
+  const idLicencia = await filaPendiente.locator('td').first().textContent();
+  console.log(`Procesando licencia con ID: ${idLicencia}`);
+
+  // Resto del flujo de aprobación...
+  await filaPendiente.locator('button[title="Ver detalle"]').click();
+
+  // 5. Primer click en Aprobar
+  await page.getByRole('button', { name: 'Aprobar', exact: true }).click();
+
+  // 6. Manejo del modal de confirmación
+  try {
+    const modal = page.locator('div.bg-white.rounded-lg.shadow-xl');
+    await modal.waitFor({ state: 'visible', timeout: 8000 });
+    
+    await expect(modal.locator('h3:text("Aprobar Licencia")')).toBeVisible();
+    
+    const botonAprobarModal = modal.locator('button:has-text("Aprobar")');
+    await botonAprobarModal.scrollIntoViewIfNeeded();
+    await botonAprobarModal.click();
+    
+    await modal.waitFor({ state: 'hidden', timeout: 5000 });
+  } catch (error) {
+    await page.screenshot({ path: `error-${idLicencia}.png` });
+    throw new Error(`Fallo al aprobar licencia ${idLicencia}: ${error}`);
+  }
+
+  // 7. Verificación del cambio de estado
+  await expect(async () => {
+    await page.reload();
+    const filaActualizada = page.locator(`tbody tr:has(td:text("${idLicencia}"))`);
+    await expect(filaActualizada.locator('td:text("Aprobada")')).toBeVisible();
+  }).toPass({ intervals: [1000, 2000, 5000], timeout: 20000 });
+
+  console.log(`Licencia ${idLicencia} aprobada correctamente`);
 });
