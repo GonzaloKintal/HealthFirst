@@ -21,6 +21,13 @@ from urllib.parse import unquote
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
+import magic  
+import img2pdf
+from django.db import transaction
+
+from backend.utils.predictions import predict_license_type;
+from backend.utils.file_utils import *
+
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
@@ -349,25 +356,27 @@ def create_license(request):
 
         required_days = (end_date_parsed - start_date_parsed).days + 1
 
-        # Crear la licencia
-        license = License.objects.create(
-            user=user,
-            type=license_type,
-            start_date=start_date_parsed,
-            end_date=end_date_parsed,
-            required_days=required_days,
-            information=information,
-            request_date=datetime.now(),
-            justified=False,
-        )
+        with transaction.atomic():
+            license = License.objects.create(
+                user=user,
+                type=license_type,
+                start_date=start_date_parsed,
+                end_date=end_date_parsed,
+                required_days=required_days,
+                information=information,
+                request_date=datetime.now(),
+                justified=False,
+            )
 
-        # Crear certificado si viene incluido
-        if certificate_data:
-            file_data = certificate_data.get('file', None)
-            if file_data:
+            if certificate_data:
+                try:
+                    file_data = process_certificate(certificate_data)
+                except Exception as e:
+                    raise Exception(f'Error en certificado: {str(e)}') 
+
                 Certificate.objects.create(
                     license=license,
-                    file=file_data, # guardamos el string base64
+                    file=file_data,
                     validation=certificate_data.get('validation', False),
                     upload_date=datetime.now(),
                     is_deleted=False,
@@ -444,36 +453,39 @@ def update_license(request, id):
             license.end_date = end_date_parsed
             license.required_days = (end_date_parsed - start_date_parsed).days + 1
 
-        # Actualizar información/motivo
-        license.information = information
+        with transaction.atomic():
+                license.information = information
 
-        license.save()
+                license.save()
 
-        # Actualizar certificado
-        if certificate_data:
-            file_data = certificate_data.get('file', None)
-            validation = certificate_data.get('validation', False)
+                # Actualizar certificado
+                if certificate_data:
+                    try:
+                        file_data = process_certificate(certificate_data)
+                    except Exception as e:
+                        raise Exception(f'Error en certificado: {str(e)}')
+                        
+                    validation = certificate_data.get('validation', False)
 
-            if file_data:
-                if hasattr(license, 'certificate'):
-                    cert = license.certificate
-                    cert.file = file_data
-                    cert.validation = validation
-                    cert.upload_date = datetime.now()
-                    cert.is_deleted = False
-                    cert.deleted_at = None
-                    cert.save()
-                else:
-                    Certificate.objects.create(
-                        license=license,
-                        file=file_data,
-                        validation=validation,
-                        upload_date=datetime.now(),
-                        is_deleted=False,
-                        deleted_at=None
-                    )
-
-        return JsonResponse({'message': 'Licencia actualizada exitosamente.'}, status=200)
+                    if file_data:
+                        if hasattr(license, 'certificate'):
+                            cert = license.certificate
+                            cert.file = file_data
+                            cert.validation = validation
+                            cert.upload_date = datetime.now()
+                            cert.is_deleted = False
+                            cert.deleted_at = None
+                            cert.save()
+                        else:
+                            Certificate.objects.create(
+                                license=license,
+                                file=file_data,
+                                validation=validation,
+                                upload_date=datetime.now(),
+                                is_deleted=False,
+                                deleted_at=None
+                        )
+                return JsonResponse({'message': 'Licencia actualizada exitosamente.'}, status=200)
 
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
@@ -561,6 +573,8 @@ def get_license_detail(request, id):
             "required_days": (license.end_date - license.start_date).days + 1,
             "justified": license.justified,
             "information": license.information,
+            "evaluator": (license.evaluator.first_name + ' ' + license.evaluator.last_name) if license.evaluator else "",
+            "evaluator_role": license.evaluator.role.name if license.evaluator else "",
         }
 
         # Estado actual de la licencia
@@ -604,3 +618,54 @@ def get_licenses_types(request):
 
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
+
+
+@api_view(['POST'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def upload_base64_file(request):
+    try:
+        body_unicode = request.body.decode('utf-8')
+        body = json.loads(body_unicode)
+        base64_string = body.get("file_base64")
+
+        if not base64_string:
+            return JsonResponse({"error": "El campo 'file_base64' es obligatorio"}, status=400)
+
+        result = predict_license_type(base64_string)
+        parsed_result = {item[0]: item[1] for item in result}
+
+
+        if "error" in result:
+            return JsonResponse(parsed_result, status=500)
+
+        return JsonResponse(parsed_result, status=200)
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+
+
+def process_certificate(certificate_data):
+        file_data = certificate_data.get('file', None)
+        if not file_data:
+            raise ValueError('Archivo del certificado no encontrado.')
+        
+        file_decoded = base64.b64decode(file_data)
+        
+        # Detectar tipo de archivo
+        mime = magic.Magic(mime=True)
+        file_type = mime.from_buffer(file_decoded)
+        
+        allowed_types = ['image/jpeg', 'image/png', 'application/pdf']
+        if file_type not in allowed_types:
+            raise ValueError('Tipo de archivo no permitido. Solo se aceptan JPG, PNG o PDF.')
+        
+        if file_type in ['image/jpeg', 'image/png']:
+            file_decoded = img2pdf.convert(file_decoded)
+        
+        file_encoded = base64.b64encode(file_decoded).decode('utf-8')
+
+        return file_encoded
+
+  

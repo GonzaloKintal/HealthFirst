@@ -5,6 +5,7 @@ import Notification from '../utils/Notification';
 import { getLicenseDetail,
   updateLicense,
   getLicenseTypes } from '../../services/licenseService';
+import FileValidator from '../utils/FileValidator';
 
 const EditLicense = () => {
   const { id } = useParams();
@@ -15,7 +16,7 @@ const EditLicense = () => {
     endDate: '',
     information: '',
     documents: null,
-    declaration: false
+    declaration: false,
   });
   const [calculatedDays, setCalculatedDays] = useState(0);
   const [notification, setNotification] = useState(null);
@@ -167,76 +168,65 @@ useEffect(() => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!formData.declaration) {
-      setNotification({
-        type: 'error',
-        message: 'Debe aceptar la declaración para enviar la solicitud.'
-      });
-      return;
-    }
-
-    if (formData.startDate && formData.endDate) {
-      const start = new Date(formData.startDate);
-      const end = new Date(formData.endDate);
-      
-      if (end < start) {
+    try {
+      // Validar declaración
+      if (!formData.declaration) {
+        setNotification({
+          type: 'error',
+          message: 'Debe aceptar la declaración para continuar.'
+        });
+        return;
+      }
+  
+      // Validar fechas
+      if (new Date(formData.endDate) < new Date(formData.startDate)) {
         setNotification({
           type: 'error',
           message: 'La fecha de fin no puede ser anterior a la fecha de inicio.'
         });
         return;
       }
-    }
-    
-    try {
-      // Preparar los datos para actualizar
-      const certificate = formData.documents 
-        ? {
-            validation: true,
-            file: await readFileAsBase64(formData.documents),
-            file_name: formData.documents.name
-          }
-        : existingDocument
-          ? {
-              validation: true,
-              file: "",
-              file_name: existingDocument
-            }
-          : {
-              validation: false,
-              file: "",
-              file_name: ""
-            };
-
-      const licenseData = {
-        type_id: Number(formData.licenseTypeId),
+  
+      // Preparar datos para enviar al backend
+      const requestData = {
+        type_id: formData.licenseTypeId,
         start_date: formData.startDate,
         end_date: formData.endDate,
-        information: formData.reason,
-        certificate
+        information: formData.information
       };
-
-      // Enviar la actualización
-      const response = await updateLicense(id, licenseData);
-      
+  
+      // Solo manejar nuevo documento
+      if (formData.documents) {
+        const base64File = await readFileAsBase64(formData.documents);
+        requestData.certificate = {
+          file: base64File,
+          validation: false
+        };
+      }
+  
+      const response = await updateLicense(id, requestData);
+  
       if (response.success) {
         setNotification({
           type: 'success',
-          message: 'La licencia ha sido actualizada correctamente.'
+          message: 'Licencia actualizada exitosamente.'
         });
         
-        // Redirigir después de 3 segundos
+        // Redirigir después de 2 segundos
         setTimeout(() => {
-          navigate(-1); // Volver a la página anterior
-        }, 3000);
+          navigate(-1); // O a la ruta que prefieras
+        }, 2000);
       } else {
-        throw new Error(response.error || 'Error al actualizar la licencia');
+        setNotification({
+          type: 'error',
+          message: response.error || 'Error al actualizar la licencia.'
+        });
       }
     } catch (error) {
+      console.error('Error al enviar el formulario:', error);
       setNotification({
         type: 'error',
-        message: error.response?.data?.message || 
-               'Ocurrió un error al actualizar la licencia.'
+        message: 'Ocurrió un error inesperado al procesar la solicitud.'
       });
     }
   };
@@ -245,16 +235,6 @@ useEffect(() => {
     setFormData(prev => ({ ...prev, documents: null }));
     setExistingDocument(null);
   };
-
-  if (isLoading) {
-    return (
-      <div className="p-6 max-w-3xl mx-auto">
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="p-6 max-w-3xl mx-auto relative">
@@ -410,48 +390,56 @@ useEffect(() => {
             <FiUpload className="mr-2" /> Documentación Adjunta
           </h2>
           
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Adjuntar Documento (opcional)
-            </label>
-            
-            {existingDocument && !formData.documents && (
-              <div className="mb-3 p-3 bg-gray-50 rounded-md flex justify-between items-center">
-                <div className="flex items-center">
-                  <FiFileText className="text-gray-500 mr-2" />
-                  <span className="text-sm">{existingDocument}</span>
+          <FileValidator onValidation={(result) => {
+            if (!result.isValid) {
+              setNotification({ type: 'error', message: result.error });
+            }
+          }}>
+            {({ validateFile, error }) => (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Adjuntar Documento (opcional)
+                </label>
+                
+                {existingDocument && !formData.documents && (
+                  <div className="mb-3 p-3 bg-gray-50 rounded-md flex items-center">
+                    <FiFileText className="text-gray-500 mr-2" />
+                    <span className="text-sm">{existingDocument}</span>
+                  </div>
+                )}
+                
+                <div className="mt-1 flex items-center">
+                  <label className="cursor-pointer bg-white py-2 px-3 border border-gray-300 rounded-md shadow-sm text-sm leading-4 font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    <FiFileText className="inline mr-2 text-lg" />
+                    {formData.documents ? 'Reemplazar archivo' : 'Seleccionar archivo'}
+                    <input
+                      type="file"
+                      name="documents"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (validateFile(file)) {
+                          handleChange(e);
+                        } else {
+                          e.target.value = ''; // Resetear input
+                        }
+                      }}
+                      className="hidden"
+                      accept=".pdf,.jpg,.jpeg,.png"
+                    />
+                  </label>
+
+                  <span className="ml-2 text-sm text-gray-500">
+                    {formData.documents ? formData.documents.name : 
+                    existingDocument ? 'Documento existente' : 'Ningún archivo seleccionado'}
+                  </span>
                 </div>
-                <button
-                  type="button"
-                  onClick={handleRemoveDocument}
-                  className="text-red-600 hover:text-red-800"
-                >
-                  <FiX size={18} />
-                </button>
+                {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
+                <p className="mt-1 text-xs text-gray-500">
+                  Formatos aceptados: PDF, JPG, PNG (Máx. 10MB)
+                </p>
               </div>
             )}
-            
-            <div className="mt-1 flex items-center">
-              <label className="cursor-pointer bg-white py-2 px-3 border border-gray-300 rounded-md shadow-sm text-sm leading-4 font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                <FiFileText className="inline mr-2 text-lg" />
-                {formData.documents || existingDocument ? 'Cambiar archivo' : 'Seleccionar archivo'}
-                <input
-                  type="file"
-                  name="documents"
-                  onChange={handleChange}
-                  className="hidden"
-                  accept=".pdf,.jpg,.jpeg,.png"
-                />
-              </label>
-              <span className="ml-2 text-sm text-gray-500">
-                {formData.documents ? formData.documents.name : 
-                 existingDocument ? 'Documento existente' : 'Ningún archivo seleccionado'}
-              </span>
-            </div>
-            <p className="mt-1 text-xs text-gray-500">
-              Formatos aceptados: PDF, JPG, PNG (Máx. 10MB)
-            </p>
-          </div>
+          </FileValidator>
 
           {/* Declaración y Confirmación */}
           <div className="mt-6 p-4 bg-gray-50 rounded-md">
