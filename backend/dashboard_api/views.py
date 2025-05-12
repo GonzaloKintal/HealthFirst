@@ -1,14 +1,11 @@
+from ast import Raise
 import base64
 from django.core.files.base import ContentFile
 from django.utils import timezone
 from datetime import datetime
-from django.utils.timezone import get_current_timezone
 from django.contrib.auth import get_user_model
 from xmlrpc.client import NOT_WELLFORMED_ERROR
-from django.views.decorators.http import require_POST
-from django.views.decorators.http import require_http_methods
 from .models import *
-from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 import json
 from .serializers import HealthFirstUserSerializer, LicenseSerializer, LicenseTypeSerializer
@@ -24,6 +21,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 import magic  
 import img2pdf
 from django.db import transaction
+from license_validation.analisis import license_analysis
 
 from backend.utils.predictions import predict_license_type;
 from backend.utils.file_utils import *
@@ -116,6 +114,8 @@ def delete_user(request,id):
 
     if not id:
         return JsonResponse({'error': 'El id es requerido.'}, status=400)
+    if id==request.user.id:
+        raise Exception("No puedes eliminar tu propio usuario.")
 
     try:
         user = HealthFirstUser.objects.get(id=id,is_deleted=False)
@@ -357,7 +357,7 @@ def create_license(request):
         required_days = (end_date_parsed - start_date_parsed).days + 1
 
         with transaction.atomic():
-            license = License.objects.create(
+            license = License(
                 user=user,
                 type=license_type,
                 start_date=start_date_parsed,
@@ -367,6 +367,9 @@ def create_license(request):
                 request_date=datetime.now(),
                 justified=False,
             )
+            license_analysis(license)
+
+            license.save()
 
             if certificate_data:
                 try:
