@@ -217,16 +217,18 @@ const LicensesPage = () => {
                       <span>Detalle</span>
                     </button>
                   </td>
+                  
                   {canShowActions && (
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex space-x-3 justify-center">
-                        <Link
-                          to={`/edit-license/${license.id}`}
-                          className="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-50 cursor-pointer"
-                        >
-                          <FiEdit size={18} />
-                        </Link>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex space-x-3 justify-center">
+                      <Link
+                        to={`/edit-license/${license.id}`}
+                        className="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-50 cursor-pointer"
+                      >
+                        <FiEdit size={18} />
+                      </Link>
 
+                      {user?.role === 'admin' && (
                         <button 
                           onClick={() => handleDelete(license.id)}
                           className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50 cursor-pointer"
@@ -234,9 +236,10 @@ const LicensesPage = () => {
                         >
                           <FiTrash2 size={18} />
                         </button>
-                      </div>
-                    </td>
-                  )}
+                      )}
+                    </div>
+                  </td>
+                )}
                 </tr>
               ))}
             </tbody>
