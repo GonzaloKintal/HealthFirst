@@ -1,12 +1,11 @@
 import { useEffect, useState } from 'react';
-import { FiCheck, FiX, FiEdit, FiTrash2, FiEye, FiUser, FiCalendar, FiFileText, FiArrowLeft } from 'react-icons/fi';
+import { FiCheck, FiX, FiEdit, FiEye, FiUser, FiCalendar, FiFileText, FiArrowLeft } from 'react-icons/fi';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { FormattedDate } from '../../components/utils/FormattedDate';
 import Confirmation from '../../components/utils/Confirmation';
-import { getLicenseDetail } from '../../services/licenseService';
+import { getLicenseDetail, evaluateLicense, analyzeCertificate } from '../../services/licenseService';
 import useAuth from '../../hooks/useAuth';
 import Notification from '../../components/utils/Notification';
-import { evaluateLicense } from '../../services/licenseService';
 
 const LicenseDetail = () => {
   const { id } = useParams();
@@ -23,8 +22,9 @@ const LicenseDetail = () => {
   });
   const [showApproveConfirmation, setShowApproveConfirmation] = useState(false);
   const [showRejectConfirmation, setShowRejectConfirmation] = useState(false);
-
   const canShowActions = ['admin', 'supervisor'].includes(user?.role);
+  const [analysis, setAnalysis] = useState(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   useEffect(() => {
     const fetchLicense = async () => {
@@ -50,7 +50,10 @@ const LicenseDetail = () => {
             email: response.data.user?.email || '',
             phone: response.data.user?.phone || '',
             dateOfBirth: response.data.user?.date_of_birth || '',
-            rejectionReason: status === 'rejected' ? response.data.status?.evaluation_comment || '' : ''
+            rejectionReason: status === 'rejected' ? response.data.status?.evaluation_comment || '' : '',
+            evaluator: response.data.license?.evaluator || '',
+            evaluatorRole: response.data.license?.evaluator_role || '',
+            evaluationDate: response.data.status?.evaluation_date || ''
           };
           setLicense(licenseData);
         } else {
@@ -65,6 +68,7 @@ const LicenseDetail = () => {
     fetchLicense();
   }, [id]);
 
+
   const handleApprove = async () => {
     try {
       const response = await evaluateLicense(id, 'approved');
@@ -75,8 +79,13 @@ const LicenseDetail = () => {
           type: 'success',
           message: 'Licencia aprobada correctamente'
         });
-        // Actualizar el estado local de la licencia
-        setLicense(prev => ({ ...prev, status: 'approved' }));
+        setLicense(prev => ({ 
+          ...prev, 
+          status: 'approved',
+          evaluator: `${user.first_name} ${user.last_name}`,
+          evaluatorRole: user.role,
+          evaluationDate: new Date().toISOString().split('T')[0]
+        }));
       } else {
         setNotification({
           show: true,
@@ -95,7 +104,7 @@ const LicenseDetail = () => {
       setShowApproveConfirmation(false);
     }
   };
-
+  
   const handleReject = async () => {
     try {
       const response = await evaluateLicense(id, 'rejected', rejectionReason);
@@ -106,11 +115,13 @@ const LicenseDetail = () => {
           type: 'success',
           message: 'Licencia rechazada correctamente'
         });
-        // Actualizar el estado local de la licencia
         setLicense(prev => ({
           ...prev,
           status: 'rejected',
-          rejectionReason: rejectionReason
+          rejectionReason: rejectionReason,
+          evaluator: `${user.first_name} ${user.last_name}`,
+          evaluatorRole: user.role,
+          evaluationDate: new Date().toISOString().split('T')[0]
         }));
         resetRejectionForm();
       } else {
@@ -132,11 +143,6 @@ const LicenseDetail = () => {
     }
   };
 
-  const resetRejectionForm = () => {
-    setRejectionReason('');
-    setShowRejectionInput(false);
-  };
-
   const handleViewCertificate = () => {
     try {
       if (!license?.certificate?.file) {
@@ -151,7 +157,7 @@ const LicenseDetail = () => {
       const base64Data = license.certificate.file.includes(',') 
         ? license.certificate.file.split(',')[1]
         : license.certificate.file;
-  
+        
       const byteCharacters = atob(base64Data);
       const byteNumbers = new Array(byteCharacters.length);
       for (let i = 0; i < byteCharacters.length; i++) {
@@ -180,6 +186,53 @@ const LicenseDetail = () => {
         type: 'error',
         message: 'No se pudo abrir el certificado'
       });
+    }
+  };
+
+  const resetRejectionForm = () => {
+    setRejectionReason('');
+    setShowRejectionInput(false);
+  };
+
+  const handleAnalyzeCertificate = async () => {
+    if (!license?.certificate?.file) {
+      setNotification({
+        show: true,
+        type: 'error',
+        message: 'No hay certificado disponible para analizar'
+      });
+      return;
+    }
+  
+    try {
+      setIsAnalyzing(true);
+      const base64String = license.certificate.file.includes(',') 
+        ? license.certificate.file.split(',')[1]
+        : license.certificate.file;
+      
+      const [response] = await Promise.all([
+        analyzeCertificate(base64String),
+        new Promise(resolve => setTimeout(resolve, 2000))
+      ]);
+      
+      if (response.success) {
+        setAnalysis(response.data);
+      } else {
+        setNotification({
+          show: true,
+          type: 'error',
+          message: response.error || 'Error al analizar el certificado'
+        });
+      }
+    } catch (error) {
+      console.error('Error analyzing certificate:', error);
+      setNotification({
+        show: true,
+        type: 'error',
+        message: 'Error al analizar el certificado'
+      });
+    } finally {
+      setIsAnalyzing(false);
     }
   };
 
@@ -332,11 +385,6 @@ const LicenseDetail = () => {
               <div>
                 <p className="text-sm text-gray-500">Estado</p>
                 <div className="flex items-center">
-                  {license.status === 'approved' ? (
-                    <FiCheck className="text-green-500 mr-1" />
-                  ) : license.status === 'rejected' ? (
-                    <FiX className="text-red-500 mr-1" />
-                  ) : null}
                   <span className={`font-medium ${
                     license.status === 'approved' 
                       ? 'text-green-700' 
@@ -346,9 +394,16 @@ const LicenseDetail = () => {
                   }`}>
                     {license.status === 'approved' ? 'Aprobada' : 
                     license.status === 'rejected' ? 'Rechazada' : 'Pendiente'}
+                    {(license.status === 'approved' || license.status === 'rejected') && 
+                    ['admin', 'supervisor'].includes(user?.role) && (
+                      <span className="text-gray-600 text-sm font-normal ml-2">
+                        por el {license.evaluatorRole === 'admin' ? 'administrador' : license.evaluatorRole} {license.evaluator} el {FormattedDate({ dateString: license.evaluationDate }).date}
+                      </span>
+                    )}
                   </span>
                 </div>
               </div>
+
               <div>
                 <p className="text-sm text-gray-500">Fecha de Inicio</p>
                 <p className="font-medium">
@@ -413,6 +468,49 @@ const LicenseDetail = () => {
                   <p className="text-gray-400">No hay documentación adjunta</p>
                 )}
               </div>
+
+              {license.certificate?.file && (
+                <button
+                  onClick={handleAnalyzeCertificate}
+                  disabled={isAnalyzing}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center cursor-pointer disabled:bg-blue-500"
+                >
+                  {isAnalyzing ? (
+                    <>
+                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Analizando...
+                    </>
+                  ) : (
+                    <>
+                      <FiFileText className="mr-2" />
+                      Analizar coherencia
+                    </>
+                  )}
+                </button>
+              )}
+
+              {analysis && (
+                <div className="bg-gray-50 p-3 rounded-md">
+                  <h4 className="font-medium mb-2">Resultados del análisis:</h4>
+                  <div className="border border-gray-200 rounded overflow-hidden max-w-md">
+                    {Object.entries(analysis).map(([key, value]) => (
+                      <div key={key} className="flex border-b border-gray-200 last:border-b-0">
+                        <div className="w-2/3 py-1 px-2 border-r border-gray-200">
+                          <span className="text-sm capitalize">{key.replace(/_/g, ' ')}</span>
+                        </div>
+                        <div className="w-1/3 py-1 px-2 text-right">
+                          <span className="text-sm font-medium">
+                            {typeof value === 'number' ? `${Math.round(value * 100)}%` : value.toString()}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {license.status === 'rejected' && license.rejectionReason && (
                 <div className="bg-red-50 p-3 rounded-md">

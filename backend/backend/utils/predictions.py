@@ -1,7 +1,8 @@
 import pandas as pd
 import re
 import joblib
-import file_utils as f_u 
+from backend.utils import file_utils as f_u
+
 import os
 
 from sklearn.linear_model import LogisticRegression
@@ -268,7 +269,7 @@ def predict_license_type(base64_text):
     "Toma un pdf en formato base64 y predice a que 3 tipos de licencia puede pertenecer"
     model=joblib.load("prediction_type_model.pkl") #cargamos el modelo
     license_text=f_u.normalize_text(f_u.base64_to_text(base64_text,f_u.is_pdf_image(base64_text))) #Tenemos el texto del certificado normalizado
-    return predict_top_3(license_text) #Lista de tupla como "("enfermedad",85%)"
+    return predict_top_3(license_text, model) #Lista de tupla como "("enfermedad",85%)"
 
 #Lista de tipos por licencia, con esto + funcion rapida creamos todos los atributos del dataframe automatico
 
@@ -294,8 +295,9 @@ def create_strict_feature(text, must_find, could_find, n_minimum):
     return 0
 
 #Cargar el dataset basico
-os.chdir("HealthFirst/backend/backend/utils")
-df=pd.read_csv("dataset_coherence_license_type.csv")
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+csv_path = os.path.join(CURRENT_DIR, "dataset_coherence_license_type.csv")
+df = pd.read_csv(csv_path)
 
 #Generanding los atributos del dataframe
 
@@ -316,7 +318,7 @@ for type in TYPES:
 #Entrenar el modelo
 X=df.filter(like="justify_")
 y=df["real_license_type"]
-print(df["real_license_type"].value_counts())
+#print(df["real_license_type"].value_counts())
 #Divido el dataset para poder ver la exactitud de la prediccion
 X_train, X_test, y_train, y_test=train_test_split(
     X,y,
@@ -325,8 +327,8 @@ X_train, X_test, y_train, y_test=train_test_split(
     shuffle=True, #Mezcla datos antes de dividir
     stratify=y #Para mantener proporcion de clases
 )
-print("Distribución en y_train:\n", y_train.value_counts())
-print("Distribución en y_test:\n", y_test.value_counts())
+#print("Distribución en y_train:\n", y_train.value_counts())
+#print("Distribución en y_test:\n", y_test.value_counts())
 
 model = LogisticRegression(solver="lbfgs", C=0.1, max_iter=1000)
 model.fit(X_train,y_train)
@@ -359,7 +361,7 @@ def predict_top_3(certificate_text,model):
 #Predecir etiquetas para el test
 y_pred=model.predict(X_test)
 #Mostramos el reporte de clasificacion
-print(classification_report(y_test,y_pred))
+#print(classification_report(y_test,y_pred))
 #Matriz de confusion para ver que clases se confunden
-print(confusion_matrix(y_test, y_pred, labels=model.classes_))
+#print(confusion_matrix(y_test, y_pred, labels=model.classes_))
 

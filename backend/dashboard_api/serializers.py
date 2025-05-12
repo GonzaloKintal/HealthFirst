@@ -24,16 +24,24 @@ class LicenseSerializer(serializers.ModelSerializer):
     status = serializers.SerializerMethodField()
     user = HealthFirstUserSerializer(read_only=True)
     type=serializers.SlugRelatedField(read_only=True, slug_field='name')
+    evaluator=serializers.SerializerMethodField()
+    evaluator_role=serializers.SerializerMethodField()
 
     class Meta:
         model = License
-        fields = ['user', 'license_id', 'user_id', 'employee', 'type', 'start_date', 'end_date', 'days', 'status', 'information']
+        fields = ['user', 'license_id', 'user_id', 'employee', 'type', 'start_date', 'end_date', 'days', 'status', 'information','evaluator','evaluator_role']
 
     def get_days(self, obj):
         return (obj.end_date - obj.start_date).days + 1
 
     def get_status(self, obj):
         return obj.status.name
+    
+    def get_evaluator(self, obj):
+        return (obj.evaluator.first_name + ' ' + obj.evaluator.last_name) if obj.evaluator else ""
+    
+    def get_evaluator_role(self, obj):
+        return obj.evaluator.role.name if obj.evaluator else ""
 
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
