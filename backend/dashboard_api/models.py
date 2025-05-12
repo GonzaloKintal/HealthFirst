@@ -127,19 +127,6 @@ class HealthFirstUser(AbstractUser):
     def get_user(cls, id):
         user = cls.objects.get(id=id, is_deleted=False)
         return user
-    
-class Type_License(models.Model):
-    type_license_id=models.AutoField(primary_key=True)
-    name=models.CharField(max_length=15,null=False, blank=False)
-    description=models.CharField(max_length=50,null=False, blank=False)
-    min_advance_notice_days=models.IntegerField(null=False, blank=False)
-    certificate_require= models.BooleanField(default=True)
-    tolerance_days_certificate_submission=models.IntegerField(null=True, blank=True)
-    total_days_granted=models.IntegerField(null=True, blank=True)
-    max_consecutive_days=models.IntegerField(null=True, blank=True)
-    yearly_approved_requests=models.IntegerField(null=True, blank=True)
-    is_deleted = models.BooleanField(default=False)
-    deleted_at = models.DateTimeField(blank=True, null=True)
 
 
 class LicenseType(models.Model):

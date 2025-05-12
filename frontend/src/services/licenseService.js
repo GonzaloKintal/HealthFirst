@@ -98,19 +98,24 @@ export const getLicenseTypes = async () => {
 // Editar una licencia existente
 export const updateLicense = async (id, licenseData) => {
   try {
-    const response = await api.put(`api/licenses/update/${id}`, licenseData, {
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    });
-    return response.data;
+    const response = await api.put(`api/licenses/update/${id}`, licenseData);
+    
+    return {
+      success: true,
+      data: response.data
+    };
+    
   } catch (error) {
     console.error('Error al actualizar licencia:', {
       message: error.message,
       response: error.response?.data,
       config: error.config
     });
-    throw error;
+    
+    return {
+      success: false,
+      error: error.response?.data?.error || error.message || 'Error al actualizar la licencia'
+    };
   }
 };
 

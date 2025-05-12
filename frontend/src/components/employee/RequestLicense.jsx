@@ -7,6 +7,7 @@ import useAuth from '../../hooks/useAuth';
 import Notification from '../utils/Notification';
 import { getUser, getUsers } from '../../services/userService';
 import { requestLicense, getLicenseTypes } from '../../services/licenseService';
+import FileValidator from '../utils/FileValidator';
 
 const RequestLicense = () => {
   const { user } = useAuth();
@@ -182,7 +183,6 @@ useEffect(() => {
           const start = new Date(newData.startDate);
           const end = new Date(newData.endDate);
           
-          // Validar que la fecha de fin no sea anterior a la de inicio
           if (end < start) {
             setNotification({
               type: 'error',
@@ -215,7 +215,6 @@ useEffect(() => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Validaciones previas
     if (!formData.declaration) {
       setNotification({
         type: 'error',
@@ -245,8 +244,28 @@ useEffect(() => {
       return;
     }
     
+    if (formData.documents) {
+      const validTypes = ['application/pdf', 'image/png', 'image/jpeg', 'image/jpg'];
+      const maxSize = 10 * 1024 * 1024; // 10MB
+      
+      if (!validTypes.includes(formData.documents.type)) {
+        setNotification({
+          type: 'error',
+          message: 'Formato de archivo no válido. Solo se permiten PDF, PNG, JPG o JPEG.'
+        });
+        return;
+      }
+      
+      if (formData.documents.size > maxSize) {
+        setNotification({
+          type: 'error',
+          message: 'El archivo es demasiado grande. El tamaño máximo permitido es 10MB.'
+        });
+        return;
+      }
+    }
+    
     try {
-      // Obtener el user_id correcto según el rol
       let userId;
       if (user?.role === 'admin' || user?.role === 'supervisor') {
         userId = formData.selectedEmployee;
@@ -258,31 +277,23 @@ useEffect(() => {
       if (!userId) {
         throw new Error('No se pudo determinar el usuario');
       }
-
-      let certificateBase64 = '';
-      if (formData.documents) {
-        certificateBase64 = await readFileAsBase64(formData.documents);
-      }
   
-      // Preparar los datos en el formato exacto que espera el backend
-      const certificate = formData.documents 
-        ? {
-            validation: true,
-            file: await readFileAsBase64(formData.documents)
-          }
-        : {
-            validation: false,
-            file: ""
-          };
-
+      // Preparar los datos para el backend
       const licenseData = {
         user_id: Number(userId),
         type_id: Number(formData.licenseTypeId),
         start_date: formData.startDate,
         end_date: formData.endDate,
-        information: formData.reason,
-        certificate
+        information: formData.reason
       };
+  
+      // Solo agregar certificado si hay documento
+      if (formData.documents) {
+        licenseData.certificate = {
+          validation: false,
+          file: await readFileAsBase64(formData.documents)
+        };
+      }
       
       // Enviar la solicitud
       await requestLicense(licenseData);
@@ -505,30 +516,47 @@ useEffect(() => {
             <FiUpload className="mr-2" /> Documentación Adjunta
           </h2>
           
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Adjuntar Documento (opcional)
-            </label>
-            <div className="mt-1 flex items-center">
-              <label className="cursor-pointer bg-white py-2 px-3 border border-gray-300 rounded-md shadow-sm text-sm leading-4 font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                <FiFileText className="inline mr-2 text-lg" />
-                Seleccionar archivo
-                <input
-                  type="file"
-                  name="documents"
-                  onChange={handleChange}
-                  className="hidden"
-                  accept=".pdf"
-                />
-              </label>
-              <span className="ml-2 text-sm text-gray-500">
-                {formData.documents ? formData.documents.name : 'Ningún archivo seleccionado'}
-              </span>
-            </div>
-            <p className="mt-1 text-xs text-gray-500">
-              Formatos aceptados: PDF (Máx. 10MB)
-            </p>
-          </div>
+          <FileValidator onValidation={(result) => {
+            if (!result.isValid && result.error) {
+              setNotification({ type: 'error', message: result.error });
+            }
+          }}>
+            {({ validateFile, error }) => (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Adjuntar Documento (opcional)
+                </label>
+                
+                <div className="mt-1 flex items-center">
+                  <label className="cursor-pointer bg-white py-2 px-3 border border-gray-300 rounded-md shadow-sm text-sm leading-4 font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    <FiFileText className="inline mr-2 text-lg" />
+                    Seleccionar archivo
+                    <input
+                      type="file"
+                      name="documents"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (validateFile(file)) {
+                          handleChange(e);
+                        } else {
+                          e.target.value = ''; // Resetear input si no es válido
+                        }
+                      }}
+                      className="hidden"
+                      accept=".pdf,.png,.jpg,.jpeg"
+                    />
+                  </label>
+                  <span className="ml-2 text-sm text-gray-500">
+                    {formData.documents ? formData.documents.name : 'Ningún archivo seleccionado'}
+                  </span>
+                </div>
+                {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
+                <p className="mt-1 text-xs text-gray-500">
+                  Formatos aceptados: PDF, PNG, JPG, JPEG (Máx. 10MB)
+                </p>
+              </div>
+            )}
+          </FileValidator>
 
           {/* Declaración y Confirmación */}
           <div className="mt-6 p-4 bg-gray-50 rounded-md">

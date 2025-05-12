@@ -1,22 +1,14 @@
 import PropTypes from 'prop-types';
 
 /**
- * Componente para formatear fechas de manera genérica con soporte para UTC y zona horaria local
+ * Componente para formatear fechas siempre en hora de Argentina (GMT-3)
  * @param {string} dateString - La fecha a formatear (en formato ISO o similar)
- * @param {string} [dateFormat] - Formato para la fecha (por defecto 'es-AR')
- * @param {string} [timeFormat] - Formato para la hora (por defecto 'es-AR')
  * @param {boolean} [showTime=true] - Si debe mostrar la hora
- * @param {boolean} [utc=false] - Si debe forzar el uso de UTC
- * @param {string} [timeZone='America/Argentina/Buenos_Aires'] - Zona horaria a usar
  * @returns {object} Objeto con las propiedades formateadas { date, time, datetime }
  */
 export const FormattedDate = ({ 
   dateString, 
-  dateFormat = 'es-AR', 
-  timeFormat = 'es-AR',
-  showTime = true,
-  utc = false,
-  timeZone = 'America/Argentina/Buenos_Aires'
+  showTime = true
 }) => {
   if (!dateString) {
     return {
@@ -27,14 +19,20 @@ export const FormattedDate = ({
   }
 
   try {
+    // Crear fecha y ajustar a GMT-3 (Argentina)
     const date = new Date(dateString);
+    
+    // Obtener diferencia horaria para Argentina (GMT-3)
+    const offsetArgentina = -3 * 60; // -3 horas en minutos
+    const localOffset = date.getTimezoneOffset(); // Offset local en minutos
+    const argentinaTime = new Date(date.getTime() + (localOffset - offsetArgentina) * 60000);
     
     // Opciones para formatear la fecha
     const dateOptions = { 
       day: '2-digit', 
       month: '2-digit', 
       year: 'numeric',
-      timeZone: utc ? 'UTC' : timeZone
+      timeZone: 'America/Argentina/Buenos_Aires'
     };
     
     // Opciones para formatear la hora
@@ -42,13 +40,13 @@ export const FormattedDate = ({
       hour: '2-digit', 
       minute: '2-digit',
       hour12: false,
-      timeZone: utc ? 'UTC' : timeZone
+      timeZone: 'America/Argentina/Buenos_Aires'
     };
     
     // Formatear componentes
-    const formattedDate = date.toLocaleDateString(dateFormat, dateOptions);
+    const formattedDate = argentinaTime.toLocaleDateString('es-AR', dateOptions);
     const formattedTime = showTime 
-      ? date.toLocaleTimeString(timeFormat, timeOptions) + ' hs' 
+      ? date.toLocaleTimeString('es-AR', timeOptions) + ' hs' 
       : null;
     
     return {
@@ -70,17 +68,9 @@ export const FormattedDate = ({
 
 FormattedDate.propTypes = {
   dateString: PropTypes.string,
-  dateFormat: PropTypes.string,
-  timeFormat: PropTypes.string,
-  showTime: PropTypes.bool,
-  utc: PropTypes.bool,
-  timeZone: PropTypes.string
+  showTime: PropTypes.bool
 };
 
 FormattedDate.defaultProps = {
-  dateFormat: 'es-AR',
-  timeFormat: 'es-AR',
-  showTime: true,
-  utc: false,
-  timeZone: 'America/Argentina/Buenos_Aires'
+  showTime: true
 };
