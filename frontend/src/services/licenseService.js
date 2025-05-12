@@ -139,3 +139,28 @@ export const evaluateLicense = async (licenseId, status, comment = '') => {
     };
   }
 };
+
+// Verificar coherencia de certificado
+export const analyzeCertificate = async (base64File) => {
+  try {
+    const response = await api.post('/api/licenses/certificate/coherence', {
+      file_base64: base64File
+    });
+    
+    return {
+      success: true,
+      data: response.data
+    };
+  } catch (error) {
+    console.error('Error al analizar el certificado', {
+      message: error.message,
+      response: error.response?.data,
+      config: error.config
+    });
+    
+    return {
+      success: false,
+      error: error.response?.data?.error || 'Error al analizar el certificado'
+    };
+  }
+};
