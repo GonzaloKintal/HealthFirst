@@ -26,7 +26,8 @@ def generate_coherence_model(cvs_path, TYPES):
                 f_u.normalize_text(x),
                 type_data["MUST"],
                 type_data["COULD"],
-                type_data["N_MIN"]
+                2,
+                1
             )
      )
         

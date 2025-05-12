@@ -117,14 +117,18 @@ TYPE_CONFIG = {
     "ESTUDIOS": {
         "NAME": "ESTUDIOS",
         "MUST": [
-            
+            ["estudiante","facultad", "universidad", "instituto","escuela"],
             ["examen", "final", "evaluacion","rendimiento","parcial/final"],
             ["asignatura", "materia", "actividad"],
             ["carrera", "propuesta"],
         ],
-        "COULD": ["regional", "modalidad", "ubicacion", "sede",
-                  "turno", "rendir", "realizar","hora","alumno",
-                  "alumna", "alumno/a", "estudiante","facultad", "universidad", "instituto","escuela",
+        "COULD": [
+            ["regional", "modalidad"],
+            ["ubicacion", "sede"],
+            ["turno"],
+            ["rendir","realizar"],
+            ["hora"],
+            ["alumno","alumna", "alumno/a"]
 ],
         "N_MIN": 0
     },
@@ -267,37 +271,44 @@ TYPE_CONFIG = {
 def pruebaRapida(): #borrar despues
     return TYPE_CONFIG
 
-def predict_license_type(base64_text):
-    "Toma un pdf en formato base64 y predice a que 3 tipos de licencia puede pertenecer"
-    model=joblib.load("prediction_type_model.pkl") #why? si no lo uso
-    license_text=f_u.normalize_text(f_u.base64_to_text(base64_text,f_u.is_pdf_image(base64_text))) #Tenemos el texto del certificado normalizado
-    return predict_top_3(license_text, model) #Lista de tupla como "("enfermedad",85%)"
-
 #a_predecir="HealthFirst/backend/backend/utils/pdf_imagen.pdf"
 #print(predict_license_type(f_u.pdf_to_base64(a_predecir)))
 
-def create_strict_feature(normalized_text, must_find, could_find, n_minimum):
-    """Recorre cada grupo de palabras claves y finalmente avisa si se encontraron en el texto normalizado de entrada """
+def create_strict_feature(normalized_text, must_find, could_find, must_weight, could_weight):
+    """
+    Recorre cada grupo de palabras clave y evalúa si se encuentran en el texto normalizado de entrada.
+    Calcula un puntaje basado en las palabras encontradas y sus respectivos pesos, devolviendo un porcentaje.
+    """
+    must_found = 0
+    could_found = 0
+    
+    # Calcula cuántas palabras clave "obligatorias" se encuentran
     for word_group in must_find:
         pattern = r'(?<!\w)(?:' + '|'.join([re.escape(w) for w in word_group]) + r')(?:[.:-]\S*|\s+)?'
-        if not re.search(pattern, normalized_text):
-            return 0
-    if n_minimum==0: ##no hace falta chequear palabras que podrian estar
-        return 1
-    count = 0
-    for word in could_find:
-        pattern = r'(?<!\w)' + re.escape(word) + r'(?:[.:-]\S*|\s+)?'
         if re.search(pattern, normalized_text):
-            count += 1
-            if count >= n_minimum:
-                return 1
-    return 0
+            must_found += 1
+
+    # Calcula cuántas palabras clave "opcionales" se encuentran
+    for word_group in could_find:
+        pattern = r'(?<!\w)(?:' + '|'.join([re.escape(w) for w in word_group]) + r')(?:[.:-]\S*|\s+)?'
+        if re.search(pattern, normalized_text):
+            could_found += 1
+
+    # Calcula el puntaje máximo basado en los pesos
+    max_score = (len(must_find) * must_weight) + (len(could_find) * could_weight)
+    
+    # Calcula el puntaje total y el porcentaje
+    if max_score > 0:
+        percentage =int(((must_found * must_weight + could_found * could_weight) / max_score) * 100)
+    else:
+        percentage = 0  # Si no hay palabras clave, el puntaje es 0
+    
+    return str(percentage)+"%"
+
 must_estudios = TYPE_CONFIG["ESTUDIOS"]["MUST"]
 could_estudios = TYPE_CONFIG["ESTUDIOS"]["COULD"]
-
 texto=f_u.normalize_text("Constancia de Examen Final: Apellido y Nombre: JIMENEZ FERRER CARLOS ALBERTO Identificacion: DNI 95879762 por la presente se certifica que la persona cuyos datos se citan anteriormente se presento a rendir el siguiente examen: Propuesta (R) Ingenieria Electronica Actividad: Ingenieria y Sociedad Fecha de examen: 12/01/2021 Ubicacion: campus. Se extiende  la presente constancia a pedido del interesado para ser presentada ante JEFE DE DEPARTAMENTO en CABA- Ciudad Autonoma de Buenos Aires., Ciudad Autonoma de Buenos Aires a los 14 dias del mes de enero de 2021. ")
-print(texto)
-print(create_strict_feature(texto,must_estudios,could_estudios,0))
+print(create_strict_feature(texto,must_estudios,could_estudios,2,1))
 
 #a_buscar=["instituto","examen","materia:","carrera:"]
 #print(f"a ver si encontramos:{f_u.search_in_pdf_text(texto,a_buscar)}")
@@ -372,3 +383,9 @@ def predict_top_3(certificate_text,model):
 #Matriz de confusion para ver que clases se confunden
 #print(confusion_matrix(y_test, y_pred, labels=model.classes_))
 
+
+def predict_license_type(base64_text):
+    "Toma un pdf en formato base64 y predice a que 3 tipos de licencia puede pertenecer"
+    model=joblib.load("prediction_type_model.pkl") #why? si no lo uso
+    license_text=f_u.normalize_text(f_u.base64_to_text(base64_text,f_u.is_pdf_image(base64_text))) #Tenemos el texto del certificado normalizado
+    return predict_top_3(license_text, model) #Lista de tupla como "("enfermedad",85%)"
