@@ -277,6 +277,7 @@ def predict_license_type(base64_text):
 #print(predict_license_type(f_u.pdf_to_base64(a_predecir)))
 
 def create_strict_feature(normalized_text, must_find, could_find, n_minimum):
+    print(must_find)
     """Recorre cada grupo de palabras claves y finalmente avisa si se encontraron en el texto normalizado de entrada """
     for word_group in must_find:
         pattern = r'(?<!\w)(?:' + '|'.join([re.escape(w) for w in word_group]) + r')(?:[.:-]\S*|\s+)?'
@@ -290,11 +291,15 @@ def create_strict_feature(normalized_text, must_find, could_find, n_minimum):
             if count >= n_minimum:
                 return 1
     return 0
-
 must_estudios = TYPE_CONFIG["ESTUDIOS"]["MUST"]
 could_estudios = TYPE_CONFIG["ESTUDIOS"]["COULD"]
-texto=f_u.normalize_text("Universidad Nacional de Córdoba - Facultad de Ciencias Económicas CERTIFICADO DE RENDIMIENTO Alumno: Lucía M. Fernández DNI 34.123.876 Carrera: Contador Público Materia: Impuestos II (Código: CP-410) Fecha: 10/07/2024 Nota: 8 (ocho) Tipo: Recuperatorio Sello UNC: 2024-ECON-345 Justificación: 2 días hábiles por examen Firma: Dr. Pablo Herrera")
-print(create_strict_feature(texto,must_estudios,could_estudios,1))
+
+texto=f_u.normalize_text("Instituto Superior de Técnicas Bancarias (ISTB) CERTIFICADO DE EXAMEN ESPECIAL Nombre: Diego A. Ríos DNI 32.456.321 Carrera: Tec. en Finanzas Materia: Análisis de Riesgo Crediticio Fecha: 28/08/2024 Horario: 09:00 a 12:00 hs Calificación: 9 (nueve) Validez: Para presentación ante empleadores según Convenio 543/2024 Firma: Lic. Silvana Castro (Reg. ISTB-2024)")
+
+(create_strict_feature(texto,must_estudios,could_estudios,1))
+
+#a_buscar=["instituto","examen","materia:","carrera:"]
+#print(f"a ver si encontramos:{f_u.search_in_pdf_text(texto,a_buscar)}")
 
 #Cargar el dataset basico
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))

@@ -35,7 +35,7 @@ def generate_coherence_model(cvs_path, TYPES):
     # Para verificar los primeros textos
     print(df[f"justify_ESTUDIOS"]) 
 
-print(generate_coherence_model("HealthFirst/backend/backend/utils/coherence_license_type_dataset.csv",pr.pruebaRapida()))
+#print(generate_coherence_model("HealthFirst/backend/backend/utils/coherence_license_type_dataset.csv",pr.pruebaRapida()))
 
 """
     #Entrenar el modelo
