@@ -157,8 +157,7 @@ const LicenseDetail = () => {
       const base64Data = license.certificate.file.includes(',') 
         ? license.certificate.file.split(',')[1]
         : license.certificate.file;
-        const [analysis, setAnalysis] = useState(null);
-        const [isAnalyzing, setIsAnalyzing] = useState(false);
+        
       const byteCharacters = atob(base64Data);
       const byteNumbers = new Array(byteCharacters.length);
       for (let i = 0; i < byteCharacters.length; i++) {
