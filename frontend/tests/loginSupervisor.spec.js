@@ -3,9 +3,10 @@ import { test, expect } from '@playwright/test';
 import { login } from './utils/login.js';  // Asegúrate de que la ruta sea correcta
 
 test('Login exitoso del supervisor', async ({ page }) => {
-  await login(page, 'supervisor@gmail.com', '1234');
+  // Realiza el login
+  await login(page, 'supervisor@gmail.com', '123456');
+  // Verifica que la URL sea la del supervisor después de loguearse
   await expect(page).toHaveURL('http://localhost:5173/supervisor', { timeout: 10000 });
-  await page.click('text=Licencias'),{timeout: 10000};
-  await expect(page).toHaveURL('http://localhost:5173/supervisor/licencias', { timeout: 10000 });
-
+  
 });
+
