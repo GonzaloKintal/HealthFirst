@@ -1,18 +1,17 @@
 import pandas as pd
 import joblib
 import numpy as np
+
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.pipeline import make_pipeline
 from file_utils import normalize_text
 
-
 _modelo = None
 
 def inicializar_modelo(ruta_csv='HealthFirst/backend/backend/utils/coherence_license_type_dataset.csv'):
-    """
-    Carga y entrena el modelo una sola vez
-    """
+    """Carga y entrena el modelo una sola vez """
+
     global _modelo
     
     if _modelo is None:
@@ -25,11 +24,7 @@ def inicializar_modelo(ruta_csv='HealthFirst/backend/backend/utils/coherence_lic
                 engine='python',
                 on_bad_lines='skip'
             )
-            required_cols = ['text', 'clase']
-            if not all(col in df.columns for col in required_cols):
-                raise ValueError(f"El CSV debe contener columnas: {required_cols}")
-            
-            df = df.dropna(subset=required_cols)
+
             df['text'] = df['text'].apply(normalize_text)
             return df['text'].tolist(), df['clase'].tolist()
 
@@ -37,8 +32,15 @@ def inicializar_modelo(ruta_csv='HealthFirst/backend/backend/utils/coherence_lic
         
         # 2. Crear y entrenar modelo con parámetros optimizados
         _modelo = make_pipeline(
-            TfidfVectorizer(max_features=1500, ngram_range=(1, 2)),
-            RandomForestClassifier(n_estimators=100, class_weight='balanced')
+            TfidfVectorizer(
+                max_features=1500,
+                ngram_range=(1, 2),
+                min_df=2
+                ),
+            RandomForestClassifier(
+                n_estimators=200,
+                class_weight='balanced',
+                )
         )
         _modelo.fit(textos, etiquetas)
         
@@ -46,6 +48,7 @@ def inicializar_modelo(ruta_csv='HealthFirst/backend/backend/utils/coherence_lic
         joblib.dump(_modelo, 'modelo_clasificador.joblib')
     
     return _modelo
+
 def predict_top_3(texto):
     """ Devuelve el top 3 de predicciones [('Estudios', '86.0%'), ('Asistencia_familiar', '6.0%'),
     ('Mudanza', '4.0%')]"""
@@ -57,7 +60,6 @@ def predict_top_3(texto):
     
     probas = _modelo.predict_proba([normalize_text(texto)])[0]
     
-    # Convertir a tipos nativos de Python y formatear
     resultados = [
         (str(clase),  
         f"{prob*100:.1f}%"  # Formato porcentaje
@@ -69,9 +71,7 @@ def predict_top_3(texto):
 
 if __name__ == "__main__":
     # 1. Inicializar modelo
-    print("Entrenando modelo...")
     inicializar_modelo()
-    
     #Para probar
-    texto="Acta de citación n.º 2247-2024 – Juzgado Nacional en lo Criminal y Correccional N.º 21 – Fecha de audiencia: 12/12/2024 – Hora: 09:00 – Expediente: C-12458/2023 – Ciudadano citado: Ramírez, Cecilia Noemí (DNI 31.220.567) – Motivo: Citación obligatoria en carácter de testigo en causa penal caratulada Gutiérrez, Marcelo s/ Robo agravado – Sede: Talcahuano 550, CABA – Juez a cargo: Dr. Esteban Di Lorenzo – Sello: JNCyC21-CABA-2024-2247"
+    texto="REPÚBLICA ARGENTINA PROVINCIA DE MENDOZA REGISTRO CIVIL DE GUAYMALLÉN ACTA DE NACIMIENTO N° 7890-2024 INSCRIPCIÓN TARDÍA N° 234 FECHA DE TRAMITE: 22/06/2024 LIBRO 12 FOLIO 90 APELLIDO Y NOMBRES: LÓPEZ MATEO JAVIER SEXO: MASCULINO FECHA DE NACIMIENTO: 10/01/2020 LUGAR: DOMICILIO PARTICULAR CALLE SAN MARTÍN 123 PADRE: LÓPEZ ROBERTO DNI 29.678.901 MADRE: DÍAZ JULIETA DNI 31.789.012 DECLARACIÓN JURADA PRESENTADA EL 15/06/2024 FIRMADO POR: DRA. MARÍA INÉS SUÁREZ MATRÍCULA 67.890 Sello Electrónico: RCMZA-2024-45678"
     print(predict_top_3(texto))
