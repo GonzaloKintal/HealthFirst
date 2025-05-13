@@ -35,21 +35,6 @@ def normalize_text(text):
     return text
 
 
-"""
-def normalize_text(text):
-    Normaliza texto: minúsculas, sin tildes, sin puntuación, conserva ñ/Ñ
-    clean_text = []
-    for char in text:
-        if char in ['ñ', 'Ñ']:
-            clean_text.append(char)
-        else:
-            normalized_char = unicodedata.normalize('NFD', char)
-            clean_text.append(''.join(c for c in normalized_char if unicodedata.category(c) != 'Mn'))
-    text = ''.join(clean_text).lower()
-    text = re.sub(r'[^\wñÑ\s]', '', text)
-    text = re.sub(r'\s+', ' ', text).strip()
-    return text
-"""
 def base64_to_text(base64_pdf, is_image=False):
     """Decodifica base64 y extrae texto,le tenes que avisar avisar si pdf imagen"""
     try:
@@ -132,3 +117,6 @@ def search_in_pdf_text(text, search_terms):
             if term_str not in text_lower:
                 return False
     return True
+
+texto="REPÚBLICA ARGENTINA PROVINCIA DE MENDOZA REGISTRO CIVIL DE GUAYMALLÉN ACTA DE NACIMIENTO N° 7890-2024 INSCRIPCIÓN TARDÍA N° 234 FECHA DE TRAMITE: 22/06/2024 LIBRO 12 FOLIO 90 APELLIDO Y NOMBRES: LÓPEZ MATEO JAVIER SEXO: MASCULINO FECHA DE NACIMIENTO: 10/01/2020 LUGAR: DOMICILIO PARTICULAR CALLE SAN MARTÍN 123 PADRE: LÓPEZ ROBERTO DNI 29.678.901 MADRE: DÍAZ JULIETA DNI 31.789.012 DECLARACIÓN JURADA PRESENTADA EL 15/06/2024 FIRMADO POR: DRA. MARÍA INÉS SUÁREZ MATRÍCULA 67.890 Sello Electrónico: RCMZA-2024-45678"
+print(search_dni_in_text(texto,"31.789.012"))
