@@ -14,7 +14,7 @@ class LicenseValidationError(Exception): # para las excepiones
 
 def license_analysis(license): #se le pasa el id de la solicitud
 
-    if license.type.name== "Vacaciones" and license.required_days > calculate_total_vacation_days(license.user,license):
+    if license.type.name== "Vacaciones" and license.required_days > calculate_total_vacation_days(license.user):
         raise LicenseValidationError ("No posee los dias suficientes para solicitar vacaciones") #actualizo la cantidad de dias que tiene por vacaciones
     
     current_date = date.today()
@@ -37,7 +37,7 @@ def license_analysis(license): #se le pasa el id de la solicitud
     
     #Minimo de preaviso
  
-    days_until_license = (start_date - request_date.date()).days
+    days_until_license = (start_date - request_date).days
     
 
     if days_until_license < license.type.min_advance_notice_days :
