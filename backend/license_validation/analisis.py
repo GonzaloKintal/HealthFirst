@@ -1,4 +1,4 @@
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 import os
 import django
 from django.db.models import Sum
@@ -54,6 +54,10 @@ def calculate_total_vacation_days(user): # se obtienen el total de dias para las
          raise LicenseValidationError("El usuario no tiene una fecha de ingreso registrada")
 
     seniority_days = last_date - user.employment_start_date
+
+    if(seniority_days.days < 180 ):
+        return get_business_days(user.employment_start_date,last_date)//20
+    
     seniority_years = seniority_days.days // 365  # obtengo la antiguedad del empleado
 
     days = 0
@@ -90,6 +94,15 @@ def get_res_lim(user, license): # se obtienen los pedidos que ya realizó, retor
         ).count()
     
     return approved_requests_count
+
+def get_business_days(start_date,last_date):
+    business_days = 0
+    current_date= start_date
+    while current_date <= last_date:
+         if(current_date.weekday() < 5): # si es un dia de semana(dia habil)
+             business_days += 1
+         current_date += timedelta(days=1)
+    return business_days
 
 
 
