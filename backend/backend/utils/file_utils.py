@@ -17,6 +17,39 @@ def is_pdf_image(base64_pdf):
    text = extract_text(BytesIO(pdf_bytes))
    return not bool(text.strip())  # True si NO hay texto
 
+def normalize_text(text):
+    """Normaliza texto: minúsculas, sin tildes, sin puntuación, conserva ñ/Ñ"""
+    if not isinstance(text, str):
+        return ""  # Maneja valores no-string
+    
+    clean_text = []
+    for char in text:
+        if char in ['ñ', 'Ñ']:
+            clean_text.append(char)
+        else:
+            normalized_char = unicodedata.normalize('NFD', char)
+            clean_text.append(''.join(c for c in normalized_char if unicodedata.category(c) != 'Mn'))
+    text = ''.join(clean_text).lower()
+    text = re.sub(r'[^\wñÑ\s]', '', text)  # Remueve puntuación pero conserva espacios
+    text = re.sub(r'\s+', ' ', text).strip()
+    return text
+
+
+"""
+def normalize_text(text):
+    Normaliza texto: minúsculas, sin tildes, sin puntuación, conserva ñ/Ñ
+    clean_text = []
+    for char in text:
+        if char in ['ñ', 'Ñ']:
+            clean_text.append(char)
+        else:
+            normalized_char = unicodedata.normalize('NFD', char)
+            clean_text.append(''.join(c for c in normalized_char if unicodedata.category(c) != 'Mn'))
+    text = ''.join(clean_text).lower()
+    text = re.sub(r'[^\wñÑ\s]', '', text)
+    text = re.sub(r'\s+', ' ', text).strip()
+    return text
+"""
 def base64_to_text(base64_pdf, is_image=False):
     """Decodifica base64 y extrae texto,le tenes que avisar avisar si pdf imagen"""
     try:
@@ -40,16 +73,6 @@ def base64_to_text(base64_pdf, is_image=False):
         if os.path.exists("temp.pdf"):
             os.remove("temp.pdf")
 
-
-def normalize_text(text): 
-    """Normaliza el texto (todo minúscula, sin tildes), mantiene ñ y Ñ"""
-    clean_text = []
-    for char in text:
-        if char in ['ñ','Ñ']:
-            clean_text.append(char)
-        else:
-            clean_text.append(''.join(c for c in unicodedata.normalize('NFD', char) if unicodedata.category(c) != 'Mn'))
-    return ''.join(clean_text).lower()
 
 #Solo para testing
 def pdf_to_base64(pdf_path):
@@ -109,14 +132,3 @@ def search_in_pdf_text(text, search_terms):
             if term_str not in text_lower:
                 return False
     return True
-
-#Paso el base64 a texto~
-#texto=base64_to_text("C:/Users/Usuario/Documents/LABORATORIO/certificados/texto_prueba.pdf",is_image=True)
-#texto=base64_a_texto(texto_base64,es_imagen=True)
-#print(texto)
-#Los datos del empleado que voy a buscar en el pdf
-#search_term = ["2020","11222333","Docente"] 
-
-# Aviso si encontre lo que buscaba
-#found = search_in_pdf_base64(texto, search_term)
-#print(f"¿Se encontró '{search_term}' en el PDF? {found}")
