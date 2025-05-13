@@ -37,7 +37,7 @@ def license_analysis(license): #se le pasa el id de la solicitud
     
     #Minimo de preaviso
  
-    days_until_license = (start_date - request_date).days
+    days_until_license = (start_date - request_date.date()).days
     
 
     if days_until_license < license.type.min_advance_notice_days :
