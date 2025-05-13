@@ -73,5 +73,5 @@ if __name__ == "__main__":
     # 1. Inicializar modelo
     inicializar_modelo()
     #Para probar
-    texto="REPÚBLICA ARGENTINA PROVINCIA DE MENDOZA REGISTRO CIVIL DE GUAYMALLÉN ACTA DE NACIMIENTO N° 7890-2024 INSCRIPCIÓN TARDÍA N° 234 FECHA DE TRAMITE: 22/06/2024 LIBRO 12 FOLIO 90 APELLIDO Y NOMBRES: LÓPEZ MATEO JAVIER SEXO: MASCULINO FECHA DE NACIMIENTO: 10/01/2020 LUGAR: DOMICILIO PARTICULAR CALLE SAN MARTÍN 123 PADRE: LÓPEZ ROBERTO DNI 29.678.901 MADRE: DÍAZ JULIETA DNI 31.789.012 DECLARACIÓN JURADA PRESENTADA EL 15/06/2024 FIRMADO POR: DRA. MARÍA INÉS SUÁREZ MATRÍCULA 67.890 Sello Electrónico: RCMZA-2024-45678"
+    texto="Convocatoria urgente - Sindicato de Empleados de Comercio - Delegado/a: Carlos Alberto Rodríguez (legajo 67890) - Fecha: 18/10/2024 - Hora: 10:00 - Lugar: Sede Gremial (Mitre 567, Rosario) - Motivo: Tratamiento de despidos injustificados en cadena de supermercados 'La Económica' - Eximir presentación laboral según Art. 42 Ley 23.551 - Firma: Ana Fernández (Secretaria de Conflictos SEC Rosario) - Contacto: 341-5551234"
     print(predict_top_3(texto))
