@@ -17,6 +17,20 @@ def is_pdf_image(base64_pdf):
    text = extract_text(BytesIO(pdf_bytes))
    return not bool(text.strip())  # True si NO hay texto
 
+def normalize_text(text):
+    """Normaliza texto: minúsculas, sin tildes, sin puntuación, conserva ñ/Ñ"""
+    clean_text = []
+    for char in text:
+        if char in ['ñ', 'Ñ']:
+            clean_text.append(char)
+        else:
+            normalized_char = unicodedata.normalize('NFD', char)
+            clean_text.append(''.join(c for c in normalized_char if unicodedata.category(c) != 'Mn'))
+    text = ''.join(clean_text).lower()
+    text = re.sub(r'[^\wñÑ\s]', '', text)
+    text = re.sub(r'\s+', ' ', text).strip()
+    return text
+
 def base64_to_text(base64_pdf, is_image=False):
     """Decodifica base64 y extrae texto,le tenes que avisar avisar si pdf imagen"""
     try:
@@ -39,47 +53,6 @@ def base64_to_text(base64_pdf, is_image=False):
     finally:
         if os.path.exists("temp.pdf"):
             os.remove("temp.pdf")
-
-
-"""def normalize_text(text): 
-    Normaliza el texto (todo minúscula, sin tildes), mantiene ñ y Ñ
-    clean_text = []
-    for char in text:
-        if char in ['ñ','Ñ']:
-            clean_text.append(char)
-        else:
-            clean_text.append(''.join(c for c in unicodedata.normalize('NFD', char) if unicodedata.category(c) != 'Mn'))
-    return ''.join(clean_text).lower()"""
-
-def normalize_text(text):
-    """Normaliza texto: minúsculas, sin tildes, sin puntuación, espacios simples, conserva ñ/Ñ"""
-    # Paso 1: Eliminar tildes pero conservar ñ/Ñ
-    clean_text = []
-    for char in text:
-        if char in ['ñ', 'Ñ']:
-            clean_text.append(char)
-        else:
-            normalized_char = unicodedata.normalize('NFD', char)
-            clean_text.append(''.join(c for c in normalized_char if unicodedata.category(c) != 'Mn'))
-    text = ''.join(clean_text).lower()
-    
-    # Paso 2: Eliminar todo excepto letras, números, espacios y ñ/Ñ
-    text = re.sub(r'[^\wñÑ\s]', '', text)
-    
-    # Paso 3: Normalizar espacios
-    text = re.sub(r'\s+', ' ', text).strip()
-    
-    return text
-texto="Acta de citación n.º 2247-2024 – Juzgado Nacional en lo Criminal y Correccional N.º 21 – Fecha de audiencia: 12/12/2024 – Hora: 09:00 – Expediente: C-12458/2023 – Ciudadano citado: Ramírez, Cecilia Noemí (DNI 31.220.567) – Motivo: Citación obligatoria en carácter de testigo en causa penal caratulada Gutiérrez, Marcelo s/ Robo agravado – Sede: Talcahuano 550, CABA – Juez a cargo: Dr. Esteban Di Lorenzo – Sello: JNCyC21-CABA-2024-2247"
-print(normalize_text(texto))
-
-def words_from_set(text,set):
-    count_words=0
-    for word in text:
-        if word in set:
-            count_words+=1
-    return count_words
-
 
 
 #Solo para testing
@@ -140,14 +113,3 @@ def search_in_pdf_text(text, search_terms):
             if term_str not in text_lower:
                 return False
     return True
-
-#Paso el base64 a texto~
-#texto=base64_to_text("C:/Users/Usuario/Documents/LABORATORIO/certificados/texto_prueba.pdf",is_image=True)
-#texto=base64_a_texto(texto_base64,es_imagen=True)
-#print(texto)
-#Los datos del empleado que voy a buscar en el pdf
-#search_term = ["2020","11222333","Docente"] 
-
-# Aviso si encontre lo que buscaba
-#found = search_in_pdf_base64(texto, search_term)
-#print(f"¿Se encontró '{search_term}' en el PDF? {found}")
