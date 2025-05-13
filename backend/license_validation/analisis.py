@@ -1,4 +1,4 @@
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 import os
 import django
 from django.db.models import Sum
@@ -6,91 +6,103 @@ from django.db.models import Sum
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'backend.settings')
 django.setup()
 
-from dashboard_api.models import License, HealthFirstUser
-
+from dashboard_api.models import License
 
 class LicenseValidationError(Exception): # para las excepiones
     pass
 
 
-def license_analysis(licencia): #se le pasa el id de la solicitud
+def license_analysis(license): #se le pasa el id de la solicitud
 
-    if licencia.type.name== "Vacaciones" and licencia.required_days > calculate_total_vacation_days(licencia.user,licencia):
+    if license.type.name== "Vacaciones" and license.required_days > calculate_total_vacation_days(license.user):
         raise LicenseValidationError ("No posee los dias suficientes para solicitar vacaciones") #actualizo la cantidad de dias que tiene por vacaciones
     
-    fecha_actual = date.today()
-    fecha_inicio = licencia.start_date
-    fecha_solicitud = licencia.request_date
+    current_date = date.today()
+    start_date = license.start_date
+    request_date = license.request_date
     
-    if fecha_inicio < fecha_actual:
+    if start_date < current_date:
         raise LicenseValidationError ("La fecha del inicio de licencia es anterior a la actual")
     
-    if licencia.type.total_days_granted is not None and licencia.required_days > get_total_days_res(licencia.user,licencia) :
+    if license.type.total_days_granted is not None and license.required_days > get_total_days_res(license.user,license) :
         raise LicenseValidationError ("Los dias solicitados exceden los dias restantes que le quedan al empleado")
 
     #Limite en pedidos por año
-    if licencia.type.yearly_approved_requests is not None and get_res_lim(licencia.user,licencia) >= licencia.type.yearly_approved_requests :
+    if license.type.yearly_approved_requests is not None and get_res_lim(license.user,license) >= license.type.yearly_approved_requests :
         raise LicenseValidationError ("Se han completado el maximo de pedidos por año")
     
     #Dias corridos
-    if licencia.type.max_consecutive_days is not None and licencia.required_days > licencia.type.max_consecutive_days :
+    if license.type.max_consecutive_days is not None and license.required_days > license.type.max_consecutive_days :
         raise LicenseValidationError ("Excede los dias corridos para este tipo de licencia")
     
     #Minimo de preaviso
  
-    dias_hasta_licencia = (fecha_inicio - fecha_solicitud.date()).days
+    days_until_license = (start_date - request_date).days
     
 
-    if dias_hasta_licencia < licencia.type.min_advance_notice_days :
+    if days_until_license < license.type.min_advance_notice_days :
         raise LicenseValidationError ("No cumple con el minimo de dias de preaviso para solicitar la licencia")
     
 
-def calculate_total_vacation_days(usuario, licencia): # se obtienen el total de dias para las vacaciones
+def calculate_total_vacation_days(user): # se obtienen el total de dias para las vacaciones
 
-    anio_actual = datetime.now().year # obtengo el año actual
-    fecha_ultima = date(anio_actual, 12, 31) #se usa para calcular la antiguedad
+    current_year = datetime.now().year # obtengo el año actual
+    last_date = date(current_year, 12, 31) #se usa para calcular la antiguedad
     
 
-    if usuario.employment_start_date is None:
+    if user.employment_start_date is None:
          raise LicenseValidationError("El usuario no tiene una fecha de ingreso registrada")
 
-    antiguedad_dias = fecha_ultima - usuario.employment_start_date
-    antiguedad_anios = antiguedad_dias.days // 365  # obtengo la antiguedad del empleado
+    seniority_days = last_date - user.employment_start_date
+
+    if(seniority_days.days < 180 ):
+        return get_business_days(user.employment_start_date,last_date)//20
+    
+    seniority_years = seniority_days.days // 365  # obtengo la antiguedad del empleado
 
     days = 0
-    if antiguedad_anios <= 5:
+    if seniority_years <= 5:
         days = 14
-    elif 5 < antiguedad_anios <= 10:
+    elif 5 < seniority_years <= 10:
         days = 21
-    elif 10 < antiguedad_anios <= 20:
+    elif 10 < seniority_years <= 20:
         days = 28
     else:
         days = 35
 
     return days
 
-def get_total_days_res(user_id, licencia): # se obtienen el total de dias restantes que le quedan por tipo y empleado
-    dias_utilizados = License.objects.filter(
-        user=licencia.user,
-        type=licencia.type,
+def get_total_days_res(license): # se obtienen el total de dias restantes que le quedan por tipo y empleado
+    used_days = License.objects.filter(
+        user=license.user,
+        type=license.type,
         status__name="approved",
         is_deleted=False
     ).aggregate(total=Sum('required_days'))['total'] or 0  # si no hay registros, devuelve 0
 
-    dias_totales = licencia.type.total_days_granted - dias_utilizados
+    total_days = license.type.total_days_granted - used_days
 
-    return dias_totales
+    return total_days
 
-def get_res_lim(user, licencia): # se obtienen los pedidos que ya realizó, retorna 0 si no hay limite
+def get_res_lim(user, license): # se obtienen los pedidos que ya realizó, retorna 0 si no hay limite
     user_id=user.id
-    cant_pedidos_aprobados = License.objects.filter(
+    approved_requests_count = License.objects.filter(
             user_id=user_id,
-            type=licencia.type,
+            type=license.type,
             status__name="approved",
             is_deleted=False
         ).count()
     
-    return cant_pedidos_aprobados
+    return approved_requests_count
+
+def get_business_days(start_date,last_date):
+    business_days = 0
+    current_date= start_date
+    while current_date <= last_date:
+         if(current_date.weekday() < 5): # si es un dia de semana(dia habil)
+             business_days += 1
+         current_date += timedelta(days=1)
+    return business_days
 
 
 
