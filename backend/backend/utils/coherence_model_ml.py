@@ -73,5 +73,5 @@ if __name__ == "__main__":
     # 1. Inicializar modelo
     inicializar_modelo()
     #Para probar
-    texto="Convocatoria urgente - Sindicato de Empleados de Comercio - Delegado/a: Carlos Alberto Rodríguez (legajo 67890) - Fecha: 18/10/2024 - Hora: 10:00 - Lugar: Sede Gremial (Mitre 567, Rosario) - Motivo: Tratamiento de despidos injustificados en cadena de supermercados 'La Económica' - Eximir presentación laboral según Art. 42 Ley 23.551 - Firma: Ana Fernández (Secretaria de Conflictos SEC Rosario) - Contacto: 341-5551234"
+    texto="Citar a reunión gremial - Sindicato de Empleados de Comercio (SEC) - Delegado/a: María Laura Gómez (legajo 12345) - Fecha: 15/10/2024 - Hora: 14:00 - Lugar: Salón Sindical (Av. Rivadavia 1234, CABA) - Orden del día: 1) Análisis de paritarias 2024, 2) Condiciones de higiene en sucursales, 3) Elección de nueva comisión interna - Conforme al Art. 41 del CCT 130/75 - Presentarse con credencial gremial - Firma: Juan Pérez (Secretario General SEC Seccional CABA) - Contacto: reuniones@seccaba.org.ar"
     print(predict_top_3(texto))
