@@ -22,10 +22,8 @@ import magic
 import img2pdf
 from django.db import transaction
 from license_validation.analisis import license_analysis
-
-from backend.utils.predictions import predict_license_type;
 from backend.utils.file_utils import *
-
+from backend.utils.coherence_model_ml import predict_top_3
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
@@ -634,8 +632,8 @@ def upload_base64_file(request):
 
         if not base64_string:
             return JsonResponse({"error": "El campo 'file_base64' es obligatorio"}, status=400)
-
-        result = predict_license_type(base64_string)
+        text=base64_to_text(base64_string)
+        result = predict_top_3(text)
         parsed_result = {item[0]: item[1] for item in result}
 
 
