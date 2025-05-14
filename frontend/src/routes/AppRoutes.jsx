@@ -18,6 +18,8 @@ import AddUser from '../components/admin/AddUser';
 import EditUser from '../components/admin/EditUser';
 import MyDataPage from '../pages/employee/MyDataPage';
 import LicenseDetail from '../components/supervisor/LicenseDetail';
+import SettingsPage from '../pages/admin/SettingsPage';
+
 
 const AppRoutes = () => {
   return (
@@ -81,8 +83,16 @@ const AppRoutes = () => {
             </ProtectedRoute>
           } 
       />
-        
 
+      <Route 
+          path="/settings" 
+          element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <SettingsPage />
+            </ProtectedRoute>
+          } 
+        />
+        
         <Route 
           path="/supervisor/*" 
           element={

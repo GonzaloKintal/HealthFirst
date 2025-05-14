@@ -1,10 +1,10 @@
 
 import { useState, useEffect } from 'react';
-import { FiEdit, FiTrash2, FiPlus, FiUser, FiSearch, FiFilter, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
+import { FiEdit, FiTrash2, FiPlus, FiUser, FiSearch, FiFilter, FiChevronLeft, FiChevronRight, FiUsers } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
 import Confirmation from '../../components/utils/Confirmation';
 import { deleteUser, getUsersByFilter } from '../../services/userService';
-
+import Notification from '../../components/utils/Notification';
 const UsersPage = () => {
   const [users, setUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -17,6 +17,15 @@ const UsersPage = () => {
     totalUsers: 0
   });
   const [error, setError] = useState(null);
+  const [notification, setNotification] = useState({
+    show: false,
+    type: '',
+    message: ''
+  });
+
+  const authData = localStorage.getItem('auth_data');
+  const user = authData ? JSON.parse(authData).user : null;
+  const currentUserId = user?.id;
 
   // Obtener usuarios del backend
   useEffect(() => {
@@ -119,21 +128,24 @@ const UsersPage = () => {
   
   const confirmDelete = async () => {
     try {
-      // Guarda el estado actual por si necesitamos revertir
+      if (userToDelete === currentUserId) {
+        showNotification('error', 'No puedes eliminarte a ti mismo');
+        setShowDeleteConfirmation(false);
+        setUserToDelete(null);
+        return;
+      }
+
       const previousUsers = [...users];
       const previousPagination = {...pagination};
       
-      // Actualización optimista
       setUsers(previousUsers.filter(user => user.id !== userToDelete));
       setPagination(prev => ({
         ...prev,
         totalUsers: prev.totalUsers - 1
       }));
       
-      // Llama al servicio para eliminar el usuario en el backend
       await deleteUser(userToDelete);
       
-      // Manejo de paginación
       const usersLeftInPage = previousUsers.filter(user => user.id !== userToDelete).length;
       if (usersLeftInPage === 0 && previousPagination.currentPage > 1) {
         setPagination(prev => ({
@@ -142,15 +154,23 @@ const UsersPage = () => {
         }));
       }
       
+      showNotification('success', 'Usuario eliminado correctamente');
     } catch (error) {
       console.error('Error al eliminar usuario:', error);
+      showNotification('error', error.message || 'No se pudo eliminar el usuario');
       setUsers(previousUsers);
       setPagination(previousPagination);
-      setError('No se pudo eliminar el usuario. Por favor intenta nuevamente.');
     } finally {
       setShowDeleteConfirmation(false);
       setUserToDelete(null);
     }
+  };
+
+  const showNotification = (type, message) => {
+    setNotification({ show: true, type, message });
+    setTimeout(() => {
+      setNotification(prev => ({ ...prev, show: false }));
+    }, 5000);
   };
 
   // Colores según el rol
@@ -169,7 +189,10 @@ const UsersPage = () => {
     <div className="p-6">
       {/* Encabezado y contador */}
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Gestión de Usuarios</h1>
+        <h1 className="text-2xl font-bold flex items-center">
+          <FiUsers className="mr-2" />
+          Gestión de Usuarios
+        </h1>
         <div className="flex items-center space-x-4">
           <span className="text-sm text-gray-600">
             Mostrando {users.length} de {pagination.totalUsers} usuarios
@@ -376,6 +399,15 @@ const UsersPage = () => {
         cancelText="Cancelar"
         type="danger"
       />
+
+      {notification.show && (
+        <Notification 
+          type={notification.type} 
+          message={notification.message} 
+          onClose={() => setNotification(prev => ({ ...prev, show: false }))}
+        />
+      )}
+      
     </div>
   );
 };

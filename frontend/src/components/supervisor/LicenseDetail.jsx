@@ -269,6 +269,7 @@ const LicenseDetail = () => {
       </div>
 
       <div className="bg-white rounded-lg shadow overflow-hidden">
+
         <div className="p-6 space-y-6">
           {/* Sección de Acciones */}
           {license.status === 'pending' && canShowActions && (
@@ -327,6 +328,13 @@ const LicenseDetail = () => {
 
             </div>
           )}
+
+        {license.status === 'rejected' && license.rejectionReason && (
+          <div className="bg-red-50 p-3 rounded-md">
+            <p className="text-sm text-gray-500">Motivo de rechazo</p>
+            <p className="text-red-600 whitespace-pre-line">{license.rejectionReason}</p>
+          </div>
+        )}
           
           {/* Sección de Información del Empleado */}
           {(user?.role === 'admin' || user?.role === 'supervisor') && (
@@ -469,7 +477,7 @@ const LicenseDetail = () => {
                 )}
               </div>
 
-              {license.certificate?.file && (
+              {(user?.role === 'admin' || user?.role === 'supervisor') && license.certificate?.file && license.status === 'pending' && (
                 <button
                   onClick={handleAnalyzeCertificate}
                   disabled={isAnalyzing}
@@ -512,12 +520,6 @@ const LicenseDetail = () => {
                 </div>
               )}
 
-              {license.status === 'rejected' && license.rejectionReason && (
-                <div className="bg-red-50 p-3 rounded-md">
-                  <p className="text-sm text-gray-500">Motivo de rechazo</p>
-                  <p className="text-red-600 whitespace-pre-line">{license.rejectionReason}</p>
-                </div>
-              )}
             </div>
           </div>
 
