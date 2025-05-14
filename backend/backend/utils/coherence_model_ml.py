@@ -30,12 +30,12 @@ def train_and_save_model():
 
     model = make_pipeline(
         TfidfVectorizer(
-                max_features=1500,
+                max_features=5000,
                 ngram_range=(1, 2),
-                min_df=2       
+                min_df=2,     
         ),
         RandomForestClassifier(
-            n_estimators=200,
+            n_estimators=500,
             class_weight='balanced',    
         )
     )
