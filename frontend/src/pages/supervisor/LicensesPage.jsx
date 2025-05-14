@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FiSearch, FiFilter, FiDownload, FiEdit, FiTrash2, FiEye, FiPlus } from 'react-icons/fi';
+import { FiSearch, FiFilter, FiDownload, FiEdit, FiTrash2, FiEye, FiPlus, FiFileText } from 'react-icons/fi';
 import useAuth from '../../hooks/useAuth';
 import Confirmation from '../../components/utils/Confirmation';
 import { Link } from 'react-router-dom';
@@ -116,7 +116,10 @@ const LicensesPage = () => {
     <div className="p-6 relative">
       {/* Contenido principal */}
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Gestión de Licencias</h1>
+      <h1 className="text-2xl font-bold flex items-center">
+          <FiFileText className="mr-2" />
+          Gestión de Licencias
+        </h1>
         <div className="flex space-x-3">
           <Link
             to="/request-license"
@@ -125,10 +128,12 @@ const LicensesPage = () => {
             <FiPlus className="mr-2" />
             Solicitar Nueva
           </Link>
-          <button className="flex items-center px-4 py-2 bg-blue-600 text-white font-medium rounded-md cursor-pointer hover:bg-blue-700 transition duration-200">
-            <FiDownload className="mr-2" />
-            Exportar
-          </button>
+          {(user?.role === 'admin' || user?.role === 'supervisor') && (
+            <button className="flex items-center px-4 py-2 bg-blue-600 text-white font-medium rounded-md cursor-pointer hover:bg-blue-700 transition duration-200">
+              <FiDownload className="mr-2" />
+              Exportar
+            </button>
+          )}
         </div>
       </div>
 
