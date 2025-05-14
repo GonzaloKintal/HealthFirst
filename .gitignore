@@ -28,3 +28,4 @@ __pycache__/
 local.py
 backend/env/
 backend/venv/
+modelo_clasificador.joblib

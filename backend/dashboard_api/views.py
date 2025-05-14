@@ -625,6 +625,7 @@ def get_licenses_types(request):
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
 def upload_base64_file(request):
+
     try:
         body_unicode = request.body.decode('utf-8')
         body = json.loads(body_unicode)
@@ -632,10 +633,16 @@ def upload_base64_file(request):
 
         if not base64_string:
             return JsonResponse({"error": "El campo 'file_base64' es obligatorio"}, status=400)
-        text=base64_to_text(base64_string)
+
+        is_image=False
+
+        if is_pdf_image(base64_string):
+            is_image=True
+
+        text= base64_to_text(base64_string,is_image)
         result = predict_top_3(text)
         parsed_result = {item[0]: item[1] for item in result}
-
+ 
 
         if "error" in result:
             return JsonResponse(parsed_result, status=500)
