@@ -123,27 +123,3 @@ def search_in_pdf_text(text, search_terms):
             if term_str not in text_lower:
                 return False
     return True
-
-
-def base64_image_pdf_to_text(base64_pdf):
-    try:
-        # 1. Decodificar y guardar temporalmente el PDF
-        pdf_bytes = base64.b64decode(base64_pdf)
-        with open("temp.pdf", "wb") as f:
-            f.write(pdf_bytes)
-
-        # 2. Convertir cada página del PDF en imagen
-        images = convert_from_path("temp.pdf")
-
-        # 3. Aplicar OCR sobre cada imagen
-        text = ""
-        for img in images:
-            text += pytesseract.image_to_string(img, lang='spa')  # español
-        return text.strip()
-
-    except Exception as e:
-        print(f"Error: {e}")
-        return None
-    finally:
-        if os.path.exists("temp.pdf"):
-            os.remove("temp.pdf")
