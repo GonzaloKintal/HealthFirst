@@ -36,28 +36,34 @@ def normalize_text(text):
 
 
 def base64_to_text(base64_pdf, is_image=False):
-    """Decodifica base64 y extrae texto,le tenes que avisar avisar si pdf imagen"""
+    """Decodifica un PDF en base64 y extrae texto. Usa OCR si is_image=True."""
     try:
         pdf_bytes = base64.b64decode(base64_pdf)
         with open("temp.pdf", "wb") as temp_file:
             temp_file.write(pdf_bytes)
-        
+
+        text = ""
+
         if not is_image:
             with open("temp.pdf", "rb") as file:
-                text = "".join([page.extract_text() for page in PdfReader(file).pages])
+                reader = PdfReader(file)
+                for page in reader.pages:
+                    page_text = page.extract_text()
+                    if page_text:
+                        text += page_text
         else:
-            text = ""
-            for img in convert_from_path("temp.pdf"):
-                text += pytesseract.image_to_string(img) #si aclaro el idioma para las ñ Ñ se pone raro el tesseract (img, lang='spa') podria ver el tema de la configuracion 
-        return text
-    
+            images = convert_from_path("temp.pdf")
+            for img in images:
+                text += pytesseract.image_to_string(img, lang='spa')  # si tenés soporte
+
+        return text.strip()
+
     except Exception as e:
         print(f"Error: {e}")
         return None
     finally:
         if os.path.exists("temp.pdf"):
             os.remove("temp.pdf")
-
 
 #Solo para testing
 def pdf_to_base64(pdf_path):
