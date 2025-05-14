@@ -1,77 +1,65 @@
 import pandas as pd
 import joblib
-import numpy as np
-
+from pathlib import Path
+from functools import lru_cache
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.pipeline import make_pipeline
-from file_utils import normalize_text
+from .file_utils import normalize_text
 
-_modelo = None
+# Paths
+MODEL_PATH = Path(__file__).resolve().parent / 'modelo_clasificador.joblib'
+DATASET_PATH = Path(__file__).resolve().parent / 'coherence_license_type_dataset.csv'
 
-def inicializar_modelo(ruta_csv='HealthFirst/backend/backend/utils/coherence_license_type_dataset.csv'):
-    """Carga y entrena el modelo una sola vez """
 
-    global _modelo
-    
-    if _modelo is None:
-        # 1. Cargar y preparar datos
-        def cargar_datos(archivo_csv):
-            df = pd.read_csv(
-                archivo_csv,
-                delimiter=',',
-                quotechar='"',
-                engine='python',
-                on_bad_lines='skip'
-            )
+def load_data(csv_file: Path):
+    """Loads and normalizes the dataset from a CSV file."""
+    df = pd.read_csv(
+        csv_file,
+        delimiter=',',
+        quotechar='"',
+        engine='python',
+        on_bad_lines='skip'
+    )
+    df['text'] = df['text'].apply(normalize_text)
+    return df['text'].tolist(), df['clase'].tolist()
 
-            df['text'] = df['text'].apply(normalize_text)
-            return df['text'].tolist(), df['clase'].tolist()
 
-        textos, etiquetas = cargar_datos(ruta_csv)
-        
-        # 2. Crear y entrenar modelo con parámetros optimizados
-        _modelo = make_pipeline(
-            TfidfVectorizer(
+def train_and_save_model():
+    texts, labels = load_data(DATASET_PATH)
+
+    model = make_pipeline(
+        TfidfVectorizer(
                 max_features=1500,
                 ngram_range=(1, 2),
-                min_df=2
-                ),
-            RandomForestClassifier(
-                n_estimators=200,
-                class_weight='balanced',
-                )
+                min_df=2       
+        ),
+        RandomForestClassifier(
+            n_estimators=200,
+            class_weight='balanced',    
         )
-        _modelo.fit(textos, etiquetas)
-        
-        # Guardar modelo
-        joblib.dump(_modelo, 'modelo_clasificador.joblib')
-    
-    return _modelo
-
-def predict_top_3(texto):
-    """ Devuelve el top 3 de predicciones [('Estudios', '86.0%'), ('Asistencia_familiar', '6.0%'),
-    ('Mudanza', '4.0%')]"""
-
-    global _modelo
-    
-    if _modelo is None:
-        _modelo = joblib.load('modelo_clasificador.joblib') 
-    
-    probas = _modelo.predict_proba([normalize_text(texto)])[0]
-    
-    resultados = [
-        (str(clase),  
-        f"{prob*100:.1f}%"  # Formato porcentaje
-    ) for clase, prob in zip(_modelo.classes_, probas)]
-    
-    # Ordenar y tomar top 3
-    return sorted(resultados, key=lambda x: float(x[1][:-1]), reverse=True)[:3]
+    )
+    model.fit(texts, labels)
+    joblib.dump(model, MODEL_PATH)
+    return model
 
 
-if __name__ == "__main__":
-    # 1. Inicializar modelo
-    inicializar_modelo()
-    #Para probar
-    texto="Citar a reunión gremial - Sindicato de Empleados de Comercio (SEC) - Delegado/a: María Laura Gómez (legajo 12345) - Fecha: 15/10/2024 - Hora: 14:00 - Lugar: Salón Sindical (Av. Rivadavia 1234, CABA) - Orden del día: 1) Análisis de paritarias 2024, 2) Condiciones de higiene en sucursales, 3) Elección de nueva comisión interna - Conforme al Art. 41 del CCT 130/75 - Presentarse con credencial gremial - Firma: Juan Pérez (Secretario General SEC Seccional CABA) - Contacto: reuniones@seccaba.org.ar"
-    print(predict_top_3(texto))
+# @lru_cache(maxsize=1)
+def get_model():
+    if MODEL_PATH.exists():
+        return joblib.load(MODEL_PATH)
+    else:
+        return train_and_save_model()
+
+
+def predict_top_3(text):
+    model = get_model()
+    normalized_text = normalize_text(text)
+    probabilities = model.predict_proba([normalized_text])[0]
+
+    results = [
+        (str(label), f"{prob * 100:.1f}%")
+        for label, prob in zip(model.classes_, probabilities)
+    ]
+
+    return sorted(results, key=lambda x: float(x[1][:-1]), reverse=True)[:3]

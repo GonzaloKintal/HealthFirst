@@ -24,7 +24,7 @@ def license_analysis(license): #se le pasa el id de la solicitud
     if start_date < current_date:
         raise LicenseValidationError ("La fecha del inicio de licencia es anterior a la actual")
     
-    if license.type.total_days_granted is not None and license.required_days > get_total_days_res(license.user,license) :
+    if license.type.total_days_granted is not None and license.required_days > get_total_days_res(license) :
         raise LicenseValidationError ("Los dias solicitados exceden los dias restantes que le quedan al empleado")
 
     #Limite en pedidos por año
