@@ -141,45 +141,45 @@ const AddUser = () => {
       )}
       
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Crear Nuevo Usuario</h1>
+        <h1 className="text-2xl font-bold text-foreground">Crear Nuevo Usuario</h1>
       </div>
       
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Sección de Información Personal */}
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h2 className="text-xl font-semibold mb-4 flex items-center">
+        <div className="bg-background p-6 rounded-lg shadow">
+          <h2 className="text-xl font-semibold mb-4 flex items-center text-foreground">
             <FiUser className="mr-2" /> Información Personal
           </h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Nombre *</label>
+              <label className="block text-sm font-medium text-foreground mb-1">Nombre *</label>
               <input
                 type="text"
                 name="first_name"
                 value={formData.first_name}
                 onChange={handleChange}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-border rounded-md focus:ring-primary-border focus:border-primary-border bg-background"
                 placeholder="Ej: Luis"
               />
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Apellido *</label>
+              <label className="block text-sm font-medium text-foreground mb-1">Apellido *</label>
               <input
                 type="text"
                 name="last_name"
                 value={formData.last_name}
                 onChange={handleChange}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-border rounded-md focus:ring-primary-border focus:border-primary-border bg-background"
                 placeholder="Ej: Pérez"
               />
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-foreground mb-1">
                 DNI *
               </label>
               <input
@@ -189,25 +189,25 @@ const AddUser = () => {
                 onChange={handleChange}
                 required
                 pattern="\d{7,8}"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-border rounded-md focus:ring-primary-border focus:border-primary-border bg-background"
                 placeholder="Ej: 12345678"
               />
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de Nacimiento *</label>
+              <label className="block text-sm font-medium text-foreground mb-1">Fecha de Nacimiento *</label>
               <input
                 type="date"
                 name="date_of_birth"
                 value={formData.date_of_birth}
                 onChange={handleChange}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-border rounded-md focus:ring-primary-border focus:border-primary-border bg-background text-foreground"
               />
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Teléfono *</label>
+              <label className="block text-sm font-medium text-foreground mb-1">Teléfono *</label>
               <input
                 type="tel"
                 name="phone"
@@ -215,32 +215,32 @@ const AddUser = () => {
                 onChange={handleChange}
                 required
                 pattern="\d{10,15}"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-border rounded-md focus:ring-primary-border focus:border-primary-border bg-background"
                 placeholder="Ej: 1123456789"
               />
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Correo Electrónico *</label>
+              <label className="block text-sm font-medium text-foreground mb-1">Correo Electrónico *</label>
               <input
                 type="email"
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-border rounded-md focus:ring-primary-border focus:border-primary-border bg-background"
                 placeholder="Ej: usuario@empresa.com"
               />
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Departamento *</label>
+              <label className="block text-sm font-medium text-foreground mb-1">Departamento *</label>
               <select
                 name="department"
                 value={formData.department}
                 onChange={handleChange}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-border rounded-md focus:ring-primary-border focus:border-primary-border bg-background text-foreground"
               >
                 <option value="">Seleccionar departamento</option>
                 {departments.map(dept => (
@@ -250,48 +250,48 @@ const AddUser = () => {
             </div>
 
             <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de Ingreso a la Empresa *</label>
+              <label className="block text-sm font-medium text-foreground mb-1">Fecha de Ingreso a la Empresa *</label>
               <input
                 type="date"
                 name="employment_start_date"
                 value={formData.employment_start_date}
                 onChange={handleChange}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-border rounded-md focus:ring-primary-border focus:border-primary-border bg-background text-foreground"
               />
             </div>
           </div>
         </div>
 
          {/* Sección de Credenciales */}
-         <div className="bg-white p-6 rounded-lg shadow">
-           <h2 className="text-xl font-semibold mb-4 flex items-center">
+         <div className="bg-background p-6 rounded-lg shadow">
+           <h2 className="text-xl font-semibold mb-4 flex items-center text-foreground">
              <FiLock className="mr-2" /> Credenciales de Acceso
            </h2>
           
            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
              <div>
-               <label className="block text-sm font-medium text-gray-700 mb-1">Contraseña *</label>
+               <label className="block text-sm font-medium text-foreground mb-1">Contraseña *</label>
                <input
                 type="password"
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-border rounded-md focus:ring-primary-border focus:border-primary-border bg-background"
                 placeholder="Mínimo 6 caracteres"
               />
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Confirmar Contraseña *</label>
+              <label className="block text-sm font-medium text-foreground mb-1">Confirmar Contraseña *</label>
               <input
                 type="password"
                 name="confirmPassword"
                 value={formData.confirmPassword}
                 onChange={handleChange}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-border rounded-md focus:ring-primary-border focus:border-primary-border bg-background"
                 placeholder="Repite la contraseña"
               />
             </div>
@@ -299,25 +299,25 @@ const AddUser = () => {
         </div>
 
         {/* Sección de Rol */}
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h2 className="text-xl font-semibold mb-4 flex items-center">
+        <div className="bg-background p-6 rounded-lg shadow">
+          <h2 className="text-xl font-semibold mb-4 flex items-center text-foreground">
             <FiBriefcase className="mr-2" /> Rol y Permisos
           </h2>
           
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Rol del Usuario *</label>
+            <label className="block text-sm font-medium text-foreground mb-1">Rol del Usuario *</label>
             <select
               name="role_name"
               value={formData.role_name}
               onChange={handleChange}
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-2 border border-border rounded-md focus:ring-primary-border focus:border-primary-border bg-background text-foreground"
             >
               {roles.map(role => (
                 <option key={role.value} value={role.value}>{role.label}</option>
               ))}
             </select>
-            <p className="mt-1 text-xs text-gray-500">
+            <p className="mt-1 text-xs text-foreground">
               Seleccione el nivel de acceso que tendrá este usuario
             </p>
           </div>
@@ -327,14 +327,14 @@ const AddUser = () => {
         <div className="flex justify-end space-x-3">
           <Link
             to="/users"
-            className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 cursor-pointer"
+            className="px-4 py-2 border border-border rounded-md text-foreground hover:bg-card cursor-pointer"
           >
             Cancelar
           </Link>
 
           <button
             type="submit"
-            className={`px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center ${
+            className={`px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-hover flex items-center ${
               isSubmitting ? 'opacity-70 cursor-not-allowed' : 'cursor-pointer'
             }`}
             disabled={isSubmitting}

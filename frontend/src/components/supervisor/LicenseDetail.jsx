@@ -245,9 +245,9 @@ const LicenseDetail = () => {
         </div>
         <button 
           onClick={() => navigate(-1)}
-          className="mt-4 flex items-center text-blue-600 hover:text-blue-800 cursor-pointer"
+          className="mt-4 flex items-center text-primary-text cursor-pointer"
         >
-          <FiArrowLeft className="mr-2" /> Volver atrás
+          <FiArrowLeft className="mr-2 text-foreground" /> Volver atrás
         </button>
       </div>
     );
@@ -262,18 +262,18 @@ const LicenseDetail = () => {
       <div className="mb-6">
         <button 
           onClick={() => navigate(-1)}
-          className="flex items-center text-blue-600 hover:text-blue-800 cursor-pointer"
+          className="flex items-center text-primary-text cursor-pointer"
         >
           <FiArrowLeft className="mr-2" /> Volver atrás
         </button>
       </div>
 
-      <div className="bg-white rounded-lg shadow overflow-hidden">
+      <div className="bg-background rounded-lg shadow overflow-hidden">
 
         <div className="p-6 space-y-6">
           {/* Sección de Acciones */}
           {license.status === 'pending' && canShowActions && (
-            <div className="flex flex-col space-y-3 pb-4 border-b border-gray-200">
+            <div className="flex flex-col space-y-3 pb-4 border-b border-border">
               <div className="flex space-x-3">
                 <button
                   onClick={() => setShowApproveConfirmation(true)}
@@ -295,7 +295,7 @@ const LicenseDetail = () => {
                   value={rejectionReason}
                   onChange={(e) => setRejectionReason(e.target.value)}
                   placeholder="Ingrese el motivo del rechazo..."
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 resize-none"
+                  className="w-full p-2 border bg-background border-border rounded-md focus:ring-primary-border focus:border-primary-border resize-none text-foreground"
                   rows={3}
                   required
                 />
@@ -318,7 +318,7 @@ const LicenseDetail = () => {
                   </button>
                   <button
                     onClick={resetRejectionForm}
-                    className="px-3 py-1 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 text-sm cursor-pointer"
+                    className="px-3 py-1 bg-border text-foreground rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 text-sm cursor-pointer transition-colors"
                   >
                     Cancelar
                   </button>
@@ -329,43 +329,43 @@ const LicenseDetail = () => {
             </div>
           )}
 
-        {license.status === 'rejected' && license.rejectionReason && (
-          <div className="bg-red-50 p-3 rounded-md">
-            <p className="text-sm text-gray-500">Motivo de rechazo</p>
-            <p className="text-red-600 whitespace-pre-line">{license.rejectionReason}</p>
-          </div>
-        )}
+          {license.status === 'rejected' && license.rejectionReason && (
+            <div className="bg-rejected p-3 rounded-md">
+              <p className="text-sm text-foreground">Motivo de rechazo</p>
+              <p className="text-rejected whitespace-pre-line">{license.rejectionReason}</p>
+            </div>
+          )}
           
           {/* Sección de Información del Empleado */}
           {(user?.role === 'admin' || user?.role === 'supervisor') && (
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <h3 className="font-medium text-lg mb-3 flex items-center">
+            <div className="bg-card p-4 rounded-lg">
+              <h3 className="font-medium text-lg mb-3 flex items-center text-foreground">
                 <FiUser className="mr-2" /> Información del Empleado
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm text-gray-500">Nombre completo</p>
-                  <p className="font-medium">{license.employee}</p>
+                  <p className="text-sm text-foreground">Nombre completo</p>
+                  <p className="font-medium text-foreground">{license.employee}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">DNI</p>
-                  <p className="font-medium">{license.DNI}</p>
+                  <p className="text-sm text-foreground">DNI</p>
+                  <p className="font-medium text-foreground">{license.DNI}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Departamento/Área</p>
-                  <p className="font-medium">{license.department}</p>
+                  <p className="text-sm text-foreground">Departamento/Área</p>
+                  <p className="font-medium text-foreground">{license.department}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Email</p>
-                  <p className="font-medium">{license.email}</p>
+                  <p className="text-sm text-foreground">Email</p>
+                  <p className="font-medium text-foreground">{license.email}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Teléfono</p>
-                  <p className="font-medium">{license.phone ? `+54 ${license.phone}` : 'No disponible'}</p>
+                  <p className="text-sm text-foreground">Teléfono</p>
+                  <p className="font-medium text-foreground">{license.phone ? `+54 ${license.phone}` : 'No disponible'}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Fecha de Nacimiento</p>
-                  <p className="font-medium">
+                  <p className="text-sm text-foreground">Fecha de Nacimiento</p>
+                  <p className="font-medium text-foreground">
                     {license.dateOfBirth 
                       ? new Date(license.dateOfBirth).toLocaleDateString('es-AR', { 
                           timeZone: 'UTC',
@@ -381,30 +381,30 @@ const LicenseDetail = () => {
           )}
 
           {/* Sección de Detalles de la Licencia */}
-          <div className="bg-gray-50 p-4 rounded-lg">
-            <h3 className="font-medium text-lg mb-3 flex items-center">
+          <div className="bg-card p-4 rounded-lg">
+            <h3 className="font-medium text-lg mb-3 flex items-center text-foreground">
               <FiCalendar className="mr-2" /> Detalles de la Licencia
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <p className="text-sm text-gray-500">Tipo de Licencia</p>
-                <p className="font-medium capitalize">{license.type}</p>
+                <p className="text-sm text-foreground">Tipo de Licencia</p>
+                <p className="font-medium capitalize text-foreground">{license.type}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-500">Estado</p>
+                <p className="text-sm text-foreground">Estado</p>
                 <div className="flex items-center">
-                  <span className={`font-medium ${
+                  <span className={`font-medium text-foreground ${
                     license.status === 'approved' 
                       ? 'text-green-700' 
                       : license.status === 'rejected' 
-                        ? 'text-red-700' 
+                        ? 'text-red-500' 
                         : 'text-yellow-600'
                   }`}>
                     {license.status === 'approved' ? 'Aprobada' : 
                     license.status === 'rejected' ? 'Rechazada' : 'Pendiente'}
                     {(license.status === 'approved' || license.status === 'rejected') && 
                     ['admin', 'supervisor'].includes(user?.role) && (
-                      <span className="text-gray-600 text-sm font-normal ml-2">
+                      <span className="text-foreground text-sm font-normal ml-2">
                         por el {license.evaluatorRole === 'admin' ? 'administrador' : license.evaluatorRole} {license.evaluator} el {FormattedDate({ dateString: license.evaluationDate }).date}
                       </span>
                     )}
@@ -413,53 +413,53 @@ const LicenseDetail = () => {
               </div>
 
               <div>
-                <p className="text-sm text-gray-500">Fecha de Inicio</p>
-                <p className="font-medium">
+                <p className="text-sm text-foreground">Fecha de Inicio</p>
+                <p className="font-medium text-foreground">
                   {license.startDate ? FormattedDate({ dateString: license.startDate }).date : 'No disponible'}
                 </p>
               </div>
               <div>
-                <p className="text-sm text-gray-500">Fecha de Fin</p>
-                <p className="font-medium">
+                <p className="text-sm text-foreground">Fecha de Fin</p>
+                <p className="font-medium text-foreground">
                   {license.endDate ? FormattedDate({ dateString: license.endDate }).date : 'No disponible'}
                 </p>
               </div>
               <div>
-                <p className="text-sm text-gray-500">Días solicitados</p>
-                <p className="font-medium">{license.days} día(s)</p>
+                <p className="text-sm text-foreground">Días solicitados</p>
+                <p className="font-medium text-foreground">{license.days} día(s)</p>
               </div>
             </div>
           </div>
 
           {/* Sección de Justificación y Documentos */}
-          <div className="bg-gray-50 p-4 rounded-lg shadow">
-            <h3 className="font-medium text-lg mb-3 flex items-center">
+          <div className="bg-card p-4 rounded-lg shadow">
+            <h3 className="font-medium text-lg mb-3 flex items-center text-foreground">
               <FiFileText className="mr-2" /> Justificación
             </h3>
             
             <div className="space-y-4">
               <div>
-                <p className="text-sm text-gray-500">Motivo</p>
-                <p className="font-medium whitespace-pre-line">{license.information || 'No disponible'}</p>
+                <p className="text-sm text-foreground">Motivo</p>
+                <p className="font-medium whitespace-pre-line text-foreground">{license.information || 'No disponible'}</p>
               </div>
 
               {/* Documentación adjunta */}
               <div>
-                <p className="text-sm text-gray-500">Documentación adjunta</p>
+                <p className="text-sm text-foreground">Documentación adjunta</p>
                 {license.certificate?.file ? (
-                  <div className="bg-blue-100 p-3 rounded-md">
-                    <h4 className="font-medium mb-2">Certificado</h4>
+                  <div className="bg-special-light dark:bg-special-dark p-3 rounded-md">
+                    <h4 className="font-medium mb-2 text-foreground">Certificado</h4>
                     {license.certificate.upload_date && (
                       <div className="flex flex-col gap-1">
                         <div className="flex items-center gap-1">
-                          <p className="text-sm text-gray-500">Cargado el:</p>
-                          <p className="font-medium">
+                          <p className="text-sm text-foreground">Cargado el:</p>
+                          <p className="font-medium text-foreground">
                             {FormattedDate({ dateString: license.certificate.upload_date }).date}
                           </p>
                         </div>
                         <div className="flex items-center gap-1">
-                          <p className="text-sm text-gray-500">A las:</p>
-                          <p className="font-medium">
+                          <p className="text-sm text-foreground">A las:</p>
+                          <p className="font-medium text-foreground">
                             {FormattedDate({ dateString: license.certificate.upload_date }).time}
                           </p>
                         </div>
@@ -467,13 +467,13 @@ const LicenseDetail = () => {
                     )}
                     <button 
                       onClick={handleViewCertificate}
-                      className="mt-2 inline-flex items-center text-blue-600 hover:text-blue-800 cursor-pointer"
+                      className="mt-2 inline-flex items-center text-primary-text cursor-pointer"
                     >
                       <FiEye className="mr-1" /> Ver certificado
                     </button>
                   </div>
                 ) : (
-                  <p className="text-gray-400">No hay documentación adjunta</p>
+                  <p className="text-foreground">No hay documentación adjunta</p>
                 )}
               </div>
 
@@ -481,7 +481,7 @@ const LicenseDetail = () => {
                 <button
                   onClick={handleAnalyzeCertificate}
                   disabled={isAnalyzing}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center cursor-pointer disabled:bg-blue-500"
+                  className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-hover flex items-center cursor-pointer disabled:bg-blue-500"
                 >
                   {isAnalyzing ? (
                     <>
@@ -501,16 +501,16 @@ const LicenseDetail = () => {
               )}
 
               {analysis && (
-                <div className="bg-gray-50 p-3 rounded-md">
-                  <h4 className="font-medium mb-2">Resultados del análisis:</h4>
-                  <div className="border border-gray-200 rounded overflow-hidden max-w-md">
+                <div className="bg-card p-3 rounded-md">
+                  <h4 className="font-medium mb-2 text-foreground">Resultados del análisis:</h4>
+                  <div className="border border-border rounded overflow-hidden max-w-md">
                     {Object.entries(analysis).map(([key, value]) => (
-                      <div key={key} className="flex border-b border-gray-200 last:border-b-0">
-                        <div className="w-2/3 py-1 px-2 border-r border-gray-200">
-                          <span className="text-sm capitalize">{key.replace(/_/g, ' ')}</span>
+                      <div key={key} className="flex border-b border-border last:border-b-0">
+                        <div className="w-2/3 py-1 px-2 border-r border-border">
+                          <span className="text-sm capitalize text-foreground">{key.replace(/_/g, ' ')}</span>
                         </div>
                         <div className="w-1/3 py-1 px-2 text-right">
-                          <span className="text-sm font-medium">
+                          <span className="text-sm font-medium text-foreground">
                             {typeof value === 'number' ? `${Math.round(value * 100)}%` : value.toString()}
                           </span>
                         </div>
@@ -524,17 +524,17 @@ const LicenseDetail = () => {
           </div>
 
           {/* Botones de acción */}
-          <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+          <div className="flex justify-end space-x-3 pt-4 border-t border-border">
             <button
               onClick={() => navigate(-1)}
-              className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 cursor-pointer"
+              className="px-4 py-2 bg-card text-foreground rounded-md hover:bg-border cursor-pointer"
             >
               Volver
             </button>
             {(user?.role === 'admin' || (user?.role === 'supervisor' && license.status === 'pending')) && (
               <Link
                 to={`/edit-license/${license.id}`}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center"
+                className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-hover flex items-center"
               >
                 <FiEdit className="mr-2" /> Editar
               </Link>

@@ -156,3 +156,6 @@ SIMPLE_JWT = {
 
 
 AUTH_USER_MODEL = 'dashboard_api.HealthFirstUser'
+
+
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB

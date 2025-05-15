@@ -134,23 +134,23 @@ const MyDataPage = () => {
   }
 
   return (
-    <div className="p-6">
+    <div className="p-6 bg-background">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold flex items-center">
+        <h1 className="text-2xl font-bold flex items-center text-foreground">
           <FiUser className="mr-2" />
           Mis Datos
         </h1>
       </div>
 
-      <div className="bg-white p-6 rounded-lg shadow">
+      <div className="bg-card p-6 rounded-lg shadow">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {dataFields.map((data, index) => (
-            <div key={index} className="border-b border-gray-100 pb-4">
-              <div className="text-sm font-medium text-gray-500 flex items-center">
+            <div key={index} className="border-b border-border pb-4">
+              <div className="text-sm font-medium text-foreground flex items-center">
                 {data.icon}
                 {data.label}
               </div>
-              <div className="mt-1 text-lg font-medium text-gray-900">
+              <div className="mt-1 text-lg font-medium text-foreground">
                 {data.value || 'No especificado'}
               </div>
             </div>
@@ -159,9 +159,9 @@ const MyDataPage = () => {
       </div>
 
       {shouldShowUpdateMessage && (
-        <div className="mt-6 p-4 bg-blue-50 border-l-4 border-blue-400 rounded">
-          <p className="text-blue-700">
-            Para actualizar tus datos personales, por favor contacta a un <strong>administrador</strong> del sistema.
+        <div className="mt-6 p-4 bg-special-light dark:bg-special-dark border-l-4 border-primary-border rounded">
+          <p className="text-primary-text">
+            Para actualizar tus datos personales, por favor contacta a un <strong className="text-primary-text">administrador</strong> del sistema.
           </p>
         </div>
       )}

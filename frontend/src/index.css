@@ -1,1 +1,65 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root { 
+  /* Colores light mode */
+  --primary: #2563eb;       /* blue-600 */
+  --primary-hover: #1d4ed8; /* blue-700 */
+  --primary-text: #2563eb;  /* blue-600 */
+  --primary-border: #3b82f6;/* blue-500 */
+  
+  --background: #ffffff;
+  --foreground: #1f2937;    /* gray-800 */
+  --card: #f9fafb;          /* gray-50 */
+  --border: #e5e7eb;        /* gray-200 */
+
+  --special-bg-light: #dbeafe; /* bg-blue-100 */
+  --special-bg-dark: #1e3a8a;  /* bg-blue-900 */
+
+  --rejected-bg-light: #fee2e2;  /* red-50 */
+  --rejected-text-light: #dc2626; /* red-600 */
+}
+
+.dark {
+  /* Colores dark mode */
+  --primary: #1e40af;       /* blue-800 */
+  --primary-hover: #1e3a8a; /* blue-900 */
+  --primary-text: #93c5fd;  /* blue-300 */
+  --primary-border: #60a5fa;/* blue-400 */
+  
+  --background: #111827;    /* gray-900 */
+  --foreground: #f3f4f6;    /* gray-100 */
+  --card: #1f2937;          /* gray-800 */
+  --border: #374151;        /* gray-700 */
+
+  --special-bg-light: #1e3a8a;
+  --special-bg-dark: #dbeafe;
+
+  --rejected-bg-dark: #7f1d1d;   /* red-900 */
+  --rejected-text-dark: #fca5a5; /* red-300 */
+}
+
+.bg-special-light {
+    background-color: var(--special-bg-light);
+}
+
+.dark .bg-special-dark {
+    background-color: var(--special-bg-dark);
+}
+  
+.bg-rejected {
+    background-color: var(--rejected-bg-light);
+}
+  
+.dark .bg-rejected {
+    background-color: var(--rejected-bg-dark);
+}
+  
+.text-rejected {
+    color: var(--rejected-text-light);
+}
+  
+.dark .text-rejected {
+    color: var(--rejected-text-dark);
+}

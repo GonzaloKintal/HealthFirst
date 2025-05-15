@@ -19,12 +19,19 @@ import EditUser from '../components/admin/EditUser';
 import MyDataPage from '../pages/employee/MyDataPage';
 import LicenseDetail from '../components/supervisor/LicenseDetail';
 import SettingsPage from '../pages/admin/SettingsPage';
-
+import PublicRoute from './PublicRoute';
 
 const AppRoutes = () => {
   return (
     <Routes>
-      <Route path="/login" element={<LoginPage />} />
+      <Route 
+        path="/login" 
+        element={
+          <PublicRoute>
+            <LoginPage />
+          </PublicRoute>
+        } 
+      />
       
       <Route element={<DashboardLayout />}>
         {/* Redirección basada en rol */}

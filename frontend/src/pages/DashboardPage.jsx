@@ -10,8 +10,8 @@ import {
 const DashboardPage = () => {
   return (
     <main className="flex-1 p-6">
-      <div className="bg-white rounded-lg shadow p-6">
-        <h1 className="text-2xl font-bold text-gray-800">Bienvenido a tu Dashboard</h1>
+      <div className="bg-background rounded-lg shadow p-6">
+        <h1 className="text-2xl font-bold text-foreground">Bienvenido a tu Dashboard</h1>
         <p className="mt-2 text-gray-600">Este es un panel de control moderno construido con Tailwind CSS y React.</p>
         
         <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

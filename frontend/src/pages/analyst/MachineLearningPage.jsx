@@ -79,12 +79,12 @@ const MachineLearningPage = ({ activeTab }) => {
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold flex items-center">
+        <h1 className="text-2xl font-bold flex items-center text-foreground">
           <FiCpu className="mr-2" />
           Machine Learning
         </h1>
         <div className="flex space-x-3">
-          <label className="flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md shadow-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer transition duration-200">
+          <label className="flex items-center px-4 py-2 bg-background border border-border rounded-md shadow-sm font-medium text-foreground hover:bg-card cursor-pointer transition duration-200">
             <FiUpload className="mr-2" />
             Cargar Datos
             <input 
@@ -100,7 +100,7 @@ const MachineLearningPage = ({ activeTab }) => {
             className={`flex items-center px-4 py-2 rounded-md shadow-sm font-medium text-white cursor-pointer transition duration-200 ${
               !dataset || isTraining 
                 ? 'bg-blue-400 cursor-not-allowed' 
-                : 'bg-blue-600 hover:bg-blue-700'
+                : 'bg-primary hover:bg-primary-hover'
             }`}
           >
             <FiPlay className="mr-2" />
@@ -110,32 +110,32 @@ const MachineLearningPage = ({ activeTab }) => {
       </div>
 
       {user?.role === 'admin' && (
-        <div className="mt-6 p-4 bg-blue-50 border-l-4 border-blue-400 rounded">
-          <p className="text-blue-700">
-            <strong>Nota:</strong> Como administrador, puedes configurar los parámetros avanzados 
+        <div className="mt-6 p-4 bg-special-light dark:bg-special-dark border-l-4 border-primary-border rounded">
+          <p className="text-primary-text">
+            <strong className="text-primary-text">Nota:</strong> Como administrador, puedes configurar los parámetros avanzados 
             de los modelos de machine learning y acceder a todos los datos de entrenamiento.
           </p>
         </div>
       )}
 
-      <Tabs selectedIndex={tabIndex} onSelect={(index) => setTabIndex(index)} className="mt-6">
+      <Tabs selectedIndex={tabIndex} onSelect={(index) => setTabIndex(index)} className="mt-6 text-foreground">
         <TabList>
           <Tab>Dataset</Tab>
           <Tab>Modelo</Tab>
         </TabList>
 
         <TabPanel>
-          <div className="mt-6 bg-white rounded-lg shadow p-6">
+          <div className="mt-6 bg-background rounded-lg shadow p-6">
             {!dataset ? (
-              <div className="text-center py-12 border-2 border-dashed border-gray-300 rounded-lg">
+              <div className="text-center py-12 border-2 border-dashed border-border rounded-lg">
                 <FiFile className="mx-auto h-12 w-12 text-gray-400" />
-                <h3 className="mt-2 text-lg font-medium text-gray-900">
+                <h3 className="mt-2 text-lg font-medium text-foreground">
                   No hay dataset cargado
                 </h3>
-                <p className="mt-1 text-sm text-gray-500">
+                <p className="mt-1 text-sm text-foreground">
                   Sube un archivo CSV, Excel o JSON para comenzar
                 </p>
-                <label className="mt-5 inline-flex items-center px-4 py-2 bg-blue-600 rounded-md shadow-sm font-medium text-white hover:bg-blue-700 cursor-pointer transition duration-200">
+                <label className="mt-5 inline-flex items-center px-4 py-2 bg-primary rounded-md shadow-sm font-medium text-white hover:bg-primary-hover cursor-pointer transition duration-200">
                   <FiUpload className="mr-2" />
                   Seleccionar archivo
                   <input 
@@ -151,7 +151,7 @@ const MachineLearningPage = ({ activeTab }) => {
                 <div className="flex justify-between items-center mb-6">
                   <div>
                     <h2 className="text-lg font-medium">{dataset.name}</h2>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-foreground">
                       {dataset.rows} filas × {dataset.columns} columnas | Última modificación: {dataset.lastModified}
                     </p>
                   </div>
@@ -167,27 +167,27 @@ const MachineLearningPage = ({ activeTab }) => {
                   <h3 className="font-medium mb-2">Vista previa</h3>
                   <div className="border rounded-lg overflow-hidden">
                     <div className="overflow-x-auto">
-                      <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-50">
+                      <table className="min-w-full divide-y divide-border">
+                        <thead className="bg-card">
                           <tr>
                             {previewData.length > 0 && Object.keys(previewData[0]).map((key, idx) => (
                               <th 
                                 key={idx}
                                 scope="col"
-                                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                className="px-6 py-3 text-left text-xs font-medium text-foreground uppercase tracking-wider"
                               >
                                 {key}
                               </th>
                             ))}
                           </tr>
                         </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
+                        <tbody className="bg-background divide-y divide-border">
                           {previewData.map((row, rowIdx) => (
                             <tr key={rowIdx}>
                               {Object.values(row).map((value, colIdx) => (
                                 <td 
                                   key={colIdx}
-                                  className="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
+                                  className="px-6 py-4 whitespace-nowrap text-sm text-foreground"
                                 >
                                   {value}
                                 </td>
@@ -201,11 +201,11 @@ const MachineLearningPage = ({ activeTab }) => {
                 </div>
 
                 <div className="flex justify-end space-x-3">
-                  <button className="flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md shadow-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer transition duration-200">
+                  <button className="flex items-center px-4 py-2 bg-background border border-border rounded-md shadow-sm font-medium text-foreground hover:bg-card cursor-pointer transition duration-200">
                     <FiDownload className="mr-2" />
                     Exportar Dataset
                   </button>
-                  <label className="flex items-center px-4 py-2 bg-blue-600 rounded-md shadow-sm font-medium text-white hover:bg-blue-700 cursor-pointer transition duration-200">
+                  <label className="flex items-center px-4 py-2 bg-primary rounded-md shadow-sm font-medium text-white hover:bg-primary-hover cursor-pointer transition duration-200">
                     <FiUpload className="mr-2" />
                     Reemplazar
                     <input 
@@ -222,7 +222,7 @@ const MachineLearningPage = ({ activeTab }) => {
         </TabPanel>
 
         <TabPanel>
-          <div className="mt-6 bg-white rounded-lg shadow p-6">
+          <div className="mt-6 bg-background rounded-lg shadow p-6">
             <h2 className="text-lg font-medium mb-6">Modelo de Regresión Logística</h2>
             
             {isTraining && (
@@ -233,7 +233,7 @@ const MachineLearningPage = ({ activeTab }) => {
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2.5">
                   <div 
-                    className="bg-blue-600 h-2.5 rounded-full" 
+                    className="bg-primary h-2.5 rounded-full" 
                     style={{ width: `${trainingProgress}%` }}
                   ></div>
                 </div>
@@ -302,7 +302,7 @@ const MachineLearningPage = ({ activeTab }) => {
                 </div>
 
                 <div className="flex justify-end">
-                  <button className="flex items-center px-4 py-2 bg-blue-600 rounded-md shadow-sm font-medium text-white hover:bg-blue-700 cursor-pointer transition duration-200">
+                  <button className="flex items-center px-4 py-2 bg-primary rounded-md shadow-sm font-medium text-white hover:bg-primary-hover cursor-pointer transition duration-200">
                     <FiDownload className="mr-2" />
                     Exportar Modelo
                   </button>
@@ -311,10 +311,10 @@ const MachineLearningPage = ({ activeTab }) => {
             ) : (
               <div className="text-center py-12">
                 <FiBarChart2 className="mx-auto h-12 w-12 text-gray-400" />
-                <h3 className="mt-2 text-lg font-medium text-gray-900">
+                <h3 className="mt-2 text-lg font-medium text-foreground">
                   {dataset ? 'Modelo no entrenado' : 'Dataset no cargado'}
                 </h3>
-                <p className="mt-1 text-sm text-gray-500">
+                <p className="mt-1 text-sm text-foreground">
                   {dataset 
                     ? 'Entrena el modelo con el dataset cargado para ver las métricas' 
                     : 'Carga un dataset primero para poder entrenar el modelo'}
