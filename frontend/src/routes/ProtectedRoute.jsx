@@ -27,9 +27,7 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
   const rolesArray = Array.isArray(allowedRoles) ? allowedRoles : [allowedRoles];
   
   if (!rolesArray.includes(currentUser?.role)) {
-    return <Navigate to="/unauthorized" replace />;
-    // O podrías redirigir al dashboard del usuario:
-    // return <Navigate to={`/${currentUser?.role}`} replace />;
+    return <Navigate to={`/${currentUser?.role}`} replace />;
   }
   
   return children;

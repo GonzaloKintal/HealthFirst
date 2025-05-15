@@ -1,5 +1,3 @@
-
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FiSearch, FiFilter, FiDownload, FiEdit, FiTrash2, FiEye, FiPlus, FiFileText } from 'react-icons/fi';
@@ -112,24 +110,91 @@ const LicensesPage = () => {
     navigate(`/license-detail/${licenseId}`);
   };
 
+  const getStatusColors = (status) => {
+    const lightColors = {
+      approved: { 
+        bg: 'bg-green-100', 
+        text: 'text-green-800' 
+      },
+      rejected: { 
+        bg: 'bg-[var(--rejected-bg-light)]', 
+        text: 'text-[var(--rejected-text-light)]' 
+      },
+      pending: { 
+        bg: 'bg-yellow-100', 
+        text: 'text-yellow-800' 
+      },
+      default: { 
+        bg: 'bg-gray-100', 
+        text: 'text-foreground' 
+      }
+    };
+  
+    const darkColors = {
+      approved: { 
+        bg: 'dark:bg-green-900', 
+        text: 'dark:text-green-200' 
+      },
+      rejected: { 
+        bg: 'dark:bg-[var(--rejected-bg-dark)]', 
+        text: 'dark:text-[var(--rejected-text-dark)]' 
+      },
+      pending: { 
+        bg: 'dark:bg-yellow-700', 
+        text: 'dark:text-yellow-100' 
+      }
+    };
+  
+    // Combinamos los colores base con las variantes dark
+    const colors = {
+      approved: {
+        bg: `${lightColors.approved.bg} ${darkColors.approved.bg}`,
+        text: `${lightColors.approved.text} ${darkColors.approved.text}`
+      },
+      rejected: {
+        bg: `${lightColors.rejected.bg} ${darkColors.rejected.bg}`,
+        text: `${lightColors.rejected.text} ${darkColors.rejected.text}`
+      },
+      pending: {
+        bg: `${lightColors.pending.bg} ${darkColors.pending.bg}`,
+        text: `${lightColors.pending.text} ${darkColors.pending.text}`
+      },
+      default: {
+        bg: `${lightColors.default.bg} dark:bg-gray-800`,
+        text: lightColors.default.text
+      }
+    };
+  
+    return colors[status] || colors.default;
+  };
+
+const translateStatus = (status) => {
+  const statusMap = {
+    approved: 'Aprobada',
+    rejected: 'Rechazada',
+    pending: 'Pendiente'
+  };
+  return statusMap[status] || status;
+};
+
   return (
     <div className="p-6 relative">
       {/* Contenido principal */}
       <div className="flex justify-between items-center mb-6">
-      <h1 className="text-2xl font-bold flex items-center">
+      <h1 className="text-2xl font-bold flex items-center text-foreground">
           <FiFileText className="mr-2" />
           Gestión de Licencias
         </h1>
         <div className="flex space-x-3">
           <Link
             to="/request-license"
-            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            className="flex items-center px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-hover"
           >
             <FiPlus className="mr-2" />
             Solicitar Nueva
           </Link>
           {(user?.role === 'admin' || user?.role === 'supervisor') && (
-            <button className="flex items-center px-4 py-2 bg-blue-600 text-white font-medium rounded-md cursor-pointer hover:bg-blue-700 transition duration-200">
+            <button className="flex items-center px-4 py-2 bg-primary text-white font-medium rounded-md cursor-pointer hover:bg-primary-hover transition duration-200">
               <FiDownload className="mr-2" />
               Exportar
             </button>
@@ -144,8 +209,8 @@ const LicensesPage = () => {
         </div>
       )}
 
-      <div className="bg-white rounded-lg shadow overflow-hidden mb-6">
-        <div className="p-4 border-b border-gray-200 flex flex-col md:flex-row md:items-center space-y-3 md:space-y-0 md:space-x-4">
+      <div className="bg-background rounded-lg shadow overflow-hidden mb-6">
+        <div className="p-4 border-b border-border flex flex-col md:flex-row md:items-center space-y-3 md:space-y-0 md:space-x-4">
           <div className="relative flex-grow">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <FiSearch className="text-gray-400" />
@@ -153,7 +218,7 @@ const LicensesPage = () => {
             <input
               type="text"
               placeholder="Buscar empleado..."
-              className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none"
+              className="block w-full pl-10 pr-3 py-2 border border-border rounded-md focus:outline-none text-foreground bg-background"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -162,7 +227,7 @@ const LicensesPage = () => {
           <div className="flex items-center space-x-2">
             <FiFilter className="text-gray-400" />
             <select 
-              className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="border border-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-border focus:border-primary-border text-foreground bg-background"
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
             >
@@ -175,47 +240,44 @@ const LicensesPage = () => {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+          <table className="min-w-full divide-y divide-border">
+            <thead className="bg-card">
               <tr>
-                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Empleado</th>
-                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo</th>
-                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
-                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Días</th>
-                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
-                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Detalle</th>
+                <th className="px-6 py-3 text-center text-xs font-medium text-foreground uppercase tracking-wider">Empleado</th>
+                <th className="px-6 py-3 text-center text-xs font-medium text-foreground uppercase tracking-wider">Tipo</th>
+                <th className="px-6 py-3 text-center text-xs font-medium text-foreground uppercase tracking-wider">Fecha</th>
+                <th className="px-6 py-3 text-center text-xs font-medium text-foreground uppercase tracking-wider">Días</th>
+                <th className="px-6 py-3 text-center text-xs font-medium text-foreground uppercase tracking-wider">Estado</th>
+                <th className="px-6 py-3 text-center text-xs font-medium text-foreground uppercase tracking-wider">Detalle</th>
                 {canShowActions && (
-                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                  <th className="px-6 py-3 text-center text-xs font-medium text-foreground uppercase tracking-wider">Acciones</th>
                 )}
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-background divide-y divide-border">
               {filteredLicenses.map((license) => (
                 <tr key={license.id} className='text-center'>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="font-medium text-gray-900">{license.employee}</div>
+                    <div className="font-medium text-foreground">{license.employee}</div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 capitalize">{license.type}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground capitalize">{license.type}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground">
                     {license.startDate} al {license.endDate}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{license.days}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground">{license.days}</td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                      license.status === 'approved' 
-                        ? 'bg-green-100 text-green-800' 
-                        : license.status === 'rejected' 
-                          ? 'bg-red-100 text-red-800' 
-                          : 'bg-yellow-100 text-yellow-800'
-                    }`}>
-                      {license.status === 'approved' ? 'Aprobada' : 
-                       license.status === 'rejected' ? 'Rechazada' : 'Pendiente'}
-                    </span>
+                  <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                    getStatusColors(license.status).bg
+                  } ${
+                    getStatusColors(license.status).text
+                  }`}>
+                    {translateStatus(license.status)}
+                  </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <button
                       onClick={() => handleViewDetails(license.id)}
-                      className="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-50 cursor-pointer flex items-center mx-auto"
+                      className="text-primary-text hover:text-primary-hover p-1 rounded hover:bg-blue-50 cursor-pointer flex items-center mx-auto"
                       title="Ver detalle"
                     >
                       <FiEye size={18} className="mr-1" />
@@ -228,7 +290,7 @@ const LicensesPage = () => {
                     <div className="flex space-x-3 justify-center">
                       <Link
                         to={`/edit-license/${license.id}`}
-                        className="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-50 cursor-pointer"
+                        className="text-primary-text hover:text-primary-hover p-1 rounded hover:bg-blue-50 cursor-pointer"
                       >
                         <FiEdit size={18} />
                       </Link>
@@ -236,7 +298,7 @@ const LicensesPage = () => {
                       {user?.role === 'admin' && (
                         <button 
                           onClick={() => handleDelete(license.id)}
-                          className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50 cursor-pointer"
+                          className="text-red-500 hover:text-red-900 p-1 rounded hover:bg-red-50 cursor-pointer"
                           title="Eliminar"
                         >
                           <FiTrash2 size={18} />
@@ -253,7 +315,7 @@ const LicensesPage = () => {
       </div>
 
       {filteredLicenses.length === 0 && (
-        <div className="text-center py-12 text-gray-500">
+        <div className="text-center py-12 text-foreground">
           No se encontraron licencias que coincidan con los filtros
         </div>
       )}

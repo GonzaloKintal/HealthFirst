@@ -248,84 +248,84 @@ useEffect(() => {
       )}
       
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Editar Licencia</h1>
+        <h1 className="text-2xl font-bold text-foreground">Editar Licencia</h1>
       </div>
       
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Sección de Datos Personales (solo lectura) */}
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h2 className="text-xl font-semibold mb-4 flex items-center">
+        <div className="bg-background p-6 rounded-lg shadow">
+          <h2 className="text-xl font-semibold mb-4 flex items-center text-foreground">
             <FiUser className="mr-2" /> Datos del Solicitante
           </h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
+              <label className="block text-sm font-medium text-foreground mb-1">Nombre</label>
               <input
                 type="text"
                 value={applicantData.firstName}
                 readOnly
-                className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50"
+                className="w-full px-3 py-2 border border-border rounded-md text-foreground bg-background"
               />
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Apellido</label>
+              <label className="block text-sm font-medium text-foreground mb-1">Apellido</label>
               <input
                 type="text"
                 value={applicantData.lastName}
                 readOnly
-                className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50"
+                className="w-full px-3 py-2 border border-border rounded-md text-foreground bg-background"
               />
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">DNI</label>
+              <label className="block text-sm font-medium text-foreground mb-1">DNI</label>
               <input
                 type="text"
                 value={applicantData.dni}
                 readOnly
-                className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50"
+                className="w-full px-3 py-2 border border-border rounded-md text-foreground bg-background"
               />
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Departamento/Área</label>
+              <label className="block text-sm font-medium text-foreground mb-1">Departamento/Área</label>
               <input
                 type="text"
                 value={applicantData.department}
                 readOnly
-                className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50"
+                className="w-full px-3 py-2 border border-border rounded-md text-foreground bg-background"
               />
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
+              <label className="block text-sm font-medium text-foreground mb-1">Teléfono</label>
               <input
                 type="text"
                 value={applicantData.phone}
                 readOnly
-                className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50"
+                className="w-full px-3 py-2 border border-border rounded-md text-foreground bg-background"
               />
             </div>
           </div>
         </div>
 
         {/* Sección de Detalles de la Licencia (editable) */}
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h2 className="text-xl font-semibold mb-4 flex items-center">
+        <div className="bg-background p-6 rounded-lg shadow">
+          <h2 className="text-xl font-semibold mb-4 flex items-center text-foreground">
             <FiCalendar className="mr-2" /> Detalles de la Licencia
           </h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de Licencia *</label>
+              <label className="block text-sm font-medium text-foreground mb-1">Tipo de Licencia *</label>
               <select
                 name="licenseTypeId"
                 value={formData.licenseTypeId}
                 onChange={handleChange}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-border rounded-md focus:ring-primary-border focus:border-primary-border text-foreground bg-background"
               >
                 <option value="">Seleccionar tipo</option>
                 {licenseTypes.map(type => (
@@ -335,29 +335,29 @@ useEffect(() => {
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Días Solicitados</label>
+              <label className="block text-sm font-medium text-foreground mb-1">Días Solicitados</label>
               <input
                 type="text"
                 value={calculatedDays > 0 ? `${calculatedDays} día(s)` : 'Se calculará automáticamente'}
                 readOnly
-                className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50"
+                className="w-full px-3 py-2 border border-border rounded-md text-foreground bg-background"
               />
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de Inicio *</label>
+              <label className="block text-sm font-medium text-foreground mb-1">Fecha de Inicio *</label>
               <input
                 type="date"
                 name="startDate"
                 value={formData.startDate}
                 onChange={handleChange}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-border rounded-md focus:ring-primary-border focus:border-primary-border text-foreground bg-background"
               />
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de Fin *</label>
+              <label className="block text-sm font-medium text-foreground mb-1">Fecha de Fin *</label>
               <input
                 type="date"
                 name="endDate"
@@ -365,28 +365,28 @@ useEffect(() => {
                 onChange={handleChange}
                 required
                 min={formData.startDate}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-border rounded-md focus:ring-primary-border focus:border-primary-border text-foreground bg-background"
               />
             </div>
           </div>
           
           <div className="mt-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Motivo *</label>
+            <label className="block text-sm font-medium text-foreground mb-1">Motivo *</label>
             <textarea
               name="information"
               value={formData.information}
               onChange={handleChange}
               required
               rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 resize-none"
+              className="w-full px-3 py-2 border border-border rounded-md focus:ring-primary-border focus:border-primary-border resize-none text-foreground bg-background"
               placeholder="Describa el motivo de la licencia..."
             />
           </div>
         </div>
 
         {/* Sección de Documentación (editable) */}
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h2 className="text-xl font-semibold mb-4 flex items-center">
+        <div className="bg-background p-6 rounded-lg shadow">
+          <h2 className="text-xl font-semibold mb-4 flex items-center text-foreground">
             <FiUpload className="mr-2" /> Documentación Adjunta
           </h2>
           
@@ -397,21 +397,21 @@ useEffect(() => {
           }}>
             {({ validateFile, error }) => (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-foreground bg-background mb-1">
                   Adjuntar Documento (opcional)
                 </label>
                 
                 {existingDocument && !formData.documents && (
-                  <div className="mb-3 p-3 bg-gray-50 rounded-md flex items-center">
-                    <FiFileText className="text-gray-500 mr-2" />
+                  <div className="mb-3 p-3 bg-background rounded-md flex items-center text-foreground">
+                    <FiFileText className="text-foreground mr-2" />
                     <span className="text-sm">{existingDocument}</span>
                   </div>
                 )}
                 
                 <div className="mt-1 flex items-center">
-                  <label className="cursor-pointer bg-white py-2 px-3 border border-gray-300 rounded-md shadow-sm text-sm leading-4 font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                  <label className="cursor-pointer bg-background py-2 px-3 border border-border rounded-md shadow-sm text-sm leading-4 font-medium text-foreground hover:bg-card focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-border">
                     <FiFileText className="inline mr-2 text-lg" />
-                    {formData.documents ? 'Reemplazar archivo' : 'Seleccionar archivo'}
+                    {(formData.documents || existingDocument) ? 'Reemplazar archivo' : 'Seleccionar archivo'}
                     <input
                       type="file"
                       name="documents"
@@ -428,13 +428,13 @@ useEffect(() => {
                     />
                   </label>
 
-                  <span className="ml-2 text-sm text-gray-500">
+                  <span className="ml-2 text-sm text-foreground">
                     {formData.documents ? formData.documents.name : 
                     existingDocument ? 'Documento existente' : 'Ningún archivo seleccionado'}
                   </span>
                 </div>
                 {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
-                <p className="mt-1 text-xs text-gray-500">
+                <p className="mt-1 text-xs text-foreground">
                   Formatos aceptados: PDF, JPG, PNG (Máx. 10MB)
                 </p>
               </div>
@@ -442,9 +442,9 @@ useEffect(() => {
           </FileValidator>
 
           {/* Declaración y Confirmación */}
-          <div className="mt-6 p-4 bg-gray-50 rounded-md">
-            <h3 className="text-lg font-medium mb-2">Declaración y Confirmación</h3>
-            <p className="text-sm mb-3">
+          <div className="mt-6 p-4 bg-card rounded-md">
+            <h3 className="text-lg font-medium mb-2 text-foreground">Declaración y Confirmación</h3>
+            <p className="text-sm mb-3 text-foreground">
               "Declaro que la información proporcionada es correcta y entiendo que la aprobación de esta licencia está sujeta a las políticas de la empresa."
             </p>
             <label className="inline-flex items-center">
@@ -453,10 +453,10 @@ useEffect(() => {
                 name="declaration"
                 checked={formData.declaration}
                 onChange={handleChange}
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                className="h-4 w-4 text-primary-text focus:ring-primary-border border-border rounded"
                 required
               />
-              <span className="ml-2 text-sm text-gray-700">Acepto la declaración</span>
+              <span className="ml-2 text-sm text-foreground">Acepto la declaración</span>
             </label>
           </div>
         </div>
@@ -465,13 +465,13 @@ useEffect(() => {
         <div className="flex justify-end space-x-3">
           <Link
             to={-1}
-            className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 cursor-pointer"
+            className="px-4 py-2 border border-border rounded-md text-foreground hover:bg-card cursor-pointer"
           >
             Cancelar
           </Link>
           <button
             type="submit"
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center cursor-pointer"
+            className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-hover flex items-center cursor-pointer"
           >
             <FiSave className="mr-2" />
             Guardar Cambios
