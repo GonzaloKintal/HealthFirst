@@ -175,13 +175,63 @@ const UsersPage = () => {
 
   // Colores según el rol
   const getRoleColors = (role) => {
-    const colors = {
-      admin: { bg: 'bg-red-100', text: 'text-red-800' },
-      supervisor: { bg: 'bg-blue-100', text: 'text-blue-800' },
-      analyst: { bg: 'bg-yellow-100', text: 'text-yellow-800' },
-      employee: { bg: 'bg-green-100', text: 'text-green-800' },
-      default: { bg: 'bg-gray-100', text: 'text-gray-800' }
+    const lightColors = {
+      admin: { 
+        bg: 'bg-red-100 dark:bg-red-800', 
+        text: 'text-red-700 dark:text-red-200' 
+      },
+      supervisor: { 
+        bg: 'bg-blue-100 dark:bg-blue-800', 
+        text: 'text-blue-700 dark:text-blue-200' 
+      },
+      analyst: { 
+        bg: 'bg-yellow-100 dark:bg-yellow-700', 
+        text: 'text-yellow-600 dark:text-yellow-200' 
+      },
+      employee: { 
+        bg: 'bg-green-100 dark:bg-green-900', 
+        text: 'text-green-800 dark:text-green-200' 
+      },
+      default: { 
+        bg: 'bg-gray-100 dark:bg-gray-800', 
+        text: 'text-foreground' 
+      }
     };
+  
+    const darkColors = {
+      admin: { 
+        bg: 'dark:bg-[var(--rejected-bg-dark)]', 
+        text: 'dark:text-[var(--rejected-text-dark)]' 
+      },
+      supervisor: { 
+        bg: 'dark:bg-[var(--special-bg-dark)]', 
+        text: 'dark:text-blue-200' 
+      },
+    };
+  
+    const colors = {
+      admin: {
+        bg: `${lightColors.admin.bg} ${darkColors.admin.bg}`,
+        text: `${lightColors.admin.text} ${darkColors.admin.text}`
+      },
+      supervisor: {
+        bg: `${lightColors.supervisor.bg} ${darkColors.supervisor.bg}`,
+        text: `${lightColors.supervisor.text} ${darkColors.supervisor.text}`
+      },
+      analyst: {
+        bg: lightColors.analyst.bg,
+        text: lightColors.analyst.text
+      },
+      employee: {
+        bg: lightColors.employee.bg,
+        text: lightColors.employee.text
+      },
+      default: {
+        bg: lightColors.default.bg,
+        text: lightColors.default.text
+      }
+    };
+  
     return colors[role] || colors.default;
   };
 
@@ -189,17 +239,17 @@ const UsersPage = () => {
     <div className="p-6">
       {/* Encabezado y contador */}
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold flex items-center">
+        <h1 className="text-2xl text-foreground font-bold flex items-center">
           <FiUsers className="mr-2" />
           Gestión de Usuarios
         </h1>
         <div className="flex items-center space-x-4">
-          <span className="text-sm text-gray-600">
+          <span className="text-sm text-foreground">
             Mostrando {users.length} de {pagination.totalUsers} usuarios
           </span>
           <Link
             to="/add-user"
-            className="bg-blue-600 text-white px-4 py-2 rounded-md flex items-center cursor-pointer hover:bg-blue-700 transition duration-200"
+            className="bg-primary text-white px-4 py-2 rounded-md flex items-center cursor-pointer hover:bg-primary-hover transition duration-200"
           >
             <FiPlus className="mr-2" />
             Nuevo Usuario
@@ -215,8 +265,8 @@ const UsersPage = () => {
       )}
 
       {/* Barra de búsqueda y filtro */}
-      <div className="bg-white rounded-lg shadow overflow-hidden mb-6">
-        <div className="p-4 border-b border-gray-200 flex flex-col md:flex-row md:items-center space-y-3 md:space-y-0 md:space-x-4">
+      <div className="bg-background rounded-lg shadow overflow-hidden mb-6">
+        <div className="p-4 border-b border-border flex flex-col md:flex-row md:items-center space-y-3 md:space-y-0 md:space-x-4">
           <div className="relative flex-grow flex">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <FiSearch className="text-gray-400" />
@@ -224,23 +274,23 @@ const UsersPage = () => {
             <input
               type="text"
               placeholder="Buscar usuarios por nombre, DNI, email o departamento..."
-              className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-l-md focus:outline-none"
+              className="block w-full pl-10 pr-3 py-2 border border-border rounded-l-md focus:outline-none text-foreground bg-background"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               onKeyDown={handleKeyDown}
             />
             <button
               onClick={handleSearch}
-              className="px-4 py-2 border border-l-0 border-gray-300 rounded-r-md bg-blue-600 text-white hover:bg-blue-700 transition duration-200 cursor-pointer"
+              className="px-4 py-2 border border-l-0 border-border rounded-r-md bg-primary text-white hover:bg-primary-hover transition duration-200 cursor-pointer"
             >
               Buscar
             </button>
           </div>
           
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-2 text-foreground">
             <FiFilter className="text-gray-400" />
             <select 
-              className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="border border-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-border focus:border-primary-border text-foreground bg-background"
               value={filter}
               onChange={(e) => {
                 setFilter(e.target.value);
@@ -258,33 +308,33 @@ const UsersPage = () => {
 
         {/* Tabla de usuarios */}
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+          <table className="min-w-full divide-y divide-border">
+            <thead className="bg-card">
               <tr>
-                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-center text-xs font-medium text-foreground uppercase tracking-wider">
                   Nombre
                 </th>
-                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-center text-xs font-medium text-foreground uppercase tracking-wider">
                   DNI
                 </th>
-                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-center text-xs font-medium text-foreground uppercase tracking-wider">
                   Email
                 </th>
-                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-center text-xs font-medium text-foreground uppercase tracking-wider">
                   Departamento
                 </th>
-                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-center text-xs font-medium text-foreground uppercase tracking-wider">
                   Rol
                 </th>
-                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-center text-xs font-medium text-foreground uppercase tracking-wider">
                   Acciones
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-background divide-y divide-border">
               {users.length > 0 ? (
                 users.map((user) => (
-                  <tr key={user.id} className="hover:bg-gray-50 text-center">
+                  <tr key={user.id} className="hover:bg-card text-center">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div 
@@ -295,20 +345,20 @@ const UsersPage = () => {
                           <FiUser />
                         </div>
                         <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">
+                          <div className="text-sm font-medium text-foreground">
                             {user.name}
                           </div>
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground">
                       {user.dni}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground">
                       {user.email}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{user.department}</div>
+                      <div className="text-sm text-foreground">{user.department}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
@@ -323,12 +373,12 @@ const UsersPage = () => {
                       <div className="flex space-x-4 justify-center">
                         <Link
                           to={`/edit-user/${user.id}`}
-                          className="text-blue-600 hover:text-blue-900"
+                          className="text-primary-text hover:text-primary-hover p-1 rounded hover:bg-blue-50 cursor-pointer"
                         >
                           <FiEdit className="text-lg" />
                         </Link>
                         <button 
-                          className="text-red-600 hover:text-red-900 cursor-pointer"
+                          className="text-red-500 hover:text-red-900 p-1 rounded hover:bg-red-50 cursor-pointer"
                           onClick={() => handleDelete(user.id)}
                         >
                           <FiTrash2 className="text-lg" />
@@ -339,7 +389,7 @@ const UsersPage = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="6" className="px-6 py-4 text-center text-gray-500">
+                  <td colSpan="6" className="px-6 py-4 text-center text-foreground">
                     {searchTerm || filter !== 'all' 
                       ? 'No se encontraron usuarios que coincidan con los filtros'
                       : 'No hay usuarios registrados'}
@@ -358,7 +408,7 @@ const UsersPage = () => {
             <button
               onClick={() => handlePageChange(pagination.currentPage - 1)}
               disabled={pagination.currentPage === 1}
-              className="px-3 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 flex items-center"
+              className="px-3 py-2 rounded-l-md border border-border bg-background text-sm font-medium text-foreground hover:bg-card disabled:opacity-50 flex items-center"
             >
               <FiChevronLeft className="mr-1" /> Anterior
             </button>
@@ -367,10 +417,10 @@ const UsersPage = () => {
               <button
                 key={i + 1}
                 onClick={() => handlePageChange(i + 1)}
-                className={`px-3 py-2 border-t border-b border-gray-300 text-sm font-medium ${
+                className={`px-3 py-2 border-t border-b border-border text-sm font-medium ${
                   pagination.currentPage === i + 1
-                    ? 'bg-blue-50 text-blue-600'
-                    : 'bg-white text-gray-500 hover:bg-gray-50'
+                    ? 'bg-blue-50 text-primary-text'
+                    : 'bg-background text-foreground hover:bg-card'
                 }`}
               >
                 {i + 1}
@@ -380,7 +430,7 @@ const UsersPage = () => {
             <button
               onClick={() => handlePageChange(pagination.currentPage + 1)}
               disabled={pagination.currentPage === pagination.totalPages}
-              className="px-3 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 flex items-center"
+              className="px-3 py-2 rounded-r-md border border-border bg-background text-sm font-medium text-foreground hover:bg-card disabled:opacity-50 flex items-center"
             >
               Siguiente <FiChevronRight className="ml-1" />
             </button>

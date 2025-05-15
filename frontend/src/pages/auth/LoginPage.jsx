@@ -18,6 +18,7 @@ const LoginPage = () => {
     setError('');
     setIsLoading(true);
   
+    
     try {
       // Simulamos un retardo de 3 segundos antes de hacer la petición
       await new Promise(resolve => setTimeout(resolve, 3000));
@@ -84,7 +85,7 @@ const LoginPage = () => {
             <img
               src="/logo2.svg"
               alt="Logo ProHealth"
-              className="h-30 w-auto mb-8 filter brightness-0 invert opacity-20" 
+              className="h-28 w-auto mb-8 filter brightness-0 invert opacity-20" 
             />
             <div className="mt-20">
               <h1 className="text-5xl font-bold mb-4">Bienvenido a</h1>

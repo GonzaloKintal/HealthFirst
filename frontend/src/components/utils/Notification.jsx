@@ -44,7 +44,7 @@ const Notification = ({ type, message, onClose, duration = 3000 }) => {
         </div>
         <button 
           onClick={onClose}
-          className="ml-4 text-gray-400 hover:text-gray-500"
+          className="ml-4 text-gray-400 hover:text-foreground"
           aria-label="Cerrar notificación"
         >
           <FiX />
