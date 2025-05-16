@@ -2,12 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { FiCalendar, FiUpload, FiUser, FiFileText } from 'react-icons/fi';
+import { FiCalendar, FiUpload, FiUser, FiFileText} from 'react-icons/fi';
 import useAuth from '../../hooks/useAuth';
 import Notification from '../utils/Notification';
 import { getUser, getUsers } from '../../services/userService';
 import { requestLicense, getLicenseTypes } from '../../services/licenseService';
 import FileValidator from '../utils/FileValidator';
+import EmployeeSelector from '../supervisor/EmployeeSelector';
 
 const RequestLicense = () => {
   const { user } = useAuth();
@@ -24,10 +25,11 @@ const RequestLicense = () => {
   const [calculatedDays, setCalculatedDays] = useState(0);
   const [notification, setNotification] = useState(null);
   const [employees, setEmployees] = useState([]);
-  const [selectedEmployeeData, setSelectedEmployeeData] = useState(null);
   const [loadingEmployees, setLoadingEmployees] = useState(false);
+  const [selectedEmployeeData, setSelectedEmployeeData] = useState(null);
   const [currentUserData, setCurrentUserData] = useState(null);
   const [licenseTypes, setLicenseTypes] = useState([]);
+
 
   useEffect(() => {
     if (notification) {
@@ -43,8 +45,8 @@ const RequestLicense = () => {
   useEffect(() => {
     const fetchCurrentUserData = async () => {
       try {
-        // Solo si no es admin (para empleados y supervisores)
-        if (user?.role !== 'admin') {
+        // Solo para empleados y analistas
+        if (user?.role === 'employee' || user?.role === 'analyst') {
           const response = await getUser(user.id);
           setCurrentUserData(response);
         }
@@ -145,7 +147,8 @@ useEffect(() => {
       };
     }
     
-    // Para empleados/analistas o cuando no hay empleado seleccionado
+    // Para empleados/analistas
+  if (user?.role === 'employee' || user?.role === 'analyst') {
     // Usamos currentUserData si está disponible (datos completos del usuario)
     if (currentUserData) {
       return {
@@ -165,7 +168,17 @@ useEffect(() => {
       department: user?.department || '',
       phone: user?.phone || '',
     };
+  }
+
+  // Para admin/supervisor sin empleado seleccionado
+  return {
+    firstName: '',
+    lastName: '',
+    dni: '',
+    department: '',
+    phone: '',
   };
+};
 
   const employeeData = getEmployeeData();
 
@@ -360,25 +373,11 @@ useEffect(() => {
           
           {/* Selector de empleados para admin/supervisor */}
           {(user?.role === 'admin' || user?.role === 'supervisor') && (
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-foreground mb-1">Seleccionar Empleado *</label>
-              <select
-                name="selectedEmployee"
-                value={formData.selectedEmployee}
-                onChange={handleChange}
-                required
-                className="w-full px-3 py-2 border border-border rounded-md focus:ring-primary-border focus:border-primary-border bg-background text-foreground"
-                disabled={loadingEmployees}
-              >
-                <option value="">Seleccionar empleado</option>
-                {employees.map(employee => (
-                  <option key={employee.id} value={employee.id}>
-                    {employee.first_name} {employee.last_name} ({employee.dni})
-                  </option>
-                ))}
-              </select>
-              {loadingEmployees && <p className="text-sm text-foreground mt-1">Cargando empleados...</p>}
-            </div>
+            <EmployeeSelector 
+              selectedEmployee={formData.selectedEmployee}
+              onEmployeeSelected={(value) => setFormData(prev => ({ ...prev, selectedEmployee: value }))}
+              initialEmployees={employees}
+            />
           )}
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
