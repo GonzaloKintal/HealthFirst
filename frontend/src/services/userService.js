@@ -12,7 +12,7 @@ export const getUsers = async (page = 1, search = '', role) => {
         if (search) body.search = search;
         if (role && role !== 'all') body.role = role;
 
-        const response = await api.post('/users', body);
+        const response = await api.post('/users/', body);
         return response.data;
     } catch (error) {
         console.error('Error fetching users:', error);

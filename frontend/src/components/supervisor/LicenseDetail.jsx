@@ -403,10 +403,10 @@ const LicenseDetail = () => {
                     {license.status === 'approved' ? 'Aprobada' : 
                     license.status === 'rejected' ? 'Rechazada' : 'Pendiente'}
                     {(license.status === 'approved' || license.status === 'rejected') && 
-                    ['admin', 'supervisor'].includes(user?.role) && (
-                      <span className="text-foreground text-sm font-normal ml-2">
-                        por el {license.evaluatorRole === 'admin' ? 'administrador' : license.evaluatorRole} {license.evaluator} el {FormattedDate({ dateString: license.evaluationDate }).date}
-                      </span>
+                      ['admin', 'supervisor'].includes(user?.role) && license.evaluator && license.evaluatorRole && (
+                        <span className="text-foreground text-sm font-normal ml-2">
+                          por el {license.evaluatorRole === 'admin' ? 'administrador' : license.evaluatorRole} {license.evaluator} el {FormattedDate({ dateString: license.evaluationDate }).date}
+                        </span>
                     )}
                   </span>
                 </div>

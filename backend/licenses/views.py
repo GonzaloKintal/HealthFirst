@@ -19,9 +19,8 @@ from django.db import transaction
 from .analisis import license_analysis
 from licenses.utils.file_utils import *
 from licenses.utils.coherence_model_ml import predict_top_3
+from django.db.models import Q
 
-
-# Create your views here.
 # LICENSES API
 @api_view(['POST'])
 @authentication_classes([JWTAuthentication])
@@ -50,7 +49,10 @@ def licenses_list(request):
 
         # Filtro por nombre de empleado
         if employee_name:
-            queryset = queryset.filter(user_first_name_icontains=employee_name)
+            queryset = queryset.filter(
+            Q(user__first_name__icontains=employee_name) | 
+            Q(user__last_name__icontains=employee_name)
+        )
 
         # Filtro por estado
         if status_filter:
