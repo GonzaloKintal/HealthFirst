@@ -1,6 +1,8 @@
+
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FiSearch, FiFilter, FiDownload, FiEdit, FiTrash2, FiEye, FiPlus, FiFileText } from 'react-icons/fi';
+import { FiSearch, FiFilter, FiDownload, FiEdit, FiTrash2, FiEye, FiPlus, FiFileText, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import useAuth from '../../hooks/useAuth';
 import Confirmation from '../../components/utils/Confirmation';
 import { Link } from 'react-router-dom';
@@ -12,6 +14,7 @@ const LicensesPage = () => {
   const navigate = useNavigate();
   const [licenses, setLicenses] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState('all');
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [licenseToDelete, setLicenseToDelete] = useState(null);
@@ -22,15 +25,26 @@ const LicensesPage = () => {
     type: '',
     message: ''
   });
+  const [pagination, setPagination] = useState({
+    totalPages: 1,
+    currentPage: 1,
+    totalLicenses: 0
+  });
 
+  // Obtener licencias del backend con paginación
   useEffect(() => {
     const fetchLicenses = async () => {
       try {
+        setError(null);
         const shouldShowAll = ['admin', 'supervisor'].includes(user?.role);
         
         const response = await getLicenses({ 
           user_id: user?.id,
-          show_all_users: shouldShowAll
+          show_all_users: shouldShowAll,
+          status: filter !== 'all' ? filter : null,
+          employee_name: searchQuery,
+          page: pagination.currentPage,
+          page_size: 10
         });
         
         if (response.success) {
@@ -44,29 +58,70 @@ const LicensesPage = () => {
             status: license.status,
             requestedOn: license.created_at || '',
           }));
+          
           setLicenses(formattedLicenses);
+          setPagination({
+            totalPages: response.pagination.totalPages || 1,
+            currentPage: response.pagination.currentPage || 1,
+            totalLicenses: response.pagination.totalLicenses || 0
+          });
         } else {
           console.error('Error fetching licenses:', response.error);
           setLicenses([]);
-          setError('No se pudieron cargar las licencias. Por favor intenta nuevamente.');
+          setError(response.error || 'No se pudieron cargar las licencias. Por favor intenta nuevamente.');
+          setPagination({
+            totalPages: 1,
+            currentPage: 1,
+            totalLicenses: 0
+          });
         }
       } catch (error) {
         console.error('Error fetching licenses:', error);
         setLicenses([]);
         setError('No se pudieron cargar las licencias. Por favor intenta nuevamente.');
+        setPagination({
+          totalPages: 1,
+          currentPage: 1,
+          totalLicenses: 0
+        });
       }
     };
   
     if (user?.id) {
       fetchLicenses();
     }
-  }, [user]);
+  }, [user, filter, pagination.currentPage, searchQuery]);
 
-  const filteredLicenses = licenses.filter(license => {
-    const matchesSearch = license.employee.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter = filter === 'all' || license.status === filter;
-    return matchesSearch && matchesFilter;
-  });
+  // Función para búsqueda manual (con Enter o botón)
+  const handleSearch = () => {
+    try {
+      setError(null);
+      // Actualizamos searchQuery con el valor actual de searchTerm
+      setSearchQuery(searchTerm);
+      // Resetear a página 1 cuando se realiza una nueva búsqueda
+      setPagination(prev => ({ ...prev, currentPage: 1 }));
+    } catch (err) {
+      console.error('Error en búsqueda:', err);
+      setError('Error al realizar la búsqueda');
+    }
+  };
+  
+  // Manejar la tecla Enter
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
+  };
+
+  // Cambiar de página
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= pagination.totalPages && newPage !== pagination.currentPage) {
+      setPagination(prev => ({
+        ...prev,
+        currentPage: newPage
+      }));
+    }
+  };
 
   const handleDelete = (id) => {
     setLicenseToDelete(id);
@@ -74,13 +129,30 @@ const LicensesPage = () => {
   };
 
   const confirmDelete = async () => {
+    let previousLicenses = [];
+    let previousPagination = {};
+    
     try {
-      const previousLicenses = [...licenses];
+      previousLicenses = [...licenses];
+      previousPagination = {...pagination};
       
       // Actualización optimista
       setLicenses(previousLicenses.filter(license => license.id !== licenseToDelete));
+      setPagination(prev => ({
+        ...prev,
+        totalLicenses: prev.totalLicenses - 1
+      }));
       
       await deleteLicense(licenseToDelete);
+      
+      // Si la página queda vacía y no estamos en la primera página, retroceder
+      const licensesLeftInPage = previousLicenses.filter(license => license.id !== licenseToDelete).length;
+      if (licensesLeftInPage === 0 && previousPagination.currentPage > 1) {
+        setPagination(prev => ({
+          ...prev,
+          currentPage: prev.currentPage - 1
+        }));
+      }
       
       setNotification({
         show: true,
@@ -91,6 +163,7 @@ const LicensesPage = () => {
     } catch (error) {
       console.error('Error al eliminar licencia:', error);
       setLicenses(previousLicenses);
+      setPagination(previousPagination);
       setNotification({
         show: true,
         type: 'error',
@@ -99,10 +172,6 @@ const LicensesPage = () => {
     } finally {
       setShowDeleteConfirmation(false);
       setLicenseToDelete(null);
-      
-      setTimeout(() => {
-        setNotification({ show: false, type: '', message: '' });
-      }, 3000);
     }
   };
 
@@ -145,7 +214,6 @@ const LicensesPage = () => {
       }
     };
   
-    // Combinamos los colores base con las variantes dark
     const colors = {
       approved: {
         bg: `${lightColors.approved.bg} ${darkColors.approved.bg}`,
@@ -168,20 +236,20 @@ const LicensesPage = () => {
     return colors[status] || colors.default;
   };
 
-const translateStatus = (status) => {
-  const statusMap = {
-    approved: 'Aprobada',
-    rejected: 'Rechazada',
-    pending: 'Pendiente'
+  const translateStatus = (status) => {
+    const statusMap = {
+      approved: 'Aprobada',
+      rejected: 'Rechazada',
+      pending: 'Pendiente'
+    };
+    return statusMap[status] || status;
   };
-  return statusMap[status] || status;
-};
 
   return (
     <div className="p-6 relative">
       {/* Contenido principal */}
       <div className="flex justify-between items-center mb-6">
-      <h1 className="text-2xl font-bold flex items-center text-foreground">
+        <h1 className="text-2xl font-bold flex items-center text-foreground">
           <FiFileText className="mr-2" />
           Gestión de Licencias
         </h1>
@@ -209,27 +277,40 @@ const translateStatus = (status) => {
         </div>
       )}
 
+      {/* Barra de búsqueda y filtro */}
       <div className="bg-background rounded-lg shadow overflow-hidden mb-6">
         <div className="p-4 border-b border-border flex flex-col md:flex-row md:items-center space-y-3 md:space-y-0 md:space-x-4">
-          <div className="relative flex-grow">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <FiSearch className="text-gray-400" />
+          {(user?.role === 'admin' || user?.role === 'supervisor') && (
+            <div className="relative flex-grow flex">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <FiSearch className="text-gray-400" />
+              </div>
+              <input
+                type="text"
+                placeholder="Buscar empleado por nombre o apellido..."
+                className="block w-full pl-10 pr-3 py-2 border border-border rounded-l-md focus:outline-none text-foreground bg-background"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onKeyDown={handleKeyDown}
+              />
+              <button
+                onClick={handleSearch}
+                className="px-4 py-2 border border-l-0 border-border rounded-r-md bg-primary text-white hover:bg-primary-hover transition duration-200 cursor-pointer"
+              >
+                Buscar
+              </button>
             </div>
-            <input
-              type="text"
-              placeholder="Buscar empleado..."
-              className="block w-full pl-10 pr-3 py-2 border border-border rounded-md focus:outline-none text-foreground bg-background"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
+          )}
           
           <div className="flex items-center space-x-2">
             <FiFilter className="text-gray-400" />
             <select 
               className="border border-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-border focus:border-primary-border text-foreground bg-background"
               value={filter}
-              onChange={(e) => setFilter(e.target.value)}
+              onChange={(e) => {
+                setFilter(e.target.value);
+                setPagination(prev => ({ ...prev, currentPage: 1 }));
+              }}
             >
               <option value="all">Todas</option>
               <option value="pending">Pendientes</option>
@@ -255,68 +336,109 @@ const translateStatus = (status) => {
               </tr>
             </thead>
             <tbody className="bg-background divide-y divide-border">
-              {filteredLicenses.map((license) => (
-                <tr key={license.id} className='text-center'>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="font-medium text-foreground">{license.employee}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground capitalize">{license.type}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground">
-                    {license.startDate} al {license.endDate}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground">{license.days}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                    getStatusColors(license.status).bg
-                  } ${
-                    getStatusColors(license.status).text
-                  }`}>
-                    {translateStatus(license.status)}
-                  </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <button
-                      onClick={() => handleViewDetails(license.id)}
-                      className="text-primary-text hover:text-primary-hover p-1 rounded hover:bg-blue-50 cursor-pointer flex items-center mx-auto"
-                      title="Ver detalle"
-                    >
-                      <FiEye size={18} className="mr-1" />
-                      <span>Detalle</span>
-                    </button>
-                  </td>
-                  
-                  {canShowActions && (
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex space-x-3 justify-center">
-                      <Link
-                        to={`/edit-license/${license.id}`}
-                        className="text-primary-text hover:text-primary-hover p-1 rounded hover:bg-blue-50 cursor-pointer"
+              {licenses.length > 0 ? (
+                licenses.map((license) => (
+                  <tr key={license.id} className='text-center'>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="font-medium text-foreground">{license.employee}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground capitalize">{license.type}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground">
+                      {license.startDate} al {license.endDate}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground">{license.days}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                      getStatusColors(license.status).bg
+                    } ${
+                      getStatusColors(license.status).text
+                    }`}>
+                      {translateStatus(license.status)}
+                    </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <button
+                        onClick={() => handleViewDetails(license.id)}
+                        className="text-primary-text hover:text-primary-hover p-1 rounded hover:bg-blue-50 cursor-pointer flex items-center mx-auto"
+                        title="Ver detalle"
                       >
-                        <FiEdit size={18} />
-                      </Link>
-
-                      {user?.role === 'admin' && (
-                        <button 
-                          onClick={() => handleDelete(license.id)}
-                          className="text-red-500 hover:text-red-900 p-1 rounded hover:bg-red-50 cursor-pointer"
-                          title="Eliminar"
+                        <FiEye size={18} className="mr-1" />
+                        <span>Detalle</span>
+                      </button>
+                    </td>
+                    
+                    {canShowActions && (
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex space-x-3 justify-center">
+                        <Link
+                          to={`/edit-license/${license.id}`}
+                          className="text-primary-text hover:text-primary-hover p-1 rounded hover:bg-blue-50 cursor-pointer"
                         >
-                          <FiTrash2 size={18} />
-                        </button>
-                      )}
-                    </div>
+                          <FiEdit size={18} />
+                        </Link>
+
+                        {user?.role === 'admin' && (
+                          <button 
+                            onClick={() => handleDelete(license.id)}
+                            className="text-red-500 hover:text-red-900 p-1 rounded hover:bg-red-50 cursor-pointer"
+                            title="Eliminar"
+                          >
+                            <FiTrash2 size={18} />
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  )}
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={canShowActions ? 7 : 6} className="px-6 py-4 text-center text-foreground">
+                    {searchQuery || filter !== 'all' 
+                      ? 'No se encontraron licencias que coincidan con los filtros'
+                      : 'No hay licencias registradas'}
                   </td>
-                )}
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>
       </div>
 
-      {filteredLicenses.length === 0 && (
-        <div className="text-center py-12 text-foreground">
-          No se encontraron licencias que coincidan con los filtros
+      {/* Paginación */}
+      {pagination.totalPages > 1 && (
+        <div className="flex justify-center mt-6">
+          <nav className="inline-flex rounded-md shadow">
+            <button
+              onClick={() => handlePageChange(pagination.currentPage - 1)}
+              disabled={pagination.currentPage === 1}
+              className="px-3 py-2 rounded-l-md border border-border bg-background text-sm font-medium text-foreground hover:bg-card disabled:opacity-50 flex items-center"
+            >
+              <FiChevronLeft className="mr-1" /> Anterior
+            </button>
+            
+            {Array.from({ length: pagination.totalPages }, (_, i) => (
+              <button
+                key={i + 1}
+                onClick={() => handlePageChange(i + 1)}
+                className={`px-3 py-2 border-t border-b border-border text-sm font-medium ${
+                  pagination.currentPage === i + 1
+                    ? 'bg-blue-50 text-primary-text'
+                    : 'bg-background text-foreground hover:bg-card'
+                }`}
+              >
+                {i + 1}
+              </button>
+            ))}
+            
+            <button
+              onClick={() => handlePageChange(pagination.currentPage + 1)}
+              disabled={pagination.currentPage === pagination.totalPages}
+              className="px-3 py-2 rounded-r-md border border-border bg-background text-sm font-medium text-foreground hover:bg-card disabled:opacity-50 flex items-center"
+            >
+              Siguiente <FiChevronRight className="ml-1" />
+            </button>
+          </nav>
         </div>
       )}
 

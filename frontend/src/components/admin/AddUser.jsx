@@ -144,7 +144,7 @@ const AddUser = () => {
         <h1 className="text-2xl font-bold text-foreground">Crear Nuevo Usuario</h1>
       </div>
       
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-6" autoComplete='off'>
         {/* Sección de Información Personal */}
         <div className="bg-background p-6 rounded-lg shadow">
           <h2 className="text-xl font-semibold mb-4 flex items-center text-foreground">
@@ -160,7 +160,7 @@ const AddUser = () => {
                 value={formData.first_name}
                 onChange={handleChange}
                 required
-                className="w-full px-3 py-2 border border-border rounded-md focus:ring-primary-border focus:border-primary-border bg-background"
+                className="w-full px-3 py-2 border border-border rounded-md focus:ring-primary-border focus:border-primary-border bg-background text-foreground"
                 placeholder="Ej: Luis"
               />
             </div>
@@ -173,7 +173,7 @@ const AddUser = () => {
                 value={formData.last_name}
                 onChange={handleChange}
                 required
-                className="w-full px-3 py-2 border border-border rounded-md focus:ring-primary-border focus:border-primary-border bg-background"
+                className="w-full px-3 py-2 border border-border rounded-md focus:ring-primary-border focus:border-primary-border bg-background text-foreground"
                 placeholder="Ej: Pérez"
               />
             </div>
@@ -189,7 +189,7 @@ const AddUser = () => {
                 onChange={handleChange}
                 required
                 pattern="\d{7,8}"
-                className="w-full px-3 py-2 border border-border rounded-md focus:ring-primary-border focus:border-primary-border bg-background"
+                className="w-full px-3 py-2 border border-border rounded-md focus:ring-primary-border focus:border-primary-border bg-background text-foreground"
                 placeholder="Ej: 12345678"
               />
             </div>
@@ -215,7 +215,7 @@ const AddUser = () => {
                 onChange={handleChange}
                 required
                 pattern="\d{10,15}"
-                className="w-full px-3 py-2 border border-border rounded-md focus:ring-primary-border focus:border-primary-border bg-background"
+                className="w-full px-3 py-2 border border-border rounded-md focus:ring-primary-border focus:border-primary-border bg-background text-foreground"
                 placeholder="Ej: 1123456789"
               />
             </div>
@@ -228,7 +228,7 @@ const AddUser = () => {
                 value={formData.email}
                 onChange={handleChange}
                 required
-                className="w-full px-3 py-2 border border-border rounded-md focus:ring-primary-border focus:border-primary-border bg-background"
+                className="w-full px-3 py-2 border border-border rounded-md focus:ring-primary-border focus:border-primary-border bg-background text-foreground"
                 placeholder="Ej: usuario@empresa.com"
               />
             </div>
@@ -278,7 +278,7 @@ const AddUser = () => {
                 value={formData.password}
                 onChange={handleChange}
                 required
-                className="w-full px-3 py-2 border border-border rounded-md focus:ring-primary-border focus:border-primary-border bg-background"
+                className="w-full px-3 py-2 border border-border rounded-md focus:ring-primary-border focus:border-primary-border bg-background text-foreground"
                 placeholder="Mínimo 6 caracteres"
               />
             </div>
@@ -291,7 +291,7 @@ const AddUser = () => {
                 value={formData.confirmPassword}
                 onChange={handleChange}
                 required
-                className="w-full px-3 py-2 border border-border rounded-md focus:ring-primary-border focus:border-primary-border bg-background"
+                className="w-full px-3 py-2 border border-border rounded-md focus:ring-primary-border focus:border-primary-border bg-background text-foreground"
                 placeholder="Repite la contraseña"
               />
             </div>
