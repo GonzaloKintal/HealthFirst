@@ -1,4 +1,3 @@
-import predictions as pr
 import file_utils as f_u
 import os
 

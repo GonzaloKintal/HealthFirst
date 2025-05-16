@@ -4,7 +4,7 @@ import api from './api';
 // Obtener todas las licencias
 export const getLicenses = async (filters = {}) => {
   try {
-    const response = await api.post('/api/licenses', {
+    const response = await api.post('/licenses/', {
       user_id: filters.user_id || null,
       status: filters.status || null,
       employee_name: filters.employeeName || '',
@@ -35,7 +35,7 @@ export const getLicenses = async (filters = {}) => {
 // Obtener detalles de una licencia específica
 export const getLicenseDetail = async (licenseId) => {
   try {
-    const response = await api.get(`/api/licenses/${licenseId}`);
+    const response = await api.get(`/licenses/${licenseId}`);
     return {
       success: true,
       data: response.data
@@ -52,7 +52,7 @@ export const getLicenseDetail = async (licenseId) => {
 // Solicitar una nueva licencia
 export const requestLicense = async (licenseData) => {
   try {
-    const response = await api.post('api/licenses/request', licenseData, {
+    const response = await api.post('/licenses/request', licenseData, {
       headers: {
         'Content-Type': 'application/json'
       }
@@ -71,7 +71,7 @@ export const requestLicense = async (licenseData) => {
 // Eliminar una licencia
 export const deleteLicense = async (licenseId) => {
   try {
-  await api.delete(`/api/licenses/delete/${licenseId}`);
+  await api.delete(`/licenses/delete/${licenseId}`);
   } catch (error) {
   console.error('Error deleting user:', error);
   throw error;
@@ -81,7 +81,7 @@ export const deleteLicense = async (licenseId) => {
 // Obtener tipos de licencias
 export const getLicenseTypes = async () => {
   try {
-    const response = await api.get('/api/get_licenses_types');
+    const response = await api.get('/licenses/get_licenses_types');
     return {
       success: true,
       data: response.data
@@ -98,7 +98,7 @@ export const getLicenseTypes = async () => {
 // Editar una licencia existente
 export const updateLicense = async (id, licenseData) => {
   try {
-    const response = await api.put(`api/licenses/update/${id}`, licenseData);
+    const response = await api.put(`/licenses/update/${id}`, licenseData);
     
     return {
       success: true,
@@ -122,7 +122,7 @@ export const updateLicense = async (id, licenseData) => {
 // Evaluar una licencia (aprobar/rechazar)
 export const evaluateLicense = async (licenseId, status, comment = '') => {
   try {
-    const response = await api.put(`/api/licenses/${licenseId}/evaluation`, {
+    const response = await api.put(`/licenses/${licenseId}/evaluation`, {
       license_status: status,
       evaluation_comment: comment
     });
@@ -143,7 +143,7 @@ export const evaluateLicense = async (licenseId, status, comment = '') => {
 // Verificar coherencia de certificado
 export const analyzeCertificate = async (base64File) => {
   try {
-    const response = await api.post('/api/licenses/certificate/coherence', {
+    const response = await api.post('/licenses/certificate/coherence', {
       file_base64: base64File
     });
     

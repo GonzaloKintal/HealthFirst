@@ -6,7 +6,7 @@ from django.db.models import Sum
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'backend.settings')
 django.setup()
 
-from dashboard_api.models import License
+from licenses.models import License
 
 class LicenseValidationError(Exception): # para las excepiones
     pass

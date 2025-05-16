@@ -56,7 +56,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'corsheaders',
-    'dashboard_api',
+    'users',
+    'licenses',
 ]
 
 MIDDLEWARE = [
@@ -151,11 +152,11 @@ SIMPLE_JWT = {
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
     'ALGORITHM': 'HS256',
     'SIGNING_KEY': SECRET_KEY, 
-    'TOKEN_OBTAIN_SERIALIZER': 'dashboard_api.serializers.CustomTokenObtainPairSerializer',
+    'TOKEN_OBTAIN_SERIALIZER': 'users.serializers.CustomTokenObtainPairSerializer',
 }
 
 
-AUTH_USER_MODEL = 'dashboard_api.HealthFirstUser'
+AUTH_USER_MODEL = 'users.HealthFirstUser'
 
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
