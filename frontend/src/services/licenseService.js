@@ -7,7 +7,7 @@ export const getLicenses = async (filters = {}) => {
     const response = await api.post('/licenses/', {
       user_id: filters.user_id || null,
       status: filters.status || null,
-      employee_name: filters.employeeName || '',
+      employee_name: filters.employee_name || '',
       page: filters.page || 1,
       page_size: filters.pageSize || 10,
       show_all_users: filters.show_all_users || false
