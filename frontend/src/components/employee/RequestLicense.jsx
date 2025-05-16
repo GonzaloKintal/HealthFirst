@@ -364,7 +364,7 @@ useEffect(() => {
       
       <h1 className="text-2xl font-bold mb-6 text-foreground">Solicitar Licencia</h1>
       
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-6" autoComplete='off'>
         {/* Sección de Datos Personales */}
         <div className="bg-background p-6 rounded-lg shadow">
           <h2 className="text-xl font-semibold mb-4 flex items-center text-foreground">

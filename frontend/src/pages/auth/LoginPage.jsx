@@ -145,7 +145,7 @@ const LoginPage = () => {
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-6" autoComplete='off'>
               <div>
                 <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
                   Usuario
