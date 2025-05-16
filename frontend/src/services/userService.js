@@ -12,7 +12,7 @@ export const getUsers = async (page = 1, search = '', role) => {
         if (search) body.search = search;
         if (role && role !== 'all') body.role = role;
 
-        const response = await api.post('/api/users', body);
+        const response = await api.post('/users', body);
         return response.data;
     } catch (error) {
         console.error('Error fetching users:', error);
@@ -22,7 +22,7 @@ export const getUsers = async (page = 1, search = '', role) => {
 
 export const addUser = async (user) => {
     try {
-        await api.post(`/api/users/register`, user);
+        await api.post(`/users/register`, user);
     } catch (error) {
         console.error('Error adding user:', error);
         throw error;
@@ -31,7 +31,7 @@ export const addUser = async (user) => {
 
 export const deleteUser = async (userId) => {
     try {
-    await api.delete(`/api/users/delete/${userId}`);
+    await api.delete(`/users/delete/${userId}`);
     } catch (error) {
     console.error('Error deleting user:', error);
     throw error;
@@ -40,7 +40,7 @@ export const deleteUser = async (userId) => {
 
 export const editUser = async (id, data) => {
     try {
-        await api.put(`/api/users/update/${id}`, data);
+        await api.put(`/users/update/${id}`, data);
     } catch (error) {
         console.error('Error editing user:', error);
         throw error;
@@ -49,7 +49,7 @@ export const editUser = async (id, data) => {
 
 export const getUser = async (id) => {
     try {
-        const response = await api.get(`/api/get_user/${id}`);
+        const response = await api.get(`/users/get_user/${id}`);
         return response.data.user;
     } catch (error) {
         console.error('Error fetching user:', error);
@@ -65,7 +65,7 @@ export const getUsersByFilter = async (page = 1, filter = '', pageSize = 5) => {
             filter: filter
         };
 
-        const response = await api.post('/api/get_users_by_filter', body);
+        const response = await api.post('/users/get_users_by_filter', body);
 
         return {
             users: response.data.users,

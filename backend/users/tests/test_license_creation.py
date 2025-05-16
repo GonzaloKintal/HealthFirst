@@ -3,7 +3,7 @@ from django.test import TestCase
 from django.urls import reverse
 from rest_framework import status
 from django.contrib.auth import get_user_model
-from dashboard_api.models import HealthFirstUser, Role, Department
+from users.models import HealthFirstUser, Role, Department
 
 class HealthFirstUserTests(TestCase):
 
