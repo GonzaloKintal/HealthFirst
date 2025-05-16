@@ -77,7 +77,7 @@ const Header = ({ toggleDrawer }) => {
   };
 
   return (
-    <header className="z-50 fixed top-0 left-0 right-0 bg-background shadow-sm border-b border-border">
+    <header className="z-30 fixed top-0 left-0 right-0 bg-background shadow-sm border-b border-border">
       <div className="flex items-center justify-between h-16 px-6">
         {/* Left section */}
         <div className="flex items-center space-x-4">
