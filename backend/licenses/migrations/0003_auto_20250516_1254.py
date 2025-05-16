@@ -1,17 +1,17 @@
 from django.db import migrations,connection
 
 def reset_license_types(apps, schema_editor):
-    LicenseType = apps.get_model('dashboard_api', 'LicenseType')
+    LicenseType = apps.get_model('licenses', 'LicenseType')
 
     LicenseType.objects.all().delete()
 
     with connection.cursor() as cursor:
-        cursor.execute("ALTER SEQUENCE dashboard_api_licensetype_id_seq RESTART WITH 1;")
+        cursor.execute("ALTER SEQUENCE licenses_licensetype_id_seq RESTART WITH 1;")
 
     insert_licenses_types(apps, schema_editor)
 
 def insert_licenses_types(apps, schema_editor):
-    LicenseType = apps.get_model('dashboard_api', 'LicenseType')
+    LicenseType = apps.get_model('licenses', 'LicenseType')
     LicenseType.objects.bulk_create([
         LicenseType(
             name='Vacaciones',
@@ -200,7 +200,7 @@ def insert_licenses_types(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dashboard_api', '0004_auto_20250510_2301'),
+        ('licenses', '0002_initial'),
     ]
 
     operations = [

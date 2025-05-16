@@ -2,13 +2,13 @@ from django.db import migrations
 from django.contrib.auth.hashers import make_password
 
 def reverse_create_admin_user(apps, schema_editor):
-    HealthFirstUser = apps.get_model('dashboard_api', 'HealthFirstUser')
+    HealthFirstUser = apps.get_model('users', 'HealthFirstUser')
     HealthFirstUser.objects.filter(username='admin@admin.com').delete()
 
 def create_admin_user(apps, schema_editor):
-    HealthFirstUser = apps.get_model('dashboard_api', 'HealthFirstUser')
-    Department = apps.get_model('dashboard_api', 'Department')
-    Role = apps.get_model('dashboard_api', 'Role')
+    HealthFirstUser = apps.get_model('users', 'HealthFirstUser')
+    Department = apps.get_model('users', 'Department')
+    Role = apps.get_model('users', 'Role')
     
     if not HealthFirstUser.objects.filter(username='admin@admin.com').exists():
         role, _ = Role.objects.get_or_create(
@@ -40,7 +40,7 @@ def create_admin_user(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dashboard_api', '0005_auto_20250511_2226'),
+        ('users', '0001_initial'),
     ]
 
     operations = [
