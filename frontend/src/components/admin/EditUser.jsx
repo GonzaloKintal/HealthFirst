@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
-import { FiUser, FiMail, FiLock, FiBriefcase, FiSave, FiPhone, FiCalendar } from 'react-icons/fi';
+import { FiUser, FiLock, FiBriefcase, FiSave } from 'react-icons/fi';
 import { useParams, useNavigate } from 'react-router-dom';
 import Notification from '../utils/Notification';
 import { editUser, getUser } from '../../services/userService';
-
+import StyledDatePicker from '../utils/StyledDatePicker';
+import es from 'date-fns/locale/es';
+import { format } from 'date-fns';
 const EditUser = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -16,9 +18,9 @@ const EditUser = () => {
     password: '',
     confirmPassword: '',
     phone: '',
-    date_of_birth: '',
+    date_of_birth: null,
     department: '',
-    employment_start_date: '',
+    employment_start_date: null,
     role_name: 'employee'
   });
   const [notification, setNotification] = useState(null);
@@ -48,7 +50,6 @@ const EditUser = () => {
       try {
         const userData = await getUser(id);
 
-
         setFormData({
           id: userData.id,
           first_name: userData.first_name || '',
@@ -56,10 +57,10 @@ const EditUser = () => {
           dni: userData.dni || '',
           email: userData.email || '',
           phone: userData.phone || '',
-          date_of_birth: userData.date_of_birth || '',
+          date_of_birth: userData.date_of_birth ? new Date(userData.date_of_birth) : null,
           department: userData.department || '',
           role_name: userData.role || 'employee',
-          employment_start_date: userData.employment_start_date || '',
+          employment_start_date: userData.employment_start_date ? new Date(userData.employment_start_date) : null,
           password: '',
           confirmPassword: ''
         });
@@ -82,6 +83,13 @@ const EditUser = () => {
     setFormData(prev => ({
       ...prev,
       [name]: value
+    }));
+  };
+
+  const handleDateChange = (date, field) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: date
     }));
   };
 
@@ -148,10 +156,10 @@ const EditUser = () => {
         dni: formData.dni,
         email: formData.email,
         phone: formData.phone,
-        date_of_birth: formData.date_of_birth,
+        date_of_birth: formData.date_of_birth ? format(formData.date_of_birth, 'yyyy-MM-dd') : null,
         department: formData.department,
         role_name: formData.role_name,
-        employment_start_date: formData.employment_start_date,
+        employment_start_date: formData.employment_start_date ? format(formData.employment_start_date, 'yyyy-MM-dd') : null,
       };
   
       // Solo incluimos la contraseña si se está editando
@@ -259,13 +267,18 @@ const EditUser = () => {
             
             <div>
               <label className="block text-sm font-medium text-foreground bg-background mb-1">Fecha de Nacimiento *</label>
-              <input
-                type="date"
-                name="date_of_birth"
-                value={formData.date_of_birth}
-                onChange={handleChange}
+              <StyledDatePicker
+                selected={formData.date_of_birth}
+                onChange={(date) => handleDateChange(date, 'date_of_birth')}
                 required
-                className="w-full px-3 py-2 border border-border rounded-md focus:ring-primary-border focus:border-primary-border text-foreground bg-background"
+                locale={es}
+                dateFormat="dd/MM/yyyy"
+                placeholderText="Seleccione una fecha"
+                showYearDropdown
+                dropdownMode="select"
+                maxDate={new Date()}
+                peekNextMonth
+                showMonthDropdown
               />
             </div>
             
@@ -314,13 +327,19 @@ const EditUser = () => {
 
             <div>
               <label className="block text-sm font-medium text-foreground bg-background mb-1">Fecha de Ingreso a la Empresa *</label>
-              <input
-                type="date"
-                name="employment_start_date"
-                value={formData.employment_start_date}
-                onChange={handleChange}
+              <StyledDatePicker
+                selected={formData.employment_start_date}
+                onChange={(date) => handleDateChange(date, 'employment_start_date')}
                 required
-                className="w-full px-3 py-2 border border-border rounded-md focus:ring-primary-border focus:border-primary-border text-foreground bg-background"
+                locale={es}
+                dateFormat="dd/MM/yyyy"
+                className="w-full px-3 py-2 border border-border rounded-md focus:ring-primary-border focus:border-primary-border bg-background text-foreground"
+                placeholderText="Seleccione una fecha"
+                showYearDropdown
+                dropdownMode="select"
+                minDate={new Date(2000, 0, 1)}
+                peekNextMonth
+                showMonthDropdown
               />
             </div>
           
