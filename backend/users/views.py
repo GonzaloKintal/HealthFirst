@@ -130,6 +130,7 @@ def update_user(request, id):
         password = data.get('password', None)
         department= data.get('department', None)
         dni= data.get('dni', None)
+        date_of_birth = data.get('date_of_birth')
         phone= data.get('phone', None)
         employment_start_date = data.get('employment_start_date', None)
 
@@ -151,6 +152,8 @@ def update_user(request, id):
             user.department = department
         if dni:
             user.dni = dni
+        if date_of_birth:
+            user.date_of_birth = date_of_birth
         if phone:
             user.phone = phone
         if employment_start_date:
