@@ -147,11 +147,16 @@ def create_license(request):
 
             license.save()
 
+            if not certificate_data and license.type.requieres_inmediate_certificate():
+                raise Exception(f'El tipo de licencia "{license.type.name}" requiere certificado inmediato.')
+
             if certificate_data:
                 try:
                     file_data = process_certificate(certificate_data)
                 except Exception as e:
-                    raise Exception(f'Error en certificado: {str(e)}') 
+                    raise Exception(f'Error en certificado: {str(e)}')
+            
+            
 
                 Certificate.objects.create(
                     license=license,
@@ -162,14 +167,8 @@ def create_license(request):
                     deleted_at=None
                 )
 
-        # Crear estado inicial como "pending"
-        default_status = Status.StatusChoices.PENDING
-
-        Status.objects.create(
-            license=license,
-            name=default_status,
-            evaluation_comment='Nueva solicitud.'
-        )
+                # Crear estado inicial como "pending"
+            license.assign_status()
 
         return JsonResponse({'message': 'Licencia solicitada exitosamente.'}, status=200)
 
