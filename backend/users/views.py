@@ -6,7 +6,7 @@ from .serializers import HealthFirstUserSerializer
 from django.db import IntegrityError
 from django.core.paginator import Paginator
 from rest_framework_simplejwt.views import TokenObtainPairView
-from users.serializers import CustomTokenObtainPairSerializer
+from users.serializers import CustomTokenObtainPairSerializer, DepartmentSerializer
 from django.db.models import Q
 from urllib.parse import unquote
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
@@ -234,10 +234,113 @@ def get_users_by_filter(request):
 
     except Exception as e:
         return JsonResponse({'error': 'Ocurrió un error inesperado'}, status=500)
+@api_view(['POST'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def create_department(request):
+    response_data = {}
+    status_code = None
+
+    try:
+        data = json.loads(request.body)
+        name = data.get('name', None)
+        description = data.get('description', None)
+
+        if not name:
+            response_data = {'error': 'El nombre es requerido.'}
+            status_code = 400
+        elif Department.objects.filter(name=name).exists():
+            response_data = {'error': 'El nombre del departamento ya existe.'}
+            status_code = 400
+        else:
+            Department.objects.create(name=name, description=description)
+            response_data = {'ok': True}
+            status_code = 200
+    except Exception as e:
+        response_data = {'error': 'Ocurrió un error inesperado'}
+        status_code = 500
+
+    return JsonResponse(response_data, status=status_code)
 
 
+@api_view(['DELETE'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def delete_department(request, id):
+    response_data = {}
+    status_code = None
 
+    try:
+        if HealthFirstUser.objects.filter(department_id=id).exists():
+            response_data = {'error': 'No se puede eliminar el departamento porque tiene usuarios asociados.'}
+            status_code = 400
+        else:
+            department = Department.objects.get(department_id=id)
+            department.delete()
+            response_data = {'ok': True}
+            status_code = 200
 
+    except Department.DoesNotExist:
+        response_data = {'error': 'El departamento no existe.'}
+        status_code = 404
+
+    except Exception as e:
+        response_data = {'error': str(e)}
+        status_code = 500
+
+    return JsonResponse(response_data, status=status_code)
+
+@api_view(['PUT'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def update_department(request, id):
+    response_data = {}
+    status_code = None
+    try:
+        data = json.loads(request.body)
+        name = data.get('name', None)
+        description = data.get('description', None)
+
+        if not name and not description:
+            response_data = {'error': 'Debe enviar al menos un campo.'}
+            status_code = 400
+
+        elif Department.objects.filter(name=name).exists():
+            response_data = {'error': 'El nombre del departamento ya existe.'}
+            status_code = 400
+
+        elif not Department.objects.filter(department_id=id).exists():
+            response_data = {'error': 'El departamento no existe.'}
+            status_code = 404
+
+        else:
+            department = Department.objects.get(department_id=id)
+            if name:
+                department.name = name
+            if description:
+                department.description = description
+            department.save()
+            response_data = {'ok': True}
+            status_code = 200
+            
+    except Exception as e:
+        response_data = {'error': 'Ocurrió un error inesperado'}
+        status_code = 500
+
+    return JsonResponse(response_data, status=status_code)
+
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def get_departments(request):
+    try:
+        departments = Department.objects.all()
+        departments_data = DepartmentSerializer(departments, many=True).data
+        return JsonResponse({"departments": departments_data}, status=200)
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+       
 
 
   

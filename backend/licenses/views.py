@@ -479,8 +479,6 @@ def update_expired(request):
         return JsonResponse({"expired_licenses": expired_licenses}, status=200)
     
     except Exception as e:
-        print(e)
-        return JsonResponse({"error": str(e)}, status=500)
-    
+        return JsonResponse({"error": str(e)}, status=500)  
 
 
