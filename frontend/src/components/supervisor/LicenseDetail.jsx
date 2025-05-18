@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
-import { FiCheck, FiX, FiEdit, FiEye, FiUser, FiCalendar, FiFileText, FiArrowLeft } from 'react-icons/fi';
+import { FiCheck, FiX, FiEdit, FiEye, FiUser, FiCalendar, FiFileText, FiArrowLeft, FiPlus } from 'react-icons/fi';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { FormattedDate } from '../../components/utils/FormattedDate';
 import Confirmation from '../../components/utils/Confirmation';
 import { getLicenseDetail, evaluateLicense, analyzeCertificate } from '../../services/licenseService';
 import useAuth from '../../hooks/useAuth';
 import Notification from '../../components/utils/Notification';
+import UploadCertificateModal from '../employee/UploadCertificateModal';
 
 const LicenseDetail = () => {
   const { id } = useParams();
@@ -25,6 +26,8 @@ const LicenseDetail = () => {
   const canShowActions = ['admin', 'supervisor'].includes(user?.role);
   const [analysis, setAnalysis] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+ 
+  const [showUploadModal, setShowUploadModal] = useState(false);
 
   useEffect(() => {
     const fetchLicense = async () => {
@@ -236,6 +239,54 @@ const LicenseDetail = () => {
     }
   };
 
+  const handleUploadSuccess = async (updatedData) => {
+    try {
+      // Refetch los datos de la licencia para asegurarnos de tener la última versión
+      const response = await getLicenseDetail(id);
+      
+      if (response.success && response.data) {
+        const status = response.data.status?.name?.toLowerCase() || 'pending';
+        const updatedLicense = {
+          id: id,
+          employee: response.data.user?.full_name || 
+                   `${response.data.user?.first_name} ${response.data.user?.last_name}`,
+          DNI: response.data.user?.dni || 'No disponible',
+          department: response.data.user?.department || 'No disponible',
+          type: response.data.license?.type || 'No disponible',
+          startDate: response.data.license?.start_date || '',
+          endDate: response.data.license?.end_date || '',
+          days: response.data.license?.required_days || 0,
+          status: status,
+          requestedOn: response.data.license?.request_date || '',
+          information: response.data.license?.information || '',
+          certificate: response.data.certificate || null,
+          email: response.data.user?.email || '',
+          phone: response.data.user?.phone || '',
+          dateOfBirth: response.data.user?.date_of_birth || '',
+          rejectionReason: status === 'rejected' ? response.data.status?.evaluation_comment || '' : '',
+          evaluator: response.data.license?.evaluator || '',
+          evaluatorRole: response.data.license?.evaluator_role || '',
+          evaluationDate: response.data.status?.evaluation_date || ''
+        };
+        
+        setLicense(updatedLicense);
+      }
+      
+      setNotification({
+        show: true,
+        type: 'success',
+        message: 'Certificado cargado exitosamente'
+      });
+    } catch (error) {
+      console.error('Error al actualizar los datos de la licencia:', error);
+      setNotification({
+        show: true,
+        type: 'error',
+        message: 'Certificado cargado pero hubo un error al actualizar la vista'
+      });
+    }
+  };
+
   if (error) {
     return (
       <div className="p-6">
@@ -393,22 +444,30 @@ const LicenseDetail = () => {
               <div>
                 <p className="text-sm text-foreground">Estado</p>
                 <div className="flex items-center">
-                  <span className={`font-medium text-foreground ${
-                    license.status === 'approved' 
-                      ? 'text-green-700' 
-                      : license.status === 'rejected' 
-                        ? 'text-red-500' 
-                        : 'text-yellow-600'
-                  }`}>
-                    {license.status === 'approved' ? 'Aprobada' : 
-                    license.status === 'rejected' ? 'Rechazada' : 'Pendiente'}
-                    {(license.status === 'approved' || license.status === 'rejected') && 
-                      ['admin', 'supervisor'].includes(user?.role) && license.evaluator && license.evaluatorRole && (
-                        <span className="text-foreground text-sm font-normal ml-2">
-                          por el {license.evaluatorRole === 'admin' ? 'administrador' : license.evaluatorRole} {license.evaluator} el {FormattedDate({ dateString: license.evaluationDate }).date}
-                        </span>
-                    )}
-                  </span>
+                <span className={`font-medium text-foreground ${
+                  license.status === 'approved' 
+                    ? 'text-green-700 dark:text-green-400' 
+                    : license.status === 'rejected' 
+                      ? 'text-red-500 dark:text-red-400'
+                      : license.status === 'pending'
+                        ? 'text-blue-600 dark:text-blue-400'
+                        : license.status === 'missing_doc'
+                          ? 'text-yellow-600 dark:text-yellow-400'
+                          : 'text-red-600 dark:text-red-400'
+                }`}>
+                  {license.status === 'approved' ? 'Aprobada' : 
+                  license.status === 'rejected' ? 'Rechazada' : 
+                  license.status === 'pending' ? 'Pendiente' :
+                  license.status === 'missing_doc' ? 'Falta certificado' :
+                  'Expirada'}
+                  
+                  {(license.status === 'approved' || license.status === 'rejected') && 
+                    ['admin', 'supervisor'].includes(user?.role) && license.evaluator && license.evaluatorRole && (
+                      <span className="text-foreground text-sm font-normal ml-2">
+                        por el {license.evaluatorRole === 'admin' ? 'administrador' : license.evaluatorRole} {license.evaluator} el {FormattedDate({ dateString: license.evaluationDate }).date}
+                      </span>
+                  )}
+                </span>
                 </div>
               </div>
 
@@ -442,8 +501,6 @@ const LicenseDetail = () => {
                 <p className="text-sm text-foreground">Motivo</p>
                 <p className="font-medium whitespace-pre-line text-foreground">{license.information || 'No disponible'}</p>
               </div>
-
-              {/* Documentación adjunta */}
               <div>
                 <p className="text-sm text-foreground">Documentación adjunta</p>
                 {license.certificate?.file ? (
@@ -473,7 +530,18 @@ const LicenseDetail = () => {
                     </button>
                   </div>
                 ) : (
-                  <p className="text-foreground">No hay documentación adjunta</p>
+                  <>
+                    <p className="text-foreground">No hay documentación adjunta</p>
+                    {license.status === 'missing_doc' && (
+                      <button
+                        onClick={() => setShowUploadModal(true)}
+                        className="mt-2 inline-flex items-center px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-hover cursor-pointer"
+                      >
+                        <FiPlus className="mr-2" />
+                        Agregar certificado
+                      </button>
+                    )}
+                  </>
                 )}
               </div>
 
@@ -570,6 +638,14 @@ const LicenseDetail = () => {
           type={notification.type}
           message={notification.message}
           onClose={() => setNotification({ show: false, type: '', message: '' })}
+        />
+      )}
+
+      {showUploadModal && (
+        <UploadCertificateModal
+          licenseId={license.id}
+          onClose={() => setShowUploadModal(false)}
+          onUploadSuccess={handleUploadSuccess}
         />
       )}
     </div>
