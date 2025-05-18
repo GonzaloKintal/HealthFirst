@@ -243,8 +243,8 @@ def create_department(request):
 
     try:
         data = json.loads(request.body)
-        name = data.get('name')
-        description = data.get('description')
+        name = data.get('name', None)
+        description = data.get('description', None)
 
         if not name:
             response_data = {'error': 'El nombre es requerido.'}
@@ -290,7 +290,44 @@ def delete_department(request, id):
 
     return JsonResponse(response_data, status=status_code)
 
+@api_view(['PUT'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def update_department(request, id):
+    response_data = {}
+    status_code = None
+    try:
+        data = json.loads(request.body)
+        name = data.get('name', None)
+        description = data.get('description', None)
 
+        if not name and not description:
+            response_data = {'error': 'Debe enviar al menos un campo.'}
+            status_code = 400
+
+        elif Department.objects.filter(name=name).exists():
+            response_data = {'error': 'El nombre del departamento ya existe.'}
+            status_code = 400
+            
+        elif not Department.objects.filter(department_id=id).exists():
+            response_data = {'error': 'El departamento no existe.'}
+            status_code = 404
+
+        else:
+            department = Department.objects.get(department_id=id)
+            if name:
+                department.name = name
+            if description:
+                department.description = description
+            department.save()
+            response_data = {'ok': True}
+            status_code = 200
+            
+    except Exception as e:
+        response_data = {'error': 'Ocurrió un error inesperado'}
+        status_code = 500
+
+    return JsonResponse(response_data, status=status_code)
        
 
 

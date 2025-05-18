@@ -15,7 +15,7 @@ urlpatterns = [
     path('get_users_by_filter', get_users_by_filter, name='get_user_by_filter'),
 
     path('department/create', create_department, name='create_department'),
-    # path('department/update/<int:id>', update_department, name='update_department'),
+    path('department/update/<int:id>', update_department, name='update_department'),
     path('department/delete/<int:id>', delete_department, name='delete_department'),    
 
 ]
