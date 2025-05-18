@@ -35,6 +35,7 @@ const LicensesPage = () => {
   useEffect(() => {
     const fetchLicenses = async () => {
       try {
+        console.log('Filtrando por:', filter);
         setError(null);
         const shouldShowAll = ['admin', 'supervisor'].includes(user?.role);
         
@@ -96,9 +97,7 @@ const LicensesPage = () => {
   const handleSearch = () => {
     try {
       setError(null);
-      // Actualizamos searchQuery con el valor actual de searchTerm
       setSearchQuery(searchTerm);
-      // Resetear a página 1 cuando se realiza una nueva búsqueda
       setPagination(prev => ({ ...prev, currentPage: 1 }));
     } catch (err) {
       console.error('Error en búsqueda:', err);
@@ -190,8 +189,16 @@ const LicensesPage = () => {
         text: 'text-[var(--rejected-text-light)]' 
       },
       pending: { 
-        bg: 'bg-yellow-100', 
-        text: 'text-yellow-800' 
+        bg: 'bg-blue-100', 
+        text: 'text-blue-800' 
+      },
+      missing_doc: {
+        bg: 'bg-yellow-100',
+        text: 'text-yellow-800'
+      },
+      expired: {
+        bg: 'bg-red-100',
+        text: 'text-red-800'
       },
       default: { 
         bg: 'bg-gray-100', 
@@ -209,8 +216,16 @@ const LicensesPage = () => {
         text: 'dark:text-[var(--rejected-text-dark)]' 
       },
       pending: { 
-        bg: 'dark:bg-yellow-700', 
-        text: 'dark:text-yellow-100' 
+        bg: 'dark:bg-blue-700', 
+        text: 'dark:text-blue-100' 
+      },
+      missing_doc: {
+        bg: 'dark:bg-yellow-700',
+        text: 'dark:text-yellow-100'
+      },
+      expired: {
+        bg: 'dark:bg-red-900',
+        text: 'dark:text-red-200'
       }
     };
   
@@ -227,6 +242,14 @@ const LicensesPage = () => {
         bg: `${lightColors.pending.bg} ${darkColors.pending.bg}`,
         text: `${lightColors.pending.text} ${darkColors.pending.text}`
       },
+      missing_doc: {
+        bg: `${lightColors.missing_doc.bg} ${darkColors.missing_doc.bg}`,
+        text: `${lightColors.missing_doc.text} ${darkColors.missing_doc.text}`
+      },
+      expired: {
+        bg: `${lightColors.expired.bg} ${darkColors.expired.bg}`,
+        text: `${lightColors.expired.text} ${darkColors.expired.text}`
+      },
       default: {
         bg: `${lightColors.default.bg} dark:bg-gray-800`,
         text: lightColors.default.text
@@ -240,7 +263,9 @@ const LicensesPage = () => {
     const statusMap = {
       approved: 'Aprobada',
       rejected: 'Rechazada',
-      pending: 'Pendiente'
+      pending: 'Pendiente',
+      missing_doc: 'Falta certificado',
+      expired: 'Expirada'
     };
     return statusMap[status] || status;
   };
@@ -316,6 +341,8 @@ const LicensesPage = () => {
               <option value="pending">Pendientes</option>
               <option value="approved">Aprobadas</option>
               <option value="rejected">Rechazadas</option>
+              <option value="missing_doc">Falta certificado</option>
+              <option value="expired">Expiradas</option>
             </select>
           </div>
         </div>
