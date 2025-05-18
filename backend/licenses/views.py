@@ -58,11 +58,15 @@ def licenses_list(request):
         if status_filter:
             status_filter = status_filter.lower()
             if status_filter == "approved":
-                queryset = queryset.filter(justified=True)
+                queryset = queryset.filter(status__name=Status.StatusChoices.APPROVED)
             elif status_filter == "pending":
-                queryset = queryset.filter(justified=False, closing_date__isnull=True)
+                queryset = queryset.filter(status__name=Status.StatusChoices.PENDING)
             elif status_filter == "rejected":
-                queryset = queryset.filter(justified=False, closing_date__isnull=False)
+                queryset = queryset.filter(status__name=Status.StatusChoices.REJECTED)
+            elif status_filter == "expired":
+                queryset = queryset.filter(status__name=Status.StatusChoices.EXPIRED)
+            elif status_filter == "missing_doc":
+                queryset = queryset.filter(status__name=Status.StatusChoices.MISSING_DOC)
 
         role_name = current_user.role.name if current_user.role else None
 
