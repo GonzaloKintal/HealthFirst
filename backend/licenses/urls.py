@@ -9,6 +9,7 @@ urlpatterns = [
     path('delete/<int:id>', delete_license, name='delete-license'),
     path('update/<int:id>', update_license, name='update_license'),
     path('<int:id>/evaluation', evaluate_license, name='evaluate-license'),
+    path('update_expired', update_expired, name='expired_licenses'),
 
     path('get_licenses_types', get_licenses_types, name='get_licenses_types'),
 

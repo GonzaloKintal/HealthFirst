@@ -37,7 +37,7 @@
   --special-bg-dark: #dbeafe;
 
   --rejected-bg-dark: #7f1d1d;   /* red-900 */
-  --rejected-text-dark: #fca5a5; /* red-300 */
+  --rejected-text-dark: #f7b7b7; /* red-300 */
 }
 
 .bg-special-light {

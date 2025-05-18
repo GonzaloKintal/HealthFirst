@@ -9,14 +9,17 @@ import { getUser, getUsers } from '../../services/userService';
 import { requestLicense, getLicenseTypes } from '../../services/licenseService';
 import FileValidator from '../utils/FileValidator';
 import EmployeeSelector from '../supervisor/EmployeeSelector';
+import StyledDatePicker from '../utils/StyledDatePicker';
+import { format } from 'date-fns';
+import es from 'date-fns/locale/es';
 
 const RequestLicense = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     licenseTypeId: '',
-    startDate: '',
-    endDate: '',
+    startDate: null,
+    endDate: null,
     reason: '',
     documents: null,
     declaration: false,
@@ -185,31 +188,32 @@ useEffect(() => {
   const handleChange = (e) => {
     const { name, value, files, type, checked } = e.target;
     
+    setFormData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : (files ? files[0] : value)
+    }));
+  };
+
+  const handleDateChange = (date, field) => {
     setFormData(prev => {
       const newData = {
         ...prev,
-        [name]: type === 'checkbox' ? checked : (files ? files[0] : value)
+        [field]: date
       };
       
-      if (name === 'startDate' || name === 'endDate') {
-        if (newData.startDate && newData.endDate) {
-          const start = new Date(newData.startDate);
-          const end = new Date(newData.endDate);
-          
-          if (end < start) {
-            setNotification({
-              type: 'error',
-              message: 'La fecha de fin no puede ser anterior a la fecha de inicio.'
-            });
-            return prev;
-          }
-          
-          const diffTime = Math.abs(end - start);
-          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
-          setCalculatedDays(diffDays);
-        } else {
-          setCalculatedDays(0);
-        }
+      // Calcular días si ambas fechas están presentes
+      if (field === 'startDate' && date && newData.endDate) {
+        const end = new Date(newData.endDate);
+        const diffTime = Math.abs(end - date);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+        setCalculatedDays(diffDays);
+      } else if (field === 'endDate' && date && newData.startDate) {
+        const start = new Date(newData.startDate);
+        const diffTime = Math.abs(date - start);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+        setCalculatedDays(diffDays);
+      } else if (!date) {
+        setCalculatedDays(0);
       }
       
       return newData;
@@ -290,13 +294,15 @@ useEffect(() => {
       if (!userId) {
         throw new Error('No se pudo determinar el usuario');
       }
+
+      const formatDate = (date) => date ? format(date, 'yyyy-MM-dd') : '';
   
       // Preparar los datos para el backend
       const licenseData = {
         user_id: Number(userId),
         type_id: Number(formData.licenseTypeId),
-        start_date: formData.startDate,
-        end_date: formData.endDate,
+        start_date: formatDate(formData.startDate),
+        end_date: formatDate(formData.endDate),
         information: formData.reason
       };
   
@@ -320,8 +326,8 @@ useEffect(() => {
       // Resetear formulario
       setFormData({
         licenseTypeId: '',
-        startDate: '',
-        endDate: '',
+        startDate: null,
+        endDate: null,
         reason: '',
         documents: null,
         declaration: false,
@@ -470,27 +476,35 @@ useEffect(() => {
             
             <div>
               <label className="block text-sm font-medium text-foreground mb-1">Fecha de Inicio *</label>
-              <input
-                type="date"
-                name="startDate"
-                value={formData.startDate}
-                onChange={handleChange}
+              <StyledDatePicker
+                selected={formData.startDate}
+                onChange={(date) => handleDateChange(date, 'startDate')}
+                selectsStart
+                startDate={formData.startDate}
+                endDate={formData.endDate}
+                minDate={new Date()}
                 required
-                min={new Date().toISOString().split('T')[0]}
-                className="w-full px-3 py-2 border border-border rounded-md focus:ring-primary-border focus:border-primary-border bg-background text-foreground"
+                locale={es}
+                dateFormat="dd/MM/yyyy"
+                placeholderText="Seleccione fecha de inicio"
+                className="w-full"
               />
             </div>
             
             <div>
               <label className="block text-sm font-medium text-foreground mb-1">Fecha de Fin *</label>
-              <input
-                type="date"
-                name="endDate"
-                value={formData.endDate}
-                onChange={handleChange}
+              <StyledDatePicker
+                selected={formData.endDate}
+                onChange={(date) => handleDateChange(date, 'endDate')}
+                selectsEnd
+                startDate={formData.startDate}
+                endDate={formData.endDate}
+                minDate={formData.startDate || new Date()}
                 required
-                min={formData.startDate || new Date().toISOString().split('T')[0]}
-                className="w-full px-3 py-2 border border-border rounded-md focus:ring-primary-border focus:border-primary-border bg-background text-foreground"
+                locale={es}
+                dateFormat="dd/MM/yyyy"
+                placeholderText="Seleccione fecha de fin"
+                className="w-full"
               />
             </div>
           </div>

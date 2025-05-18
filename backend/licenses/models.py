@@ -8,7 +8,7 @@ class Status(models.Model):
     # Todos los estados validos posibles 
     class StatusChoices(models.TextChoices):
         MISSING_DOC = 'missing_doc', 'Documentacion faltante'
-        PENDING = 'pending', 'Pendiente de aprobacion'
+        PENDING = 'pending', 'Pendiente de aprobación'
         REJECTED = 'rejected', 'Rechazada'
         APPROVED = 'approved', 'Aprobada'
         EXPIRED = 'expired', 'Expirada'
@@ -33,6 +33,10 @@ class LicenseType(models.Model):
     yearly_approved_requests=models.IntegerField(null=True, blank=True)
     is_deleted = models.BooleanField(default=False)
     deleted_at = models.DateTimeField(blank=True, null=True)
+
+
+    def requieres_inmediate_certificate(self):
+        return self.certificate_require and self.tolerance_days_certificate_submission==0
 
 
 class License(models.Model):
@@ -76,6 +80,23 @@ class License(models.Model):
                 certificate.save()
             except Certificate.DoesNotExist:
                 pass  # No tiene certificado, no hacemos nada
+    def assign_status(self):
+        try:
+            certificate=self.certificate
+        except Certificate.DoesNotExist:
+            certificate=None
+
+        if self.type.certificate_require and certificate is None:
+            default_status = Status.StatusChoices.MISSING_DOC
+        else:
+            default_status = Status.StatusChoices.PENDING
+
+        Status.objects.create(
+            license=self,
+            name=default_status,
+            evaluation_comment='Nueva solicitud.'
+        )
+
 
 
 class Certificate(models.Model):

@@ -4,6 +4,8 @@ import { FiUser, FiSave, FiBriefcase, FiLock } from 'react-icons/fi';
 import { Link, useNavigate } from 'react-router-dom';
 import Notification from '../utils/Notification';
 import { addUser } from '../../services/userService';
+import StyledDatePicker from '../utils/StyledDatePicker';
+import es from 'date-fns/locale/es';
 
 const AddUser = () => {
   const navigate = useNavigate();
@@ -15,9 +17,9 @@ const AddUser = () => {
     confirmPassword: '',
     email: '',
     phone: '',
-    date_of_birth: '',
+    date_of_birth: null,
     department: '',
-    employment_start_date: '',
+    employment_start_date: null,
     role_name: 'employee'
   });
 
@@ -49,6 +51,13 @@ const AddUser = () => {
       [name]: value
     }));
   };
+
+  const handleDateChange = (date, field) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: date
+    }));
+  };
   
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -76,10 +85,12 @@ const AddUser = () => {
     }
   
     try {
-      // Preparamos los datos para enviar (sin confirmPassword)
+      // Preparamos los datos para enviar
       const userData = {
         ...formData,
-        confirmPassword: undefined // Eliminamos este campo del objeto a enviar
+        date_of_birth: formData.date_of_birth ? formData.date_of_birth.toISOString().split('T')[0] : '',
+        employment_start_date: formData.employment_start_date ? formData.employment_start_date.toISOString().split('T')[0] : '',
+        confirmPassword: undefined
       };
       delete userData.confirmPassword;
   
@@ -101,9 +112,9 @@ const AddUser = () => {
           confirmPassword: '',
           email: '',
           phone: '',
-          date_of_birth: '',
+          date_of_birth: null,
           department: '',
-          employment_start_date: '',
+          employment_start_date: null,
           role_name: 'employee'
         });
         navigate('/users');
@@ -196,13 +207,18 @@ const AddUser = () => {
             
             <div>
               <label className="block text-sm font-medium text-foreground mb-1">Fecha de Nacimiento *</label>
-              <input
-                type="date"
-                name="date_of_birth"
-                value={formData.date_of_birth}
-                onChange={handleChange}
+              <StyledDatePicker
+                selected={formData.date_of_birth}
+                onChange={(date) => handleDateChange(date, 'date_of_birth')}
                 required
-                className="w-full px-3 py-2 border border-border rounded-md focus:ring-primary-border focus:border-primary-border bg-background text-foreground"
+                locale={es}
+                dateFormat="dd/MM/yyyy"
+                placeholderText="Seleccione una fecha"
+                showYearDropdown
+                dropdownMode="select"
+                maxDate={new Date()}
+                peekNextMonth
+                showMonthDropdown
               />
             </div>
             
@@ -251,13 +267,19 @@ const AddUser = () => {
 
             <div>
               <label className="block text-sm font-medium text-foreground mb-1">Fecha de Ingreso a la Empresa *</label>
-              <input
-                type="date"
-                name="employment_start_date"
-                value={formData.employment_start_date}
-                onChange={handleChange}
+              <StyledDatePicker
+                selected={formData.employment_start_date}
+                onChange={(date) => handleDateChange(date, 'employment_start_date')}
                 required
+                locale={es}
+                dateFormat="dd/MM/yyyy"
                 className="w-full px-3 py-2 border border-border rounded-md focus:ring-primary-border focus:border-primary-border bg-background text-foreground"
+                placeholderText="Seleccione una fecha"
+                showYearDropdown
+                dropdownMode="select"
+                minDate={new Date(2000, 0, 1)}
+                peekNextMonth
+                showMonthDropdown
               />
             </div>
           </div>
