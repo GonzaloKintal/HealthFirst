@@ -6,7 +6,7 @@ from .serializers import HealthFirstUserSerializer
 from django.db import IntegrityError
 from django.core.paginator import Paginator
 from rest_framework_simplejwt.views import TokenObtainPairView
-from users.serializers import CustomTokenObtainPairSerializer
+from users.serializers import CustomTokenObtainPairSerializer, DepartmentSerializer
 from django.db.models import Q
 from urllib.parse import unquote
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
@@ -308,7 +308,7 @@ def update_department(request, id):
         elif Department.objects.filter(name=name).exists():
             response_data = {'error': 'El nombre del departamento ya existe.'}
             status_code = 400
-            
+
         elif not Department.objects.filter(department_id=id).exists():
             response_data = {'error': 'El departamento no existe.'}
             status_code = 404
@@ -328,6 +328,18 @@ def update_department(request, id):
         status_code = 500
 
     return JsonResponse(response_data, status=status_code)
+
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def get_departments(request):
+    try:
+        departments = Department.objects.all()
+        departments_data = DepartmentSerializer(departments, many=True).data
+        return JsonResponse({"departments": departments_data}, status=200)
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
        
 
 
