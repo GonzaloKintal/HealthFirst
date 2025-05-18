@@ -262,6 +262,35 @@ def create_department(request):
 
     return JsonResponse(response_data, status=status_code)
 
+
+@api_view(['DELETE'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def delete_department(request, id):
+    response_data = {}
+    status_code = None
+
+    try:
+        if HealthFirstUser.objects.filter(department_id=id).exists():
+            response_data = {'error': 'No se puede eliminar el departamento porque tiene usuarios asociados.'}
+            status_code = 400
+        else:
+            department = Department.objects.get(department_id=id)
+            department.delete()
+            response_data = {'ok': True}
+            status_code = 200
+
+    except Department.DoesNotExist:
+        response_data = {'error': 'El departamento no existe.'}
+        status_code = 404
+
+    except Exception as e:
+        response_data = {'error': str(e)}
+        status_code = 500
+
+    return JsonResponse(response_data, status=status_code)
+
+
        
 
 
