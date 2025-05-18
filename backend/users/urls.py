@@ -13,4 +13,6 @@ urlpatterns = [
     path('update/<int:id>', update_user, name='update_user'),
     path('get_user/<int:id>', get_user, name='get_user'),
     path('get_users_by_filter', get_users_by_filter, name='get_user_by_filter'),
+
+    path('department/create', create_department, name='create_department'),
 ]

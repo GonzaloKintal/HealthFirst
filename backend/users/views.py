@@ -234,10 +234,35 @@ def get_users_by_filter(request):
 
     except Exception as e:
         return JsonResponse({'error': 'Ocurrió un error inesperado'}, status=500)
+@api_view(['POST'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def create_department(request):
+    response_data = {}
+    status_code = None
 
+    try:
+        data = json.loads(request.body)
+        name = data.get('name')
+        description = data.get('description')
 
+        if not name:
+            response_data = {'error': 'El nombre es requerido.'}
+            status_code = 400
+        elif Department.objects.filter(name=name).exists():
+            response_data = {'error': 'El nombre del departamento ya existe.'}
+            status_code = 400
+        else:
+            Department.objects.create(name=name, description=description)
+            response_data = {'ok': True}
+            status_code = 200
+    except Exception as e:
+        response_data = {'error': 'Ocurrió un error inesperado'}
+        status_code = 500
 
+    return JsonResponse(response_data, status=status_code)
 
+       
 
 
   
