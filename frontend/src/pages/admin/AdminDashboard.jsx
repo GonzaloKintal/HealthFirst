@@ -1,5 +1,6 @@
 import { useLocation, Routes, Route } from 'react-router-dom';
 import Users from './UsersPage';
+import AdminDashboardIFrame from './AdminDashboardIFrame';
 
 const AdminDashboard = () => {
 
@@ -10,7 +11,7 @@ const AdminDashboard = () => {
 
       <div className="mt-6">
         <Routes>
-          <Route index element={<div className='text-foreground'>Dashboard del Admin</div>} />
+          <Route index element={<AdminDashboardIFrame />} />
           <Route path="users" element={<Users />} />
         </Routes>
       </div>
