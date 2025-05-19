@@ -1,8 +1,8 @@
 import { test, expect } from '@playwright/test';
 import { login } from './utils/login.js';
 
-test('Presionar ingresar con ambos campos vacios', async ({ page }) => {
-  await login(page, '', '');
+test('Presionar ingresar con Campo contraseña vacio', async ({ page }) => {
+  await login(page, 'empleado@gmail.com', '');
 
   // Esperar un momento para que la acción de login intente procesarse
   await page.waitForTimeout(1000);
