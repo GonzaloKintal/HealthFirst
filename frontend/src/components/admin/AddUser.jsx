@@ -1,11 +1,18 @@
-
 import { useState } from 'react';
-import { FiUser, FiSave, FiBriefcase, FiLock } from 'react-icons/fi';
+import { FiUser, FiSave, FiBriefcase, FiLock, FiEye, FiEyeOff } from 'react-icons/fi';
 import { Link, useNavigate } from 'react-router-dom';
 import Notification from '../utils/Notification';
 import { addUser } from '../../services/userService';
 import StyledDatePicker from '../utils/StyledDatePicker';
 import es from 'date-fns/locale/es';
+import { 
+  validateName, 
+  validateAge, 
+  validateDNI, 
+  validatePhone, 
+  validatePassword,
+  validateEmail
+} from '../utils/Validations';
 
 const AddUser = () => {
   const navigate = useNavigate();
@@ -25,6 +32,10 @@ const AddUser = () => {
 
   const [notification, setNotification] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState({
+    password: false,
+    confirmPassword: false
+  });
 
   const roles = [
     { value: 'admin', label: 'Administrador' },
@@ -43,6 +54,13 @@ const AddUser = () => {
     'Finanzas',
     'Legal'
   ];
+
+  const toggleShowPassword = (field) => {
+    setShowPassword(prev => ({
+      ...prev,
+      [field]: !prev[field]
+    }));
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -64,21 +82,74 @@ const AddUser = () => {
     setNotification(null);
     setIsSubmitting(true);
   
-    // Validación de contraseñas
-    if (formData.password !== formData.confirmPassword) {
+    // Validaciones
+    if (!validateName(formData.first_name)) {
       setNotification({
         type: 'error',
-        message: 'Las contraseñas no coinciden'
+        message: 'Nombre inválido. Solo letras y espacios permitidos'
       });
       setIsSubmitting(false);
       return;
     }
   
-    // Validación de longitud mínima de contraseña
-    if (formData.password.length < 6) {
+    if (!validateName(formData.last_name)) {
+      setNotification({
+        type: 'error',
+        message: 'Apellido inválido. Solo letras y espacios permitidos'
+      });
+      setIsSubmitting(false);
+      return;
+    }
+  
+    if (!validateDNI(formData.dni)) {
+      setNotification({
+        type: 'error',
+        message: 'DNI inválido. Debe tener 7 u 8 dígitos'
+      });
+      setIsSubmitting(false);
+      return;
+    }
+  
+    if (!validateAge(formData.date_of_birth)) {
+      setNotification({
+        type: 'error',
+        message: 'El usuario debe ser mayor de edad (18 años o más)'
+      });
+      setIsSubmitting(false);
+      return;
+    }
+  
+    if (!validatePhone(formData.phone)) {
+      setNotification({
+        type: 'error',
+        message: 'Teléfono inválido. Debe tener entre 10 y 15 dígitos'
+      });
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!validateEmail(formData.email)) {
+      setNotification({
+        type: 'error',
+        message: 'Correo electrónico inválido'
+      });
+      setIsSubmitting(false);
+      return;
+    }
+  
+    if (!validatePassword(formData.password)) {
       setNotification({
         type: 'error',
         message: 'La contraseña debe tener al menos 6 caracteres'
+      });
+      setIsSubmitting(false);
+      return;
+    }
+  
+    if (formData.password !== formData.confirmPassword) {
+      setNotification({
+        type: 'error',
+        message: 'Las contraseñas no coinciden'
       });
       setIsSubmitting(false);
       return;
@@ -171,9 +242,16 @@ const AddUser = () => {
                 value={formData.first_name}
                 onChange={handleChange}
                 required
-                className="w-full px-3 py-2 border border-border rounded-md focus:ring-primary-border focus:border-primary-border bg-background text-foreground"
+                className={`w-full px-3 py-2 border rounded-md focus:ring-primary-border focus:border-primary-border bg-background text-foreground ${
+                  formData.first_name && !validateName(formData.first_name) 
+                    ? 'border-red-500' 
+                    : 'border-border'
+                }`}
                 placeholder="Ej: Luis"
               />
+              {formData.first_name && !validateName(formData.first_name) && (
+                <p className="mt-1 text-xs text-red-500">Nombre inválido. Solo letras y espacios permitidos</p>
+              )}
             </div>
             
             <div>
@@ -184,9 +262,16 @@ const AddUser = () => {
                 value={formData.last_name}
                 onChange={handleChange}
                 required
-                className="w-full px-3 py-2 border border-border rounded-md focus:ring-primary-border focus:border-primary-border bg-background text-foreground"
+                className={`w-full px-3 py-2 border rounded-md focus:ring-primary-border focus:border-primary-border bg-background text-foreground ${
+                  formData.last_name && !validateName(formData.last_name) 
+                    ? 'border-red-500' 
+                    : 'border-border'
+                }`}
                 placeholder="Ej: Pérez"
               />
+              {formData.last_name && !validateName(formData.last_name) && (
+                <p className="mt-1 text-xs text-red-500">Apellido inválido. Solo letras y espacios permitidos</p>
+              )}
             </div>
             
             <div>
@@ -199,10 +284,16 @@ const AddUser = () => {
                 value={formData.dni}
                 onChange={handleChange}
                 required
-                pattern="\d{7,8}"
-                className="w-full px-3 py-2 border border-border rounded-md focus:ring-primary-border focus:border-primary-border bg-background text-foreground"
+                className={`w-full px-3 py-2 border rounded-md focus:ring-primary-border focus:border-primary-border bg-background text-foreground ${
+                  formData.dni && !validateDNI(formData.dni) 
+                    ? 'border-red-500' 
+                    : 'border-border'
+                }`}
                 placeholder="Ej: 12345678"
               />
+              {formData.dni && !validateDNI(formData.dni) && (
+                <p className="mt-1 text-xs text-red-500">DNI inválido. Debe tener 7 u 8 dígitos</p>
+              )}
             </div>
             
             <div>
@@ -213,6 +304,11 @@ const AddUser = () => {
                 required
                 locale={es}
                 dateFormat="dd/MM/yyyy"
+                className={`w-full px-3 py-2 border rounded-md focus:ring-primary-border focus:border-primary-border bg-background text-foreground ${
+                  formData.date_of_birth && !validateAge(formData.date_of_birth) 
+                    ? 'border-red-500' 
+                    : 'border-border'
+                }`}
                 placeholderText="Seleccione una fecha"
                 showYearDropdown
                 dropdownMode="select"
@@ -220,6 +316,9 @@ const AddUser = () => {
                 peekNextMonth
                 showMonthDropdown
               />
+              {formData.date_of_birth && !validateAge(formData.date_of_birth) && (
+                <p className="mt-1 text-xs text-red-500">El usuario debe ser mayor de edad (18 años o más)</p>
+              )}
             </div>
             
             <div>
@@ -230,10 +329,16 @@ const AddUser = () => {
                 value={formData.phone}
                 onChange={handleChange}
                 required
-                pattern="\d{10,15}"
-                className="w-full px-3 py-2 border border-border rounded-md focus:ring-primary-border focus:border-primary-border bg-background text-foreground"
+                className={`w-full px-3 py-2 border rounded-md focus:ring-primary-border focus:border-primary-border bg-background text-foreground ${
+                  formData.phone && !validatePhone(formData.phone) 
+                    ? 'border-red-500' 
+                    : 'border-border'
+                }`}
                 placeholder="Ej: 1123456789"
               />
+              {formData.phone && !validatePhone(formData.phone) && (
+                <p className="mt-1 text-xs text-red-500">Teléfono inválido. Debe tener entre 10 y 15 dígitos</p>
+              )}
             </div>
             
             <div>
@@ -244,9 +349,16 @@ const AddUser = () => {
                 value={formData.email}
                 onChange={handleChange}
                 required
-                className="w-full px-3 py-2 border border-border rounded-md focus:ring-primary-border focus:border-primary-border bg-background text-foreground"
+                className={`w-full px-3 py-2 border rounded-md focus:ring-primary-border focus:border-primary-border bg-background text-foreground ${
+                  formData.email && !validateEmail(formData.email) 
+                    ? 'border-red-500' 
+                    : 'border-border'
+                }`}
                 placeholder="Ej: usuario@empresa.com"
               />
+              {formData.email && !validateEmail(formData.email) && (
+                <p className="mt-1 text-xs text-red-500">Correo electrónico inválido</p>
+              )}
             </div>
             
             <div>
@@ -285,37 +397,69 @@ const AddUser = () => {
           </div>
         </div>
 
-         {/* Sección de Credenciales */}
-         <div className="bg-background p-6 rounded-lg shadow">
-           <h2 className="text-xl font-semibold mb-4 flex items-center text-foreground">
-             <FiLock className="mr-2" /> Credenciales de Acceso
-           </h2>
+        {/* Sección de Credenciales */}
+        <div className="bg-background p-6 rounded-lg shadow">
+          <h2 className="text-xl font-semibold mb-4 flex items-center text-foreground">
+            <FiLock className="mr-2" /> Credenciales de Acceso
+          </h2>
           
-           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-             <div>
-               <label className="block text-sm font-medium text-foreground mb-1">Contraseña *</label>
-               <input
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                required
-                className="w-full px-3 py-2 border border-border rounded-md focus:ring-primary-border focus:border-primary-border bg-background text-foreground"
-                placeholder="Mínimo 6 caracteres"
-              />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-1">Contraseña *</label>
+              <div className="relative">
+                <input
+                  type={showPassword.password ? "text" : "password"}
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  required
+                  className={`w-full px-3 py-2 border rounded-md focus:ring-primary-border focus:border-primary-border bg-background text-foreground pr-10 ${
+                    formData.password && !validatePassword(formData.password) 
+                      ? 'border-red-500' 
+                      : 'border-border'
+                  }`}
+                  placeholder="Mínimo 6 caracteres"
+                />
+                <button
+                  type="button"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                  onClick={() => toggleShowPassword('password')}
+                >
+                  {showPassword.password ? <FiEyeOff className="h-5 w-5" /> : <FiEye className="h-5 w-5" />}
+                </button>
+              </div>
+              {formData.password && !validatePassword(formData.password) && (
+                <p className="mt-1 text-xs text-red-500">La contraseña debe tener al menos 6 caracteres</p>
+              )}
             </div>
             
             <div>
               <label className="block text-sm font-medium text-foreground mb-1">Confirmar Contraseña *</label>
-              <input
-                type="password"
-                name="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                required
-                className="w-full px-3 py-2 border border-border rounded-md focus:ring-primary-border focus:border-primary-border bg-background text-foreground"
-                placeholder="Repite la contraseña"
-              />
+              <div className="relative">
+                <input
+                  type={showPassword.confirmPassword ? "text" : "password"}
+                  name="confirmPassword"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  required
+                  className={`w-full px-3 py-2 border rounded-md focus:ring-primary-border focus:border-primary-border bg-background text-foreground pr-10 ${
+                    formData.confirmPassword && formData.password !== formData.confirmPassword
+                      ? 'border-red-500'
+                      : 'border-border'
+                  }`}
+                  placeholder="Repite la contraseña"
+                />
+                <button
+                  type="button"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                  onClick={() => toggleShowPassword('confirmPassword')}
+                >
+                  {showPassword.confirmPassword ? <FiEyeOff className="h-5 w-5" /> : <FiEye className="h-5 w-5" />}
+                </button>
+              </div>
+              {formData.confirmPassword && formData.password !== formData.confirmPassword && (
+                <p className="mt-1 text-xs text-red-500">Las contraseñas no coinciden</p>
+              )}
             </div>
           </div>
         </div>

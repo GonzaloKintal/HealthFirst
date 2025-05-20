@@ -9,7 +9,7 @@ export const getLicenses = async (filters = {}) => {
       status: filters.status || null,
       employee_name: filters.employee_name || '',
       page: filters.page || 1,
-      page_size: filters.pageSize || 10,
+      page_size: filters.pageSize || 5,
       show_all_users: filters.show_all_users || false
     });
     
