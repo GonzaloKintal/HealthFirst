@@ -1,6 +1,6 @@
 import base64
 from django.utils import timezone
-from datetime import datetime
+from datetime import datetime, timedelta
 from django.utils.timezone import now
 from django.contrib.auth import get_user_model
 from xmlrpc.client import NOT_WELLFORMED_ERROR
@@ -233,9 +233,7 @@ def update_license(request, id):
 
         with transaction.atomic():
                 license.information = information
-
                 license.save()
-
                 # Actualizar certificado
                 if certificate_data:
                     try:
@@ -263,6 +261,13 @@ def update_license(request, id):
                                 is_deleted=False,
                                 deleted_at=None
                         )
+                        if license.status.name not in [Status.StatusChoices.APPROVED, Status.StatusChoices.REJECTED]:
+                            license.status.name=Status.StatusChoices.PENDING
+                            license.status.evaluation_comment='Pendiente de aprobación.'
+                            license.status.save()
+
+
+                
                 return JsonResponse({'message': 'Licencia actualizada exitosamente.'}, status=200)
 
     except Exception as e:
@@ -452,3 +457,30 @@ def process_certificate(certificate_data):
         file_encoded = base64.b64encode(file_decoded).decode('utf-8')
 
         return file_encoded
+
+@api_view(['PUT'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def update_expired(request):
+    licenses = License.objects.filter(is_deleted=False, status__name=Status.StatusChoices.MISSING_DOC)
+    try:
+        if not licenses:
+            raise Exception('No se encontraron licencias vencidas.')
+
+        for license in licenses:
+            expired_time= license.request_date + timedelta(days=license.required_days)
+            expired_licenses=0
+            if expired_time < timezone.now().date():
+                license.status.name = Status.StatusChoices.EXPIRED
+                license.status.evaluation_comment = 'Licencia vencida.'
+                license.status.save()
+                expired_licenses+=1
+        print(expired_licenses)
+        return JsonResponse({"expired_licenses": expired_licenses}, status=200)
+    
+    except Exception as e:
+        print(e)
+        return JsonResponse({"error": str(e)}, status=500)
+    
+
+
