@@ -1,6 +1,5 @@
-
-import { FiLock, FiUser } from 'react-icons/fi';
-import { useState, useContext } from 'react';
+import { FiLock, FiUser, FiEye, FiEyeOff, FiSun, FiMoon } from 'react-icons/fi';
+import { useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext';
 import { login } from '../../services/authService';
@@ -12,15 +11,39 @@ const LoginPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { login: authLogin } = useContext(AuthContext);
+  const [showPassword, setShowPassword] = useState(false);
+  const [darkMode, setDarkMode] = useState(false);
+
+  useEffect(() => {
+    const theme = localStorage.getItem('theme');
+    const isDark = theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    
+    setDarkMode(isDark);
+    if (isDark) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, []);
+
+  const toggleDarkMode = () => {
+    const newMode = !darkMode;
+    setDarkMode(newMode);
+    if (newMode) {
+      localStorage.setItem('theme', 'dark');
+      document.documentElement.classList.add('dark');
+    } else {
+      localStorage.setItem('theme', 'light');
+      document.documentElement.classList.remove('dark');
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
   
-    
     try {
-      // Simulamos un retardo de 3 segundos antes de hacer la petición
       await new Promise(resolve => setTimeout(resolve, 3000));
       
       const response = await login(username, password);
@@ -47,7 +70,6 @@ const LoginPage = () => {
     setIsLoading(true);
     setError('');
     try {
-      // Simulamos un retardo de 3 segundos antes de hacer la petición
       await new Promise(resolve => setTimeout(resolve, 3000));
       
       const adminCredentials = {
@@ -76,12 +98,22 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#2b60e5] lg:bg-gray-50">
+    <div className="min-h-screen bg-background dark:bg-card">
       {/* Contenedor principal - Flex en desktop, bloque en mobile */}
       <div className="flex flex-col lg:flex-row min-h-screen">
         {/* Sección izquierda - Solo visible en desktop */}
-        <div className="hidden lg:flex lg:w-1/2 bg-[#2b60e5] text-white p-12 relative overflow-hidden">
+        <div className="hidden lg:flex lg:w-1/2 bg-primary dark:bg-primary-hover text-white p-12 relative overflow-hidden">
           <div className="z-10 relative w-full">
+            <div className="absolute top-0 right-0">
+              <button 
+                onClick={toggleDarkMode}
+                className="p-2 text-white rounded-full hover:bg-primary-hover dark:hover:bg-primary focus:outline-none"
+                aria-label={darkMode ? 'Activar light mode' : 'Activar dark mode'}
+              >
+                {darkMode ? <FiSun className="h-5 w-5" /> : <FiMoon className="h-5 w-5" />}
+              </button>
+            </div>
+            
             <img
               src="/logo2.svg"
               alt="Logo ProHealth"
@@ -128,31 +160,41 @@ const LoginPage = () => {
 
         {/* Sección derecha - Formulario (siempre visible) */}
         <div className="flex-1 flex items-center justify-center p-4 pt-16 lg:pt-0">
-          <div className="w-full max-w-lg bg-white p-8 rounded-lg shadow-lg border border-gray-200 lg:mx-12">
+          <div className="w-full max-w-lg bg-background dark:bg-card p-8 rounded-lg shadow-lg border-2 border-border dark:border-border">
+            <div className="flex justify-end lg:hidden">
+              <button 
+                onClick={toggleDarkMode}
+                className="p-2 text-foreground dark:text-foreground rounded-full hover:bg-card dark:hover:bg-background focus:outline-none"
+                aria-label={darkMode ? 'Activar light mode' : 'Activar dark mode'}
+              >
+                {darkMode ? <FiSun className="h-5 w-5" /> : <FiMoon className="h-5 w-5" />}
+              </button>
+            </div>
+            
             <div className="mb-8 text-center">
               <img
                 src="/logo2.svg"
                 alt="Logo ProHealth"
                 className="h-20 w-auto mx-auto lg:hidden mb-4"
               />
-              <h2 className="text-2xl font-bold text-gray-800">Iniciar sesión</h2>
-              <p className="text-gray-600 mt-2">Ingresa tus credenciales para acceder al sistema</p>
+              <h2 className="text-2xl font-bold text-foreground dark:text-foreground">Iniciar sesión</h2>
+              <p className="text-foreground dark:text-foreground opacity-80 mt-2">Ingresa tus credenciales para acceder al sistema</p>
             </div>
 
             {error && (
-              <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+              <div className="mb-4 p-3 bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-200 rounded">
                 {error}
               </div>
             )}
 
             <form onSubmit={handleSubmit} className="space-y-6" autoComplete='off'>
               <div>
-                <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="username" className="block text-sm font-medium text-foreground dark:text-foreground mb-1">
                   Usuario
                 </label>
                 <div className="relative rounded-lg shadow-sm">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <FiUser className="h-5 w-5 text-gray-400" />
+                    <FiUser className="h-5 w-5 text-gray-400 dark:text-gray-500" />
                   </div>
                   <input
                     id="username"
@@ -161,30 +203,37 @@ const LoginPage = () => {
                     required
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2b60e5] focus:border-[#2b60e5]"
+                    className="block w-full pl-10 pr-3 py-2 border border-border dark:border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary bg-background dark:bg-card text-foreground dark:text-foreground"
                     placeholder="Ingrese su usuario"
                   />
                 </div>
               </div>
 
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="password" className="block text-sm font-medium text-foreground dark:text-foreground mb-1">
                   Contraseña
                 </label>
                 <div className="relative rounded-lg shadow-sm">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <FiLock className="h-5 w-5 text-gray-400" />
+                    <FiLock className="h-5 w-5 text-gray-400 dark:text-gray-500" />
                   </div>
                   <input
                     id="password"
                     name="password"
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2b60e5] focus:border-[#2b60e5]"
+                    className="block w-full pl-10 pr-10 py-2 border border-border dark:border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary bg-background dark:bg-card text-foreground dark:text-foreground"
                     placeholder="Ingrese su contraseña"
                   />
+                  <button
+                    type="button"
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? <FiEyeOff className="h-5 w-5" /> : <FiEye className="h-5 w-5" />}
+                  </button>
                 </div>
               </div>
 
@@ -192,7 +241,7 @@ const LoginPage = () => {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full flex justify-center items-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-[#2b60e5] hover:bg-[#2b60e5c7] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#2b60e5] transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full flex justify-center items-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isLoading ? (
                     <>
@@ -208,7 +257,7 @@ const LoginPage = () => {
             </form>
 
             {import.meta.env.DEV && (
-              <div className="mt-6 pt-6 border-t border-gray-200">
+              <div className="mt-6 pt-6 border-t border-border dark:border-border">
                 <button
                   onClick={handleQuickAdminAccess}
                   disabled={isLoading}
@@ -224,15 +273,15 @@ const LoginPage = () => {
                     </>
                   ) : 'Acceso Rápido Admin'}
                 </button>
-                <p className="text-xs text-gray-500 mt-2 text-center">
+                <p className="text-xs text-foreground dark:text-foreground opacity-70 mt-2 text-center">
                   Solo disponible en entorno de desarrollo
                 </p>
               </div>
             )}
 
-            <p className="text-gray-600 text-center mt-8">
+            <p className="text-foreground dark:text-foreground opacity-80 text-center mt-8">
               ¿No tienes una cuenta?<br />
-              Contacta con el <strong className="text-[#2b60e5]">administrador</strong> para obtener acceso.
+              Contacta con el <strong className="text-primary dark:text-primary-text">administrador</strong> para obtener acceso.
             </p>
           </div>
         </div>
