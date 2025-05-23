@@ -5,10 +5,10 @@ from django.utils.timezone import now
 from django.contrib.auth import get_user_model
 from xmlrpc.client import NOT_WELLFORMED_ERROR
 from .models import *
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 import json
 from .serializers import HealthFirstUserSerializer
-from licenses.serializers import LicenseSerializer, LicenseTypeSerializer
+from licenses.serializers import LicenseSerializer, LicenseTypeSerializer, LicenseSerializerCSV
 from django.core.paginator import Paginator
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.permissions import IsAuthenticated
@@ -20,6 +20,10 @@ from .analisis import license_analysis
 from licenses.utils.file_utils import *
 from licenses.utils.coherence_model_ml import predict_top_3
 from django.db.models import Q
+from urllib.parse import unquote
+import csv
+from django.views.decorators.csrf import csrf_exempt
+
 
 # LICENSES API
 @api_view(['POST'])
@@ -486,3 +490,58 @@ def update_expired(request):
         return JsonResponse({"error": str(e)}, status=500)  
 
 
+@api_view(['PUT'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def export_licenses_to_csv(request):
+    try:
+        data = json.loads(request.body)
+        filter = data.get('filter', '')
+        decoded_filter = unquote(filter)
+        keywords = decoded_filter.strip().split()
+
+        query = Q(is_deleted=False)
+        for word in keywords:
+            subquery = (
+                Q(status__name__icontains=word) |
+                Q(type__name__icontains=word) |
+                Q(user__email__icontains=word) |
+                Q(user__first_name__icontains=word) |
+                Q(user__last_name__icontains=word)
+            )
+            query &= subquery
+
+        licenses = License.objects.filter(query)
+        licenses_data = LicenseSerializerCSV(licenses, many=True).data
+
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="licenses.csv"'
+
+        writer = csv.writer(response)
+        if licenses_data:
+            column_headers = {
+                'id': 'ID de Licencia',
+                'username': 'Nombre de Usuario',
+                'user_name': 'Nombre Completo',
+                'type': 'Tipo de Licencia',
+                'start_date': 'Fecha de Inicio',
+                'end_date': 'Fecha de Fin',
+                'days': 'Días',
+                'status': 'Estado',
+                'information': 'Información',
+                'evaluator': 'Evaluador',
+                'evaluator_role': 'Rol del Evaluador'
+            }
+            original_fields = LicenseSerializerCSV.Meta.fields
+
+            headers = [column_headers.get(field, field) for field in original_fields]
+            writer.writerow(headers)
+            for item in licenses_data:
+                writer.writerow([item.get(field, '') for field in original_fields])
+        else:
+            writer.writerow(['No data found'])
+
+        return response
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
