@@ -64,37 +64,21 @@ def create_model_supervisor(data):
     #joblib.dump(model, 'isolation_forest_sup_model.pkl') 
 
     return model # NO deberia retornarlo, pero por ahora para pruebas lo dejo así
-def anomalies(data):
-    # 1. Obtener datos desde el ORM
-    #qs = License.objects.values('user_id').annotate(
-    #    total_days_requested=Sum('required_days'),
-    #    num_requests=Count('license_id')
-    #)
+def anomalies_supervisores(data,model): #por ahora recibe el modelo, pero NO deberia
+    print("ANOMALIAS PARA SUPERVISORES")
 
-    # 2. Crear DataFrame
-    #data = pd.DataFrame(list(qs))
+    #Cargo el modelo previamente guardado #ESTO ES LO CORRECTO
+    #model = joblib.load('isolation_forest_sup_model.pkl')
 
-    #if data.empty:
-    #    print("No hay datos para analizar.")
-    #    return
+    features = data[['total_requests', 'approved_requests', 'rejected_requests', 'approval_rate', 'rejection_rate']]
 
-    # 3. Calcular promedio
-    #data['prom_days_request'] = data['total_days_requested'] / data['num_requests']
-
-    features = data[['total_days_requested', 'num_requests', 'prom_days_request']]
-
-    # Entrenamiento del modelo Isolation Forest
-    model = IsolationForest(n_estimators=100, contamination=0.2, random_state=42)
-    model.fit(features)
 
     data['anomaly_score'] = model.decision_function(features)
     data['is_anomaly'] = model.predict(features)
-
-    # Convertir la predicción a etiquetas comprensibles
     data['is_anomaly'] = data['is_anomaly'].map({1: 0, -1: 1})  # 1 = Anómalo, 0 = Normal
 
-    # Mostrar resultados
-    print(data[['user_id', 'total_days_requested', 'num_requests', 'prom_days_request', 'anomaly_score', 'is_anomaly']])
+    #muestro los resultados
+    print(data[['evaluator_id', 'total_requests', 'approved_requests', 'rejected_requests', 'approval_rate', 'rejection_rate', 'anomaly_score', 'is_anomaly']])
 
 #data=create_dataFrame() cuando tenga mas info en el dataset
 data = pd.DataFrame({
