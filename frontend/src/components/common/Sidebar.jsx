@@ -1,4 +1,3 @@
-
 import { 
   FiHome as Dashboard,
   FiSettings as Settings,
@@ -57,7 +56,7 @@ const Sidebar = ({ isOpen }) => {
   const options = menuOptions[user?.role] || menuOptions.employee;
 
   return (
-    <div className={`z-1000 fixed h-screen bg-background shadow-lg border-r border-border flex flex-col transition-all duration-300 ${
+    <div className={`z-40 fixed h-screen bg-background shadow-lg border-r border-border flex flex-col transition-all duration-300 ${
       isOpen ? 'translate-x-0' : '-translate-x-full'
     }`} style={{ width: '16rem' }}>
       
