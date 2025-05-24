@@ -490,7 +490,7 @@ def update_expired(request):
         return JsonResponse({"error": str(e)}, status=500)  
 
 
-@api_view(['PUT'])
+@api_view(['POST'])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
 def export_licenses_to_csv(request):

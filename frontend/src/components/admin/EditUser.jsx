@@ -3,6 +3,7 @@ import { FiUser, FiLock, FiBriefcase, FiSave, FiEye, FiEyeOff } from 'react-icon
 import { useParams, useNavigate } from 'react-router-dom';
 import Notification from '../utils/Notification';
 import { editUser, getUser } from '../../services/userService';
+import { getDepartments } from '../../services/departmentService';
 import StyledDatePicker from '../utils/StyledDatePicker';
 import es from 'date-fns/locale/es';
 import { format } from 'date-fns';
@@ -48,16 +49,7 @@ const EditUser = () => {
     { value: 'employee', label: 'Empleado' }
   ];
 
-  const departments = [
-    'Administración',
-    'Recursos Humanos',
-    'Tecnología',
-    'Operaciones',
-    'Ventas',
-    'Marketing',
-    'Finanzas',
-    'Legal'
-  ];
+  const [departments, setDepartments] = useState([]);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -91,6 +83,23 @@ const EditUser = () => {
       fetchUserData();
     }
   }, [id]);
+
+  useEffect(() => {
+    const fetchDepartments = async () => {
+      try {
+        const data = await getDepartments();
+        setDepartments(data);
+      } catch (error) {
+        console.error('Error al cargar departamentos:', error);
+        setNotification({
+          type: 'error',
+          message: 'Error al cargar los departamentos'
+        });
+      }
+    };
+    
+    fetchDepartments();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -419,7 +428,9 @@ const EditUser = () => {
               >
                 <option value="">Seleccionar departamento</option>
                 {departments.map(dept => (
-                  <option key={dept} value={dept}>{dept}</option>
+                  <option key={dept.department_id} value={dept.name}>
+                    {dept.name}
+                  </option>
                 ))}
               </select>
             </div>
