@@ -6,7 +6,7 @@ import { FiSearch, FiFilter, FiDownload, FiEdit, FiTrash2, FiEye, FiPlus, FiFile
 import useAuth from '../../hooks/useAuth';
 import Confirmation from '../../components/utils/Confirmation';
 import { Link } from 'react-router-dom';
-import { getLicenses, deleteLicense } from '../../services/licenseService';
+import { getLicenses, deleteLicense, exportLicensesToCSV } from '../../services/licenseService';
 import Notification from '../../components/utils/Notification';
 
 const LicensesPage = () => {
@@ -17,6 +17,7 @@ const LicensesPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState('all');
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  const [showExportConfirmation, setShowExportConfirmation] = useState(false);
   const [licenseToDelete, setLicenseToDelete] = useState(null);
   const canShowActions = ['admin', 'supervisor'].includes(user?.role);
   const [error, setError] = useState(null);
@@ -37,7 +38,7 @@ const LicensesPage = () => {
       try {
         setError(null);
         const shouldShowAll = ['admin', 'supervisor'].includes(user?.role);
-        
+        console.log(filter)
         const response = await getLicenses({ 
           user_id: user?.id,
           show_all_users: shouldShowAll,
@@ -177,6 +178,47 @@ const LicensesPage = () => {
     navigate(`/license-detail/${licenseId}`);
   };
 
+  const handleExportClick = () => {
+    if (licenses.length === 0) return;
+    setShowExportConfirmation(true);
+  };
+
+  const confirmExport = async () => {
+    setShowExportConfirmation(false);
+    try {
+      // Preparamos los parámetros de filtrado igual que en la consulta principal
+      const shouldShowAll = ['admin', 'supervisor'].includes(user?.role);
+      const filters = {
+        user_id: shouldShowAll ? null : user?.id,
+        status: filter !== 'all' ? filter : null,
+        employee_name: searchQuery
+      };
+      
+      // Convertimos los filtros a un string para enviar al backend
+      const filterString = [
+        filters.status ? `estado:${filters.status}` : '',
+        filters.employee_name ? `empleado:${filters.employee_name}` : ''
+      ].filter(Boolean).join(' ');
+  
+      const result = await exportLicensesToCSV(filterString);
+      
+      if (!result.success) {
+        setNotification({
+          show: true,
+          type: 'error',
+          message: result.error || 'Error al exportar las licencias'
+        });
+      }
+    } catch (error) {
+      console.error('Error exporting licenses:', error);
+      setNotification({
+        show: true,
+        type: 'error',
+        message: 'Error al exportar las licencias'
+      });
+    }
+  };
+
   const getStatusColors = (status) => {
     const lightColors = {
       approved: { 
@@ -286,10 +328,14 @@ const LicensesPage = () => {
             Solicitar Nueva
           </Link>
           {(user?.role === 'admin' || user?.role === 'supervisor') && (
-            <button className="flex items-center px-4 py-2 bg-primary text-white font-medium rounded-md cursor-pointer hover:bg-primary-hover transition duration-200">
+            <button 
+              onClick={handleExportClick}
+              className="flex items-center px-4 py-2 bg-primary text-white font-medium rounded-md cursor-pointer hover:bg-primary-hover transition duration-200"
+              disabled={licenses.length === 0}
+            >
               <FiDownload className="mr-2" />
               Exportar
-            </button>
+            </button> 
           )}
         </div>
       </div>
@@ -477,6 +523,17 @@ const LicensesPage = () => {
         confirmText="Eliminar"
         cancelText="Cancelar"
         type="danger"
+      />
+
+      <Confirmation
+        isOpen={showExportConfirmation}
+        onClose={() => setShowExportConfirmation(false)}
+        onConfirm={confirmExport}
+        title="Exportar Licencias"
+        message="¿Desea exportar las licencias con los filtros actuales?"
+        confirmText="Exportar"
+        cancelText="Cancelar"
+        type="info"
       />
 
       {notification.show && (

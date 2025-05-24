@@ -164,3 +164,33 @@ export const analyzeCertificate = async (base64File) => {
     };
   }
 };
+
+// Exportar licencias a CSV
+export const exportLicensesToCSV = async (filter = '') => {
+  try {
+    const response = await api.post('/licenses/export', {
+      filter: filter
+    }, {
+      responseType: 'blob' // Para manejar la respuesta como archivo
+    });
+
+    // Crear un enlace temporal para descargar el archivo
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'licencias.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    return {
+      success: true
+    };
+  } catch (error) {
+    console.error('Error exporting licenses to CSV:', error);
+    return {
+      success: false,
+      error: error.response?.data?.error || 'Error al exportar las licencias a CSV'
+    };
+  }
+};
