@@ -40,8 +40,30 @@ def create_dataFrame():
     print(df)
     return df
 
+def create_dataframe_supervisor():
+    qs = License.objects.filter(evaluator__isnull=False).values('evaluator_id').annotate(
+    total_requests=Count('id'),
+    approved_requests=Count('id', filter=Q(status__name='approved')), #cant solicitudes aprobadas
+    rejected_requests=Count('id', filter=Q(status__name='rejected')) #cant solicitudes rechazadas
+    )
+    
+    df = pd.DataFrame(list(qs))
+    df['approval_rate'] = df['approved_requests'] / df['total_requests'] #porcentaje de aprobados
+    df['rejection_rate'] = df['rejected_requests'] / df['total_requests'] #porcentaje de rechazados
+    print(df)
+    return df
 
+def create_model_supervisor(data):
+    features = data[['total_requests', 'approved_requests', 'rejected_requests', 'approval_rate', 'rejection_rate']]
 
+     # Entrenamiento del modelo Isolation Forest
+    model = IsolationForest(n_estimators=100, contamination=0.2, random_state=42)
+    model.fit(features)
+
+    # Guardar el modelo en un archivo, ESTO ES LO CORRECTO
+    #joblib.dump(model, 'isolation_forest_sup_model.pkl') 
+
+    return model # NO deberia retornarlo, pero por ahora para pruebas lo dejo así
 def anomalies(data):
     # 1. Obtener datos desde el ORM
     #qs = License.objects.values('user_id').annotate(
