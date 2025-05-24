@@ -35,7 +35,6 @@ const LicensesPage = () => {
   useEffect(() => {
     const fetchLicenses = async () => {
       try {
-        console.log('Filtrando por:', filter);
         setError(null);
         const shouldShowAll = ['admin', 'supervisor'].includes(user?.role);
         
