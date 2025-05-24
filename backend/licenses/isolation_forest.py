@@ -80,11 +80,16 @@ def anomalies_supervisores(data,model): #por ahora recibe el modelo, pero NO deb
     #muestro los resultados
     print(data[['evaluator_id', 'total_requests', 'approved_requests', 'rejected_requests', 'approval_rate', 'rejection_rate', 'anomaly_score', 'is_anomaly']])
 
-#data=create_dataFrame() cuando tenga mas info en el dataset
-data = pd.DataFrame({
-    'user_id': range(1, 11),
-    'total_days_requested': [5, 6, 15, 5, 6, 7, 5, 4, 6, 30],  # Usuario 10 es anómalo
-    'num_requests': [1, 1, 15, 1, 1, 1, 1, 1, 1, 2]
-})
-data['prom_days_request'] = data['total_days_requested'] / data['num_requests']
-anomalies(data)
+
+def data_csv_sup():#para pruebas
+    data = pd.DataFrame({
+        'evaluator_id': range(1, 11),
+        'total_requests': [20, 15, 10, 8, 30, 12, 7, 25, 18, 5],  # Ej: supervisor 10 podría ser anómalo
+        'approved_requests': [18, 12, 9, 8, 28, 10, 6, 10, 17, 0],
+        'rejected_requests': [2, 3, 1, 0, 2, 2, 1, 15, 1, 5]
+    })
+
+    data['approval_rate'] = data['approved_requests'] / data['total_requests']
+    data['rejection_rate'] = data['rejected_requests'] / data['total_requests']
+    print(data)
+    return data
