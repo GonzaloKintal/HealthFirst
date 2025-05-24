@@ -58,7 +58,7 @@ def create_model_supervisor(data):
     features = data[['total_requests', 'approved_requests', 'rejected_requests', 'approval_rate', 'rejection_rate']]
 
      # Entrenamiento del modelo Isolation Forest
-    model = IsolationForest(n_estimators=100, contamination=0.1, random_state=42)
+    model = IsolationForest(n_estimators=100, contamination=0.5, random_state=42)
     model.fit(features)
 
     # Guardar el modelo en un archivo, ESTO ES LO CORRECTO
@@ -77,7 +77,8 @@ def anomalies_supervisores(data,model): #por ahora recibe el modelo, pero NO deb
     data['anomaly_score'] = model.decision_function(features)
     data['is_anomaly'] = model.predict(features)
     data['is_anomaly'] = data['is_anomaly'].map({1: 0, -1: 1})  # 1 = Anómalo, 0 = Normal
-
+    data['approval_rate'] = (data['approval_rate'] * 100).map("{:.2f}%".format)
+    data['rejection_rate'] = (data['rejection_rate'] * 100).map("{:.2f}%".format)
     #muestro los resultados
     print(data[['evaluator_id', 'total_requests', 'approved_requests', 'rejected_requests', 'approval_rate', 'rejection_rate', 'anomaly_score', 'is_anomaly']])
 
@@ -95,7 +96,7 @@ def data_csv_sup():#para pruebas
     print(data)
     return data
 
-data=create_dataframe_supervisor("Hora mensual") #cuando tenga mas info en el dataset 3esto se le debe pasar para las anomalias
+data=create_dataframe_supervisor("") #cuando tenga mas info en el dataset 3esto se le debe pasar para las anomalias
 #data = data_csv_sup()
 anomalies_supervisores(data, create_model_supervisor(data)) # uso data_csv() hasta que tenga mas info en el dataset,
 
