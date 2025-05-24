@@ -234,6 +234,8 @@ def get_users_by_filter(request):
 
     except Exception as e:
         return JsonResponse({'error': 'Ocurrió un error inesperado'}, status=500)
+    
+
 @api_view(['POST'])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
@@ -301,27 +303,29 @@ def update_department(request, id):
         name = data.get('name', None)
         description = data.get('description', None)
 
+        if not Department.objects.filter(department_id=id).exists():
+            response_data = {'error': 'El departamento no existe.'}
+            status_code = 404
+            return JsonResponse(response_data, status=status_code)
+
+        department = Department.objects.get(department_id=id)
+
         if not name and not description:
             response_data = {'error': 'Debe enviar al menos un campo.'}
             status_code = 400
-
-        elif Department.objects.filter(name=name).exists():
-            response_data = {'error': 'El nombre del departamento ya existe.'}
-            status_code = 400
-
-        elif not Department.objects.filter(department_id=id).exists():
-            response_data = {'error': 'El departamento no existe.'}
-            status_code = 404
-
         else:
-            department = Department.objects.get(department_id=id)
-            if name:
-                department.name = name
-            if description:
-                department.description = description
-            department.save()
-            response_data = {'ok': True}
-            status_code = 200
+            if name and name != department.name and Department.objects.exclude(department_id=id).filter(name=name).exists():
+                response_data = {'error': 'El nombre del departamento ya existe.'}
+                status_code = 400
+            else:
+                if name:
+                    department.name = name
+                if description:
+                    department.description = description
+                
+                department.save()
+                response_data = {'ok': True}
+                status_code = 200
             
     except Exception as e:
         response_data = {'error': 'Ocurrió un error inesperado'}

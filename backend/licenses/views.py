@@ -5,10 +5,10 @@ from django.utils.timezone import now
 from django.contrib.auth import get_user_model
 from xmlrpc.client import NOT_WELLFORMED_ERROR
 from .models import *
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 import json
 from .serializers import HealthFirstUserSerializer
-from licenses.serializers import LicenseSerializer, LicenseTypeSerializer
+from licenses.serializers import LicenseSerializer, LicenseTypeSerializer, LicenseSerializerCSV
 from django.core.paginator import Paginator
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.permissions import IsAuthenticated
@@ -20,6 +20,10 @@ from .analisis import license_analysis
 from licenses.utils.file_utils import *
 from licenses.utils.coherence_model_ml import predict_top_3
 from django.db.models import Q
+from urllib.parse import unquote
+import csv
+from django.views.decorators.csrf import csrf_exempt
+
 
 # LICENSES API
 @api_view(['POST'])
@@ -486,3 +490,80 @@ def update_expired(request):
         return JsonResponse({"error": str(e)}, status=500)  
 
 
+@api_view(['POST'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def export_licenses_to_csv(request):
+    try:
+        data = json.loads(request.body)
+        user_id = data.get('user_id')
+        show_all_users = data.get('show_all_users', False)
+        status_filter = data.get('status')
+        employee_name = data.get('employee_name', '').strip()
+
+
+        if not user_id:
+            return JsonResponse({'error': 'El campo user_id es requerido.'}, status=400)
+
+        try:
+            current_user = HealthFirstUser.objects.get(id=user_id, is_deleted=False)
+        except HealthFirstUser.DoesNotExist:
+            return JsonResponse({'error': 'Usuario no encontradooo'}, status=404)
+
+        queryset = License.objects.filter(is_deleted=False) 
+
+        if employee_name:
+            queryset = queryset.filter(
+            Q(user__first_name__icontains=employee_name) | 
+            Q(user__last_name__icontains=employee_name)
+        )
+
+        # Filtro por estado
+        if status_filter:
+            queryset = queryset.filter(status__name=status_filter)
+
+        role_name = current_user.role.name if current_user.role else None
+
+        if role_name in ['employee', 'analyst']:
+            if role_name in ['employee', 'analyst']:
+                queryset = queryset.filter(user__id=user_id)
+
+        elif role_name in ['admin', 'supervisor']:
+            if not show_all_users:
+                queryset = queryset.filter(user=current_user)
+        else:
+            queryset = queryset.none()
+
+
+        licenses_data = LicenseSerializerCSV(queryset, many=True).data
+
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="licenses.csv"'
+
+        writer = csv.writer(response)
+        if licenses_data:
+            column_headers = {
+                'id': 'ID de Licencia',
+                'username': 'Nombre de Usuario',
+                'user_name': 'Nombre Completo',
+                'type': 'Tipo de Licencia',
+                'start_date': 'Fecha de Inicio',
+                'end_date': 'Fecha de Fin',
+                'days': 'Días',
+                'status': 'Estado',
+                'information': 'Información',
+                'evaluator': 'Evaluador',
+            }
+            original_fields = LicenseSerializerCSV.Meta.fields
+
+            headers = [column_headers.get(field, field) for field in original_fields]
+            writer.writerow(headers)
+            for item in licenses_data:
+                writer.writerow([item.get(field, '') for field in original_fields])
+        else:
+            writer.writerow(['No data found'])
+
+        return response
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
