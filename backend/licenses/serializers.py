@@ -43,7 +43,7 @@ class LicenseSerializerCSV(LicenseSerializer):
 
     class Meta:
         model = License
-        fields = ['license_id','username', 'user_name', 'type', 'start_date', 'end_date', 'days', 'status', 'information','evaluator','evaluator_role']  # Add new fields
+        fields = ['license_id','username', 'user_name', 'type', 'start_date', 'end_date', 'days', 'status', 'information','evaluator'] 
 
 class LicenseTypeSerializer(serializers.ModelSerializer):
     class Meta:

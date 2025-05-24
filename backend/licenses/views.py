@@ -496,23 +496,46 @@ def update_expired(request):
 def export_licenses_to_csv(request):
     try:
         data = json.loads(request.body)
-        filter = data.get('filter', '')
-        decoded_filter = unquote(filter)
-        keywords = decoded_filter.strip().split()
+        user_id = data.get('user_id')
+        show_all_users = data.get('show_all_users', False)
+        status_filter = data.get('status')
+        employee_name = data.get('employee_name', '').strip()
 
-        query = Q(is_deleted=False)
-        for word in keywords:
-            subquery = (
-                Q(status__name__icontains=word) |
-                Q(type__name__icontains=word) |
-                Q(user__email__icontains=word) |
-                Q(user__first_name__icontains=word) |
-                Q(user__last_name__icontains=word)
-            )
-            query &= subquery
 
-        licenses = License.objects.filter(query)
-        licenses_data = LicenseSerializerCSV(licenses, many=True).data
+        if not user_id:
+            return JsonResponse({'error': 'El campo user_id es requerido.'}, status=400)
+
+        try:
+            current_user = HealthFirstUser.objects.get(id=user_id, is_deleted=False)
+        except HealthFirstUser.DoesNotExist:
+            return JsonResponse({'error': 'Usuario no encontradooo'}, status=404)
+
+        queryset = License.objects.filter(is_deleted=False) 
+
+        if employee_name:
+            queryset = queryset.filter(
+            Q(user__first_name__icontains=employee_name) | 
+            Q(user__last_name__icontains=employee_name)
+        )
+
+        # Filtro por estado
+        if status_filter:
+            queryset = queryset.filter(status__name=status_filter)
+
+        role_name = current_user.role.name if current_user.role else None
+
+        if role_name in ['employee', 'analyst']:
+            if role_name in ['employee', 'analyst']:
+                queryset = queryset.filter(user__id=user_id)
+
+        elif role_name in ['admin', 'supervisor']:
+            if not show_all_users:
+                queryset = queryset.filter(user=current_user)
+        else:
+            queryset = queryset.none()
+
+
+        licenses_data = LicenseSerializerCSV(queryset, many=True).data
 
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="licenses.csv"'
@@ -530,7 +553,6 @@ def export_licenses_to_csv(request):
                 'status': 'Estado',
                 'information': 'Información',
                 'evaluator': 'Evaluador',
-                'evaluator_role': 'Rol del Evaluador'
             }
             original_fields = LicenseSerializerCSV.Meta.fields
 
