@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-const AdminDashboardIframe = () => {
+const AnalystDashboardIFrame = () => {
   const [iframeUrl, setIframeUrl] = useState('');
 
   useEffect(() => {
@@ -18,6 +18,7 @@ const AdminDashboardIframe = () => {
 
   return (
     <div>
+      <h2 className="text-xl font-bold mb-4">Dashboard del Analista</h2>
       {iframeUrl ? (
         <iframe
         src={iframeUrl}
@@ -33,4 +34,4 @@ const AdminDashboardIframe = () => {
   );
 };
 
-export default AdminDashboardIframe;
+export default AnalystDashboardIFrame;

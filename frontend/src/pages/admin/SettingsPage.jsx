@@ -1,4 +1,5 @@
 import { FiSettings } from 'react-icons/fi';
+import DepartmentsSection from '../../components/admin/DepartmentsSection';
 
 const SettingsPage = () => {
   return (
@@ -10,14 +11,21 @@ const SettingsPage = () => {
         </h1>
       </div>
 
-      <div className="bg-background p-6 rounded-lg shadow">
-        <div className="flex justify-center items-center py-12">
-          <div className="text-center">
-            <h2 className="text-xl font-medium text-foreground mb-2">Coming soon...</h2>
-            <p className="text-foreground">
-              Esta sección estará disponible en una próxima versión.
-            </p>
-          </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Sección de Departamentos */}
+        <div className="lg:col-span-2">
+          <DepartmentsSection />
+        </div>
+        
+        {/* Otras secciones de configuración que vayamos a tener */}
+        <div className="bg-background p-6 rounded-lg shadow">
+          <h2 className="text-xl font-bold text-foreground mb-4">Otra sección</h2>
+          <p className="text-foreground">Contenido pendiente...</p>
+        </div>
+        
+        <div className="bg-background p-6 rounded-lg shadow">
+          <h2 className="text-xl font-bold text-foreground mb-4">Otra sección</h2>
+          <p className="text-foreground">Contenido pendiente...</p>
         </div>
       </div>
     </div>
