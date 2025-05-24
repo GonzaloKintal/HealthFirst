@@ -166,13 +166,22 @@ export const analyzeCertificate = async (base64File) => {
 };
 
 // Exportar licencias a CSV
-export const exportLicensesToCSV = async (filter = '') => {
+export const exportLicensesToCSV = async (filters = {}) => {
   try {
-    const response = await api.post('/licenses/export', {
-      filter: filter
-    }, {
-      responseType: 'blob' // Para manejar la respuesta como archivo
-    });
+    const response = await api.post('/licenses/export', 
+      JSON.stringify({
+        user_id: filters.user_id || null,
+        show_all_users: filters.show_all_users || false,
+        status: filters.status || null,
+        employee_name: filters.employee_name || ''
+      }), 
+      {
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        responseType: 'blob'
+      }
+    );
 
     // Crear un enlace temporal para descargar el archivo
     const url = window.URL.createObjectURL(new Blob([response.data]));
@@ -187,7 +196,11 @@ export const exportLicensesToCSV = async (filter = '') => {
       success: true
     };
   } catch (error) {
-    console.error('Error exporting licenses to CSV:', error);
+    console.error('Error exporting licenses to CSV:', {
+      message: error.message,
+      response: error.response?.data,
+      config: error.config
+    });
     return {
       success: false,
       error: error.response?.data?.error || 'Error al exportar las licencias a CSV'
