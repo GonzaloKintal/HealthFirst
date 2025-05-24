@@ -1,27 +1,17 @@
 import sys
 import os
-from pathlib import Path
 import pandas as pd
 from sklearn.ensemble import IsolationForest
+import joblib
 
 import django
-import sys
-from django.db.models import Sum,Count
-import sys
+from django.db.models import Sum,Count,Q
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'settings.local')
 django.setup()
 
 from licenses.models import License
-from licenses.utils.file_utils import (
-    base64_to_text,
-    is_pdf_image,
-    normalize_text,
-    date_in_range,
-    search_in_pdf_text,
-)
-
 
 def create_dataFrame():
     #agrupo licencias por empleado
@@ -40,24 +30,35 @@ def create_dataFrame():
     print(df)
     return df
 
-def create_dataframe_supervisor():
-    qs = License.objects.filter(evaluator__isnull=False).values('evaluator_id').annotate(
-    total_requests=Count('id'),
-    approved_requests=Count('id', filter=Q(status__name='approved')), #cant solicitudes aprobadas
-    rejected_requests=Count('id', filter=Q(status__name='rejected')) #cant solicitudes rechazadas
+def create_dataframe_supervisor(type):
+    print("El tipo es:",type)
+    if(type is None or type==""):
+        qs = License.objects.filter(evaluator__isnull=False
+        ).values('evaluator_id').annotate(
+        total_requests=Count('license_id'),
+        approved_requests=Count('license_id', filter=Q(status__name='approved')), #cant solicitudes aprobadas
+        rejected_requests=Count('license_id', filter=Q(status__name='rejected')) #cant solicitudes rechazadas
     )
+    else:
+        qs = License.objects.filter(evaluator__isnull=False,type__name=type
+            ).values('evaluator_id').annotate(
+            total_requests=Count('license_id'),
+            approved_requests=Count('license_id', filter=Q(status__name='approved')), #cant solicitudes aprobadas
+            rejected_requests=Count('license_id', filter=Q(status__name='rejected')) #cant solicitudes rechazadas
+        )
     
     df = pd.DataFrame(list(qs))
+    #print(list(qs))
     df['approval_rate'] = df['approved_requests'] / df['total_requests'] #porcentaje de aprobados
     df['rejection_rate'] = df['rejected_requests'] / df['total_requests'] #porcentaje de rechazados
-    print(df)
+    #print(df)
     return df
 
 def create_model_supervisor(data):
     features = data[['total_requests', 'approved_requests', 'rejected_requests', 'approval_rate', 'rejection_rate']]
 
      # Entrenamiento del modelo Isolation Forest
-    model = IsolationForest(n_estimators=100, contamination=0.2, random_state=42)
+    model = IsolationForest(n_estimators=100, contamination=0.1, random_state=42)
     model.fit(features)
 
     # Guardar el modelo en un archivo, ESTO ES LO CORRECTO
@@ -65,7 +66,7 @@ def create_model_supervisor(data):
 
     return model # NO deberia retornarlo, pero por ahora para pruebas lo dejo así
 def anomalies_supervisores(data,model): #por ahora recibe el modelo, pero NO deberia
-    print("ANOMALIAS PARA SUPERVISORES")
+    print("\n ----------------------ANOMALIAS PARA SUPERVISORES")
 
     #Cargo el modelo previamente guardado #ESTO ES LO CORRECTO
     #model = joblib.load('isolation_forest_sup_model.pkl')
@@ -93,3 +94,9 @@ def data_csv_sup():#para pruebas
     data['rejection_rate'] = data['rejected_requests'] / data['total_requests']
     print(data)
     return data
+
+data=create_dataframe_supervisor("Hora mensual") #cuando tenga mas info en el dataset 3esto se le debe pasar para las anomalias
+#data = data_csv_sup()
+anomalies_supervisores(data, create_model_supervisor(data)) # uso data_csv() hasta que tenga mas info en el dataset,
+
+#se filtra por un solo tipo 
