@@ -38,7 +38,6 @@ const LicensesPage = () => {
       try {
         setError(null);
         const shouldShowAll = ['admin', 'supervisor'].includes(user?.role);
-        console.log(filter)
         const response = await getLicenses({ 
           user_id: user?.id,
           show_all_users: shouldShowAll,
@@ -186,21 +185,15 @@ const LicensesPage = () => {
   const confirmExport = async () => {
     setShowExportConfirmation(false);
     try {
-      // Preparamos los parámetros de filtrado igual que en la consulta principal
       const shouldShowAll = ['admin', 'supervisor'].includes(user?.role);
-      const filters = {
-        user_id: shouldShowAll ? null : user?.id,
+      const exportFilters = {
+        user_id: user?.id,
+        show_all_users: shouldShowAll,
         status: filter !== 'all' ? filter : null,
         employee_name: searchQuery
       };
-      
-      // Convertimos los filtros a un string para enviar al backend
-      const filterString = [
-        filters.status ? `estado:${filters.status}` : '',
-        filters.employee_name ? `empleado:${filters.employee_name}` : ''
-      ].filter(Boolean).join(' ');
   
-      const result = await exportLicensesToCSV(filterString);
+      const result = await exportLicensesToCSV(exportFilters);
       
       if (!result.success) {
         setNotification({
@@ -214,7 +207,7 @@ const LicensesPage = () => {
       setNotification({
         show: true,
         type: 'error',
-        message: 'Error al exportar las licencias'
+        message: error.message || 'Error al exportar las licencias'
       });
     }
   };
