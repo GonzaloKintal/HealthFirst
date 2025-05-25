@@ -1,3 +1,6 @@
+import { Routes, Route } from 'react-router-dom';
+import AnalystDashboardIFrame from './AnalystDashboardIFrame';
+
 const AnalystDashboard = () => {
   return (
     <div className="bg-background rounded-lg shadow p-6">
@@ -6,6 +9,9 @@ const AnalystDashboard = () => {
       
       <div className="mt-6">
         {/* Contenido para analista se agregará aquí */}
+        <Routes>
+          <Route index element={<AnalystDashboardIFrame />} />
+        </Routes>
       </div>
     </div>
   );
