@@ -7,8 +7,9 @@ import joblib
 
 import django
 from django.db.models import Sum,Count,Q
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
-
+#sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+sys.path.append(BASE_DIR)
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'settings.local')
 django.setup()
 
@@ -109,19 +110,16 @@ def generar_csv_supervisores(path_csv='supervisors_data_1000.csv', n=1000, semil
     df.to_csv(path_csv, index=False)
     return df
 
-
-def mostrar_anomalias(cant_filas,dataframe):
-    print("\n ----------------------LOS ",cant_filas, "MAS ANOMALOS")
-    top_anomalies = dataframe.sort_values(by='anomaly_score').head(cant_filas).reset_index(drop=True)
-    print(top_anomalies)
-
-
-
 def obtener_anomalias_supervisores(cant_filas): #FUNCION PRINCIPAL QUE SE USARA EN EL FRONT
     
     #el cant_filas es para retornar solo esa cantidad de filas, serian los cant_filas mas anomalos
     dataframe =  anomalies_supervisores(create_dataframe_supervisor())
-    top_anomalies = dataframe.sort_values(by='anomaly_score').head(cant_filas).reset_index(drop=True)
+    #top_anomalies = dataframe.sort_values(by='anomaly_score').head(cant_filas).reset_index(drop=True)
+
+    top_anomalies = dataframe[dataframe['is_anomaly'] == 1] \
+                        .sort_values(by='anomaly_score') \
+                        .head(cant_filas) \
+                        .reset_index(drop=True)
     return top_anomalies
 
     
@@ -156,7 +154,7 @@ def dataframe_pruebas(): # para pruebas
 
 def pruebas():
     dataframe= anomalies_supervisores(dataframe_pruebas())
-    top_anomalies = dataframe.sort_values(by='anomaly_score').head(5).reset_index(drop=True)
+    top_anomalies = dataframe.sort_values(by='anomaly_score').head(2).reset_index(drop=True)
     return top_anomalies
 print(pruebas()) # para pruebas
 
