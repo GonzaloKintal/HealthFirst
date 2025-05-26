@@ -30,7 +30,7 @@ def create_model_supervisor(path_csv): # le paso el csv para el entreamiento
     return model # NO deberia retornarlo, pero por ahora para pruebas lo dejo así
 
 
-def anomalies_supervisores(data): #recibe un dataframe
+def anomalies_supervisors(data): #recibe un dataframe
     print("\n ----------------------ANOMALIAS PARA SUPERVISORES")
 
     #Cargo el modelo previamente guardado
@@ -84,7 +84,7 @@ def create_dataframe_supervisor(license_type=None): # esto para lo que pide el a
 
 
 
-def generar_csv_supervisores(path_csv='supervisors_data_1000.csv', n=1000, semilla=42):
+def generate_supervisors_csv(path_csv='supervisors_data_1000.csv', n=1000, semilla=42):
     np.random.seed(semilla)
     
     evaluator_id = np.arange(1, n+1)
@@ -110,15 +110,15 @@ def generar_csv_supervisores(path_csv='supervisors_data_1000.csv', n=1000, semil
     df.to_csv(path_csv, index=False)
     return df
 
-def obtener_anomalias_supervisores(cant_filas): #FUNCION PRINCIPAL QUE SE USARA EN EL FRONT
+def get_supervisor_anomalies(row_count): #FUNCION PRINCIPAL QUE SE USARA EN EL FRONT
     
     #el cant_filas es para retornar solo esa cantidad de filas, serian los cant_filas mas anomalos
-    dataframe =  anomalies_supervisores(create_dataframe_supervisor())
+    dataframe =  anomalies_supervisors(create_dataframe_supervisor())
     #top_anomalies = dataframe.sort_values(by='anomaly_score').head(cant_filas).reset_index(drop=True)
 
     top_anomalies = dataframe[dataframe['is_anomaly'] == 1] \
                         .sort_values(by='anomaly_score') \
-                        .head(cant_filas) \
+                        .head(row_count) \
                         .reset_index(drop=True)
     return top_anomalies
 
@@ -153,7 +153,7 @@ def dataframe_pruebas(): # para pruebas
 
 
 def pruebas():
-    dataframe= anomalies_supervisores(dataframe_pruebas())
+    dataframe= anomalies_supervisors(dataframe_pruebas())
     top_anomalies = dataframe.sort_values(by='anomaly_score').head(2).reset_index(drop=True)
     return top_anomalies
 print(pruebas()) # para pruebas
