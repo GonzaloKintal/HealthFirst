@@ -7,6 +7,7 @@ import { deleteUser, getUsersByFilter } from '../../services/userService';
 import Notification from '../../components/utils/Notification';
 const UsersPage = () => {
   const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filter, setFilter] = useState('all');
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
@@ -31,6 +32,7 @@ const UsersPage = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
+        setLoading(true);
         setError(null);
         const filterToSend = filter !== 'all' ? `${filter}` : '';
         
@@ -64,21 +66,24 @@ const UsersPage = () => {
           currentPage: 1,
           totalUsers: 0
         });
+      } finally {
+        setLoading(false);
       }
     };
   
     fetchUsers();
-  }, [pagination.currentPage, filter]); // Solo depende de filter, no de searchTerm
-  
+  }, [pagination.currentPage, filter]);
+
   // Función para búsqueda manual (con Enter o botón)
   const handleSearch = async () => {
     try {
+      setLoading(true);
       setError(null);
       setPagination(prev => ({ ...prev, currentPage: 1 }));
       
       const response = await getUsersByFilter(
-        1, // Siempre va a la página 1 en nueva búsqueda
-        searchTerm, // Solo envía el texto de búsqueda
+        1,
+        searchTerm,
         5
       );
       
@@ -100,6 +105,8 @@ const UsersPage = () => {
     } catch (err) {
       console.error('Error en búsqueda:', err);
       setError('Error al realizar la búsqueda');
+    } finally {
+      setLoading(false);
     }
   };
   
@@ -278,10 +285,12 @@ const UsersPage = () => {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               onKeyDown={handleKeyDown}
+              disabled={loading}
             />
             <button
               onClick={handleSearch}
               className="px-4 py-2 border border-l-0 border-border rounded-r-md bg-primary text-white hover:bg-primary-hover transition duration-200 cursor-pointer"
+              disabled={loading}
             >
               Buscar
             </button>
@@ -296,6 +305,7 @@ const UsersPage = () => {
                 setFilter(e.target.value);
                 setPagination(prev => ({ ...prev, currentPage: 1 }));
               }}
+              disabled={loading}
             >
               <option value="all">Todos</option>
               <option value="admin">Administrador</option>
@@ -308,101 +318,107 @@ const UsersPage = () => {
 
         {/* Tabla de usuarios */}
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-border">
-            <thead className="bg-card">
-              <tr>
-                <th className="px-6 py-3 text-center text-xs font-medium text-foreground uppercase tracking-wider">
-                  Nombre
-                </th>
-                <th className="px-6 py-3 text-center text-xs font-medium text-foreground uppercase tracking-wider">
-                  DNI
-                </th>
-                <th className="px-6 py-3 text-center text-xs font-medium text-foreground uppercase tracking-wider">
-                  Email
-                </th>
-                <th className="px-6 py-3 text-center text-xs font-medium text-foreground uppercase tracking-wider">
-                  Departamento
-                </th>
-                <th className="px-6 py-3 text-center text-xs font-medium text-foreground uppercase tracking-wider">
-                  Rol
-                </th>
-                <th className="px-6 py-3 text-center text-xs font-medium text-foreground uppercase tracking-wider">
-                  Acciones
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-background divide-y divide-border">
-              {users.length > 0 ? (
-                users.map((user) => (
-                  <tr key={user.id} className="hover:bg-card text-center">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div 
-                          className={`flex-shrink-0 h-10 w-10 rounded-full flex items-center justify-center ${
-                            getRoleColors(user.role).bg
-                          } ${getRoleColors(user.role).text}`}
-                        >
-                          <FiUser />
-                        </div>
-                        <div className="ml-4">
-                          <div className="text-sm font-medium text-foreground">
-                            {user.name}
+          {loading ? (
+            <div className="flex justify-center items-center min-h-[300px]">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+            </div>
+          ) : (
+            <table className="min-w-full divide-y divide-border">
+              <thead className="bg-card">
+                <tr>
+                  <th className="px-6 py-3 text-center text-xs font-medium text-foreground uppercase tracking-wider">
+                    Nombre
+                  </th>
+                  <th className="px-6 py-3 text-center text-xs font-medium text-foreground uppercase tracking-wider">
+                    DNI
+                  </th>
+                  <th className="px-6 py-3 text-center text-xs font-medium text-foreground uppercase tracking-wider">
+                    Email
+                  </th>
+                  <th className="px-6 py-3 text-center text-xs font-medium text-foreground uppercase tracking-wider">
+                    Departamento
+                  </th>
+                  <th className="px-6 py-3 text-center text-xs font-medium text-foreground uppercase tracking-wider">
+                    Rol
+                  </th>
+                  <th className="px-6 py-3 text-center text-xs font-medium text-foreground uppercase tracking-wider">
+                    Acciones
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-background divide-y divide-border">
+                {users.length > 0 ? (
+                  users.map((user) => (
+                    <tr key={user.id} className="hover:bg-card text-center">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <div 
+                            className={`flex-shrink-0 h-10 w-10 rounded-full flex items-center justify-center ${
+                              getRoleColors(user.role).bg
+                            } ${getRoleColors(user.role).text}`}
+                          >
+                            <FiUser />
+                          </div>
+                          <div className="ml-4">
+                            <div className="text-sm font-medium text-foreground">
+                              {user.name}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground">
-                      {user.dni}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground">
-                      {user.email}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-foreground">{user.department}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                        ${getRoleColors(user.role).bg} ${getRoleColors(user.role).text}`}>
-                        {user.role === 'admin' && 'Administrador'}
-                        {user.role === 'supervisor' && 'Supervisor'}
-                        {user.role === 'analyst' && 'Analista'}
-                        {user.role === 'employee' && 'Empleado'}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
-                      <div className="flex space-x-4 justify-center">
-                        <Link
-                          to={`/edit-user/${user.id}`}
-                          className="text-primary-text hover:text-primary-hover p-1 rounded hover:bg-blue-50 cursor-pointer"
-                        >
-                          <FiEdit className="text-lg" />
-                        </Link>
-                        <button 
-                          className="text-red-500 hover:text-red-900 p-1 rounded hover:bg-red-50 cursor-pointer"
-                          onClick={() => handleDelete(user.id)}
-                        >
-                          <FiTrash2 className="text-lg" />
-                        </button>
-                      </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground">
+                        {user.dni}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground">
+                        {user.email}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-foreground">{user.department}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                          ${getRoleColors(user.role).bg} ${getRoleColors(user.role).text}`}>
+                          {user.role === 'admin' && 'Administrador'}
+                          {user.role === 'supervisor' && 'Supervisor'}
+                          {user.role === 'analyst' && 'Analista'}
+                          {user.role === 'employee' && 'Empleado'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
+                        <div className="flex space-x-4 justify-center">
+                          <Link
+                            to={`/edit-user/${user.id}`}
+                            className="text-primary-text hover:text-primary-hover p-1 rounded hover:bg-blue-50 cursor-pointer"
+                          >
+                            <FiEdit className="text-lg" />
+                          </Link>
+                          <button 
+                            className="text-red-500 hover:text-red-900 p-1 rounded hover:bg-red-50 cursor-pointer"
+                            onClick={() => handleDelete(user.id)}
+                          >
+                            <FiTrash2 className="text-lg" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="6" className="px-6 py-4 text-center text-foreground">
+                      {searchTerm || filter !== 'all' 
+                        ? 'No se encontraron usuarios que coincidan con los filtros'
+                        : 'No hay usuarios registrados'}
                     </td>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="6" className="px-6 py-4 text-center text-foreground">
-                    {searchTerm || filter !== 'all' 
-                      ? 'No se encontraron usuarios que coincidan con los filtros'
-                      : 'No hay usuarios registrados'}
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                )}
+              </tbody>
+            </table>
+          )}
         </div>
       </div>
 
-      {/* Paginación */}
-      {pagination.totalPages > 1 && (
+      {/* Paginación - solo visible cuando no está cargando */}
+      {!loading && pagination.totalPages > 1 && (
         <div className="flex justify-center mt-6">
           <nav className="inline-flex rounded-md shadow">
             <button
@@ -457,7 +473,6 @@ const UsersPage = () => {
           onClose={() => setNotification(prev => ({ ...prev, show: false }))}
         />
       )}
-      
     </div>
   );
 };

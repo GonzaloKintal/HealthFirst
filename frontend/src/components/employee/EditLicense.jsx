@@ -93,8 +93,8 @@ useEffect(() => {
         setFormData(prev => ({
           ...prev,
           licenseTypeId: licenseType?.id || '',
-          startDate: license.start_date ? new Date(license.start_date) : null,
-          endDate: license.end_date ? new Date(license.end_date) : null,
+          startDate: license.start_date ? new Date(new Date(license.start_date).getTime() + (new Date(license.start_date).getTimezoneOffset() * 60000)) : null,
+          endDate: license.end_date ? new Date(new Date(license.end_date).getTime() + (new Date(license.end_date).getTimezoneOffset() * 60000)) : null,
           information: license.information,
           documents: null,
           declaration: true
@@ -169,6 +169,19 @@ useEffect(() => {
     });
   };
 
+  const safeFormatDate = (date) => {
+    if (!date) return null;
+    try {
+      // Asegurarse de que la fecha se maneje correctamente en la zona horaria local
+      const adjustedDate = new Date(date);
+      adjustedDate.setMinutes(adjustedDate.getMinutes() + adjustedDate.getTimezoneOffset());
+      return format(adjustedDate, 'yyyy-MM-dd');
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return null;
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -191,13 +204,17 @@ useEffect(() => {
         return;
       }
 
-      const formatDate = (date) => date ? format(date, 'yyyy-MM-dd') : '';
+      const formatDate = (date) => {
+        if (!date) return '';
+        const d = new Date(date);
+        return d.toISOString().split('T')[0];
+      };
   
       // Preparar datos para enviar al backend
       const requestData = {
         type_id: formData.licenseTypeId,
-        start_date: formatDate(formData.startDate),
-        end_date: formatDate(formData.endDate),
+        start_date: safeFormatDate(formData.startDate),
+        end_date: safeFormatDate(formData.endDate),
         information: formData.information
       };
   

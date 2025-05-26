@@ -35,7 +35,16 @@ const MyDataPage = () => {
   // Función para formatear fechas usando FormattedDate
   const formatDate = (dateString) => {
     if (!dateString) return null;
-    return FormattedDate({ dateString, showTime: false }).date;
+    try {
+      const parsedDate = new Date(dateString);
+      if (isNaN(parsedDate.getTime())) {
+        return null;
+      }
+      return FormattedDate({ dateString, showTime: false }).date;
+    } catch (error) {
+      console.error('Error parsing date:', dateString, error);
+      return null;
+    }
   };
 
   const calculateAntiquity = (hireDate) => {
