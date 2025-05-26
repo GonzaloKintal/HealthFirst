@@ -26,7 +26,7 @@ export const getLicenses = async (filters = {}) => {
     console.error('Error in getLicenses:', error);
     return {
       success: false,
-      error: error.response?.data?.error || 'Error al obtener las licencias',
+      error: error.response?.data?.error || 'Error al obtener las licencias. Por favor intenta nuevamente.',
       licenses: []
     };
   }

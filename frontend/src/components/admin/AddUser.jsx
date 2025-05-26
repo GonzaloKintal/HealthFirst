@@ -46,8 +46,15 @@ const AddUser = () => {
   ];
 
   const [departments, setDepartments] = useState([]);
+  const [maxEmploymentDate, setMaxEmploymentDate] = useState(null);
 
   useEffect(() => {
+    // Calcular la fecha máxima (hoy + 2 semanas)
+    const today = new Date();
+    const twoWeeksLater = new Date(today);
+    twoWeeksLater.setDate(today.getDate() + 14);
+    setMaxEmploymentDate(twoWeeksLater);
+
     const fetchDepartments = async () => {
       try {
         const data = await getDepartments();
@@ -401,6 +408,7 @@ const AddUser = () => {
                 showYearDropdown
                 dropdownMode="select"
                 minDate={new Date(2000, 0, 1)}
+                maxDate={maxEmploymentDate}
                 peekNextMonth
                 showMonthDropdown
               />

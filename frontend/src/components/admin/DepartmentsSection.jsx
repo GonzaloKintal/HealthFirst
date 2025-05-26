@@ -11,7 +11,7 @@ import {
 
 const DepartmentsSection = () => {
   const [departments, setDepartments] = useState([]);
-  const [loading, setLoading] = useState(true); // Nuevo estado para el loader
+  const [loading, setLoading] = useState(true);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [departmentToDelete, setDepartmentToDelete] = useState(null);
   const [editingDepartment, setEditingDepartment] = useState(null);
@@ -25,6 +25,7 @@ const DepartmentsSection = () => {
     type: '',
     message: ''
   });
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     fetchDepartments();
@@ -33,10 +34,11 @@ const DepartmentsSection = () => {
   const fetchDepartments = async () => {
     try {
       setLoading(true);
+      setError(null);
       const data = await getDepartments();
       setDepartments(data);
     } catch (error) {
-      showNotification('error', 'Error al cargar los departamentos');
+      setError('Error al cargar los departamentos. Por favor intenta nuevamente.');
     } finally {
       setLoading(false);
     }
@@ -128,6 +130,13 @@ const DepartmentsSection = () => {
           {showForm ? 'Cancelar' : 'Nuevo Departamento'}
         </button>
       </div>
+
+      {/* Mensaje de error fijo */}
+      {error && (
+        <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded dark:bg-red-900 dark:border-red-700 dark:text-red-100">
+          {error}
+        </div>
+      )}
 
       {showForm && (
         <div className="mb-6 p-4 border border-border rounded-lg">
