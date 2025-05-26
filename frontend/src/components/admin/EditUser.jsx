@@ -15,6 +15,8 @@ import {
   validatePassword,
   validateEmail
 } from '../utils/Validations';
+import { FormattedDate } from '../utils/FormattedDate';
+
 
 const EditUser = () => {
   const { id } = useParams();
@@ -51,11 +53,36 @@ const EditUser = () => {
 
   const [departments, setDepartments] = useState([]);
 
+  // Reemplaza la función format de date-fns con esta función de formato segura
+  const safeFormatDate = (date) => {
+    if (!date) return null;
+    try {
+      // Asegurarse de que la fecha se maneje correctamente en la zona horaria local
+      const adjustedDate = new Date(date);
+      adjustedDate.setMinutes(adjustedDate.getMinutes() + adjustedDate.getTimezoneOffset());
+      return format(adjustedDate, 'yyyy-MM-dd');
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return null;
+    }
+  };
+
   useEffect(() => {
     const fetchUserData = async () => {
       try {
         const userData = await getUser(id);
 
+        const parseDate = (dateString) => {
+          if (!dateString) return null;
+          try {
+            const date = new Date(dateString);
+            return new Date(date.getTime() + date.getTimezoneOffset() * 60000);
+          } catch (error) {
+            console.error('Error parsing date:', error);
+            return null;
+          }
+        };
+  
         setFormData({
           id: userData.id,
           first_name: userData.first_name || '',
@@ -63,10 +90,10 @@ const EditUser = () => {
           dni: userData.dni || '',
           email: userData.email || '',
           phone: userData.phone || '',
-          date_of_birth: userData.date_of_birth ? new Date(userData.date_of_birth) : null,
+          date_of_birth: parseDate(userData.date_of_birth),
           department: userData.department || '',
           role_name: userData.role || 'employee',
-          employment_start_date: userData.employment_start_date ? new Date(userData.employment_start_date) : null,
+          employment_start_date: parseDate(userData.employment_start_date),
           password: '',
           confirmPassword: ''
         });
@@ -223,10 +250,10 @@ const EditUser = () => {
         dni: formData.dni,
         email: formData.email,
         phone: formData.phone,
-        date_of_birth: formData.date_of_birth ? format(formData.date_of_birth, 'yyyy-MM-dd') : null,
+        date_of_birth: formData.date_of_birth ? safeFormatDate(formData.date_of_birth) : null,
         department: formData.department,
         role_name: formData.role_name,
-        employment_start_date: formData.employment_start_date ? format(formData.employment_start_date, 'yyyy-MM-dd') : null,
+        employment_start_date: formData.employment_start_date ? safeFormatDate(formData.employment_start_date) : null,
       };
   
       // Solo incluimos la contraseña si se está editando y se proporcionó una nueva

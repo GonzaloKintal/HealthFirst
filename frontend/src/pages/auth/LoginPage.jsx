@@ -44,8 +44,6 @@ const LoginPage = () => {
     setIsLoading(true);
   
     try {
-      await new Promise(resolve => setTimeout(resolve, 3000));
-      
       const response = await login(username, password);
       
       authLogin({
@@ -70,7 +68,6 @@ const LoginPage = () => {
     setIsLoading(true);
     setError('');
     try {
-      await new Promise(resolve => setTimeout(resolve, 3000));
       
       const adminCredentials = {
         username: 'admin@admin.com',

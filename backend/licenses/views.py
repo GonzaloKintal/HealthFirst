@@ -275,10 +275,6 @@ def update_license(request, id):
                             license.status.name=Status.StatusChoices.PENDING
                             license.status.evaluation_comment='Pendiente de aprobación.'
                             license.status.save()
-
-                        
-
-
                 
                 return JsonResponse({'message': 'Licencia actualizada exitosamente.'}, status=200)
 
