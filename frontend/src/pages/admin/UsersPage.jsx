@@ -433,9 +433,9 @@ const UsersPage = () => {
               <button
                 key={i + 1}
                 onClick={() => handlePageChange(i + 1)}
-                className={`px-3 py-2 border-t border-b border-border text-sm font-medium ${
+                className={`px-3 py-2 border-t border-b border-border text-sm font-medium transition-colors duration-200 ${
                   pagination.currentPage === i + 1
-                    ? 'bg-blue-50 text-primary-text'
+                    ? 'bg-special-light dark:bg-special-dark text-primary-text hover:bg-primary-hover/20 dark:hover:bg-primary-hover/30'
                     : 'bg-background text-foreground hover:bg-card'
                 }`}
               >
