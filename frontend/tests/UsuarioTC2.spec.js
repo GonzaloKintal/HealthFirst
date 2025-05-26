@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { login } from './utils/login.js';
 
-test('se crea un usuario valido', async ({ page }) => {
+test('Crear usuario válido (nombre al borde inferior de clase válida) ', async ({ page }) => {
   await login(page, 'admin@admin.com', '123456');
     await expect(page).toHaveURL('http://localhost:5173/admin');
 
@@ -14,8 +14,9 @@ await page.click('text=Nuevo Usuario');
 
 
 // Luego usas ese objeto para llenar el formulario:
-await page.fill('input[name="first_name"]', 'Juan');
+await page.fill('input[name="first_name"]', 'Ju');
 await page.fill('input[name="last_name"]', 'Saltiva');
+
   const randomDNI = Math.floor(10000000 + Math.random() * 90000000).toString();
   await page.fill('input[name="dni"]', randomDNI);
 
@@ -26,14 +27,14 @@ await page.getByPlaceholder('Seleccione una fecha').first().click();
 await page.click('.react-datepicker__year-dropdown-container--select');
 
 // Paso 3: Ahora que el <select> está renderizado, seleccionás el año deseado
-await page.selectOption('select.react-datepicker__year-select', '2000');
+await page.selectOption('select.react-datepicker__year-select', '1988');
 
 // Paso 4: Seleccionás el día 19 (asegurándote de que no sea de otro mes)
-await page.locator('.react-datepicker__day--023:not(.react-datepicker__day--outside-month)').click();
+await page.locator('.react-datepicker__day--019:not(.react-datepicker__day--outside-month)').click();
 
 
 
-await page.fill('input[name="email"]', 'empleado3@gmail.com');
+await page.fill('input[name="email"]', 'empleado4@gmail.com');
 await page.fill('input[name="password"]', '123456');
 await page.fill('input[name="confirmPassword"]', '123456');
 await page.fill('input[name="phone"]', '1109899765');
