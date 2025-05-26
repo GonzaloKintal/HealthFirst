@@ -266,7 +266,7 @@ const UsersPage = () => {
 
       {/* Mensaje de error */}
       {error && (
-        <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+        <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded dark:bg-red-900 dark:border-red-700 dark:text-red-100">
           {error}
         </div>
       )}
