@@ -11,7 +11,6 @@ const MyDataPage = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        await new Promise(resolve => setTimeout(resolve, 2000));
 
         const authData = localStorage.getItem('auth_data');
         const user = authData ? JSON.parse(authData).user : null;
@@ -115,16 +114,6 @@ const MyDataPage = () => {
 
   const shouldShowUpdateMessage = ['employee', 'supervisor', 'analyst'].includes(userData?.role);
 
-  if (loading) {
-    return (
-      <div className="p-6">
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="p-6 bg-background">
       <div className="flex justify-between items-center mb-6">
@@ -140,9 +129,13 @@ const MyDataPage = () => {
         </div>
       )}
 
-      {!error && (
-        <>
-          <div className="bg-card p-6 rounded-lg shadow">
+      <div className="bg-card p-6 rounded-lg shadow">
+        {loading ? (
+          <div className="flex justify-center items-center h-64">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+          </div>
+        ) : !error && (
+          <>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {dataFields.map((data, index) => (
                 <div key={index} className="border-b border-border pb-4">
@@ -156,17 +149,17 @@ const MyDataPage = () => {
                 </div>
               ))}
             </div>
-          </div>
 
-          {shouldShowUpdateMessage && (
-            <div className="mt-6 p-4 bg-special-light dark:bg-special-dark border-l-4 border-primary-border rounded">
-              <p className="text-primary-text">
-                Para actualizar tus datos personales, por favor contacta a un <strong className="text-primary-text">administrador</strong> del sistema.
-              </p>
-            </div>
-          )}
-        </>
-      )}
+            {shouldShowUpdateMessage && (
+              <div className="mt-6 p-4 bg-special-light dark:bg-special-dark border-l-4 border-primary-border rounded">
+                <p className="text-primary-text">
+                  Para actualizar tus datos personales, por favor contacta a un <strong className="text-primary-text">administrador</strong> del sistema.
+                </p>
+              </div>
+            )}
+          </>
+        )}
+      </div>
     </div>
   );
 };
