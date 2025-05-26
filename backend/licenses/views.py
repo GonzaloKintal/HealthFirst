@@ -242,6 +242,8 @@ def update_license(request, id):
         with transaction.atomic():
                 license.information = information
                 license.save()
+                license_analysis(license)
+
                 # Actualizar certificado
                 if certificate_data:
                     try:
@@ -273,6 +275,8 @@ def update_license(request, id):
                             license.status.name=Status.StatusChoices.PENDING
                             license.status.evaluation_comment='Pendiente de aprobación.'
                             license.status.save()
+
+                        
 
 
                 
