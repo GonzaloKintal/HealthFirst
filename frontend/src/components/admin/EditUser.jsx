@@ -15,7 +15,6 @@ import {
   validatePassword,
   validateEmail
 } from '../utils/Validations';
-import { FormattedDate } from '../utils/FormattedDate';
 
 
 const EditUser = () => {
@@ -52,12 +51,12 @@ const EditUser = () => {
   ];
 
   const [departments, setDepartments] = useState([]);
+  const [maxEmploymentDate, setMaxEmploymentDate] = useState(null);
 
   // Reemplaza la función format de date-fns con esta función de formato segura
   const safeFormatDate = (date) => {
     if (!date) return null;
     try {
-      // Asegurarse de que la fecha se maneje correctamente en la zona horaria local
       const adjustedDate = new Date(date);
       adjustedDate.setMinutes(adjustedDate.getMinutes() + adjustedDate.getTimezoneOffset());
       return format(adjustedDate, 'yyyy-MM-dd');
@@ -68,6 +67,11 @@ const EditUser = () => {
   };
 
   useEffect(() => {
+    // Calcular la fecha máxima (hoy + 2 semanas)
+    const today = new Date();
+    const twoWeeksLater = new Date(today);
+    twoWeeksLater.setDate(today.getDate() + 14);
+    setMaxEmploymentDate(twoWeeksLater);
     const fetchUserData = async () => {
       try {
         const userData = await getUser(id);
@@ -463,7 +467,7 @@ const EditUser = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-foreground bg-background mb-1">Fecha de Ingreso a la Empresa *</label>
+              <label className="block text-sm font-medium text-foreground mb-1">Fecha de Ingreso a la Empresa *</label>
               <StyledDatePicker
                 selected={formData.employment_start_date}
                 onChange={(date) => handleDateChange(date, 'employment_start_date')}
@@ -475,6 +479,7 @@ const EditUser = () => {
                 showYearDropdown
                 dropdownMode="select"
                 minDate={new Date(2000, 0, 1)}
+                maxDate={maxEmploymentDate}
                 peekNextMonth
                 showMonthDropdown
               />
