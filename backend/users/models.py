@@ -1,10 +1,13 @@
 from datetime import datetime
+from this import d
 from django.utils import timezone
 from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 from django.utils.timezone import now
+from datetime import datetime, date
+from dateutil.relativedelta import relativedelta
 
 
 user_roles=[
@@ -13,6 +16,11 @@ user_roles=[
     ('analyst', 'Analista'),
     ('admin', 'Administrador')
 ]
+
+class AgeAtEmploymentError(Exception):
+    """Excepción personalizada para antiguedad."""
+    pass
+
 
 
 class Department(models.Model):
@@ -57,6 +65,16 @@ class HealthFirstUser(AbstractUser):
 
 
     def save(self, *args, **kwargs):
+        date_format = "%Y-%m-%d"
+        birth_date = datetime.strptime(self.date_of_birth, date_format).date()
+        employment_date = datetime.strptime(self.employment_start_date, date_format).date()
+
+
+        age_at_employment = relativedelta(employment_date, birth_date).years
+
+        if age_at_employment < 18:
+          raise AgeAtEmploymentError("Fecha de ingreso incorrecta. Un empleado puede ingresar a partir de los 18 años")
+        
         if self.pk is None:
             existing_user = HealthFirstUser.objects.filter(email=self.email, is_deleted=True).first()
             if existing_user:
