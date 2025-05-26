@@ -98,7 +98,11 @@ export const getLicenseTypes = async () => {
 // Editar una licencia existente
 export const updateLicense = async (id, licenseData) => {
   try {
-    const response = await api.put(`/licenses/update/${id}`, licenseData);
+    const response = await api.put(`/licenses/update/${id}`, licenseData, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
     
     return {
       success: true,

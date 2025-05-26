@@ -8,11 +8,13 @@ import Confirmation from '../../components/utils/Confirmation';
 import { Link } from 'react-router-dom';
 import { getLicenses, deleteLicense, exportLicensesToCSV } from '../../services/licenseService';
 import Notification from '../../components/utils/Notification';
+import { formatSimpleDate } from '../../components/utils/FormattedDate';
 
 const LicensesPage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [licenses, setLicenses] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState('all');
@@ -36,6 +38,7 @@ const LicensesPage = () => {
   useEffect(() => {
     const fetchLicenses = async () => {
       try {
+        setLoading(true)
         setError(null);
         const shouldShowAll = ['admin', 'supervisor'].includes(user?.role);
         const response = await getLicenses({ 
@@ -52,8 +55,10 @@ const LicensesPage = () => {
             id: license.license_id,
             employee: license.user.first_name + ' ' + license.user.last_name,
             type: license.type,
-            startDate: license.start_date,
-            endDate: license.end_date,
+            // startDate: license.start_date,
+            // endDate: license.end_date,
+            startDate: formatSimpleDate(license.start_date), // Formatear aquí
+            endDate: formatSimpleDate(license.end_date),     // Formatear aquí
             days: license.days,
             status: license.status,
             requestedOn: license.created_at || '',
@@ -84,6 +89,8 @@ const LicensesPage = () => {
           currentPage: 1,
           totalLicenses: 0
         });
+      } finally {
+        setLoading(false);
       }
     };
   
@@ -306,7 +313,7 @@ const LicensesPage = () => {
 
   return (
     <div className="p-6 relative">
-      {/* Contenido principal */}
+      {/* Contenido principal - siempre visible */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold flex items-center text-foreground">
           <FiFileText className="mr-2" />
@@ -324,7 +331,7 @@ const LicensesPage = () => {
             <button 
               onClick={handleExportClick}
               className="flex items-center px-4 py-2 bg-primary text-white font-medium rounded-md cursor-pointer hover:bg-primary-hover transition duration-200"
-              disabled={licenses.length === 0}
+              disabled={licenses.length === 0 || loading}
             >
               <FiDownload className="mr-2" />
               Exportar
@@ -332,14 +339,14 @@ const LicensesPage = () => {
           )}
         </div>
       </div>
-
+  
       {/* Mensaje de error */}
       {error && (
         <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
           {error}
         </div>
       )}
-
+  
       {/* Barra de búsqueda y filtro */}
       <div className="bg-background rounded-lg shadow overflow-hidden mb-6">
         <div className="p-4 border-b border-border flex flex-col md:flex-row md:items-center space-y-3 md:space-y-0 md:space-x-4">
@@ -355,10 +362,12 @@ const LicensesPage = () => {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 onKeyDown={handleKeyDown}
+                disabled={loading}
               />
               <button
                 onClick={handleSearch}
                 className="px-4 py-2 border border-l-0 border-border rounded-r-md bg-primary text-white hover:bg-primary-hover transition duration-200 cursor-pointer"
+                disabled={loading}
               >
                 Buscar
               </button>
@@ -374,6 +383,7 @@ const LicensesPage = () => {
                 setFilter(e.target.value);
                 setPagination(prev => ({ ...prev, currentPage: 1 }));
               }}
+              disabled={loading}
             >
               <option value="all">Todas</option>
               <option value="pending">Pendientes</option>
@@ -384,92 +394,103 @@ const LicensesPage = () => {
             </select>
           </div>
         </div>
-
+  
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-border">
-            <thead className="bg-card">
-              <tr>
-                <th className="px-6 py-3 text-center text-xs font-medium text-foreground uppercase tracking-wider">Empleado</th>
-                <th className="px-6 py-3 text-center text-xs font-medium text-foreground uppercase tracking-wider">Tipo</th>
-                <th className="px-6 py-3 text-center text-xs font-medium text-foreground uppercase tracking-wider">Fecha</th>
-                <th className="px-6 py-3 text-center text-xs font-medium text-foreground uppercase tracking-wider">Días</th>
-                <th className="px-6 py-3 text-center text-xs font-medium text-foreground uppercase tracking-wider">Estado</th>
-                <th className="px-6 py-3 text-center text-xs font-medium text-foreground uppercase tracking-wider">Detalle</th>
-                {canShowActions && (
-                  <th className="px-6 py-3 text-center text-xs font-medium text-foreground uppercase tracking-wider">Acciones</th>
-                )}
-              </tr>
-            </thead>
-            <tbody className="bg-background divide-y divide-border">
-              {licenses.length > 0 ? (
-                licenses.map((license) => (
-                  <tr key={license.id} className='text-center'>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="font-medium text-foreground">{license.employee}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground capitalize">{license.type}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground">
-                      {license.startDate} al {license.endDate}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground">{license.days}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                      getStatusColors(license.status).bg
-                    } ${
-                      getStatusColors(license.status).text
-                    }`}>
-                      {translateStatus(license.status)}
-                    </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <button
-                        onClick={() => handleViewDetails(license.id)}
-                        className="text-primary-text hover:text-primary-hover p-1 rounded hover:bg-blue-50 cursor-pointer flex items-center mx-auto"
-                        title="Ver detalle"
-                      >
-                        <FiEye size={18} className="mr-1" />
-                        <span>Detalle</span>
-                      </button>
-                    </td>
-                    
+          {loading ? (
+            // Mostrar spinner centrado en el área de la tabla
+            <div className="flex justify-center items-center min-h-[300px]">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+            </div>
+          ) : (
+            // Mostrar tabla cuando no está loading
+            <>
+              <table className="min-w-full divide-y divide-border">
+                <thead className="bg-card">
+                  <tr>
+                    <th className="px-6 py-3 text-center text-xs font-medium text-foreground uppercase tracking-wider">Empleado</th>
+                    <th className="px-6 py-3 text-center text-xs font-medium text-foreground uppercase tracking-wider">Tipo</th>
+                    <th className="px-6 py-3 text-center text-xs font-medium text-foreground uppercase tracking-wider">Fecha</th>
+                    <th className="px-6 py-3 text-center text-xs font-medium text-foreground uppercase tracking-wider">Días</th>
+                    <th className="px-6 py-3 text-center text-xs font-medium text-foreground uppercase tracking-wider">Estado</th>
+                    <th className="px-6 py-3 text-center text-xs font-medium text-foreground uppercase tracking-wider">Detalle</th>
                     {canShowActions && (
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex space-x-3 justify-center">
-                        <Link
-                          to={`/edit-license/${license.id}`}
-                          className="text-primary-text hover:text-primary-hover p-1 rounded hover:bg-blue-50 cursor-pointer"
-                        >
-                          <FiEdit size={18} />
-                        </Link>
-
-                        {user?.role === 'admin' && (
-                          <button 
-                            onClick={() => handleDelete(license.id)}
-                            className="text-red-500 hover:text-red-900 p-1 rounded hover:bg-red-50 cursor-pointer"
-                            title="Eliminar"
-                          >
-                            <FiTrash2 size={18} />
-                          </button>
-                        )}
-                      </div>
-                    </td>
-                  )}
+                      <th className="px-6 py-3 text-center text-xs font-medium text-foreground uppercase tracking-wider">Acciones</th>
+                    )}
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={canShowActions ? 7 : 6} className="px-6 py-4 text-center text-foreground">
-                    {searchQuery || filter !== 'all' 
-                      ? 'No se encontraron licencias que coincidan con los filtros'
-                      : 'No hay licencias registradas'}
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                </thead>
+                <tbody className="bg-background divide-y divide-border">
+                  {licenses.length > 0 ? (
+                    licenses.map((license) => (
+                      <tr key={license.id} className='text-center'>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="font-medium text-foreground">{license.employee}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground capitalize">{license.type}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground">
+                          {license.startDate} al {license.endDate}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground">{license.days}</td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                            getStatusColors(license.status).bg
+                          } ${
+                            getStatusColors(license.status).text
+                          }`}>
+                            {translateStatus(license.status)}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <button
+                            onClick={() => handleViewDetails(license.id)}
+                            className="text-primary-text hover:text-primary-hover p-1 rounded hover:bg-blue-50 cursor-pointer flex items-center mx-auto"
+                            title="Ver detalle"
+                          >
+                            <FiEye size={18} className="mr-1" />
+                            <span>Detalle</span>
+                          </button>
+                        </td>
+                        
+                        {canShowActions && (
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex space-x-3 justify-center">
+                              <Link
+                                to={`/edit-license/${license.id}`}
+                                className="text-primary-text hover:text-primary-hover p-1 rounded hover:bg-blue-50 cursor-pointer"
+                              >
+                                <FiEdit size={18} />
+                              </Link>
+  
+                              {user?.role === 'admin' && (
+                                <button 
+                                  onClick={() => handleDelete(license.id)}
+                                  className="text-red-500 hover:text-red-900 p-1 rounded hover:bg-red-50 cursor-pointer"
+                                  title="Eliminar"
+                                >
+                                  <FiTrash2 size={18} />
+                                </button>
+                              )}
+                            </div>
+                          </td>
+                        )}
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={canShowActions ? 7 : 6} className="px-6 py-4 text-center text-foreground">
+                        {searchQuery || filter !== 'all' 
+                          ? 'No se encontraron licencias que coincidan con los filtros'
+                          : 'No hay licencias registradas'}
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+  
+            </>
+          )}
         </div>
       </div>
-
+      
       {/* Paginación */}
       {pagination.totalPages > 1 && (
         <div className="flex justify-center mt-6">
@@ -506,7 +527,7 @@ const LicensesPage = () => {
           </nav>
         </div>
       )}
-
+  
       <Confirmation
         isOpen={showDeleteConfirmation}
         onClose={() => setShowDeleteConfirmation(false)}
@@ -517,7 +538,7 @@ const LicensesPage = () => {
         cancelText="Cancelar"
         type="danger"
       />
-
+  
       <Confirmation
         isOpen={showExportConfirmation}
         onClose={() => setShowExportConfirmation(false)}
@@ -528,7 +549,7 @@ const LicensesPage = () => {
         cancelText="Cancelar"
         type="info"
       />
-
+  
       {notification.show && (
         <Notification
           type={notification.type}
@@ -538,6 +559,6 @@ const LicensesPage = () => {
       )}
     </div>
   );
-};
+}
 
 export default LicensesPage;
