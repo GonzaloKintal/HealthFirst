@@ -51,9 +51,9 @@ def anomalies_supervisores(data): #recibe un dataframe
 
 
 
-def create_dataframe_supervisor(type): # esto para lo que pide el admin
-    print("El tipo es:",type)
-    if(type is None or type==""):
+def create_dataframe_supervisor(license_type=None): # esto para lo que pide el admin
+    print("El tipo es:",license_type)
+    if(license_type is None or license_type==""):
         qs = License.objects.filter(evaluator__isnull=False
         ).values('evaluator_id').annotate(
         total_requests=Count('license_id'),
@@ -61,7 +61,7 @@ def create_dataframe_supervisor(type): # esto para lo que pide el admin
         rejected_requests=Count('license_id', filter=Q(status__name='rejected')) #cant solicitudes rechazadas
     )
     else:
-        qs = License.objects.filter(evaluator__isnull=False,type__name=type
+        qs = License.objects.filter(evaluator__isnull=False,type__name=license_type
             ).values('evaluator_id').annotate(
             total_requests=Count('license_id'),
             approved_requests=Count('license_id', filter=Q(status__name='approved')), #cant solicitudes aprobadas
