@@ -1,0 +1,44 @@
+import { test, expect } from '@playwright/test';
+import { login } from './utils/login.js';
+
+test('Crear usuario no válido  (Contraseña de 5 caracteres))', async ({ page }) => {
+  await login(page, 'admin@admin.com', '123456');
+  await expect(page).toHaveURL('http://localhost:5173/admin');
+
+  // Ir a sección Usuarios
+  await page.getByText('Usuarios', { exact: true }).click();
+  await page.click('text=Nuevo Usuario');
+
+  // Completar campos obligatorios excepto contraseña
+  await page.fill('input[name="first_name"]', 'Laura');
+  await page.fill('input[name="last_name"]', 'González');
+
+  const randomDNI = Math.floor(10000000 + Math.random() * 90000000).toString();
+  await page.fill('input[name="dni"]', randomDNI);
+
+  // Fecha de nacimiento
+  await page.getByPlaceholder('Seleccione una fecha').first().click();
+  await page.selectOption('select.react-datepicker__year-select', '2000');
+  await page.locator('.react-datepicker__day--015:not(.react-datepicker__day--outside-month)').click();
+
+  await page.fill('input[name="email"]', 'TC36@gmail.com');
+  await page.fill('input[name="password"]', '12345'); // ❌ Contraseña de 5 caracteres
+  await page.fill('input[name="confirmPassword"]', '12345');
+  await page.fill('input[name="phone"]', '1123456789');
+
+  // Fecha de ingreso
+  await page.getByPlaceholder('Seleccione una fecha').nth(1).click();
+  await page.locator('.react-datepicker__day--019:not(.react-datepicker__day--outside-month)').click();
+
+  await page.selectOption('select[name="department"]', { label: 'Tecnología' });
+  await page.selectOption('select[name="role_name"]', { value: 'supervisor' });
+
+  // Intentar guardar
+  await page.click('button:has-text("Guardar Usuario")');
+
+  // Esperar que el borde rojo se aplique en el input contraseña
+  const passwordInput = page.locator('input[name="password"]');
+  await expect(passwordInput).toHaveClass(/border-red-500/);
+
+  await page.waitForTimeout(2000);
+});

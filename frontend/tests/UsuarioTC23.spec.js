@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { login } from './utils/login.js';
 
-test('Se crea un usuario valido', async ({ page }) => {
+test('Crear usuario válido  (Teléfono al borde superior de clase válida )', async ({ page }) => {
   await login(page, 'admin@admin.com', '123456');
     await expect(page).toHaveURL('http://localhost:5173/admin');
 
@@ -33,10 +33,10 @@ await page.locator('.react-datepicker__day--023:not(.react-datepicker__day--outs
 
 
 
-await page.fill('input[name="email"]', 'empleado@gmail.com');
-await page.fill('input[name="password"]','123456');
+await page.fill('input[name="email"]', 'TC23@gmail.com');
+await page.fill('input[name="password"]', '123456');
 await page.fill('input[name="confirmPassword"]', '123456');
-await page.fill('input[name="phone"]', '1109899765');
+await page.fill('input[name="phone"]', '999999999999999');
 // Fecha de Ingreso a la Empresa
 await page.getByPlaceholder('Seleccione una fecha').nth(1).click(); // Usa .first() si hay dos iguales
 // Esperar a que aparezca el mes y año esperados
@@ -45,7 +45,7 @@ await expect(page.locator('.react-datepicker__current-month')).toHaveText(/mayo 
 await page.locator('.react-datepicker__day--019:not(.react-datepicker__day--outside-month)').click();
 
 await page.selectOption('select[name="department"]', { label: 'Tecnología' });
-await page.selectOption('select[name="role_name"]', { value: 'employee' });
+await page.selectOption('select[name="role_name"]', { value: 'supervisor' });
 await page.click('button:has-text("Guardar Usuario")');
 // Espera a que la URL cambie a la página de usuarios
   await page.waitForURL('http://localhost:5173/users', { timeout: 5000 });

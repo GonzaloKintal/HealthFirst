@@ -1,21 +1,22 @@
 import { test, expect } from '@playwright/test';
 import { login } from './utils/login.js';
 
-test('Se crea un usuario valido', async ({ page }) => {
+test('Crear usuario válido (apellido al borde superior de clase válida)', async ({ page }) => {
   await login(page, 'admin@admin.com', '123456');
     await expect(page).toHaveURL('http://localhost:5173/admin');
 
 // apreta boton para ingresar a las seccion de usuarios 
   const userButton = await page.locator('span.ml-3.font-medium', { hasText: 'Usuarios' });
   await userButton.click();
-// hacemos click en botoin de crear usuario
+// hacemos click en boton de crear usuario
 await page.click('text=Nuevo Usuario');
 // debemos cargar los datos 
 
 
 // Luego usas ese objeto para llenar el formulario:
 await page.fill('input[name="first_name"]', 'Juan');
-await page.fill('input[name="last_name"]', 'Saltiva');
+await page.fill('input[name="last_name"]', 'Fernández López');
+
   const randomDNI = Math.floor(10000000 + Math.random() * 90000000).toString();
   await page.fill('input[name="dni"]', randomDNI);
 
@@ -26,15 +27,15 @@ await page.getByPlaceholder('Seleccione una fecha').first().click();
 await page.click('.react-datepicker__year-dropdown-container--select');
 
 // Paso 3: Ahora que el <select> está renderizado, seleccionás el año deseado
-await page.selectOption('select.react-datepicker__year-select', '2000');
+await page.selectOption('select.react-datepicker__year-select', '1988');
 
 // Paso 4: Seleccionás el día 19 (asegurándote de que no sea de otro mes)
-await page.locator('.react-datepicker__day--023:not(.react-datepicker__day--outside-month)').click();
+await page.locator('.react-datepicker__day--019:not(.react-datepicker__day--outside-month)').click();
 
 
 
-await page.fill('input[name="email"]', 'empleado@gmail.com');
-await page.fill('input[name="password"]','123456');
+await page.fill('input[name="email"]', 'FernandezLopez@gmail.com');
+await page.fill('input[name="password"]', '123456');
 await page.fill('input[name="confirmPassword"]', '123456');
 await page.fill('input[name="phone"]', '1109899765');
 // Fecha de Ingreso a la Empresa
@@ -45,7 +46,7 @@ await expect(page.locator('.react-datepicker__current-month')).toHaveText(/mayo 
 await page.locator('.react-datepicker__day--019:not(.react-datepicker__day--outside-month)').click();
 
 await page.selectOption('select[name="department"]', { label: 'Tecnología' });
-await page.selectOption('select[name="role_name"]', { value: 'employee' });
+await page.selectOption('select[name="role_name"]', { value: 'supervisor' });
 await page.click('button:has-text("Guardar Usuario")');
 // Espera a que la URL cambie a la página de usuarios
   await page.waitForURL('http://localhost:5173/users', { timeout: 5000 });
