@@ -74,3 +74,15 @@ FormattedDate.propTypes = {
 FormattedDate.defaultProps = {
   showTime: true
 };
+
+export const formatSimpleDate = (dateString) => {
+  if (!dateString) return 'No disponible';
+  
+  try {
+    const [year, month, day] = dateString.split('-');
+    return `${day}/${month}/${year}`;
+  } catch (error) {
+    console.error('Error formateando fecha:', error);
+    return 'No disponible';
+  }
+};

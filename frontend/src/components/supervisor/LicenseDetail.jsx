@@ -7,12 +7,14 @@ import { getLicenseDetail, evaluateLicense, analyzeCertificate } from '../../ser
 import useAuth from '../../hooks/useAuth';
 import Notification from '../../components/utils/Notification';
 import UploadCertificateModal from '../employee/UploadCertificateModal';
+import LicenseDetailSkeleton from './LicenseDetailSkeleton';
 
 const LicenseDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
   const [license, setLicense] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [rejectionReason, setRejectionReason] = useState('');
   const [showRejectionInput, setShowRejectionInput] = useState(false);
@@ -26,12 +28,13 @@ const LicenseDetail = () => {
   const canShowActions = ['admin', 'supervisor'].includes(user?.role);
   const [analysis, setAnalysis] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
- 
   const [showUploadModal, setShowUploadModal] = useState(false);
 
   useEffect(() => {
     const fetchLicense = async () => {
       try {
+        setLoading(true);
+
         const response = await getLicenseDetail(id);
   
         if (response.success && response.data) {
@@ -65,6 +68,8 @@ const LicenseDetail = () => {
       } catch (error) {
         console.error('Error fetching license:', error);
         setError('No se pudo cargar la licencia. Por favor intenta nuevamente.');
+      } finally {
+        setLoading(false);
       }
     };
     
@@ -302,6 +307,10 @@ const LicenseDetail = () => {
         </button>
       </div>
     );
+  }
+
+  if (loading) {
+    return <LicenseDetailSkeleton />
   }
 
   if (!license) {
