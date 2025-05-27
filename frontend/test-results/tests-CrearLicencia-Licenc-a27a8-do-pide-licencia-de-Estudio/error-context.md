@@ -1,16 +1,23 @@
 # Test info
 
-- Name: Reunion Gremial
-- Location: C:\Users\Juans\HealthFirst\frontend\tests\LicenciaReunionGremial.spec.js:4:1
+- Name: Empleado pide licencia de Estudio
+- Location: C:\Users\Juans\HealthFirst\frontend\tests\CrearLicencia\LicenciaEstudio.spec.js:4:1
 
 # Error details
 
 ```
-Error: page.waitForURL: Test timeout of 30000ms exceeded.
-=========================== logs ===========================
-waiting for navigation to "http://localhost:5173/licenses" until "load"
-============================================================
-    at C:\Users\Juans\HealthFirst\frontend\tests\LicenciaReunionGremial.spec.js:47:14
+Error: Timed out 5000ms waiting for expect(locator).toHaveURL(expected)
+
+Locator: locator(':root')
+Expected string: "http://localhost:5173/licenses"
+Received string: "http://localhost:5173/request-license"
+Call log:
+  - expect.toHaveURL with timeout 5000ms
+  - waiting for locator(':root')
+    9 × locator resolved to <html lang="en">…</html>
+      - unexpected value "http://localhost:5173/request-license"
+
+    at C:\Users\Juans\HealthFirst\frontend\tests\CrearLicencia\LicenciaEstudio.spec.js:34:22
 ```
 
 # Page snapshot
@@ -72,7 +79,7 @@ waiting for navigation to "http://localhost:5173/licenses" until "load"
     - option "Seleccionar tipo"
     - option "Vacaciones"
     - option "Nacimiento de hijo"
-    - option "Estudios"
+    - option "Estudios" [selected]
     - option "Maternidad"
     - option "Control prenatal"
     - option "Accidente de trabajo"
@@ -88,18 +95,18 @@ waiting for navigation to "http://localhost:5173/licenses" until "load"
     - option "Obligaciones públicas"
     - option "Hora mensual"
     - option "Cumpleaños"
-    - option "Reunión gremial" [selected]
+    - option "Reunión gremial"
     - option "Representante gremial"
     - option "Reunión extraordinaria"
     - option "Otros"
   - text: Días Solicitados
-  - textbox: 1 día(s)
+  - textbox: 2 día(s)
   - text: Fecha de Inicio *
   - textbox "Seleccione fecha de inicio": 29/05/2025
   - text: Fecha de Fin *
-  - textbox "Seleccione fecha de fin": 29/05/2025
+  - textbox "Seleccione fecha de fin": 30/05/2025
   - text: Motivo *
-  - textbox "Describa el motivo de su solicitud...": Debo asistir a una reunion gremial.
+  - textbox "Describa el motivo de su solicitud...": Final de ingles.
   - heading "Documentación Adjunta" [level=2]:
     - img
     - text: Documentación Adjunta
@@ -122,52 +129,39 @@ waiting for navigation to "http://localhost:5173/licenses" until "load"
    1 | import { test, expect } from '@playwright/test';
    2 | import { login } from './utils/login.js';
    3 |
-   4 | test('Reunion Gremial', async ({ page }) => {
-   5 |   // Login
+   4 | test('Empleado pide licencia de Estudio', async ({ page }) => {
+   5 |   // Login como empleado
    6 |   await login(page, 'empleado@gmail.com', '123456');
    7 |   await expect(page).toHaveURL('http://localhost:5173/employee');
    8 |
-   9 |   await page.locator('text=Solicitar Licencia').click();
-  10 |   await page.selectOption('select[name="licenseTypeId"]', '19'); // Mudanza
+   9 |   // Ir a la sección Licencias
+  10 |   await page.locator('text=Solicitar Licencia').click();
   11 |
-  12 |   // Función para seleccionar pasado mañana en el datepicker
-  13 |   const selectInTwoDays = async () => {
-  14 |     const days = page.locator('.react-datepicker__day:not(.react-datepicker__day--outside-month)');
-  15 |     const count = await days.count();
-  16 |
-  17 |     let todayIndex = -1;
-  18 |     for (let i = 0; i < count; i++) {
-  19 |       if (await days.nth(i).evaluate(el => el.classList.contains('react-datepicker__day--today'))) {
-  20 |         todayIndex = i;
-  21 |         break;
-  22 |       }
-  23 |     }
+  12 |   // Seleccionar tipo de licencia (por ejemplo, Nacimiento de hijo)
+  13 |   await page.selectOption('select[name="licenseTypeId"]', '3');
+  14 |
+  15 |   // Fecha de inicio: hoy (29 de mayo   )
+  16 |   await page.getByPlaceholder('Seleccione fecha de inicio').click();
+  17 |   await page.locator('.react-datepicker__day--029:not(.react-datepicker__day--outside-month)').click();
+  18 |   // Fecha de fin: 30 de junio
+  19 |   await page.getByPlaceholder('Seleccione fecha de fin').click();
+  20 |   await page.locator('.react-datepicker__day--030:not(.react-datepicker__day--outside-month)').click();
+  21 |
+  22 |   // Motivo
+  23 |   await page.fill('textarea[name="reason"]', 'Final de ingles.');
   24 |
-  25 |     if (todayIndex === -1 || todayIndex + 3 >= count) {
-  26 |       throw new Error('No pude encontrar la fecha en el calendario');
-  27 |     }
-  28 |
-  29 |     // Clic en el día dos días después de hoy
-  30 |     await days.nth(todayIndex + 2).click();
-  31 |   };
-  32 |
-  33 |   // Fecha de inicio: pasado mañana
-  34 |   await page.getByPlaceholder('Seleccione fecha de inicio').click();
-  35 |   await selectInTwoDays();
-  36 |
-  37 |   // Fecha de fin: pasado mañana
-  38 |   await page.getByPlaceholder('Seleccione fecha de fin').click();
-  39 |   await selectInTwoDays();
-  40 |
-  41 |   // Resto del formulario
-  42 |   await page.fill('textarea[name="reason"]', 'Debo asistir a una reunion gremial.');
-  43 |   await page.check('input[name="declaration"]');
-  44 |   await page.click('button:has-text("Enviar Solicitud")');
-  45 |
-  46 |   // Verificar redirección
-> 47 |   await page.waitForURL('http://localhost:5173/licenses');
-     |              ^ Error: page.waitForURL: Test timeout of 30000ms exceeded.
-  48 |   await expect(page).toHaveURL('http://localhost:5173/licenses');
-  49 | });
-  50 |
+  25 |   // Marcar el checkbox de declaración
+  26 |   await page.check('input[name="declaration"]');
+  27 |
+  28 |   // Enviar solicitud
+  29 |   await page.click('button:has-text("Enviar Solicitud")');
+  30 |
+  31 |   await page.waitForTimeout(3000);
+  32 |   
+  33 | // Verificar que redirige a la URL esperada
+> 34 |   await expect(page).toHaveURL('http://localhost:5173/licenses');
+     |                      ^ Error: Timed out 5000ms waiting for expect(locator).toHaveURL(expected)
+  35 |
+  36 | });
+  37 |
 ```

@@ -46,4 +46,5 @@ test('Mudanza: fecha de inicio y fin para mañana dinámicamente', async ({ page
   // Verificar redirección
   await page.waitForURL('http://localhost:5173/licenses');
   await expect(page).toHaveURL('http://localhost:5173/licenses');
+  
 });
