@@ -33,5 +33,7 @@ await page.locator('.react-datepicker__day--009:not(.react-datepicker__day--outs
   await page.click('button:has-text("Enviar Solicitud")');
 
   await page.waitForTimeout(5000);
-  // Verificar que se muestre el mensaje de éxito   
+// Verificar que redirige a la URL esperada
+await expect(page).toHaveURL('http://localhost:5173/licenses');
+  
 });
