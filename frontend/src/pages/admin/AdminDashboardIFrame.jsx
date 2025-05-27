@@ -23,7 +23,7 @@ const AdminDashboardIframe = () => {
         src={iframeUrl}
         width="100%"
         height="1100"
-        allowTransparency
+        allowtransparency="true"
         sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
       />
         ) : (

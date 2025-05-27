@@ -51,6 +51,9 @@ def register_user(request):
     except KeyError as e:
         error_messages.append(f"Falta el campo: {str(e)}")
 
+    except AgeAtEmploymentError as e:
+        error_messages.append(f"Error:{str(e)}")
+        
     except Exception as e:
         error_messages.append(f"Error inesperado: {str(e)}")
 
@@ -162,6 +165,10 @@ def update_user(request, id):
         user.save()
 
         return JsonResponse({'ok': True}, status=200)
+
+    except AgeAtEmploymentError:
+        return JsonResponse({'error': 'Fecha de ingreso incorrecta. Un empleado puede ingresar a partir de los 18 anos.'}, status=400)
+
     except ValidationError:
         return JsonResponse({'error': 'El tipo de usuario no es válido.'}, status=400)    
 
