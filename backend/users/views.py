@@ -52,7 +52,7 @@ def register_user(request):
         error_messages.append(f"Falta el campo: {str(e)}")
 
     except AgeAtEmploymentError as e:
-        error_messages.append(f"Error:{str(e)}")
+        error_messages.append(f"Error: {str(e)}")
         
     except Exception as e:
         error_messages.append(f"Error inesperado: {str(e)}")
