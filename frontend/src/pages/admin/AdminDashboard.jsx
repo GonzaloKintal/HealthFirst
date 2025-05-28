@@ -1,9 +1,9 @@
-import { useLocation, Routes, Route } from 'react-router-dom';
+
+import { Routes, Route } from 'react-router-dom';
 import Users from './UsersPage';
 import AdminDashboardIFrame from './AdminDashboardIFrame';
 
 const AdminDashboard = () => {
-
   return (
     <div className="bg-background rounded-lg shadow p-6">
       <h1 className="text-2xl font-bold text-foreground">Panel de Administrador</h1>
