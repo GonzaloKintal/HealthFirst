@@ -134,44 +134,44 @@ const UsersPage = () => {
   };
   
   const confirmDelete = async () => {
-    try {
-      if (userToDelete === currentUserId) {
-        showNotification('error', 'No puedes eliminarte a ti mismo');
-        setShowDeleteConfirmation(false);
-        setUserToDelete(null);
-        return;
-      }
-
-      const previousUsers = [...users];
-      const previousPagination = {...pagination};
-      
-      setUsers(previousUsers.filter(user => user.id !== userToDelete));
-      setPagination(prev => ({
-        ...prev,
-        totalUsers: prev.totalUsers - 1
-      }));
-      
-      await deleteUser(userToDelete);
-      
-      const usersLeftInPage = previousUsers.filter(user => user.id !== userToDelete).length;
-      if (usersLeftInPage === 0 && previousPagination.currentPage > 1) {
-        setPagination(prev => ({
-          ...prev,
-          currentPage: prev.currentPage - 1
-        }));
-      }
-      
-      showNotification('success', 'Usuario eliminado correctamente');
-    } catch (error) {
-      console.error('Error al eliminar usuario:', error);
-      showNotification('error', error.message || 'No se pudo eliminar el usuario');
-      setUsers(previousUsers);
-      setPagination(previousPagination);
-    } finally {
+  const previousUsers = [...users];
+  const previousPagination = {...pagination};
+  
+  try {
+    if (userToDelete === currentUserId) {
+      showNotification('error', 'No puedes eliminarte a ti mismo');
       setShowDeleteConfirmation(false);
       setUserToDelete(null);
+      return;
     }
-  };
+
+    setUsers(previousUsers.filter(user => user.id !== userToDelete));
+    setPagination(prev => ({
+      ...prev,
+      totalUsers: prev.totalUsers - 1
+    }));
+    
+    await deleteUser(userToDelete);
+    
+    const usersLeftInPage = previousUsers.filter(user => user.id !== userToDelete).length;
+    if (usersLeftInPage === 0 && previousPagination.currentPage > 1) {
+      setPagination(prev => ({
+        ...prev,
+        currentPage: prev.currentPage - 1
+      }));
+    }
+    
+    showNotification('success', 'Usuario eliminado correctamente');
+  } catch (error) {
+    console.error('Error al eliminar usuario:', error);
+    setUsers(previousUsers);
+    setPagination(previousPagination);
+    showNotification('error', error.message || 'No se pudo eliminar el usuario');
+  } finally {
+    setShowDeleteConfirmation(false);
+    setUserToDelete(null);
+  }
+};
 
   const showNotification = (type, message) => {
     setNotification({ show: true, type, message });

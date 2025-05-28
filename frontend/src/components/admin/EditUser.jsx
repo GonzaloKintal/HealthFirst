@@ -280,20 +280,30 @@ const EditUser = () => {
       let errorMessage = 'Error al actualizar el usuario';
       
       if (error.response) {
-        if (error.response.data && error.response.data.message) {
-          errorMessage = error.response.data.message;
-        } else if (error.response.status === 404) {
-          errorMessage = 'Usuario no encontrado';
-        } else if (error.response.status === 409) {
-          errorMessage = 'El email o DNI ya están registrados';
+        if (error.response.data?.error) {
+            errorMessage = error.response.data.error;
+        } 
+        else if (error.response.data?.message) {
+            errorMessage = error.response.data.message;
         }
+        else if (error.response.status === 400) {
+            errorMessage = 'Datos inválidos enviados al servidor';
+        }
+        else if (error.response.status === 404) {
+            errorMessage = 'Usuario no encontrado';
+        }
+        else if (error.response.status === 409) {
+            errorMessage = 'El email o DNI ya están registrados';
+        }
+      } else if (error.message) {
+          errorMessage = error.message;
       }
       
       setNotification({
-        type: 'error',
-        message: errorMessage
+          type: 'error',
+          message: errorMessage
       });
-    } finally {
+  } finally {
       setIsSubmitting(false);
     }
   };
