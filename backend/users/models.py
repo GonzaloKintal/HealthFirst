@@ -66,13 +66,9 @@ class HealthFirstUser(AbstractUser):
 
     def save(self, *args, **kwargs):
         # Asegurar campos de tipo `date`
-        if isinstance(self.date_of_birth, datetime):
-            self.date_of_birth = self.date_of_birth.date()
-        if isinstance(self.employment_start_date, datetime):
-            self.employment_start_date = self.employment_start_date.date()
-
-        birth_date = self.date_of_birth
-        employment_date = self.employment_start_date
+        date_format = "%Y-%m-%d"
+        birth_date = datetime.strptime(self.date_of_birth, date_format).date()
+        employment_date = datetime.strptime(self.employment_start_date, date_format).date()
 
         # calcular edad
         age_at_employment = relativedelta(employment_date, birth_date).years
@@ -106,7 +102,7 @@ class HealthFirstUser(AbstractUser):
     def delete(self, *args, **kwargs):
         self.is_deleted = True
         self.delete_at=now()
-        self.save()
+        super().save(*args, **kwargs)
 
     @classmethod
     def user_roles(cls):
