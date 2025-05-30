@@ -9,7 +9,6 @@ import SupervisorDashboard from '../pages/supervisor/SupervisorDashboard';
 import EmployeeDashboard from '../pages/employee/EmployeeDashboard';
 import AnalystDashboard from '../pages/analyst/AnalystDashboard';
 import UsersPage from '../pages/admin/UsersPage';
-import MetricsPage from '../pages/analyst/MetricsPage';
 import AnomaliesPage from '../pages/analyst/AnomaliesPage';
 import LicensesPage from '../pages/supervisor/LicensesPage';
 import RequestLicense from '../components/employee/RequestLicense';
@@ -161,15 +160,6 @@ const AppRoutes = () => {
           element={
             <ProtectedRoute allowedRoles={['analyst', 'admin']}>
               <AnalystDashboard />
-            </ProtectedRoute>
-          } 
-        />
-        
-        <Route 
-          path="/metrics" 
-          element={
-            <ProtectedRoute allowedRoles={['admin', 'analyst']}>
-              <MetricsPage />
             </ProtectedRoute>
           } 
         />
