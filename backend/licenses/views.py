@@ -271,25 +271,21 @@ def update_license(request, id):
                                 deleted_at=None
                         )
                 if license.status.name not in [Status.StatusChoices.APPROVED, Status.StatusChoices.REJECTED]:
-                    license.status.name=Status.StatusChoices.PENDING
-                    license.status.evaluation_comment='Pendiente de aprobación.'
+                    try:
+                        certificate=license.certificate
+                    except Certificate.DoesNotExist:
+                        certificate=None
+
+                    if  not license.type.certificate_require:
+                        license.status.name = Status.StatusChoices.PENDING
+                        if certificate is not None:
+                            license.certificate.delete()
+                    elif license.type.certificate_require and certificate is None:
+                        license.status.name = Status.StatusChoices.MISSING_DOC
+                    else:
+                        license.status.name = Status.StatusChoices.PENDING
+                    
                     license.status.save()
-
-                try:
-                    certificate=license.certificate
-                except Certificate.DoesNotExist:
-                    certificate=None
-
-                if  not license.type.certificate_require:
-                    license.status.name = Status.StatusChoices.PENDING
-                    if certificate is not None:
-                        license.certificate.delete()
-                elif license.type.certificate_require and certificate is None:
-                    license.status.name = Status.StatusChoices.MISSING_DOC
-                else:
-                    license.status.name = Status.StatusChoices.PENDING
-                
-                license.status.save()
                 
                 return JsonResponse({'message': 'Licencia actualizada exitosamente.'}, status=200)
 
