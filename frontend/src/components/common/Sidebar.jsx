@@ -22,7 +22,6 @@ const Sidebar = ({ isOpen }) => {
       { text: 'Dashboard', icon: <Dashboard className="h-5 w-5 text-primary-border" />, path: '/dashboard' },
       { text: 'Usuarios', icon: <Users className="h-5 w-5 text-primary-border" />, path: '/users' },
       { text: 'Licencias', icon: <FileText className="h-5 w-5 text-primary-border" />, path: '/licenses' },
-      { text: 'Indicadores', icon: <BarChart className="h-5 w-5 text-primary-border" />, path: '/metrics' },
       { text: 'Anomalías', icon: <Cpu className="h-5 w-5 text-primary-border" />, path: '/ml-model' },
       { text: 'Mis Datos', icon: <FiUser className="h-5 w-5 text-primary-border" />, path: '/my-data' },
       { text: 'Configuración', icon: <Settings className="h-5 w-5 text-primary-border" />, path: '/settings' },
@@ -45,7 +44,6 @@ const Sidebar = ({ isOpen }) => {
     ],
     analyst: [
       { text: 'Dashboard', icon: <Dashboard className="h-5 w-5 text-primary-border" />, path: '/dashboard' },
-      { text: 'Indicadores', icon: <BarChart className="h-5 w-5 text-primary-border" />, path: '/metrics' },
       { text: 'Mis Licencias', icon: <FileText className="h-5 w-5 text-primary-border" />, path: '/licenses' },
       { text: 'Anomalías', icon: <Cpu className="h-5 w-5 text-primary-border" />, path: '/ml-model' },
       { text: 'Mis Datos', icon: <FiUser className="h-5 w-5 text-primary-border" />, path: '/my-data' },
