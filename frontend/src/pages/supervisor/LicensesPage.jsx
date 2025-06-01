@@ -238,8 +238,8 @@ const LicensesPage = () => {
         text: 'text-yellow-800'
       },
       expired: {
-        bg: 'bg-red-100',
-        text: 'text-red-800'
+        bg: 'bg-red-900',
+        text: 'text-red-200'
       },
       default: { 
         bg: 'bg-gray-100', 
@@ -265,9 +265,9 @@ const LicensesPage = () => {
         text: 'dark:text-yellow-100'
       },
       expired: {
-        bg: 'dark:bg-red-900',
-        text: 'dark:text-red-200'
-      }
+        bg: 'dark:bg-red-100',
+        text: 'dark:text-red-800'
+      },
     };
   
     const colors = {
@@ -313,32 +313,39 @@ const LicensesPage = () => {
 
   return (
     <div className="p-6 relative">
-      {/* Contenido principal - siempre visible */}
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold flex items-center text-foreground">
-          <FiFileText className="mr-2" />
-          Gestión de Licencias
-        </h1>
-        <div className="flex space-x-3">
-          <Link
-            to="/request-license"
-            className="flex items-center px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-hover"
-          >
-            <FiPlus className="mr-2" />
-            Solicitar Nueva
-          </Link>
-          {(user?.role === 'admin' || user?.role === 'supervisor') && (
-            <button 
-              onClick={handleExportClick}
-              className="flex items-center px-4 py-2 bg-primary text-white font-medium rounded-md cursor-pointer hover:bg-primary-hover transition duration-200"
-              disabled={licenses.length === 0 || loading}
+        {/* Contenido principal - siempre visible */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-3 md:gap-0">
+          {/* Título - siempre a la izquierda */}
+          <h1 className="text-2xl font-bold flex items-center text-foreground">
+            <FiFileText className="mr-2" />
+            Gestión de Licencias
+          </h1>
+
+          {/* Contenedor derecho - horizontal siempre */}
+          <div className="flex flex-row items-center gap-3 w-full md:w-auto flex-wrap">
+            {/* Botón Solicitar Nueva */}
+            <Link
+              to="/request-license"
+              className="flex items-center px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-hover whitespace-nowrap"
             >
-              <FiDownload className="mr-2" />
-              Exportar
-            </button> 
-          )}
+              <FiPlus className="mr-2" />
+              Solicitar Nueva
+            </Link>
+
+            {/* Botón Exportar */}
+            {(user?.role === 'admin' || user?.role === 'supervisor') && (
+              <button 
+                onClick={handleExportClick}
+                className="flex items-center px-4 py-2 bg-primary text-white font-medium rounded-md cursor-pointer hover:bg-primary-hover transition duration-200 whitespace-nowrap"
+                disabled={licenses.length === 0 || loading}
+              >
+                <FiDownload className="mr-2" />
+                Exportar
+              </button> 
+            )}
+          </div>
         </div>
-      </div>
+
   
       {/* Mensaje de error */}
       {error && (

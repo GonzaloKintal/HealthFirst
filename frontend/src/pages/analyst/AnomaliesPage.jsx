@@ -100,7 +100,7 @@ const AnomaliesPage = () => {
         selectedIndex={analysisType === 'supervisors' ? 0 : 1} 
         onSelect={(index) => setAnalysisType(index === 0 ? 'supervisors' : 'employees')}
       >
-        <TabList className="flex border-b border-border dark:border-border-dark">
+        <TabList className="flex flex-col sm:flex-row border-b border-border dark:border-border-dark">
           <Tab
             className={`px-4 py-2 mx-1 font-medium cursor-pointer focus:outline-none 
                       border-t-2 border-l-2 border-r-2 rounded-t-lg
@@ -115,7 +115,7 @@ const AnomaliesPage = () => {
           </Tab>
           <Tab
             className={`px-4 py-2 mx-1 font-medium cursor-pointer focus:outline-none 
-                      border-t-2 border-l-2 border-r-2 rounded-t-lg
+                      border-t-2 border-l-2 border-r-2 rounded-t-lg mt-1 sm:mt-0
                       ${analysisType === 'employees' 
                         ? 'bg-blue-50 text-blue-600 border-border border-b-white dark:bg-blue-900/30 dark:text-blue-300 dark:border-border-dark dark:border-b-card-dark' 
                         : 'text-foreground border-transparent hover:text-primary-text dark:text-foreground-dark dark:hover:text-primary-text-dark'}`}
