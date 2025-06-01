@@ -4,6 +4,8 @@ from datetime import datetime, timedelta
 from django.utils.timezone import now
 from django.contrib.auth import get_user_model
 from xmlrpc.client import NOT_WELLFORMED_ERROR
+
+from messaging.services.brevo_email import *
 from .models import *
 from django.http import JsonResponse, HttpResponse
 import json
@@ -334,7 +336,15 @@ def evaluate_license(request, id):
         license.closing_date = now().date()
         license.save()
 
-        return JsonResponse({'message': f'Licencia evaluada correctamente.'}, status=200)
+        if license_status == Status.StatusChoices.REJECTED:
+            send_rejected_license(license)
+        if license_status == Status.StatusChoices.APPROVED:
+            send_approved_license(license)
+
+        evaluator= f"{request.user.first_name} {request.user.last_name}"
+
+        return JsonResponse({'message': 'Licencia evaluada correctamente.','evaluator': evaluator}, status=200)
+
 
     except json.JSONDecodeError:
         return JsonResponse({'error': 'El cuerpo de la solicitud debe ser JSON válido.'}, status=400)
