@@ -19,6 +19,8 @@ import MyDataPage from '../pages/employee/MyDataPage';
 import LicenseDetail from '../components/supervisor/LicenseDetail';
 import SettingsPage from '../pages/admin/SettingsPage';
 import PublicRoute from './PublicRoute';
+import GuidePage from '../components/guide/GuidePage';
+import NotFoundPage from '../pages/shared/NotFoundPage';
 
 const AppRoutes = () => {
   return (
@@ -182,11 +184,20 @@ const AppRoutes = () => {
           } 
         />
 
+        <Route
+          path="/guide" 
+          element={
+            <ProtectedRoute allowedRoles={['admin', 'analyst', 'employee', 'supervisor']}>
+              <GuidePage />
+            </ProtectedRoute>
+          }
+        />
+
       </Route>
 
         
       
-      <Route path="*" element={<div>Página no encontrada</div>} />
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );
 };

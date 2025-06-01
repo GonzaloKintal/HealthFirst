@@ -110,8 +110,8 @@ const SupervisorAnomalies = ({
           datasets: [
             {
               data: [anomalyCount.Normales, anomalyCount.Anomalías],
-              backgroundColor: ['#10B981', '#EF4444'],
-              borderColor: ['#059669', '#DC2626'],
+              backgroundColor: ['#3B82F6', '#EF4444'],
+              borderColor: ['#2563EB', '#DC2626'],
               borderWidth: 1,
             },
           ],

@@ -4,6 +4,8 @@ from datetime import datetime, timedelta
 from django.utils.timezone import now
 from django.contrib.auth import get_user_model
 from xmlrpc.client import NOT_WELLFORMED_ERROR
+
+from messaging.services.brevo_email import *
 from .models import *
 from django.http import JsonResponse, HttpResponse
 import json
@@ -175,7 +177,6 @@ def create_license(request):
                     deleted_at=None
                 )
 
-                # Crear estado inicial como "pending"
             license.assign_status()
 
         return JsonResponse({'message': 'Licencia solicitada exitosamente.'}, status=200)
@@ -271,10 +272,22 @@ def update_license(request, id):
                                 is_deleted=False,
                                 deleted_at=None
                         )
-                        if license.status.name not in [Status.StatusChoices.APPROVED, Status.StatusChoices.REJECTED]:
-                            license.status.name=Status.StatusChoices.PENDING
-                            license.status.evaluation_comment='Pendiente de aprobación.'
-                            license.status.save()
+                if license.status.name not in [Status.StatusChoices.APPROVED, Status.StatusChoices.REJECTED]:
+                    try:
+                        certificate=license.certificate
+                    except Certificate.DoesNotExist:
+                        certificate=None
+
+                    if  not license.type.certificate_require:
+                        license.status.name = Status.StatusChoices.PENDING
+                        if certificate is not None:
+                            license.certificate.delete()
+                    elif license.type.certificate_require and certificate is None:
+                        license.status.name = Status.StatusChoices.MISSING_DOC
+                    else:
+                        license.status.name = Status.StatusChoices.PENDING
+                    
+                    license.status.save()
                 
                 return JsonResponse({'message': 'Licencia actualizada exitosamente.'}, status=200)
 
@@ -323,7 +336,15 @@ def evaluate_license(request, id):
         license.closing_date = now().date()
         license.save()
 
-        return JsonResponse({'message': f'Licencia evaluada correctamente.'}, status=200)
+        if license_status == Status.StatusChoices.REJECTED:
+            send_rejected_license(license)
+        if license_status == Status.StatusChoices.APPROVED:
+            send_approved_license(license)
+
+        evaluator= f"{request.user.first_name} {request.user.last_name}"
+
+        return JsonResponse({'message': 'Licencia evaluada correctamente.','evaluator': evaluator}, status=200)
+
 
     except json.JSONDecodeError:
         return JsonResponse({'error': 'El cuerpo de la solicitud debe ser JSON válido.'}, status=400)

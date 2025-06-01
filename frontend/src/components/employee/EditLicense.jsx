@@ -9,6 +9,7 @@ import FileValidator from '../utils/FileValidator';
 import { format } from 'date-fns';
 import es from 'date-fns/locale/es';
 import StyledDatePicker from '../utils/StyledDatePicker';
+import { formatArgentinaDate } from '../utils/FormattedDate';
 
 const EditLicense = () => {
   const { id } = useParams();
@@ -31,7 +32,8 @@ const EditLicense = () => {
     lastName: '',
     dni: '',
     department: '',
-    phone: ''
+    phone: '',
+    dateOfBirth: ''
   });
 
   useEffect(() => {
@@ -84,7 +86,8 @@ useEffect(() => {
           lastName: user.last_name,
           dni: user.dni,
           department: user.department,
-          phone: user.phone
+          phone: user.phone,
+          dateOfBirth: user.date_of_birth
         });
 
         // Encuentra el tipo de licencia correspondiente
@@ -309,6 +312,16 @@ useEffect(() => {
                 value={applicantData.dni}
                 readOnly
                 className="w-full px-3 py-2 border border-border rounded-md text-foreground bg-background"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-1">Fecha de Nacimiento</label>
+              <input
+                type="text"
+                value={applicantData.dateOfBirth ? formatArgentinaDate(applicantData.dateOfBirth, false) : ''}
+                readOnly
+                className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground"
               />
             </div>
             
