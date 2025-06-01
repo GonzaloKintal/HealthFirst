@@ -6,7 +6,8 @@ import {
   FiUsers as Users,
   FiCpu as Cpu,
   FiUser,
-  FiPlus
+  FiPlus,
+  FiHelpCircle
 } from 'react-icons/fi';
 import { useContext } from 'react';
 import { AuthContext } from '../../context/AuthContext';
@@ -24,12 +25,14 @@ const Sidebar = ({ isOpen }) => {
       { text: 'Licencias', icon: <FileText className="h-5 w-5 text-primary-border" />, path: '/licenses' },
       { text: 'Anomalías', icon: <Cpu className="h-5 w-5 text-primary-border" />, path: '/ml-model' },
       { text: 'Mis Datos', icon: <FiUser className="h-5 w-5 text-primary-border" />, path: '/my-data' },
+      { text: 'Ayuda', icon: <FiHelpCircle className="h-5 w-5 text-primary-border" />, path: '/guide' },
       { text: 'Configuración', icon: <Settings className="h-5 w-5 text-primary-border" />, path: '/settings' },
     ],
     supervisor: [
       { text: 'Dashboard', icon: <Dashboard className="h-5 w-5 text-primary-border" />, path: '/dashboard' },
       { text: 'Licencias', icon: <FileText className="h-5 w-5 text-primary-border" />, path: '/licenses' },
       { text: 'Mis Datos', icon: <FiUser className="h-5 w-5 text-primary-border" />, path: '/my-data' },
+      { text: 'Ayuda', icon: <FiHelpCircle className="h-5 w-5 text-primary-border" />, path: '/guide' },
     ],
     employee: [
       { text: 'Dashboard', icon: <Dashboard className="h-5 w-5 text-primary-border" />, path: '/dashboard' },
@@ -41,12 +44,14 @@ const Sidebar = ({ isOpen }) => {
         isHighlighted: true
       },
       { text: 'Mis Datos', icon: <FiUser className="h-5 w-5 text-primary-border" />, path: '/my-data' },
+      { text: 'Ayuda', icon: <FiHelpCircle className="h-5 w-5 text-primary-border" />, path: '/guide' },
     ],
     analyst: [
       { text: 'Dashboard', icon: <Dashboard className="h-5 w-5 text-primary-border" />, path: '/dashboard' },
       { text: 'Mis Licencias', icon: <FileText className="h-5 w-5 text-primary-border" />, path: '/licenses' },
       { text: 'Anomalías', icon: <Cpu className="h-5 w-5 text-primary-border" />, path: '/ml-model' },
       { text: 'Mis Datos', icon: <FiUser className="h-5 w-5 text-primary-border" />, path: '/my-data' },
+      { text: 'Ayuda', icon: <FiHelpCircle className="h-5 w-5 text-primary-border" />, path: '/guide' },
     ]
   };
 
