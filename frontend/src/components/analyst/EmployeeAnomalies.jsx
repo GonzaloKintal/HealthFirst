@@ -106,15 +106,15 @@ const EmployeeAnomalies = ({
 
         return {
         anomalyDistribution: {
-            labels: ['Normales', 'Anomalías'],
-            datasets: [
+          labels: ['Normales', 'Anomalías'],
+          datasets: [
             {
-                data: [anomalyCount.Normales, anomalyCount.Anomalías],
-                backgroundColor: ['#10B981', '#EF4444'],
-                borderColor: ['#059669', '#DC2626'],
-                borderWidth: 1,
+              data: [anomalyCount.Normales, anomalyCount.Anomalías],
+              backgroundColor: ['#3B82F6', '#EF4444'],
+              borderColor: ['#2563EB', '#DC2626'],
+              borderWidth: 1,
             },
-            ],
+          ],
         },
         requestsByEmployee: {
             labels: requestsByEmployee.map(item => item.name),

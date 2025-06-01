@@ -12,6 +12,7 @@ import EmployeeSelector from '../supervisor/EmployeeSelector';
 import StyledDatePicker from '../utils/StyledDatePicker';
 import { format } from 'date-fns';
 import es from 'date-fns/locale/es';
+import { formatArgentinaDate } from '../utils/FormattedDate';
 
 const RequestLicense = () => {
   const { user } = useAuth();
@@ -139,20 +140,20 @@ useEffect(() => {
 
   // Datos personales basados en el rol
   const getEmployeeData = () => {
-    // Si es admin/supervisor y hay un empleado seleccionado
-    if ((user?.role === 'admin' || user?.role === 'supervisor') && selectedEmployeeData) {
-      return {
-        firstName: selectedEmployeeData.first_name || '',
-        lastName: selectedEmployeeData.last_name || '',
-        dni: selectedEmployeeData.dni || '',
-        department: selectedEmployeeData.department || '',
-        phone: selectedEmployeeData.phone || '',
-      };
-    }
-    
-    // Para empleados/analistas
+  // Si es admin/supervisor y hay un empleado seleccionado
+  if ((user?.role === 'admin' || user?.role === 'supervisor') && selectedEmployeeData) {
+    return {
+      firstName: selectedEmployeeData.first_name || '',
+      lastName: selectedEmployeeData.last_name || '',
+      dni: selectedEmployeeData.dni || '',
+      department: selectedEmployeeData.department || '',
+      phone: selectedEmployeeData.phone || '',
+      dateOfBirth: selectedEmployeeData.date_of_birth || '',
+    };
+  }
+  
+  // Para empleados/analistas
   if (user?.role === 'employee' || user?.role === 'analyst') {
-    // Usamos currentUserData si está disponible (datos completos del usuario)
     if (currentUserData) {
       return {
         firstName: currentUserData.first_name || '',
@@ -160,26 +161,27 @@ useEffect(() => {
         dni: currentUserData.dni || '',
         department: currentUserData.department || '',
         phone: currentUserData.phone || '',
+        dateOfBirth: currentUserData.date_of_birth || '',
       };
     }
     
-    // Fallback a los datos básicos del user de useAuth
     return {
       firstName: user?.first_name || '',
       lastName: user?.last_name || '',
       dni: user?.dni || '',
       department: user?.department || '',
       phone: user?.phone || '',
+      dateOfBirth: user?.date_of_birth || '',
     };
   }
 
-  // Para admin/supervisor sin empleado seleccionado
   return {
     firstName: '',
     lastName: '',
     dni: '',
     department: '',
     phone: '',
+    dateOfBirth: '',
   };
 };
 
@@ -414,6 +416,16 @@ useEffect(() => {
               <input
                 type="text"
                 value={employeeData.dni}
+                readOnly
+                className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-1">Fecha de Nacimiento</label>
+              <input
+                type="text"
+                value={employeeData.dateOfBirth ? formatArgentinaDate(employeeData.dateOfBirth, false) : ''}
                 readOnly
                 className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground"
               />
