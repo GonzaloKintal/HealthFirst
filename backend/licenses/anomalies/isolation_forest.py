@@ -1,4 +1,4 @@
-import datetime
+from datetime import date
 import sys
 import os
 import numpy as np
@@ -55,7 +55,9 @@ def anomalies_supervisors(data): #recibe un dataframe
 
 def create_dataframe_supervisor(start_date=None, end_date=None): # esto para lo que pide el admin
     qs = License.objects.filter(evaluator__isnull=False)
-    qs = qs.filter(status__evaluation_date__range=(start_date, end_date))
+
+    if start_date and end_date:
+        qs = qs.filter(status__evaluation_date__range=(start_date, end_date))
 
     qs = qs.values('evaluator_id').annotate(
         total_requests=Count('license_id'),
@@ -120,7 +122,7 @@ def get_supervisor_anomalies(start_date=None, end_date=None): #FUNCION PRINCIPAL
     #                  .reset_index(drop=True)
     return dataframe
 
-print(get_supervisor_anomalies('2025-05-31','2025-06-02'))
+print(get_supervisor_anomalies())
 
 
 
