@@ -1,9 +1,11 @@
+import datetime
 import sys
 import os
 import numpy as np
 import pandas as pd
 from sklearn.ensemble import IsolationForest
 import joblib
+from django.db.models import Min, Max
 
 import django
 from django.db.models import Sum,Count,Q
@@ -51,24 +53,20 @@ def anomalies_supervisors(data): #recibe un dataframe
 
 
 
-def create_dataframe_supervisor(license_type=None): # esto para lo que pide el admin
-    print("El tipo es:",license_type)
-    if(license_type is None or license_type==""):
-        qs = License.objects.filter(evaluator__isnull=False
-        ).values('evaluator_id').annotate(
+def create_dataframe_supervisor(start_date=None, end_date=None): # esto para lo que pide el admin
+    qs = License.objects.filter(evaluator__isnull=False)
+    qs = qs.filter(status__evaluation_date__range=(start_date, end_date))
+
+    qs = qs.values('evaluator_id').annotate(
         total_requests=Count('license_id'),
-        approved_requests=Count('license_id', filter=Q(status__name='approved')), #cant solicitudes aprobadas
-        rejected_requests=Count('license_id', filter=Q(status__name='rejected')) #cant solicitudes rechazadas
+        approved_requests=Count('license_id', filter=Q(status__name='approved')),
+        rejected_requests=Count('license_id', filter=Q(status__name='rejected'))
     )
-    else:
-        qs = License.objects.filter(evaluator__isnull=False,type__name=license_type
-            ).values('evaluator_id').annotate(
-            total_requests=Count('license_id'),
-            approved_requests=Count('license_id', filter=Q(status__name='approved')), #cant solicitudes aprobadas
-            rejected_requests=Count('license_id', filter=Q(status__name='rejected')) #cant solicitudes rechazadas
-        )
+
     
     df = pd.DataFrame(list(qs))
+    print(df.head())
+    print(df.dtypes)
     #print(list(qs))
     df['approval_rate'] = df.apply(
     lambda row: row['approved_requests'] / row['total_requests'] if row['total_requests'] > 0 else 0, #porcentaje aprobados
@@ -110,19 +108,19 @@ def generate_supervisors_csv(path_csv='supervisors_data_1000.csv', n=1000, semil
     df.to_csv(path_csv, index=False)
     return df
 
-def get_supervisor_anomalies(row_count): #FUNCION PRINCIPAL QUE SE USARA EN EL FRONT
+def get_supervisor_anomalies(start_date=None, end_date=None): #FUNCION PRINCIPAL QUE SE USARA EN EL FRONT
     
     #el cant_filas es para retornar solo esa cantidad de filas, serian los cant_filas mas anomalos
-    dataframe =  anomalies_supervisors(create_dataframe_supervisor())
+    dataframe =  anomalies_supervisors(create_dataframe_supervisor(start_date,end_date))
     #top_anomalies = dataframe.sort_values(by='anomaly_score').head(cant_filas).reset_index(drop=True)
 
-    top_anomalies = dataframe[dataframe['is_anomaly'] == 1] \
-                        .sort_values(by='anomaly_score') \
-                        .head(row_count) \
-                        .reset_index(drop=True)
-    return top_anomalies
+    #top_anomalies = dataframe[dataframe['is_anomaly'] == 1] \
+    #                    .sort_values(by='anomaly_score') \
+    #                   .head(row_count) \
+    #                  .reset_index(drop=True)
+    return dataframe
 
-    
+print(get_supervisor_anomalies('2025-05-31','2025-06-02'))
 
 
 
@@ -132,10 +130,10 @@ def get_supervisor_anomalies(row_count): #FUNCION PRINCIPAL QUE SE USARA EN EL F
 #falta evaluar fechas de ingreso, es mas anomalo teniendo en cuenta la fecha en la que el supervisor comenzó a trabajr
 def dataframe_pruebas(): # para pruebas
     data = pd.DataFrame({
-    'evaluator_id': [6,7, 8, 9, 10, 11, 12],
-    'total_requests': [0,40, 28, 35, 50, 20, 30],
-    'approved_requests': [0,35, 24, 18, 48, 3, 10],
-    'rejected_requests': [0,5, 4, 17, 2, 17, 20],
+    'evaluator_id': [6,7, 8, 9, 10, 11, 12,13],
+    'total_requests': [0,40, 28, 35, 50, 20, 30,100],
+    'approved_requests': [0,35, 24, 18, 48, 3, 10,50],
+    'rejected_requests': [0,5, 4, 17, 2, 17, 20,50],
     })
 
     # Calcular tasas
@@ -156,7 +154,7 @@ def pruebas():
     dataframe= anomalies_supervisors(dataframe_pruebas())
     top_anomalies = dataframe.sort_values(by='anomaly_score').head(2).reset_index(drop=True)
     return top_anomalies
-print(pruebas()) # para pruebas
+#print(pruebas()) # para pruebas
 
 
 #--proximamente para anomalias en empleados
