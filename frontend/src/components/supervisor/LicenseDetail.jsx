@@ -7,12 +7,14 @@ import { getLicenseDetail, evaluateLicense, analyzeCertificate } from '../../ser
 import useAuth from '../../hooks/useAuth';
 import Notification from '../../components/utils/Notification';
 import UploadCertificateModal from '../employee/UploadCertificateModal';
+import LicenseDetailSkeleton from './LicenseDetailSkeleton';
 
 const LicenseDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
   const [license, setLicense] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [rejectionReason, setRejectionReason] = useState('');
   const [showRejectionInput, setShowRejectionInput] = useState(false);
@@ -26,12 +28,13 @@ const LicenseDetail = () => {
   const canShowActions = ['admin', 'supervisor'].includes(user?.role);
   const [analysis, setAnalysis] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
- 
   const [showUploadModal, setShowUploadModal] = useState(false);
 
   useEffect(() => {
     const fetchLicense = async () => {
       try {
+        setLoading(true);
+
         const response = await getLicenseDetail(id);
   
         if (response.success && response.data) {
@@ -65,6 +68,8 @@ const LicenseDetail = () => {
       } catch (error) {
         console.error('Error fetching license:', error);
         setError('No se pudo cargar la licencia. Por favor intenta nuevamente.');
+      } finally {
+        setLoading(false);
       }
     };
     
@@ -304,6 +309,10 @@ const LicenseDetail = () => {
     );
   }
 
+  if (loading) {
+    return <LicenseDetailSkeleton />
+  }
+
   if (!license) {
     return null;
   }
@@ -444,7 +453,7 @@ const LicenseDetail = () => {
               <div>
                 <p className="text-sm text-foreground">Estado</p>
                 <div className="flex items-center">
-                <span className={`font-medium text-foreground ${
+                <span className={`font-medium ${
                   license.status === 'approved' 
                     ? 'text-green-700 dark:text-green-400' 
                     : license.status === 'rejected' 
