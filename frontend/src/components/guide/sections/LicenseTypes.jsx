@@ -1,7 +1,6 @@
 
 
 import { FiFileText } from 'react-icons/fi';
-import politics from '../../../../public/images/politics/politicsTable.png';
 
 const LicenseTypes = () => {
   return (
@@ -31,7 +30,7 @@ const LicenseTypes = () => {
 
         <div className="bg-card border border-border rounded-lg p-4 my-6 text-center">
           <h4 className="text-md font-bold mt-6 mb-3 border-b pb-2 border-border">POLÍTICAS DE LAS LICENCIAS</h4>
-          <img src={`${politics}`} alt="Licencias" className="mx-auto" />
+          <img src="/images/politics/politicsTable.png" alt="Licencias" className="mx-auto" />
         </div>
 
         <div className="space-y-6">

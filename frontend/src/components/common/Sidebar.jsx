@@ -2,12 +2,11 @@ import {
   FiHome as Dashboard,
   FiSettings as Settings,
   FiFileText as FileText,
-  FiBarChart2 as BarChart,
   FiUsers as Users,
-  FiCpu as Cpu,
   FiUser,
   FiPlus,
-  FiHelpCircle
+  FiHelpCircle,
+  FiActivity
 } from 'react-icons/fi';
 import { useContext } from 'react';
 import { AuthContext } from '../../context/AuthContext';
@@ -23,19 +22,20 @@ const Sidebar = ({ isOpen }) => {
       { text: 'Dashboard', icon: <Dashboard className="h-5 w-5 text-primary-border" />, path: '/dashboard' },
       { text: 'Usuarios', icon: <Users className="h-5 w-5 text-primary-border" />, path: '/users' },
       { text: 'Licencias', icon: <FileText className="h-5 w-5 text-primary-border" />, path: '/licenses' },
-      { text: 'Anomalías', icon: <Cpu className="h-5 w-5 text-primary-border" />, path: '/ml-model' },
+      { text: 'Predicciones', icon: <FiActivity className="h-5 w-5 text-primary-border" />, path: '/predictions' },
       { text: 'Mis Datos', icon: <FiUser className="h-5 w-5 text-primary-border" />, path: '/my-data' },
       { text: 'Ayuda', icon: <FiHelpCircle className="h-5 w-5 text-primary-border" />, path: '/guide' },
       { text: 'Configuración', icon: <Settings className="h-5 w-5 text-primary-border" />, path: '/settings' },
     ],
     supervisor: [
-      { text: 'Dashboard', icon: <Dashboard className="h-5 w-5 text-primary-border" />, path: '/dashboard' },
+      { text: 'Home', icon: <Dashboard className="h-5 w-5 text-primary-border" />, path: '/dashboard' },
       { text: 'Licencias', icon: <FileText className="h-5 w-5 text-primary-border" />, path: '/licenses' },
       { text: 'Mis Datos', icon: <FiUser className="h-5 w-5 text-primary-border" />, path: '/my-data' },
       { text: 'Ayuda', icon: <FiHelpCircle className="h-5 w-5 text-primary-border" />, path: '/guide' },
+      { text: 'Configuración', icon: <Settings className="h-5 w-5 text-primary-border" />, path: '/settings' },
     ],
     employee: [
-      { text: 'Dashboard', icon: <Dashboard className="h-5 w-5 text-primary-border" />, path: '/dashboard' },
+      { text: 'Home', icon: <Dashboard className="h-5 w-5 text-primary-border" />, path: '/dashboard' },
       { text: 'Mis Licencias', icon: <FileText className="h-5 w-5 text-primary-border" />, path: '/licenses' },
       { 
         text: 'Solicitar Licencia', 
@@ -45,13 +45,15 @@ const Sidebar = ({ isOpen }) => {
       },
       { text: 'Mis Datos', icon: <FiUser className="h-5 w-5 text-primary-border" />, path: '/my-data' },
       { text: 'Ayuda', icon: <FiHelpCircle className="h-5 w-5 text-primary-border" />, path: '/guide' },
+      { text: 'Configuración', icon: <Settings className="h-5 w-5 text-primary-border" />, path: '/settings' },
     ],
     analyst: [
       { text: 'Dashboard', icon: <Dashboard className="h-5 w-5 text-primary-border" />, path: '/dashboard' },
       { text: 'Mis Licencias', icon: <FileText className="h-5 w-5 text-primary-border" />, path: '/licenses' },
-      { text: 'Anomalías', icon: <Cpu className="h-5 w-5 text-primary-border" />, path: '/ml-model' },
+      { text: 'Predicciones', icon: <FiActivity className="h-5 w-5 text-primary-border" />, path: '/predictions' },
       { text: 'Mis Datos', icon: <FiUser className="h-5 w-5 text-primary-border" />, path: '/my-data' },
       { text: 'Ayuda', icon: <FiHelpCircle className="h-5 w-5 text-primary-border" />, path: '/guide' },
+      { text: 'Configuración', icon: <Settings className="h-5 w-5 text-primary-border" />, path: '/settings' },
     ]
   };
 
