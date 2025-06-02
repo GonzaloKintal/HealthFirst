@@ -246,7 +246,7 @@ const UsersPage = () => {
     <div className="p-6">
       {/* Encabezado y contador */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-3 md:gap-0">
-        <h1 className="text-2xl text-foreground font-bold flex items-center">
+        <h1 className="text-xl sm:text-2xl text-foreground font-bold flex items-center">
           <FiUsers className="mr-2" />
           Gestión de Usuarios
         </h1>

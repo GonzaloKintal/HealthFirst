@@ -6,7 +6,7 @@ import AdminDashboardIFrame from './AdminDashboardIFrame';
 const AdminDashboard = () => {
   return (
     <div className="bg-background rounded-lg shadow p-6">
-      <h1 className="text-2xl font-bold text-foreground">Panel de Administrador</h1>
+      <h1 className="text-xl sm:text-2xl font-bold text-foreground">Panel de Administrador</h1>
       <p className="mt-2 text-foreground">Gestión completa del sistema</p>
 
       <div className="mt-6">

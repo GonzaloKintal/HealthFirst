@@ -117,7 +117,7 @@ const MyDataPage = () => {
   return (
     <div className="p-6 bg-background">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold flex items-center text-foreground">
+        <h1 className="text-xl sm:text-2xl font-bold flex items-center text-foreground">
           <FiUser className="mr-2" />
           Mis Datos
         </h1>

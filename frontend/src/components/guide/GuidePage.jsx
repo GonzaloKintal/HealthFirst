@@ -49,7 +49,7 @@ const GuidePage = () => {
   return (
     <div className="p-6 bg-background">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold flex items-center text-foreground">
+        <h1 className="text-xl sm:text-2xl font-bold flex items-center text-foreground">
           <FiBook className="mr-2" />
           Guía del Sistema
         </h1>
@@ -87,7 +87,7 @@ const GuidePage = () => {
         <div className="flex-1">
           <div className="bg-card p-6 rounded-lg shadow">
             <div className="mb-8">
-              <h2 className="text-xl font-semibold text-foreground mb-4">Bienvenido a la guía del sistema</h2>
+              <h2 className="text-lg sm:text-xl font-semibold text-foreground mb-4">Bienvenido a la guía del sistema</h2>
             </div>
 
             {/* Mostramos solo la sección activa */}

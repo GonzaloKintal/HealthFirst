@@ -9,7 +9,6 @@ import SupervisorDashboard from '../pages/supervisor/SupervisorDashboard';
 import EmployeeDashboard from '../pages/employee/EmployeeDashboard';
 import AnalystDashboard from '../pages/analyst/AnalystDashboard';
 import UsersPage from '../pages/admin/UsersPage';
-import AnomaliesPage from '../pages/analyst/AnomaliesPage';
 import LicensesPage from '../pages/supervisor/LicensesPage';
 import RequestLicense from '../components/employee/RequestLicense';
 import EditLicense from '../components/employee/EditLicense';
@@ -21,6 +20,7 @@ import SettingsPage from '../pages/admin/SettingsPage';
 import PublicRoute from './PublicRoute';
 import GuidePage from '../components/guide/GuidePage';
 import NotFoundPage from '../pages/shared/NotFoundPage';
+import PredictionsPage from '../pages/analyst/PredictionsPage';
 
 const AppRoutes = () => {
   return (
@@ -95,7 +95,7 @@ const AppRoutes = () => {
       <Route 
           path="/settings" 
           element={
-            <ProtectedRoute allowedRoles={['admin']}>
+            <ProtectedRoute allowedRoles={['admin', 'supervisor', 'analyst', 'employee']}>
               <SettingsPage />
             </ProtectedRoute>
           } 
@@ -167,10 +167,10 @@ const AppRoutes = () => {
         />
 
         <Route 
-          path="/ml-model" 
+          path="/predictions" 
           element={
             <ProtectedRoute allowedRoles={['admin', 'analyst']}>
-              <AnomaliesPage />
+              <PredictionsPage />
             </ProtectedRoute>
           } 
         />

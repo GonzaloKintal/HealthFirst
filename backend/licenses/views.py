@@ -4,6 +4,8 @@ from datetime import datetime, timedelta
 from django.utils.timezone import now
 from django.contrib.auth import get_user_model
 from xmlrpc.client import NOT_WELLFORMED_ERROR
+
+from messaging.services.brevo_email import *
 from .models import *
 from django.http import JsonResponse, HttpResponse
 import json
@@ -291,6 +293,58 @@ def update_license(request, id):
 
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+
+
+@api_view(['PUT'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def add_certificate(request, id):
+    status_code = 200
+    response_data = {}
+    
+    try:
+        data = json.loads(request.body)
+        certificate_data = data.get('certificate', None)
+
+        try:
+            license = License.objects.get(license_id=id, is_deleted=False)
+        except License.DoesNotExist:
+            raise Exception(f'Licencia con id "{id}" no encontrada.')
+
+        if not license.type.certificate_require:
+            raise Exception('El tipo de licencia no requiere certificado.')
+        
+        try:
+            file_data = process_certificate(certificate_data)
+        except Exception as e:
+            raise Exception(f'Error en certificado: {str(e)}')
+
+        if file_data:
+            Certificate.objects.create(
+                license=license,
+                file=file_data,
+                validation=False,
+                upload_date=datetime.now(),
+                is_deleted=False,
+                deleted_at=None
+            )
+
+            license.status.name = Status.StatusChoices.PENDING
+            license.status.save()
+            response_data = {'message': 'Certificado agregado exitosamente.'}
+        else:
+            status_code = 400
+            response_data = {'error': 'No se pudo procesar el certificado.'}
+
+    except Exception as e:
+        status_code = 500
+        response_data = {'error': str(e)}
+
+    return JsonResponse(response_data, status=status_code)
+        
+
+
+    
     
 
 
@@ -334,7 +388,15 @@ def evaluate_license(request, id):
         license.closing_date = now().date()
         license.save()
 
-        return JsonResponse({'message': f'Licencia evaluada correctamente.'}, status=200)
+        if license_status == Status.StatusChoices.REJECTED:
+            send_rejected_license(license)
+        if license_status == Status.StatusChoices.APPROVED:
+            send_approved_license(license)
+
+        evaluator= f"{request.user.first_name} {request.user.last_name}"
+
+        return JsonResponse({'message': 'Licencia evaluada correctamente.','evaluator': evaluator}, status=200)
+
 
     except json.JSONDecodeError:
         return JsonResponse({'error': 'El cuerpo de la solicitud debe ser JSON válido.'}, status=400)

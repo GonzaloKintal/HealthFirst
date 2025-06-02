@@ -8,6 +8,7 @@ from django.core.exceptions import ValidationError
 from django.utils.timezone import now
 from datetime import datetime, date
 from dateutil.relativedelta import relativedelta
+from datetime import datetime, date
 
 
 user_roles=[
@@ -67,8 +68,20 @@ class HealthFirstUser(AbstractUser):
     def save(self, *args, **kwargs):
         # Asegurar campos de tipo `date`
         date_format = "%Y-%m-%d"
-        birth_date = datetime.strptime(self.date_of_birth, date_format).date()
-        employment_date = datetime.strptime(self.employment_start_date, date_format).date()
+        from datetime import datetime, date
+
+        date_format = "%Y-%m-%d"
+
+        if isinstance(self.date_of_birth, str):
+            birth_date = datetime.strptime(self.date_of_birth, date_format).date()
+        else:
+            birth_date = self.date_of_birth
+
+        if isinstance(self.employment_start_date, str):
+            employment_date = datetime.strptime(self.employment_start_date, date_format).date()
+        else:
+            employment_date = self.employment_start_date
+
 
         # calcular edad
         age_at_employment = relativedelta(employment_date, birth_date).years

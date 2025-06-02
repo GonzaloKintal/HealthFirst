@@ -453,7 +453,7 @@ const LicenseDetail = () => {
               <div>
                 <p className="text-sm text-foreground">Estado</p>
                 <div className="flex items-center">
-                <span className={`font-medium text-foreground ${
+                <span className={`font-medium ${
                   license.status === 'approved' 
                     ? 'text-green-700 dark:text-green-400' 
                     : license.status === 'rejected' 
