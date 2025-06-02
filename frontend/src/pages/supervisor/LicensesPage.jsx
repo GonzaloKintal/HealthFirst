@@ -316,7 +316,7 @@ const LicensesPage = () => {
         {/* Contenido principal - siempre visible */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-3 md:gap-0">
           {/* Título - siempre a la izquierda */}
-          <h1 className="text-2xl font-bold flex items-center text-foreground">
+          <h1 className="text-xl sm:text-2xl font-bold flex items-center text-foreground">
             <FiFileText className="mr-2" />
             Gestión de Licencias
           </h1>
