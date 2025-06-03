@@ -63,6 +63,8 @@ class HealthFirstUser(AbstractUser):
     is_deleted=models.BooleanField(default=False)
     delete_at=models.DateTimeField(null=True, blank=True,default=None)
     employment_start_date=models.DateField(null=True, blank=True)
+    is_telegram_suscriptor = models.BooleanField(default=False)
+    telegram_id=models.IntegerField(null=True, blank=True)
 
 
     def save(self, *args, **kwargs):
@@ -116,6 +118,17 @@ class HealthFirstUser(AbstractUser):
         self.is_deleted = True
         self.delete_at=now()
         super().save(*args, **kwargs)
+
+
+    def add_telegram_suscription(self, telegram_id):
+        self.is_telegram_suscriptor = True
+        self.telegram_id = telegram_id
+        super().save()
+
+    def remove_telegram_suscription(self):
+        self.is_telegram_suscriptor = False
+        self.telegram_id = None
+        super().save()
 
     @classmethod
     def user_roles(cls):
