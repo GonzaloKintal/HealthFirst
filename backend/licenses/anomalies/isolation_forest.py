@@ -17,6 +17,8 @@ django.setup()
 
 from licenses.models import License
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+MODEL_PATH = os.path.join(BASE_DIR, 'isolation_forest_sup_model.pkl')
 
 def create_model_supervisor(path_csv): # le paso el csv para el entreamiento
     data= pd.read_csv(path_csv)
@@ -27,7 +29,7 @@ def create_model_supervisor(path_csv): # le paso el csv para el entreamiento
     model.fit(features)
 
     # Guardar el modelo en un archivo, ESTO ES LO CORRECTO
-    joblib.dump(model, 'isolation_forest_sup_model.pkl') 
+    joblib.dump(model, MODEL_PATH)
 
     return model # NO deberia retornarlo, pero por ahora para pruebas lo dejo así
 
@@ -36,7 +38,7 @@ def anomalies_supervisors(data): #recibe un dataframe
     print("\n ----------------------ANOMALIAS PARA SUPERVISORES")
 
     #Cargo el modelo previamente guardado
-    model = joblib.load('isolation_forest_sup_model.pkl')
+    model = joblib.load(MODEL_PATH)
     #data= pd.read_csv(path_csv)
     features = data[['total_requests', 'approved_requests', 'rejected_requests', 'approval_rate', 'rejection_rate']]
 
