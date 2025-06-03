@@ -74,3 +74,40 @@ FormattedDate.propTypes = {
 FormattedDate.defaultProps = {
   showTime: true
 };
+
+export const formatSimpleDate = (dateString) => {
+  if (!dateString) return 'No disponible';
+  
+  try {
+    const [year, month, day] = dateString.split('-');
+    return `${day}/${month}/${year}`;
+  } catch (error) {
+    console.error('Error formateando fecha:', error);
+    return 'No disponible';
+  }
+};
+
+export const formatArgentinaDate = (dateString, showTime = true) => {
+    if (!dateString) {
+      return 'No disponible';
+    }
+
+    try {
+      const date = new Date(dateString);
+      const offsetArgentina = -3 * 60;
+      const localOffset = date.getTimezoneOffset();
+      const argentinaTime = new Date(date.getTime() + (localOffset - offsetArgentina) * 60000);
+      
+      const dateOptions = { 
+        day: '2-digit', 
+        month: '2-digit', 
+        year: 'numeric',
+        timeZone: 'America/Argentina/Buenos_Aires'
+      };
+      
+      return argentinaTime.toLocaleDateString('es-AR', dateOptions);
+    } catch (error) {
+      console.error('Error formateando fecha:', error);
+      return 'No disponible';
+    }
+  };

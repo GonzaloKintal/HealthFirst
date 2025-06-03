@@ -44,8 +44,6 @@ const LoginPage = () => {
     setIsLoading(true);
   
     try {
-      await new Promise(resolve => setTimeout(resolve, 3000));
-      
       const response = await login(username, password);
       
       authLogin({
@@ -70,7 +68,6 @@ const LoginPage = () => {
     setIsLoading(true);
     setError('');
     try {
-      await new Promise(resolve => setTimeout(resolve, 3000));
       
       const adminCredentials = {
         username: 'admin@admin.com',
@@ -182,7 +179,7 @@ const LoginPage = () => {
             </div>
 
             {error && (
-              <div className="mb-4 p-3 bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-200 rounded">
+              <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded dark:bg-red-900 dark:border-red-700 dark:text-red-100">
                 {error}
               </div>
             )}

@@ -9,8 +9,6 @@ import SupervisorDashboard from '../pages/supervisor/SupervisorDashboard';
 import EmployeeDashboard from '../pages/employee/EmployeeDashboard';
 import AnalystDashboard from '../pages/analyst/AnalystDashboard';
 import UsersPage from '../pages/admin/UsersPage';
-import MetricsPage from '../pages/analyst/MetricsPage';
-import MachineLearningPage from '../pages/analyst/MachineLearningPage';
 import LicensesPage from '../pages/supervisor/LicensesPage';
 import RequestLicense from '../components/employee/RequestLicense';
 import EditLicense from '../components/employee/EditLicense';
@@ -20,6 +18,9 @@ import MyDataPage from '../pages/employee/MyDataPage';
 import LicenseDetail from '../components/supervisor/LicenseDetail';
 import SettingsPage from '../pages/admin/SettingsPage';
 import PublicRoute from './PublicRoute';
+import GuidePage from '../components/guide/GuidePage';
+import NotFoundPage from '../pages/shared/NotFoundPage';
+import PredictionsPage from '../pages/analyst/PredictionsPage';
 
 const AppRoutes = () => {
   return (
@@ -94,7 +95,7 @@ const AppRoutes = () => {
       <Route 
           path="/settings" 
           element={
-            <ProtectedRoute allowedRoles={['admin']}>
+            <ProtectedRoute allowedRoles={['admin', 'supervisor', 'analyst', 'employee']}>
               <SettingsPage />
             </ProtectedRoute>
           } 
@@ -164,21 +165,12 @@ const AppRoutes = () => {
             </ProtectedRoute>
           } 
         />
-        
-        <Route 
-          path="/metrics" 
-          element={
-            <ProtectedRoute allowedRoles={['admin', 'analyst']}>
-              <MetricsPage />
-            </ProtectedRoute>
-          } 
-        />
 
         <Route 
-          path="/ml-model" 
+          path="/predictions" 
           element={
             <ProtectedRoute allowedRoles={['admin', 'analyst']}>
-              <MachineLearningPage />
+              <PredictionsPage />
             </ProtectedRoute>
           } 
         />
@@ -192,11 +184,20 @@ const AppRoutes = () => {
           } 
         />
 
+        <Route
+          path="/guide" 
+          element={
+            <ProtectedRoute allowedRoles={['admin', 'analyst', 'employee', 'supervisor']}>
+              <GuidePage />
+            </ProtectedRoute>
+          }
+        />
+
       </Route>
 
         
       
-      <Route path="*" element={<div>Página no encontrada</div>} />
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );
 };
