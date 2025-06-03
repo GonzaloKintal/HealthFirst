@@ -20,6 +20,12 @@ from licenses.models import License
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MODEL_PATH = os.path.join(BASE_DIR, 'isolation_forest_sup_model.pkl')
 
+import pandas as pd
+
+pd.set_option("display.max_columns", None)  # Mostrar todas las columnas
+pd.set_option("display.max_rows", None)     # Mostrar todas las filas
+pd.set_option("display.width", 0)           # Autoajuste al ancho de consola
+
 def create_model_supervisor(path_csv): # le paso el csv para el entreamiento
     data= pd.read_csv(path_csv)
     features = data[['total_requests', 'approved_requests', 'rejected_requests', 'approval_rate', 'rejection_rate']]
@@ -46,8 +52,8 @@ def anomalies_supervisors(data): #recibe un dataframe
     data['anomaly_score'] = model.decision_function(features)
     data['is_anomaly'] = model.predict(features)
     data['is_anomaly'] = data['is_anomaly'].map({1: 0, -1: 1})  # 1 = Anómalo, 0 = Normal
-    data['approval_rate'] = (data['approval_rate'] * 100).map("{:.2f}%".format)
-    data['rejection_rate'] = (data['rejection_rate'] * 100).map("{:.2f}%".format)
+    data['approval_rate'] = (data['approval_rate'])
+    data['rejection_rate'] = (data['rejection_rate'])
 
     return(data)
 
@@ -114,21 +120,26 @@ def generate_supervisors_csv(path_csv='supervisors_data_1000.csv', n=1000, semil
     return df
 
 def get_supervisor_anomalies(start_date=None, end_date=None): #FUNCION PRINCIPAL QUE SE USARA EN EL FRONT
-    # Atajar posibles errores cuando no hay resultados
     df = create_dataframe_supervisor(start_date, end_date)
     if df.empty:
-        # Devolvés un DataFrame vacío con las columnas esperadas para evitar errores
         cols = ['evaluator_id', 'total_requests', 'approved_requests', 'rejected_requests', 'approval_rate', 'rejection_rate']
         return pd.DataFrame(columns=cols)
-
-    #el cant_filas es para retornar solo esa cantidad de filas, serian los cant_filas mas anomalos
     dataframe =  anomalies_supervisors(df)
-    #top_anomalies = dataframe.sort_values(by='anomaly_score').head(cant_filas).reset_index(drop=True)
+    
+    global_approval_rate = dataframe['approval_rate'].mean()
+    global_rejection_rate = dataframe['rejection_rate'].mean()
+    total_requests_sum = dataframe['total_requests'].sum()
 
-    #top_anomalies = dataframe[dataframe['is_anomaly'] == 1] \
-    #                    .sort_values(by='anomaly_score') \
-    #                   .head(row_count) \
-    #                  .reset_index(drop=True)
+    dataframe['approval_rate_diff'] = dataframe['approval_rate'] - global_approval_rate
+    dataframe['rejection_rate_diff'] = dataframe['rejection_rate'] - global_rejection_rate
+    dataframe['total_requests_percent'] = dataframe['total_requests'] / total_requests_sum 
+
+    dataframe['approval_rate'] = (dataframe['approval_rate']*100).map("{:.2f}%".format)
+    dataframe['rejection_rate'] = (dataframe['rejection_rate']*100).map("{:.2f}%".format)
+    dataframe['approval_rate_diff'] = (dataframe['approval_rate_diff']*100).map("{:+.2f}%".format)
+    dataframe['rejection_rate_diff'] = (dataframe['rejection_rate_diff']*100).map("{:+.2f}%".format)
+    dataframe['total_requests_percent'] = (dataframe['total_requests_percent']*100).map("{:.2f}%".format)
+
     return dataframe
 
 print(get_supervisor_anomalies())
