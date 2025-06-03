@@ -6,4 +6,5 @@ urlpatterns = [
     path('users/', include('users.urls')),
     path('licenses/', include('licenses.urls')),
     path('metabase/', include('metabase.urls')),
+    path('messaging/', include('messaging.urls')),
 ]
