@@ -6,6 +6,7 @@ from django.contrib.auth import get_user_model
 from xmlrpc.client import NOT_WELLFORMED_ERROR
 
 from .anomalies.isolation_forest import get_supervisor_anomalies
+from messaging.services.brevo_email import *
 from .models import *
 from django.http import JsonResponse, HttpResponse
 import json
@@ -177,7 +178,6 @@ def create_license(request):
                     deleted_at=None
                 )
 
-                # Crear estado inicial como "pending"
             license.assign_status()
 
         return JsonResponse({'message': 'Licencia solicitada exitosamente.'}, status=200)
@@ -273,19 +273,79 @@ def update_license(request, id):
                                 is_deleted=False,
                                 deleted_at=None
                         )
-                        if license.status.name not in [Status.StatusChoices.APPROVED, Status.StatusChoices.REJECTED]:
-                            license.status.name=Status.StatusChoices.PENDING
-                            license.status.evaluation_comment='Pendiente de aprobación.'
-                            license.status.save()
+                if license.status.name not in [Status.StatusChoices.APPROVED, Status.StatusChoices.REJECTED]:
+                    try:
+                        certificate=license.certificate
+                    except Certificate.DoesNotExist:
+                        certificate=None
 
-                        
-
-
+                    if  not license.type.certificate_require:
+                        license.status.name = Status.StatusChoices.PENDING
+                        if certificate is not None:
+                            license.certificate.delete()
+                    elif license.type.certificate_require and certificate is None:
+                        license.status.name = Status.StatusChoices.MISSING_DOC
+                    else:
+                        license.status.name = Status.StatusChoices.PENDING
+                    
+                    license.status.save()
                 
                 return JsonResponse({'message': 'Licencia actualizada exitosamente.'}, status=200)
 
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+
+
+@api_view(['PUT'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def add_certificate(request, id):
+    status_code = 200
+    response_data = {}
+    
+    try:
+        data = json.loads(request.body)
+        certificate_data = data.get('certificate', None)
+
+        try:
+            license = License.objects.get(license_id=id, is_deleted=False)
+        except License.DoesNotExist:
+            raise Exception(f'Licencia con id "{id}" no encontrada.')
+
+        if not license.type.certificate_require:
+            raise Exception('El tipo de licencia no requiere certificado.')
+        
+        try:
+            file_data = process_certificate(certificate_data)
+        except Exception as e:
+            raise Exception(f'Error en certificado: {str(e)}')
+
+        if file_data:
+            Certificate.objects.create(
+                license=license,
+                file=file_data,
+                validation=False,
+                upload_date=datetime.now(),
+                is_deleted=False,
+                deleted_at=None
+            )
+
+            license.status.name = Status.StatusChoices.PENDING
+            license.status.save()
+            response_data = {'message': 'Certificado agregado exitosamente.'}
+        else:
+            status_code = 400
+            response_data = {'error': 'No se pudo procesar el certificado.'}
+
+    except Exception as e:
+        status_code = 500
+        response_data = {'error': str(e)}
+
+    return JsonResponse(response_data, status=status_code)
+        
+
+
+    
     
 
 
@@ -329,7 +389,15 @@ def evaluate_license(request, id):
         license.closing_date = now().date()
         license.save()
 
-        return JsonResponse({'message': f'Licencia evaluada correctamente.'}, status=200)
+        if license_status == Status.StatusChoices.REJECTED:
+            send_rejected_license(license)
+        if license_status == Status.StatusChoices.APPROVED:
+            send_approved_license(license)
+
+        evaluator= f"{request.user.first_name} {request.user.last_name}"
+
+        return JsonResponse({'message': 'Licencia evaluada correctamente.','evaluator': evaluator}, status=200)
+
 
     except json.JSONDecodeError:
         return JsonResponse({'error': 'El cuerpo de la solicitud debe ser JSON válido.'}, status=400)
@@ -471,30 +539,6 @@ def process_certificate(certificate_data):
         file_encoded = base64.b64encode(file_decoded).decode('utf-8')
 
         return file_encoded
-
-@api_view(['PUT'])
-@authentication_classes([JWTAuthentication])
-@permission_classes([IsAuthenticated])
-def update_expired(request):
-    licenses = License.objects.filter(is_deleted=False, status__name=Status.StatusChoices.MISSING_DOC)
-    try:
-        if not licenses:
-            raise Exception('No se encontraron licencias vencidas.')
-
-        for license in licenses:
-            expired_time= license.request_date + timedelta(days=license.required_days)
-            expired_licenses=0
-            if expired_time < timezone.now().date():
-                license.status.name = Status.StatusChoices.EXPIRED
-                license.status.evaluation_comment = 'Licencia vencida.'
-                license.status.save()
-                expired_licenses+=1
-        print(expired_licenses)
-        return JsonResponse({"expired_licenses": expired_licenses}, status=200)
-    
-    except Exception as e:
-        return JsonResponse({"error": str(e)}, status=500)  
-
 
 @api_view(['POST'])
 @authentication_classes([JWTAuthentication])
