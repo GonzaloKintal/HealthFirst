@@ -158,7 +158,23 @@ def create_model_empleados(path_csv): # le paso el csv para el entreamiento
 
     return model # NO deberia retornarlo, pero por ahora para pruebas lo dejo así
 
+#--proximamente para anomalias en empleados
+def create_dataFrame_empleados():
+    #agrupo licencias por empleado
+    licencias = License.objects.values('user_id').annotate(
+        total_days_requested=Sum('required_days'),
+        num_requests=Count('license_id')
+    )
 
+    #convertir a DataFrame
+    df = pd.DataFrame(list(licencias))
+
+    # Calcular promedio de días por solicitud
+    df['prom_days_request'] = df['total_days_requested'] / df['num_requests']
+
+
+    #print(df)
+    return df
 
 #---------------------------------------------------------------------------------------------------------------
 #falta evaluar fechas de ingreso, es mas anomalo teniendo en cuenta la fecha en la que el supervisor comenzó a trabajr
@@ -188,23 +204,3 @@ def pruebas():
     dataframe= anomalies_supervisors(dataframe_pruebas())
     top_anomalies = dataframe.sort_values(by='anomaly_score').head(2).reset_index(drop=True)
     return top_anomalies
-#print(pruebas()) # para pruebas
-
-
-#--proximamente para anomalias en empleados
-def create_dataFrame_empleados():
-    #agrupo licencias por empleado
-    licencias = License.objects.values('user_id').annotate(
-        total_days_requested=Sum('required_days'),
-        num_requests=Count('license_id')
-    )
-
-    #convertir a DataFrame
-    df = pd.DataFrame(list(licencias))
-
-    # Calcular promedio de días por solicitud
-    df['prom_days_request'] = df['total_days_requested'] / df['num_requests']
-
-
-    #print(df)
-    return df
