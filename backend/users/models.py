@@ -8,6 +8,7 @@ from django.core.exceptions import ValidationError
 from django.utils.timezone import now
 from datetime import datetime, date
 from dateutil.relativedelta import relativedelta
+from datetime import datetime, date
 
 
 user_roles=[
@@ -62,14 +63,29 @@ class HealthFirstUser(AbstractUser):
     is_deleted=models.BooleanField(default=False)
     delete_at=models.DateTimeField(null=True, blank=True,default=None)
     employment_start_date=models.DateField(null=True, blank=True)
+    is_telegram_suscriptor = models.BooleanField(default=False)
+    telegram_id=models.IntegerField(null=True, blank=True)
 
 
     def save(self, *args, **kwargs):
+        # Asegurar campos de tipo `date`
         date_format = "%Y-%m-%d"
-        birth_date = datetime.strptime(self.date_of_birth, date_format).date()
-        employment_date = datetime.strptime(self.employment_start_date, date_format).date()
+        from datetime import datetime, date
+
+        date_format = "%Y-%m-%d"
+
+        if isinstance(self.date_of_birth, str):
+            birth_date = datetime.strptime(self.date_of_birth, date_format).date()
+        else:
+            birth_date = self.date_of_birth
+
+        if isinstance(self.employment_start_date, str):
+            employment_date = datetime.strptime(self.employment_start_date, date_format).date()
+        else:
+            employment_date = self.employment_start_date
 
 
+        # calcular edad
         age_at_employment = relativedelta(employment_date, birth_date).years
 
         if age_at_employment < 18:
@@ -101,7 +117,18 @@ class HealthFirstUser(AbstractUser):
     def delete(self, *args, **kwargs):
         self.is_deleted = True
         self.delete_at=now()
-        self.save()
+        super().save(*args, **kwargs)
+
+
+    def add_telegram_suscription(self, telegram_id):
+        self.is_telegram_suscriptor = True
+        self.telegram_id = telegram_id
+        super().save()
+
+    def remove_telegram_suscription(self):
+        self.is_telegram_suscriptor = False
+        self.telegram_id = None
+        super().save()
 
     @classmethod
     def user_roles(cls):

@@ -26,7 +26,7 @@ export const getLicenses = async (filters = {}) => {
     console.error('Error in getLicenses:', error);
     return {
       success: false,
-      error: error.response?.data?.error || 'Error al obtener las licencias',
+      error: error.response?.data?.error || 'Error al obtener las licencias. Por favor intenta nuevamente.',
       licenses: []
     };
   }
@@ -98,7 +98,11 @@ export const getLicenseTypes = async () => {
 // Editar una licencia existente
 export const updateLicense = async (id, licenseData) => {
   try {
-    const response = await api.put(`/licenses/update/${id}`, licenseData);
+    const response = await api.put(`/licenses/update/${id}`, licenseData, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
     
     return {
       success: true,
@@ -136,6 +140,33 @@ export const evaluateLicense = async (licenseId, status, comment = '') => {
     return {
       success: false,
       error: error.response?.data?.error || 'Error al evaluar la licencia'
+    };
+  }
+};
+
+// Agregar un certificado a una licencia
+export const addCertificateToLicense = async (licenseId, base64File) => {
+  try {
+    const response = await api.put(`/licenses/add_certificate/${licenseId}`, base64File, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    return {
+      success: true,
+      data: response.data
+    };
+  } catch (error) {
+    console.error('Error al agregar certificado a la licencia', {
+      message: error.message,
+      response: error.response?.data,
+      config: error.config
+    });
+    
+    return {
+      success: false,
+      error: error.response?.data?.error || 'Error al agregar el certificado a la licencia'
     };
   }
 };

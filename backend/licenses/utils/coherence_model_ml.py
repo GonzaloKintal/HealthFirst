@@ -9,7 +9,7 @@ from .file_utils import normalize_text
 
 # Paths
 MODEL_PATH = Path(__file__).resolve().parent / 'modelo_clasificador.joblib'
-DATASET_PATH = Path(__file__).resolve().parent / 'coherence_license_type_dataset.csv'
+DATASET_PATH = Path(__file__).resolve().parent / 'coherence_dataset.csv'
 
 
 def load_data(csv_file: Path):

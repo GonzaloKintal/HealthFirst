@@ -16,6 +16,7 @@ import {
   validateEmail
 } from '../utils/Validations';
 
+
 const EditUser = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -50,12 +51,42 @@ const EditUser = () => {
   ];
 
   const [departments, setDepartments] = useState([]);
+  const [maxEmploymentDate, setMaxEmploymentDate] = useState(null);
+
+  // Reemplaza la función format de date-fns con esta función de formato segura
+  const safeFormatDate = (date) => {
+    if (!date) return null;
+    try {
+      const adjustedDate = new Date(date);
+      adjustedDate.setMinutes(adjustedDate.getMinutes() + adjustedDate.getTimezoneOffset());
+      return format(adjustedDate, 'yyyy-MM-dd');
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return null;
+    }
+  };
 
   useEffect(() => {
+    // Calcular la fecha máxima (hoy + 2 semanas)
+    const today = new Date();
+    const twoWeeksLater = new Date(today);
+    twoWeeksLater.setDate(today.getDate() + 14);
+    setMaxEmploymentDate(twoWeeksLater);
     const fetchUserData = async () => {
       try {
         const userData = await getUser(id);
 
+        const parseDate = (dateString) => {
+          if (!dateString) return null;
+          try {
+            const date = new Date(dateString);
+            return new Date(date.getTime() + date.getTimezoneOffset() * 60000);
+          } catch (error) {
+            console.error('Error parsing date:', error);
+            return null;
+          }
+        };
+  
         setFormData({
           id: userData.id,
           first_name: userData.first_name || '',
@@ -63,10 +94,10 @@ const EditUser = () => {
           dni: userData.dni || '',
           email: userData.email || '',
           phone: userData.phone || '',
-          date_of_birth: userData.date_of_birth ? new Date(userData.date_of_birth) : null,
+          date_of_birth: parseDate(userData.date_of_birth),
           department: userData.department || '',
           role_name: userData.role || 'employee',
-          employment_start_date: userData.employment_start_date ? new Date(userData.employment_start_date) : null,
+          employment_start_date: parseDate(userData.employment_start_date),
           password: '',
           confirmPassword: ''
         });
@@ -223,10 +254,10 @@ const EditUser = () => {
         dni: formData.dni,
         email: formData.email,
         phone: formData.phone,
-        date_of_birth: formData.date_of_birth ? format(formData.date_of_birth, 'yyyy-MM-dd') : null,
+        date_of_birth: formData.date_of_birth ? safeFormatDate(formData.date_of_birth) : null,
         department: formData.department,
         role_name: formData.role_name,
-        employment_start_date: formData.employment_start_date ? format(formData.employment_start_date, 'yyyy-MM-dd') : null,
+        employment_start_date: formData.employment_start_date ? safeFormatDate(formData.employment_start_date) : null,
       };
   
       // Solo incluimos la contraseña si se está editando y se proporcionó una nueva
@@ -249,20 +280,30 @@ const EditUser = () => {
       let errorMessage = 'Error al actualizar el usuario';
       
       if (error.response) {
-        if (error.response.data && error.response.data.message) {
-          errorMessage = error.response.data.message;
-        } else if (error.response.status === 404) {
-          errorMessage = 'Usuario no encontrado';
-        } else if (error.response.status === 409) {
-          errorMessage = 'El email o DNI ya están registrados';
+        if (error.response.data?.error) {
+            errorMessage = error.response.data.error;
+        } 
+        else if (error.response.data?.message) {
+            errorMessage = error.response.data.message;
         }
+        else if (error.response.status === 400) {
+            errorMessage = 'Datos inválidos enviados al servidor';
+        }
+        else if (error.response.status === 404) {
+            errorMessage = 'Usuario no encontrado';
+        }
+        else if (error.response.status === 409) {
+            errorMessage = 'El email o DNI ya están registrados';
+        }
+      } else if (error.message) {
+          errorMessage = error.message;
       }
       
       setNotification({
-        type: 'error',
-        message: errorMessage
+          type: 'error',
+          message: errorMessage
       });
-    } finally {
+  } finally {
       setIsSubmitting(false);
     }
   };
@@ -436,7 +477,7 @@ const EditUser = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-foreground bg-background mb-1">Fecha de Ingreso a la Empresa *</label>
+              <label className="block text-sm font-medium text-foreground mb-1">Fecha de Ingreso a la Empresa *</label>
               <StyledDatePicker
                 selected={formData.employment_start_date}
                 onChange={(date) => handleDateChange(date, 'employment_start_date')}
@@ -448,6 +489,7 @@ const EditUser = () => {
                 showYearDropdown
                 dropdownMode="select"
                 minDate={new Date(2000, 0, 1)}
+                maxDate={maxEmploymentDate}
                 peekNextMonth
                 showMonthDropdown
               />
