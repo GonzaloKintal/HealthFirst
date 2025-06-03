@@ -34,21 +34,21 @@ def create_model_supervisor(path_csv): # le paso el csv para el entreamiento
 
 def anomalies_supervisors(data): #recibe un dataframe
     print("\n ----------------------ANOMALIAS PARA SUPERVISORES")
+    if data.empty is False:
+        #Cargo el modelo previamente guardado
+        model = joblib.load('isolation_forest_sup_model.pkl')
+        #data= pd.read_csv(path_csv)
+        features = data[['total_requests', 'approved_requests', 'rejected_requests', 'approval_rate', 'rejection_rate']]
 
-    #Cargo el modelo previamente guardado
-    model = joblib.load('isolation_forest_sup_model.pkl')
-    #data= pd.read_csv(path_csv)
-    features = data[['total_requests', 'approved_requests', 'rejected_requests', 'approval_rate', 'rejection_rate']]
 
-
-    data['anomaly_score'] = model.decision_function(features)
-    data['is_anomaly'] = model.predict(features)
-    data['is_anomaly'] = data['is_anomaly'].map({1: 0, -1: 1})  # 1 = Anómalo, 0 = Normal
-    data['approval_rate'] = (data['approval_rate'] * 100).map("{:.2f}%".format)
-    data['rejection_rate'] = (data['rejection_rate'] * 100).map("{:.2f}%".format)
-    #muestro los resultados
-    #print(data[['evaluator_id', 'total_requests', 'approved_requests', 'rejected_requests', 'approval_rate', 'rejection_rate', 'anomaly_score', 'is_anomaly']])
-    print(data.head(10))
+        data['anomaly_score'] = model.decision_function(features)
+        data['is_anomaly'] = model.predict(features)
+        data['is_anomaly'] = data['is_anomaly'].map({1: 0, -1: 1})  # 1 = Anómalo, 0 = Normal
+        data['approval_rate'] = (data['approval_rate'] * 100).map("{:.2f}%".format)
+        data['rejection_rate'] = (data['rejection_rate'] * 100).map("{:.2f}%".format)
+        #muestro los resultados
+        #print(data[['evaluator_id', 'total_requests', 'approved_requests', 'rejected_requests', 'approval_rate', 'rejection_rate', 'anomaly_score', 'is_anomaly']])
+        print(data.head(10))
     return(data)
 
 
@@ -67,18 +67,17 @@ def create_dataframe_supervisor(start_date=None, end_date=None): # esto para lo 
 
     
     df = pd.DataFrame(list(qs))
-    print(df.head())
-    print(df.dtypes)
-    #print(list(qs))
-    df['approval_rate'] = df.apply(
-    lambda row: row['approved_requests'] / row['total_requests'] if row['total_requests'] > 0 else 0, #porcentaje aprobados
-    axis=1
-    )
 
-    df['rejection_rate'] = df.apply(
-        lambda row: row['rejected_requests'] / row['total_requests'] if row['total_requests'] > 0 else 0, #porcentaje rechazados
+    if df.empty is False:
+        df['approval_rate'] = df.apply(
+        lambda row: row['approved_requests'] / row['total_requests'] if row['total_requests'] > 0 else 0, #porcentaje aprobados
         axis=1
-    )
+        )
+
+        df['rejection_rate'] = df.apply(
+            lambda row: row['rejected_requests'] / row['total_requests'] if row['total_requests'] > 0 else 0, #porcentaje rechazados
+            axis=1
+        )
     #print(df)
     return df
 
@@ -122,7 +121,7 @@ def get_supervisor_anomalies(start_date=None, end_date=None): #FUNCION PRINCIPAL
     #                  .reset_index(drop=True)
     return dataframe
 
-print(get_supervisor_anomalies())
+get_supervisor_anomalies(date(2025, 5, 31),date(2025, 5, 31))
 
 
 
