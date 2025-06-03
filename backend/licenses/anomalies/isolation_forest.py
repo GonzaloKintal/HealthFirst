@@ -18,14 +18,16 @@ django.setup()
 from licenses.models import License
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-MODEL_PATH = os.path.join(BASE_DIR, 'isolation_forest_sup_model.pkl')
-
+MODEL_PATH_SUP = os.path.join(BASE_DIR, 'isolation_forest_sup_model.pkl')
+MODEL_PATH_EMP = os.path.join(BASE_DIR, 'isolation_forest_emp_model.pkl')
 import pandas as pd
 
 pd.set_option("display.max_columns", None)  # Mostrar todas las columnas
 pd.set_option("display.max_rows", None)     # Mostrar todas las filas
 pd.set_option("display.width", 0)           # Autoajuste al ancho de consola
 
+
+#ANOMALIAS SOBRE SUPERVISORES------------------------------------------------------------------------------------
 def create_model_supervisor(path_csv): # le paso el csv para el entreamiento
     data= pd.read_csv(path_csv)
     features = data[['total_requests', 'approved_requests', 'rejected_requests', 'approval_rate', 'rejection_rate']]
@@ -35,16 +37,14 @@ def create_model_supervisor(path_csv): # le paso el csv para el entreamiento
     model.fit(features)
 
     # Guardar el modelo en un archivo, ESTO ES LO CORRECTO
-    joblib.dump(model, MODEL_PATH)
+    joblib.dump(model, MODEL_PATH_SUP)
 
     return model # NO deberia retornarlo, pero por ahora para pruebas lo dejo así
 
 
 def anomalies_supervisors(data): #recibe un dataframe
-    #print("\n ----------------------ANOMALIAS PARA SUPERVISORES")
-
     #Cargo el modelo previamente guardado
-    model = joblib.load(MODEL_PATH)
+    model = joblib.load(MODEL_PATH_SUP)
     #data= pd.read_csv(path_csv)
     features = data[['total_requests', 'approved_requests', 'rejected_requests', 'approval_rate', 'rejection_rate']]
 
@@ -144,7 +144,19 @@ def get_supervisor_anomalies(start_date=None, end_date=None): #FUNCION PRINCIPAL
 
 print(get_supervisor_anomalies())
 
+#ANOMALIAS SOBRE EMPLEADOS(solicitudes de licencias)------------------------------------------------------------------------------------
+def create_model_empleados(path_csv): # le paso el csv para el entreamiento
+    data= pd.read_csv(path_csv)
+    features = data[['total_requests', 'required_days', 'required_days_rate']]
 
+     # Entrenamiento del modelo Isolation Forest
+    model = IsolationForest(n_estimators=100, contamination=0.2, random_state=42)
+    model.fit(features)
+
+    # Guardar el modelo en un archivo, ESTO ES LO CORRECTO
+    joblib.dump(model, MODEL_PATH_EMP)
+
+    return model # NO deberia retornarlo, pero por ahora para pruebas lo dejo así
 
 
 
