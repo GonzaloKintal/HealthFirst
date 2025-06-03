@@ -35,7 +35,7 @@ def create_model_supervisor(path_csv): # le paso el csv para el entreamiento
 
 
 def anomalies_supervisors(data): #recibe un dataframe
-    print("\n ----------------------ANOMALIAS PARA SUPERVISORES")
+    #print("\n ----------------------ANOMALIAS PARA SUPERVISORES")
 
     #Cargo el modelo previamente guardado
     model = joblib.load(MODEL_PATH)
@@ -67,19 +67,22 @@ def create_dataframe_supervisor(start_date=None, end_date=None): # esto para lo 
         rejected_requests=Count('license_id', filter=Q(status__name='rejected'))
     )
 
-    
     df = pd.DataFrame(list(qs))
-    print(df.head())
-    print(df.dtypes)
-    #print(list(qs))
-    df['approval_rate'] = df.apply(
-    lambda row: row['approved_requests'] / row['total_requests'] if row['total_requests'] > 0 else 0, #porcentaje aprobados
-    axis=1
+    #print(df.head())
+    #print(df.dtypes)
+
+    if df.empty:
+        return df
+
+    df['approval_rate'] = 0.0
+    df['rejection_rate'] = 0.0
+
+    df.loc[df['total_requests'] > 0, 'approval_rate'] = (
+        df.loc[df['total_requests'] > 0, 'approved_requests'] / df.loc[df['total_requests'] > 0, 'total_requests']
     )
 
-    df['rejection_rate'] = df.apply(
-        lambda row: row['rejected_requests'] / row['total_requests'] if row['total_requests'] > 0 else 0, #porcentaje rechazados
-        axis=1
+    df.loc[df['total_requests'] > 0, 'rejection_rate'] = (
+        df.loc[df['total_requests'] > 0, 'rejected_requests'] / df.loc[df['total_requests'] > 0, 'total_requests']
     )
     #print(df)
     return df
@@ -113,9 +116,15 @@ def generate_supervisors_csv(path_csv='supervisors_data_1000.csv', n=1000, semil
     return df
 
 def get_supervisor_anomalies(start_date=None, end_date=None): #FUNCION PRINCIPAL QUE SE USARA EN EL FRONT
-    
+    # Atajar posibles errores cuando no hay resultados
+    df = create_dataframe_supervisor(start_date, end_date)
+    if df.empty:
+        # Devolvés un DataFrame vacío con las columnas esperadas para evitar errores
+        cols = ['evaluator_id', 'total_requests', 'approved_requests', 'rejected_requests', 'approval_rate', 'rejection_rate']
+        return pd.DataFrame(columns=cols)
+
     #el cant_filas es para retornar solo esa cantidad de filas, serian los cant_filas mas anomalos
-    dataframe =  anomalies_supervisors(create_dataframe_supervisor(start_date,end_date))
+    dataframe =  anomalies_supervisors(df)
     #top_anomalies = dataframe.sort_values(by='anomaly_score').head(cant_filas).reset_index(drop=True)
 
     #top_anomalies = dataframe[dataframe['is_anomaly'] == 1] \
@@ -124,7 +133,7 @@ def get_supervisor_anomalies(start_date=None, end_date=None): #FUNCION PRINCIPAL
     #                  .reset_index(drop=True)
     return dataframe
 
-print(get_supervisor_anomalies())
+#print(get_supervisor_anomalies())
 
 
 
@@ -176,5 +185,5 @@ def create_dataFrame_empleados():
     df['prom_days_request'] = df['total_days_requested'] / df['num_requests']
 
 
-    print(df)
+    #print(df)
     return df
