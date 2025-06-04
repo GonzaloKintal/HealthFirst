@@ -21,31 +21,20 @@ def assign_risk(edad, cant_cert_enfermedad, cant_cert_accidente, departamento):
     peso_edad = 0.3
     peso_enfermedad = 0.4
     peso_accidente = 0.3
-    
-    riesgo_departamento = {
-        'Producción': 1.2,
-        'Logística': 1.1,
-        'Administración': 1.0,
-        'TI': 1.0,
-        'Ventas': 1.0
-    }
+    peso_departamento=0.5
     
     # Normalizamos los valores
     edad_norm = min(edad / EDAD_REFERENCIA, 1)  
     enfermedad_norm = min(cant_cert_enfermedad / MAX_LIC_ENFERMEDAD, 1) 
     accidente_norm = min(cant_cert_accidente / MAX_LIC_ACCIDENTE, 1)  
     
-    # Factor del departamento
-    factor_dep = riesgo_departamento.get(departamento, 1.0)
-    
     # Calculamos score (0-10)
-    score = (
-        (edad_norm * peso_edad) + 
-        (enfermedad_norm * peso_enfermedad) + 
-        (accidente_norm * peso_accidente)
-    ) * factor_dep * 10
+    score = (edad_norm * peso_edad + 
+        enfermedad_norm * peso_enfermedad + 
+        accidente_norm * peso_accidente+
+        departamento*peso_departamento)*10
     
-    return "Alto Riesgo" if score > 5 else "Bajo Riesgo"
+    return "Alto Riesgo" if score > 8 else "Bajo Riesgo"
 
 
 def generate_dataset(nro_empleados=500, seed=None):
@@ -59,10 +48,7 @@ def generate_dataset(nro_empleados=500, seed=None):
     edad = np.random.randint(18, 71, nro_empleados)
     cant_cert_enfermedad = np.random.randint(0, 4, nro_empleados)  # 0-3
     cant_cert_accidente = np.random.randint(0, 3, nro_empleados)    # 0-2
-    departamento = np.random.choice(
-        ['Producción', 'Logística', 'Administración', 'TI', 'Ventas'], 
-        nro_empleados
-    )
+    departamento = np.random.randint(0,2,nro_empleados)
 
     # Calculamos el riesgo para cada empleado
     riesgo = [
