@@ -84,7 +84,7 @@ def create_dataframe_supervisor(start_date=None, end_date=None): # esto para lo 
 
     # Convertir a DataFrame
     df = pd.DataFrame(list(supervisors.values(
-        'id', 'first_name', 'last_name', 'total_requests', 'approved_requests', 'rejected_requests'
+        'id', 'total_requests', 'approved_requests', 'rejected_requests'
     )))
     df = df.rename(columns={'id': 'evaluator_id'})
 
@@ -297,7 +297,7 @@ def dataframe_pruebas_emp(): # para pruebas
 
     
 #---------------------------------------------------------------------------------------------------------------
-#print(get_supervisor_anomalies())
+print(get_supervisor_anomalies())
 #generate_empleados_csv()
 #create_model_empleados('employees_data_1000.csv')
 #print(anomalies_employees(dataframe_pruebas_emp()))
