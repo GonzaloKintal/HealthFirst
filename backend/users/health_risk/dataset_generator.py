@@ -1,17 +1,16 @@
 import os
 import numpy as np
 import pandas as pd
-import random
 from pathlib import Path
 
-# Obtiene la ruta base del proyecto (donde está manage.py)
+#Obtenemos la ruta base del proyecto (donde esta manage.py)
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Ruta donde se guardará el dataset
+# Ruta donde se va a guardar el dataset
 FILE_PATH = BASE_DIR / 'health_risk'
 
-
 def assign_risk(edad, cant_lic_enfermedad, cant_lic_accidente, departamento):
+    """Asigna nivel de riesgo de saud a un empleado segun el conjunto de factores que influyen en su bienestar"""
     # Consideraciones de riesgo
     MAX_LIC_ENFERMEDAD = 3   
     MAX_LIC_ACCIDENTE = 2    
@@ -38,7 +37,7 @@ def assign_risk(edad, cant_lic_enfermedad, cant_lic_accidente, departamento):
 
 
 def generate_dataset(nro_empleados=500, seed=None):
-    # Configuración de semilla aleatoria
+    """Genera el dataset para entrenar el modelo de Riesgo de salud"""
     if seed is not None:
         np.random.seed(seed)
     else:
@@ -68,7 +67,6 @@ def generate_dataset(nro_empleados=500, seed=None):
         'Riesgo': riesgo
     })
 
-    # Convertimos a valores binarios
     df["Riesgo"] = df["Riesgo"].map({"Alto Riesgo": 1, "Bajo Riesgo": 0})
 
     # Guardamos el archivo
@@ -80,11 +78,8 @@ def generate_dataset(nro_empleados=500, seed=None):
     os.makedirs(FILE_PATH, exist_ok=True)
     df.to_csv(str(full_path), index=False)
     
-
-    print(f"Dataset generado")
+#    print(f"Dataset generado")
     return df
 
 if __name__ == "__main__":
     dataset = generate_dataset()
-"""print("\nPrimeras 5 filas del dataset:")
-    print(dataset.head())"""
