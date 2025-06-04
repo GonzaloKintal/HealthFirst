@@ -1,11 +1,8 @@
 
 
-import { FiFileText } from 'react-icons/fi';
-
 const LicenseTypes = () => {
   return (
     <>
-      <h3 className="text-lg font-medium text-foreground">Tipos de licencia disponibles</h3>
       <p className="mt-1 text-sm text-foreground mb-6">
         Diferentes categorías de licencias y sus características.
       </p>

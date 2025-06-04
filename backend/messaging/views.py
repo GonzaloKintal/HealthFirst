@@ -64,6 +64,29 @@ def remove_telegram_suscription(request,id):
 @api_view(['GET'])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
+def get_telegram_suscription(request, id):
+    try:
+        status = 200
+        try:
+            user = HealthFirstUser.objects.get(id=id)
+        except HealthFirstUser.DoesNotExist:
+            raise Exception("El usuario no existe")
+
+        response_data = {
+            "is_subscribed": user.is_telegram_suscriptor,
+            "telegram_id": user.telegram_id if user.is_telegram_suscriptor else None
+        }
+
+    except Exception as e:
+        status = 500
+        response_data = {"error": str(e)}
+
+    return JsonResponse(response_data, status=status)
+
+
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
 def get_email_stats(request):
     try:
         stats=get_brevo_stats()

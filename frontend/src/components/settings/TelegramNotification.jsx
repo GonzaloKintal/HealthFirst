@@ -1,15 +1,99 @@
-import { useState } from 'react';
-import { FiDownload, FiMessageSquare, FiSend, FiCheckCircle } from 'react-icons/fi';
 
+
+import { useState, useEffect } from 'react';
+import { FiDownload, FiMessageSquare, FiSend, FiCheckCircle, FiBell, FiTrash2 } from 'react-icons/fi';
+import { addTelegramSubscription, removeTelegramSubscription, getTelegramSubscription } from '../../services/userService';
+import useAuth from '../../hooks/useAuth';
+import Confirmation from '../utils/Confirmation';
+import Notification from '../utils/Notification';
 const TelegramNotifications = () => {
+  const { user } = useAuth();
   const [telegramId, setTelegramId] = useState('');
   const [isVerified, setIsVerified] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const [showRegisterConfirmation, setShowRegisterConfirmation] = useState(false);
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  
+  const [notification, setNotification] = useState({
+    show: false,
+    type: '',
+    message: ''
+  });
+
+  // Verificar estado de suscripción al cargar el componente
+  useEffect(() => {
+    const checkSubscription = async () => {
+      try {
+        setIsLoading(true);
+        const status = await getTelegramSubscription(user.id);
+        if (status.isSubscribed) {
+          setIsVerified(true);
+          setTelegramId(status.telegramId || '');
+        }
+      } catch (err) {
+        console.error('Error checking subscription:', err);
+        setError('Error al verificar el estado de suscripción');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (user?.id) {
+      checkSubscription();
+    }
+  }, [user]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Lógica para guardar el ID en el 
-    console.log("Telegram ID registrado:", telegramId);
-    setIsVerified(true);
+    setShowRegisterConfirmation(true);
+  };
+
+  const confirmRegister = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      await addTelegramSubscription(user.id, telegramId);
+      setIsVerified(true);
+      showNotification('success', 'ID de Telegram registrado correctamente');
+    } catch (err) {
+      console.error('Error registering Telegram ID:', err);
+      setError(err.response?.data?.error || 'Error al registrar el ID de Telegram');
+      showNotification('error', 'Error al registrar el ID de Telegram');
+    } finally {
+      setIsLoading(false);
+      setShowRegisterConfirmation(false);
+    }
+  };
+
+  const handleRemoveSubscription = () => {
+    setShowDeleteConfirmation(true);
+  };
+
+   const confirmDelete = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      await removeTelegramSubscription(user.id);
+      setIsVerified(false);
+      setTelegramId('');
+      showNotification('success', 'Suscripción eliminada correctamente');
+    } catch (err) {
+      console.error('Error removing Telegram subscription:', err);
+      setError(err.response?.data?.error || 'Error al eliminar la suscripción');
+      showNotification('error', 'Error al eliminar la suscripción');
+    } finally {
+      setIsLoading(false);
+      setShowDeleteConfirmation(false);
+    }
+  };
+
+  const showNotification = (type, message) => {
+    setNotification({ show: true, type, message });
+    setTimeout(() => {
+      setNotification(prev => ({ ...prev, show: false }));
+    }, 5000);
   };
 
   const steps = [
@@ -75,18 +159,34 @@ const TelegramNotifications = () => {
               type="text"
               value={telegramId}
               onChange={(e) => setTelegramId(e.target.value)}
-              className="w-full max-w-xs px-3 py-2 border border-border rounded-md text-base bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+              className={`w-full max-w-xs px-3 py-2 border rounded-md text-base focus:outline-none focus:ring-2 ${
+                isVerified || isLoading
+                  ? 'bg-gray-200 border-gray-300 text-gray-500 cursor-not-allowed focus:ring-0'
+                  : 'bg-background border-border text-foreground focus:ring-primary'
+              }`}
               placeholder="Ej: 123456789"
               required
+              disabled={isVerified || isLoading}
             />
           </div>
-          <button
-            type="submit"
-            className="px-4 py-2 bg-primary text-white rounded-md text-base"
-            disabled={isVerified}
-          >
-            {isVerified ? 'ID Registrado' : 'Registrar ID'}
-          </button>
+          {isVerified ? (
+            <button
+              type="button"
+              onClick={handleRemoveSubscription}
+              className="px-4 py-2 bg-red-500 text-white rounded-md text-base flex items-center gap-2"
+              disabled={isLoading}
+            >
+              <FiTrash2 /> Eliminar suscripción
+            </button>
+          ) : (
+            <button
+              type="submit"
+              className="px-4 py-2 bg-primary text-white rounded-md text-base"
+              disabled={isVerified || isLoading}
+            >
+              {isLoading ? 'Procesando...' : 'Registrar ID'}
+            </button>
+          )}
         </form>
       )
     },
@@ -122,8 +222,17 @@ const TelegramNotifications = () => {
 
   return (
     <div className="bg-card border border-border rounded-lg p-6">
-      <h3 className="text-lg font-medium text-foreground mb-2">Configurar notificaciones por Telegram</h3>
+      <h3 className="text-lg font-medium text-foreground mb-2">
+        <FiBell className="inline-block mr-2" />
+        Configurar notificaciones por Telegram
+      </h3>
       <p className="text-base text-foreground mb-6">Sigue estos pasos para recibir notificaciones en tu dispositivo</p>
+
+      {error && (
+        <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+          {error}
+        </div>
+      )}
 
       <div className="space-y-6">
         {steps.map((step, index) => (
@@ -136,8 +245,38 @@ const TelegramNotifications = () => {
                 {step.content}
             </div>
         ))}
-
       </div>
+
+      {/* Diálogos de confirmación */}
+      <Confirmation
+        isOpen={showRegisterConfirmation}
+        onClose={() => setShowRegisterConfirmation(false)}
+        onConfirm={confirmRegister}
+        title="Registrar ID de Telegram"
+        message="¿Estás seguro que deseas registrar este ID de Telegram para recibir notificaciones?"
+        confirmText="Registrar"
+        cancelText="Cancelar"
+        type="info"
+      />
+
+      <Confirmation
+        isOpen={showDeleteConfirmation}
+        onClose={() => setShowDeleteConfirmation(false)}
+        onConfirm={confirmDelete}
+        title="Eliminar suscripción"
+        message="¿Estás seguro que deseas dejar de recibir notificaciones por Telegram?"
+        confirmText="Eliminar"
+        cancelText="Cancelar"
+        type="danger"
+      />
+
+      {notification.show && (
+        <Notification 
+          type={notification.type} 
+          message={notification.message} 
+          onClose={() => setNotification(prev => ({ ...prev, show: false }))}
+        />
+      )}
     </div>
   );
 };
