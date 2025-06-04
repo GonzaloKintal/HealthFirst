@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { FiX, FiUpload } from 'react-icons/fi';
-import { updateLicense } from '../../services/licenseService';
+import { addCertificateToLicense } from '../../services/licenseService';
 import Notification from '../utils/Notification';
 
 const UploadCertificateModal = ({ 
@@ -51,7 +51,7 @@ const UploadCertificateModal = ({
         }
       };
 
-      const response = await updateLicense(licenseId, requestData);
+      const response = await addCertificateToLicense(licenseId, requestData);
       
       if (response.success) {
         onUploadSuccess(response.data);

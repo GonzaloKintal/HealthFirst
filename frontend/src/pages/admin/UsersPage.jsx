@@ -134,44 +134,44 @@ const UsersPage = () => {
   };
   
   const confirmDelete = async () => {
-    try {
-      if (userToDelete === currentUserId) {
-        showNotification('error', 'No puedes eliminarte a ti mismo');
-        setShowDeleteConfirmation(false);
-        setUserToDelete(null);
-        return;
-      }
-
-      const previousUsers = [...users];
-      const previousPagination = {...pagination};
-      
-      setUsers(previousUsers.filter(user => user.id !== userToDelete));
-      setPagination(prev => ({
-        ...prev,
-        totalUsers: prev.totalUsers - 1
-      }));
-      
-      await deleteUser(userToDelete);
-      
-      const usersLeftInPage = previousUsers.filter(user => user.id !== userToDelete).length;
-      if (usersLeftInPage === 0 && previousPagination.currentPage > 1) {
-        setPagination(prev => ({
-          ...prev,
-          currentPage: prev.currentPage - 1
-        }));
-      }
-      
-      showNotification('success', 'Usuario eliminado correctamente');
-    } catch (error) {
-      console.error('Error al eliminar usuario:', error);
-      showNotification('error', error.message || 'No se pudo eliminar el usuario');
-      setUsers(previousUsers);
-      setPagination(previousPagination);
-    } finally {
+  const previousUsers = [...users];
+  const previousPagination = {...pagination};
+  
+  try {
+    if (userToDelete === currentUserId) {
+      showNotification('error', 'No puedes eliminarte a ti mismo');
       setShowDeleteConfirmation(false);
       setUserToDelete(null);
+      return;
     }
-  };
+
+    setUsers(previousUsers.filter(user => user.id !== userToDelete));
+    setPagination(prev => ({
+      ...prev,
+      totalUsers: prev.totalUsers - 1
+    }));
+    
+    await deleteUser(userToDelete);
+    
+    const usersLeftInPage = previousUsers.filter(user => user.id !== userToDelete).length;
+    if (usersLeftInPage === 0 && previousPagination.currentPage > 1) {
+      setPagination(prev => ({
+        ...prev,
+        currentPage: prev.currentPage - 1
+      }));
+    }
+    
+    showNotification('success', 'Usuario eliminado correctamente');
+  } catch (error) {
+    console.error('Error al eliminar usuario:', error);
+    setUsers(previousUsers);
+    setPagination(previousPagination);
+    showNotification('error', error.message || 'No se pudo eliminar el usuario');
+  } finally {
+    setShowDeleteConfirmation(false);
+    setUserToDelete(null);
+  }
+};
 
   const showNotification = (type, message) => {
     setNotification({ show: true, type, message });
@@ -245,24 +245,30 @@ const UsersPage = () => {
   return (
     <div className="p-6">
       {/* Encabezado y contador */}
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl text-foreground font-bold flex items-center">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-3 md:gap-0">
+        <h1 className="text-xl sm:text-2xl text-foreground font-bold flex items-center">
           <FiUsers className="mr-2" />
           Gestión de Usuarios
         </h1>
-        <div className="flex items-center space-x-4">
-          <span className="text-sm text-foreground">
+
+        {/* Contenedor derecho - se apila en mobile */}
+        <div className="flex flex-col xs:flex-row md:flex-row items-start md:items-center gap-3 w-full md:w-auto">
+          {/* En mobile: luego el contador */}
+          <span className="text-sm text-foreground order-2 md:order-none">
             Mostrando {users.length} de {pagination.totalUsers} usuarios
           </span>
+
+          {/* En mobile: primero el botón */}
           <Link
             to="/add-user"
-            className="bg-primary text-white px-4 py-2 rounded-md flex items-center cursor-pointer hover:bg-primary-hover transition duration-200"
+            className="bg-primary text-white px-4 py-2 rounded-md flex items-center cursor-pointer hover:bg-primary-hover transition duration-200 order-1 md:order-none"
           >
             <FiPlus className="mr-2" />
             Nuevo Usuario
           </Link>
         </div>
       </div>
+
 
       {/* Mensaje de error */}
       {error && (

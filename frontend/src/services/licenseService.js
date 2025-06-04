@@ -144,6 +144,33 @@ export const evaluateLicense = async (licenseId, status, comment = '') => {
   }
 };
 
+// Agregar un certificado a una licencia
+export const addCertificateToLicense = async (licenseId, base64File) => {
+  try {
+    const response = await api.put(`/licenses/add_certificate/${licenseId}`, base64File, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    return {
+      success: true,
+      data: response.data
+    };
+  } catch (error) {
+    console.error('Error al agregar certificado a la licencia', {
+      message: error.message,
+      response: error.response?.data,
+      config: error.config
+    });
+    
+    return {
+      success: false,
+      error: error.response?.data?.error || 'Error al agregar el certificado a la licencia'
+    };
+  }
+};
+
 // Verificar coherencia de certificado
 export const analyzeCertificate = async (base64File) => {
   try {

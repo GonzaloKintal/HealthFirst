@@ -13,6 +13,7 @@ from rest_framework.decorators import api_view, authentication_classes, permissi
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from licenses.utils.file_utils import *
+from messaging.services.brevo_email import *
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
@@ -45,6 +46,8 @@ def register_user(request):
         
         user.save()
 
+        send_welcome_email(user)
+
     except IntegrityError:
         error_messages.append("El email ya esta registrado.")
 
@@ -52,7 +55,7 @@ def register_user(request):
         error_messages.append(f"Falta el campo: {str(e)}")
 
     except AgeAtEmploymentError as e:
-        error_messages.append(f"Error:{str(e)}")
+        error_messages.append(f"Error: {str(e)}")
         
     except Exception as e:
         error_messages.append(f"Error inesperado: {str(e)}")

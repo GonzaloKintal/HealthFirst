@@ -8,7 +8,6 @@ const AnalystDashboard = () => {
       <p className="mt-2 text-foreground">Reportes y datos estadísticos</p>
       
       <div className="mt-6">
-        {/* Contenido para analista se agregará aquí */}
         <Routes>
           <Route index element={<AnalystDashboardIFrame />} />
         </Routes>

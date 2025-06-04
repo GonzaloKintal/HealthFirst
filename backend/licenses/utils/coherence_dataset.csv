@@ -1,0 +1,688 @@
+text,clase
+""" Empresa:  . Legajo:  . Tipo de Accidente: Caída de altura  desde escalera de carga.  Fractura  Tratamiento: Inmovilización con yeso y analgesia. Se deriva al Hospital  para evaluación quirúrgica. Incapacidad Laboral . Dr  -  ART Cubre: Sí (N° Póliza .  Notificado a ART""",Accidente_trabajo
+""" Empresa:  . Legajo:  . Tipo de Accidente: Caída de altura  desde escalera de carga.  Fractura  Tratamiento: Inmovilización con yeso y analgesia. Se deriva al Hospital  para evaluación quirúrgica. Incapacidad Laboral . Dr  -  ART Cubre: Sí (N° Póliza .  Notificado a ART""",Accidente_trabajo
+""" Empresa:  . Legajo:  . Tipo de Accidente: Caída de altura  desde escalera de carga.  Fractura  Tratamiento: Inmovilización con yeso y analgesia. Se deriva al Hospital  para evaluación quirúrgica. Incapacidad Laboral . Dr  -  ART Cubre: Sí (N° Póliza .  Notificado a ART""",Accidente_trabajo
+"""Hospital   Paciente:  .  Empresa: .  Legajo . Accidente: Quemadura térmica grado II en brazo derecho por contacto con aceite caliente  . Control Evolutivo: Persisten molestias y necesidad de curaciones diarias. Incapacidad  . Dra. . ART: (N° Póliza ) """,Accidente_trabajo
+"""Hospital   Paciente:  .  Empresa: .  Legajo . Accidente: Quemadura térmica grado II en brazo derecho por contacto con aceite caliente  . Control Evolutivo: Persisten molestias y necesidad de curaciones diarias. Incapacidad  . Dra. . ART: (N° Póliza ) """,Accidente_trabajo
+"""Hospital   Paciente:  .  Empresa: .  Legajo . Accidente: Quemadura térmica grado II en brazo derecho por contacto con aceite caliente  . Control Evolutivo: Persisten molestias y necesidad de curaciones diarias. Incapacidad  . Dra. . ART: (N° Póliza ) """,Accidente_trabajo
+"""Centro Médico . ART . Edad:  . Empresa .  Legajo: 5678 Accidente: Lesión lumbar por esfuerzo repetitivo . Alta Médica: con secuelas (15% incapacidad permanente parcial). Indicaciones:  Reincorporación Laboral:  . Dr.  . Junta Médica: """,Accidente_trabajo
+"""Centro Médico . ART . Edad:  . Empresa .  Legajo: 5678 Accidente: Lesión lumbar por esfuerzo repetitivo . Alta Médica: con secuelas (15% incapacidad permanente parcial). Indicaciones:  Reincorporación Laboral:  . Dr.  . Junta Médica: """,Accidente_trabajo
+"""Centro Médico . ART . Edad:  . Empresa .  Legajo: 5678 Accidente: Lesión lumbar por esfuerzo repetitivo . Alta Médica: con secuelas (15% incapacidad permanente parcial). Indicaciones:  Reincorporación Laboral:  . Dr.  . Junta Médica: """,Accidente_trabajo
+"""Clínica . Accidente Laboral  . Paciente: .  Empresa:  . Legajo: 3456 . Tipo de Accidente: Caída de andamio a 2 metros de altura en obra . Diagnóstico: Fractura . Dr. """,Accidente_trabajo
+"""Clínica . Accidente Laboral  . Paciente: .  Empresa:  . Legajo: 3456 . Tipo de Accidente: Caída de andamio a 2 metros de altura en obra . Diagnóstico: Fractura . Dr. """,Accidente_trabajo
+"""Clínica . Accidente Laboral  . Paciente: .  Empresa:  . Legajo: 3456 . Tipo de Accidente: Caída de andamio a 2 metros de altura en obra . Diagnóstico: Fractura . Dr. """,Accidente_trabajo
+"""Hospital . Enfermedad Profesional .  Empresa: . Tipo: Hipoacusia bilateral por exposición a ruido . Pérdida auditiva . Estudios: Audiometría -  ART:  . Póliza .  Dra. """,Accidente_trabajo
+"""Hospital . Enfermedad Profesional .  Empresa: . Tipo: Hipoacusia bilateral por exposición a ruido . Pérdida auditiva . Estudios: Audiometría -  ART:  . Póliza .  Dra. """,Accidente_trabajo
+"""Hospital . Enfermedad Profesional .  Empresa: . Tipo: Hipoacusia bilateral por exposición a ruido . Pérdida auditiva . Estudios: Audiometría -  ART:  . Póliza .  Dra. """,Accidente_trabajo
+"""Sanatorio Servicio de Ortopedia y Traumatología  Empresa:  Legajo:  Lesión en pie izquierdo por caída de carga pesada . Fractura metatarsiana. Inmovilización con férula rígida y analgesia. Derivado a evaluación especializada en Hospital  ART:  Póliza:  ART:  Dr.""",Accidente_trabajo
+"""Sanatorio Servicio de Ortopedia y Traumatología  Empresa:  Legajo:  Lesión en pie izquierdo por caída de carga pesada . Fractura metatarsiana. Inmovilización con férula rígida y analgesia. Derivado a evaluación especializada en Hospital  ART:  Póliza:  ART:  Dr.""",Accidente_trabajo
+"""Sanatorio Servicio de Ortopedia y Traumatología  Empresa:  Legajo:  Lesión en pie izquierdo por caída de carga pesada . Fractura metatarsiana. Inmovilización con férula rígida y analgesia. Derivado a evaluación especializada en Hospital  ART:  Póliza:  ART:  Dr.""",Accidente_trabajo
+"""Hospital . Departamento de Cirugía . Paciente . 39 años . Corte profundo en mano derecha con máquina de empaque.  Laceración de tendón extensor Tratamiento: Sutura quirúrgica, curaciones y antibióticos. Incapacidad Laboral .   ART  . Póliza . Notificación ART:  Dr. Julián Pereyra.""",Accidente_trabajo
+"""Hospital . Departamento de Cirugía . Paciente . 39 años . Corte profundo en mano derecha con máquina de empaque.  Laceración de tendón extensor Tratamiento: Sutura quirúrgica, curaciones y antibióticos. Incapacidad Laboral .   ART  . Póliza . Notificación ART:  Dr. Julián Pereyra.""",Accidente_trabajo
+"""Hospital . Departamento de Cirugía . Paciente . 39 años . Corte profundo en mano derecha con máquina de empaque.  Laceración de tendón extensor Tratamiento: Sutura quirúrgica, curaciones y antibióticos. Incapacidad Laboral .   ART  . Póliza . Notificación ART:  Dr. Julián Pereyra.""",Accidente_trabajo
+"""Clínica  Guardia  Paciente: Edad:  Empresa:. Legajo: 3456 Tipo de Accidente: Golpe en la cabeza por caída de objeto. Diagnóstico: Contusión craneal sin pérdida de conocimiento . Tomografía computada sin hallazgos.Analgesia  reposo .  ART: Póliza: Dra.""",Accidente_trabajo
+"""Clínica  Guardia  Paciente: Edad:  Empresa:. Legajo: 3456 Tipo de Accidente: Golpe en la cabeza por caída de objeto. Diagnóstico: Contusión craneal sin pérdida de conocimiento . Tomografía computada sin hallazgos.Analgesia  reposo .  ART: Póliza: Dra.""",Accidente_trabajo
+"""Clínica  Guardia  Paciente: Edad:  Empresa:. Legajo: 3456 Tipo de Accidente: Golpe en la cabeza por caída de objeto. Diagnóstico: Contusión craneal sin pérdida de conocimiento . Tomografía computada sin hallazgos.Analgesia  reposo .  ART: Póliza: Dra.""",Accidente_trabajo
+"""Centro Médico. ART. Edad: 35 años Empresa: - Legajo: 9123 Accidente: Lesión cervical por postura prolongada en tareas administrativas. Alta Médica: Con secuelas (10% de incapacidad permanente parcial). Indicaciones: Reincorporación laboral con adaptación ergonómica. Dr.: - Junta Médica: Pendiente.""",Accidente_trabajo
+"""Centro Médico. ART. Edad: 35 años Empresa: - Legajo: 9123 Accidente: Lesión cervical por postura prolongada en tareas administrativas. Alta Médica: Con secuelas (10% de incapacidad permanente parcial). Indicaciones: Reincorporación laboral con adaptación ergonómica. Dr.: - Junta Médica: Pendiente.""",Accidente_trabajo
+"""Centro Médico. ART. Edad: 35 años Empresa: - Legajo: 9123 Accidente: Lesión cervical por postura prolongada en tareas administrativas. Alta Médica: Con secuelas (10% de incapacidad permanente parcial). Indicaciones: Reincorporación laboral con adaptación ergonómica. Dr.: - Junta Médica: Pendiente.""",Accidente_trabajo
+"""Sanatorio Servicio de Ortopedia y Traumatología Empresa: - Legajo: - Lesión: Desgarro muscular en pierna derecha por caída de material pesado. Tratamiento: Reposo, fisioterapia, y medicación antiinflamatoria. Derivado a evaluación especializada en Hospital. ART: - Póliza: - Dr.: -",Accidente_trabajo
+"""Sanatorio Servicio de Ortopedia y Traumatología Empresa: - Legajo: - Lesión: Desgarro muscular en pierna derecha por caída de material pesado. Tratamiento: Reposo, fisioterapia, y medicación antiinflamatoria. Derivado a evaluación especializada en Hospital. ART: - Póliza: - Dr.: -",Accidente_trabajo
+"""Sanatorio Servicio de Ortopedia y Traumatología Empresa: - Legajo: - Lesión: Desgarro muscular en pierna derecha por caída de material pesado. Tratamiento: Reposo, fisioterapia, y medicación antiinflamatoria. Derivado a evaluación especializada en Hospital. ART: - Póliza: - Dr.: -",Accidente_trabajo
+"""Clínica Guardia Paciente:  Empresa: - Tipo de Accidente: Golpe en la pierna izquierda por maquinaria. Diagnóstico: Contusión profunda sin fractura. Tratamiento: Ultrasonido terapéutico, reposo relativo y analgesia. ART: - Póliza: - Dra.: ",Accidente_trabajo
+"""Clínica Guardia Paciente:  Empresa: - Tipo de Accidente: Golpe en la pierna izquierda por maquinaria. Diagnóstico: Contusión profunda sin fractura. Tratamiento: Ultrasonido terapéutico, reposo relativo y analgesia. ART: - Póliza: - Dra.: ",Accidente_trabajo
+"""Clínica Guardia Paciente:  Empresa: - Tipo de Accidente: Golpe en la pierna izquierda por maquinaria. Diagnóstico: Contusión profunda sin fractura. Tratamiento: Ultrasonido terapéutico, reposo relativo y analgesia. ART: - Póliza: - Dra.: ",Accidente_trabajo
+"""Hospital Paciente: Edad:  Empresa: - Legajo: - Accidente: Quemadura térmica grado I en mano derecha por contacto con vapor caliente. Control Evolutivo: Mejoría parcial con necesidad de pomadas tópicas y control médico semanal. Incapacidad: Temporal. Dra.: - ART: (N° Póliza -).",Accidente_trabajo
+"""Hospital Paciente: Edad:  Empresa: - Legajo: - Accidente: Quemadura térmica grado I en mano derecha por contacto con vapor caliente. Control Evolutivo: Mejoría parcial con necesidad de pomadas tópicas y control médico semanal. Incapacidad: Temporal. Dra.: - ART: (N° Póliza -).",Accidente_trabajo
+"""Hospital Paciente: Edad:  Empresa: - Legajo: - Accidente: Quemadura térmica grado I en mano derecha por contacto con vapor caliente. Control Evolutivo: Mejoría parcial con necesidad de pomadas tópicas y control médico semanal. Incapacidad: Temporal. Dra.: - ART: (N° Póliza -).",Accidente_trabajo
+"""ART/EA: - Divergencia en la Determinación de la Incapacidad - Tipo de AT/EP: Enfermedad Profesional - Tareas Habituales del Damnificado: Empleado de depósito - Suspensión de Tareas: - Descripción de la Contingencia: Refiere que, sin causa aparente, comenzó a presentar episodios de mareos, visión borrosa y fatiga extrema durante su jornada laboral. Estos síntomas se intensificaron progresivamente, afectando su desempeño en las tareas habituales. Fue derivado a su ART para evaluación y tratamiento. Estudios y Tratamientos Recibidos: Se realizaron análisis de laboratorio que detectaron niveles elevados de glucosa en sangre, diagnosticándose diabetes tipo 2 de reciente aparición. Indicaron tratamiento médico con dieta específica, actividad física moderada y medicación antidiabética. Se realizaron controles periódicos y recomendaciones para un manejo adecuado de la enfermedad en el ámbito laboral, permitiendo su reincorporación con adaptaciones a su rutina.",Accidente_trabajo
+"""ART/EA: - Divergencia en la Determinación de la Incapacidad - Tipo de AT/EP: Enfermedad Profesional - Tareas Habituales del Damnificado: Empleado de depósito - Suspensión de Tareas: - Descripción de la Contingencia: Refiere que, sin causa aparente, comenzó a presentar episodios de mareos, visión borrosa y fatiga extrema durante su jornada laboral. Estos síntomas se intensificaron progresivamente, afectando su desempeño en las tareas habituales. Fue derivado a su ART para evaluación y tratamiento. Estudios y Tratamientos Recibidos: Se realizaron análisis de laboratorio que detectaron niveles elevados de glucosa en sangre, diagnosticándose diabetes tipo 2 de reciente aparición. Indicaron tratamiento médico con dieta específica, actividad física moderada y medicación antidiabética. Se realizaron controles periódicos y recomendaciones para un manejo adecuado de la enfermedad en el ámbito laboral, permitiendo su reincorporación con adaptaciones a su rutina.",Accidente_trabajo
+"""ART/EA: - Divergencia en la Determinación de la Incapacidad - Tipo de AT/EP: Enfermedad Profesional - Tareas Habituales del Damnificado: Empleado de depósito - Suspensión de Tareas: - Descripción de la Contingencia: Refiere que, sin causa aparente, comenzó a presentar episodios de mareos, visión borrosa y fatiga extrema durante su jornada laboral. Estos síntomas se intensificaron progresivamente, afectando su desempeño en las tareas habituales. Fue derivado a su ART para evaluación y tratamiento. Estudios y Tratamientos Recibidos: Se realizaron análisis de laboratorio que detectaron niveles elevados de glucosa en sangre, diagnosticándose diabetes tipo 2 de reciente aparición. Indicaron tratamiento médico con dieta específica, actividad física moderada y medicación antidiabética. Se realizaron controles periódicos y recomendaciones para un manejo adecuado de la enfermedad en el ámbito laboral, permitiendo su reincorporación con adaptaciones a su rutina.",Accidente_trabajo
+"""Damnificado: ART/EA: - Divergencia en la Determinación de la Incapacidad - Tipo de AT/EP: Enfermedad Profesional - Tareas Habituales del Damnificado: Operador de línea de producción - Suspensión de Tareas: - Descripción de la Contingencia: Refiere que, tras meses de trabajo continuo en una línea de ensamblaje con movimientos repetitivos, desarrolló dolor persistente en la muñeca derecha. Fue derivado a su ART para diagnóstico y tratamiento. Estudios y Tratamientos Recibidos: Se realizaron estudios de imagen que diagnosticaron tendinitis por sobreuso. Indicaron reposo relativo, fisioterapia, uso de férula durante actividades laborales y medicación antiinflamatoria. Se le asignaron tareas administrativas temporales hasta su recuperación total. """,Accidente_trabajo
+"""Damnificado: ART/EA: - Divergencia en la Determinación de la Incapacidad - Tipo de AT/EP: Enfermedad Profesional - Tareas Habituales del Damnificado: Operador de línea de producción - Suspensión de Tareas: - Descripción de la Contingencia: Refiere que, tras meses de trabajo continuo en una línea de ensamblaje con movimientos repetitivos, desarrolló dolor persistente en la muñeca derecha. Fue derivado a su ART para diagnóstico y tratamiento. Estudios y Tratamientos Recibidos: Se realizaron estudios de imagen que diagnosticaron tendinitis por sobreuso. Indicaron reposo relativo, fisioterapia, uso de férula durante actividades laborales y medicación antiinflamatoria. Se le asignaron tareas administrativas temporales hasta su recuperación total. """,Accidente_trabajo
+"""Damnificado: ART/EA: - Divergencia en la Determinación de la Incapacidad - Tipo de AT/EP: Enfermedad Profesional - Tareas Habituales del Damnificado: Operador de línea de producción - Suspensión de Tareas: - Descripción de la Contingencia: Refiere que, tras meses de trabajo continuo en una línea de ensamblaje con movimientos repetitivos, desarrolló dolor persistente en la muñeca derecha. Fue derivado a su ART para diagnóstico y tratamiento. Estudios y Tratamientos Recibidos: Se realizaron estudios de imagen que diagnosticaron tendinitis por sobreuso. Indicaron reposo relativo, fisioterapia, uso de férula durante actividades laborales y medicación antiinflamatoria. Se le asignaron tareas administrativas temporales hasta su recuperación total. """,Accidente_trabajo
+"""Damnificado: ART/EA: - Divergencia en la Determinación de la Incapacidad - Tipo de AT/EP: Accidente Laboral - Tareas Habituales del Damnificado: Empleado administrativo - Suspensión de Tareas: - Descripción de la Contingencia: Mientras organizaba archivos en un estante elevado, un folder metálico cayó desde altura, impactando en su rostro y provocando una herida cortante en la ceja izquierda. Fue derivado a su ART para evaluación y atención. Estudios y Tratamientos Recibidos: Se realizaron curaciones y sutura de la herida en la ceja izquierda. Indicaron medicación analgésica y controles periódicos hasta el cierre completo de la herida. Retornó a su puesto de trabajo sin limitaciones al recibir el alta médica.",Accidente_trabajo
+"""Damnificado: ART/EA: - Divergencia en la Determinación de la Incapacidad - Tipo de AT/EP: Accidente Laboral - Tareas Habituales del Damnificado: Empleado administrativo - Suspensión de Tareas: - Descripción de la Contingencia: Mientras organizaba archivos en un estante elevado, un folder metálico cayó desde altura, impactando en su rostro y provocando una herida cortante en la ceja izquierda. Fue derivado a su ART para evaluación y atención. Estudios y Tratamientos Recibidos: Se realizaron curaciones y sutura de la herida en la ceja izquierda. Indicaron medicación analgésica y controles periódicos hasta el cierre completo de la herida. Retornó a su puesto de trabajo sin limitaciones al recibir el alta médica.",Accidente_trabajo
+"""Damnificado: ART/EA: - Divergencia en la Determinación de la Incapacidad - Tipo de AT/EP: Accidente Laboral - Tareas Habituales del Damnificado: Empleado administrativo - Suspensión de Tareas: - Descripción de la Contingencia: Mientras organizaba archivos en un estante elevado, un folder metálico cayó desde altura, impactando en su rostro y provocando una herida cortante en la ceja izquierda. Fue derivado a su ART para evaluación y atención. Estudios y Tratamientos Recibidos: Se realizaron curaciones y sutura de la herida en la ceja izquierda. Indicaron medicación analgésica y controles periódicos hasta el cierre completo de la herida. Retornó a su puesto de trabajo sin limitaciones al recibir el alta médica.",Accidente_trabajo
+"""Damnificado: ART/EA: - Divergencia en la Determinación de la Incapacidad - Tipo de AT/EP: Enfermedad Profesional - Tareas Habituales del Damnificado: Técnico en mantenimiento - Suspensión de Tareas: - Descripción de la Contingencia: Refiere que, al manipular herramientas en un taller, sufrió una exposición prolongada a vibraciones intensas, desarrollando entumecimiento y pérdida de fuerza en ambas manos. Fue derivado a su ART para evaluación y tratamiento. Estudios y Tratamientos Recibidos: Se realizaron estudios de electromiografía que confirmaron neuropatía periférica por vibración. Indicaron fisioterapia, medicación antiinflamatoria, y adaptaciones ergonómicas en su puesto de trabajo. Se realizaron controles periódicos hasta el alta médica con recomendaciones para evitar actividades que agraven la condición. """,Accidente_trabajo
+"""Damnificado: ART/EA: - Divergencia en la Determinación de la Incapacidad - Tipo de AT/EP: Enfermedad Profesional - Tareas Habituales del Damnificado: Técnico en mantenimiento - Suspensión de Tareas: - Descripción de la Contingencia: Refiere que, al manipular herramientas en un taller, sufrió una exposición prolongada a vibraciones intensas, desarrollando entumecimiento y pérdida de fuerza en ambas manos. Fue derivado a su ART para evaluación y tratamiento. Estudios y Tratamientos Recibidos: Se realizaron estudios de electromiografía que confirmaron neuropatía periférica por vibración. Indicaron fisioterapia, medicación antiinflamatoria, y adaptaciones ergonómicas en su puesto de trabajo. Se realizaron controles periódicos hasta el alta médica con recomendaciones para evitar actividades que agraven la condición. """,Accidente_trabajo
+"""Damnificado: ART/EA: - Divergencia en la Determinación de la Incapacidad - Tipo de AT/EP: Enfermedad Profesional - Tareas Habituales del Damnificado: Técnico en mantenimiento - Suspensión de Tareas: - Descripción de la Contingencia: Refiere que, al manipular herramientas en un taller, sufrió una exposición prolongada a vibraciones intensas, desarrollando entumecimiento y pérdida de fuerza en ambas manos. Fue derivado a su ART para evaluación y tratamiento. Estudios y Tratamientos Recibidos: Se realizaron estudios de electromiografía que confirmaron neuropatía periférica por vibración. Indicaron fisioterapia, medicación antiinflamatoria, y adaptaciones ergonómicas en su puesto de trabajo. Se realizaron controles periódicos hasta el alta médica con recomendaciones para evitar actividades que agraven la condición. """,Accidente_trabajo
+"""Hospital Británico de Buenos Aires Fecha: 05/09/2024 Paciente: Laura Estefanía Pérez DNI 29.678.901 Edad: 32 años Empresa: Farmacéutica del Sur Legajo: 5678 Tipo de Accidente: Resbalón en pasillo mojado (ambiente laboral). Diagnóstico: Esguince de tobillo izquierdo (CIE-10: S93.4). Tratamiento: Vendaje funcional y sesiones de kinesiología. Incapacidad Laboral: 15 días. ART: Galeno ART N° Póliza: 67890123 Notificación ART: 05/09/2024 a las 14:00 hs. Dr. Ricardo Fernández.""",Accidente_trabajo
+"""Hospital Británico de Buenos Aires Fecha: 05/09/2024 Paciente: Laura Estefanía Pérez DNI 29.678.901 Edad: 32 años Empresa: Farmacéutica del Sur Legajo: 5678 Tipo de Accidente: Resbalón en pasillo mojado (ambiente laboral). Diagnóstico: Esguince de tobillo izquierdo (CIE-10: S93.4). Tratamiento: Vendaje funcional y sesiones de kinesiología. Incapacidad Laboral: 15 días. ART: Galeno ART N° Póliza: 67890123 Notificación ART: 05/09/2024 a las 14:00 hs. Dr. Ricardo Fernández.""",Accidente_trabajo
+"""Hospital Británico de Buenos Aires Fecha: 05/09/2024 Paciente: Laura Estefanía Pérez DNI 29.678.901 Edad: 32 años Empresa: Farmacéutica del Sur Legajo: 5678 Tipo de Accidente: Resbalón en pasillo mojado (ambiente laboral). Diagnóstico: Esguince de tobillo izquierdo (CIE-10: S93.4). Tratamiento: Vendaje funcional y sesiones de kinesiología. Incapacidad Laboral: 15 días. ART: Galeno ART N° Póliza: 67890123 Notificación ART: 05/09/2024 a las 14:00 hs. Dr. Ricardo Fernández.""",Accidente_trabajo
+""" Damnificado:  ART/EA:  -  Divergencia en la Determinacion de la Incapacidad - Tipo de AT/EP: Accidente Laboral Accidente -  Tareas Habituales del Damnificado: operario - Suspension Tareas:  - Descripcion de la contingencia: Refiere que al trabajar con una maquina una paleta le aprisiona el dedo mayor de la mano izquierda sufriendo traumatismo del mismo  con desprendimiento ungueal fue derivado a su ART  - Estudios y Tratamientos recibidos: Realizaron curaciones y toilette del tercer dedo de mano izquierda con  desprendimiento ungueal. Indicaaron medicacion antibiotica y controles hasta el alta medica con retorno a su trabajo. No realizo nuevas consultas medicas.""",Accidente_trabajo
+""" Damnificado:  ART/EA:  -  Divergencia en la Determinacion de la Incapacidad - Tipo de AT/EP: Accidente Laboral Accidente -  Tareas Habituales del Damnificado: operario - Suspension Tareas:  - Descripcion de la contingencia: Refiere que al trabajar con una maquina una paleta le aprisiona el dedo mayor de la mano izquierda sufriendo traumatismo del mismo  con desprendimiento ungueal fue derivado a su ART  - Estudios y Tratamientos recibidos: Realizaron curaciones y toilette del tercer dedo de mano izquierda con  desprendimiento ungueal. Indicaaron medicacion antibiotica y controles hasta el alta medica con retorno a su trabajo. No realizo nuevas consultas medicas.""",Accidente_trabajo
+""" Damnificado:  ART/EA:  -  Divergencia en la Determinacion de la Incapacidad - Tipo de AT/EP: Accidente Laboral Accidente -  Tareas Habituales del Damnificado: operario - Suspension Tareas:  - Descripcion de la contingencia: Refiere que al trabajar con una maquina una paleta le aprisiona el dedo mayor de la mano izquierda sufriendo traumatismo del mismo  con desprendimiento ungueal fue derivado a su ART  - Estudios y Tratamientos recibidos: Realizaron curaciones y toilette del tercer dedo de mano izquierda con  desprendimiento ungueal. Indicaaron medicacion antibiotica y controles hasta el alta medica con retorno a su trabajo. No realizo nuevas consultas medicas.""",Accidente_trabajo
+""" Enfermedad profesional - accidente de trabajo - empresa - obra social - puesto de trabajo en el momento del accidente o deteccion de la enfermedad profesional - Descripcion del accidente y sus consecuencias : MANIFIESTA HABERSE DOBLADO EL TOBILLO DERECHO, DESCENDIENDO POR LA ESCALERA - Codigo de lesión - Accidente de tránsito - Diagnóstico - Información sobre el siniestro - """,Accidente_trabajo
+""" Enfermedad profesional - accidente de trabajo - empresa - obra social - puesto de trabajo en el momento del accidente o deteccion de la enfermedad profesional - Descripcion del accidente y sus consecuencias : MANIFIESTA HABERSE DOBLADO EL TOBILLO DERECHO, DESCENDIENDO POR LA ESCALERA - Codigo de lesión - Accidente de tránsito - Diagnóstico - Información sobre el siniestro - """,Accidente_trabajo
+""" Enfermedad profesional - accidente de trabajo - empresa - obra social - puesto de trabajo en el momento del accidente o deteccion de la enfermedad profesional - Descripcion del accidente y sus consecuencias : MANIFIESTA HABERSE DOBLADO EL TOBILLO DERECHO, DESCENDIENDO POR LA ESCALERA - Codigo de lesión - Accidente de tránsito - Diagnóstico - Información sobre el siniestro - """,Accidente_trabajo
+"""Sanatorio  Servicio de Emergencias Paciente:  Empresa: Accidente: Hernia lumbar aguda por esfuerzo físico al levantar carga pesada. Diagnóstico: Hernia de disco . Tratamiento: Reposo, analgesia y fisioterapia  . ART: N° Póliza:  Dr.""",Accidente_trabajo
+"""Sanatorio  Servicio de Emergencias Paciente:  Empresa: Accidente: Hernia lumbar aguda por esfuerzo físico al levantar carga pesada. Diagnóstico: Hernia de disco . Tratamiento: Reposo, analgesia y fisioterapia  . ART: N° Póliza:  Dr.""",Accidente_trabajo
+"""Sanatorio  Servicio de Emergencias Paciente:  Empresa: Accidente: Hernia lumbar aguda por esfuerzo físico al levantar carga pesada. Diagnóstico: Hernia de disco . Tratamiento: Reposo, analgesia y fisioterapia  . ART: N° Póliza:  Dr.""",Accidente_trabajo
+"""Hospital de Hemoterapia  realizó una donación voluntaria de sangre en nuestra institución Dra.""",Donacion_sangre
+"""Hospital de Hemoterapia  realizó una donación voluntaria de sangre en nuestra institución Dra.""",Donacion_sangre
+"""Hospital de Hemoterapia  realizó una donación voluntaria de sangre en nuestra institución Dra.""",Donacion_sangre
+"""Centro de Donación de Sangre ha realizado una donación de sangre en nuestra unidad """,Donacion_sangre
+"""Centro de Donación de Sangre ha realizado una donación de sangre en nuestra unidad """,Donacion_sangre
+"""Centro de Donación de Sangre ha realizado una donación de sangre en nuestra unidad """,Donacion_sangre
+"""Banco de Sangre ha efectuado una donación de sangre en nuestra institución Dra. """,Donacion_sangre
+"""Banco de Sangre ha efectuado una donación de sangre en nuestra institución Dra. """,Donacion_sangre
+"""Banco de Sangre ha efectuado una donación de sangre en nuestra institución Dra. """,Donacion_sangre
+"Instituto de Hemoterapia  donación de sangre Dr. """,Donacion_sangre
+"Instituto de Hemoterapia  donación de sangre Dr. """,Donacion_sangre
+"Instituto de Hemoterapia  donación de sangre Dr. """,Donacion_sangre
+"""Hospital de Pediatria   concurrio a donar sangre en el dia de la fecha""",Donacion_sangre
+"""Hospital de Pediatria   concurrio a donar sangre en el dia de la fecha""",Donacion_sangre
+"""Hospital de Pediatria   concurrio a donar sangre en el dia de la fecha""",Donacion_sangre
+"""Instituo de Hemoterapia  - Certificado de donacion de sangre - Donacion n°3564 , donante:  - Repector: """,Donacion_sangre
+"""Instituo de Hemoterapia  - Certificado de donacion de sangre - Donacion n°3564 , donante:  - Repector: """,Donacion_sangre
+"""Instituo de Hemoterapia  - Certificado de donacion de sangre - Donacion n°3564 , donante:  - Repector: """,Donacion_sangre
+"""Hospital Central de Hemoterapiarealizó una donación voluntaria de sangre Dra.""",Donacion_sangre
+"""Hospital Central de Hemoterapiarealizó una donación voluntaria de sangre Dra.""",Donacion_sangre
+"""Hospital Central de Hemoterapiarealizó una donación voluntaria de sangre Dra.""",Donacion_sangre
+"""Clínica de Donación Solidaria efectuó una donación de sangre """,Donacion_sangre
+"""Clínica de Donación Solidaria efectuó una donación de sangre """,Donacion_sangre
+"""Clínica de Donación Solidaria efectuó una donación de sangre """,Donacion_sangre
+"""Centro de Hemoterapia concurrió a donar sangre en nuestra unidad Dra. """,Donacion_sangre
+"""Centro de Hemoterapia concurrió a donar sangre en nuestra unidad Dra. """,Donacion_sangre
+"""Centro de Hemoterapia concurrió a donar sangre en nuestra unidad Dra. """,Donacion_sangre
+"""Instituto Nacional de Donación donación de sangre en este instituto  """,Donacion_sangre
+"""Instituto Nacional de Donación donación de sangre en este instituto  """,Donacion_sangre
+"""Instituto Nacional de Donación donación de sangre en este instituto  """,Donacion_sangre
+"""Centro Regional de Hemoterapia  -  Donación de Sangre Donación  Donante: - Receptor: - """,Donacion_sangre
+"""Centro Regional de Hemoterapia  -  Donación de Sangre Donación  Donante: - Receptor: - """,Donacion_sangre
+"""Centro Regional de Hemoterapia  -  Donación de Sangre Donación  Donante: - Receptor: - """,Donacion_sangre
+"""Cruz Roja  -  Concurrió a donar sangre en nuestra unidad móvil. Dra. - """,Donacion_sangre
+"""Cruz Roja  -  Concurrió a donar sangre en nuestra unidad móvil. Dra. - """,Donacion_sangre
+"""Cruz Roja  -  Concurrió a donar sangre en nuestra unidad móvil. Dra. - """,Donacion_sangre
+"""Ministerio de Salud de la Nación Donación Voluntaria de Sangre Donante: - """,Donacion_sangre
+"""Ministerio de Salud de la Nación Donación Voluntaria de Sangre Donante: - """,Donacion_sangre
+"""Ministerio de Salud de la Nación Donación Voluntaria de Sangre Donante: - """,Donacion_sangre
+"""Fundación Hematológica - Donación de Sangre Donación - Donante: - Receptor: - """,Donacion_sangre
+"""Fundación Hematológica - Donación de Sangre Donación - Donante: - Receptor: - """,Donacion_sangre
+"""Fundación Hematológica - Donación de Sangre Donación - Donante: - Receptor: - """,Donacion_sangre
+"""Sanatorio - Banco de Sangre  Donación de Sangre Donante: - Receptor: - """,Donacion_sangre
+"""Sanatorio - Banco de Sangre  Donación de Sangre Donante: - Receptor: - """,Donacion_sangre
+"""Sanatorio - Banco de Sangre  Donación de Sangre Donante: - Receptor: - """,Donacion_sangre
+"""Centro de Donación -  Concurrió a donar sangre en el día de la fecha. Donante: - """,Donacion_sangre
+"""Centro de Donación -  Concurrió a donar sangre en el día de la fecha. Donante: - """,Donacion_sangre
+"""Centro de Donación -  Concurrió a donar sangre en el día de la fecha. Donante: - """,Donacion_sangre
+""" Instituto de Hemoterapia - Donación de Sangre Donación Donante: - Receptor: - """,Donacion_sangre
+""" Instituto de Hemoterapia - Donación de Sangre Donación Donante: - Receptor: - """,Donacion_sangre
+""" Instituto de Hemoterapia - Donación de Sangre Donación Donante: - Receptor: - """,Donacion_sangre
+"""Hospital Garrahan - Servicio de Hemoterapia - Donación de Sangre Donante: - Receptor: - """,Donacion_sangre
+"""Hospital Garrahan - Servicio de Hemoterapia - Donación de Sangre Donante: - Receptor: - """,Donacion_sangre
+"""Hospital Garrahan - Servicio de Hemoterapia - Donación de Sangre Donante: - Receptor: - """,Donacion_sangre
+""" Fundacion Hemocentro El paciente ha presentado 1 (un) donante de sangre""",Donacion_sangre
+""" Fundacion Hemocentro El paciente ha presentado 1 (un) donante de sangre""",Donacion_sangre
+""" Fundacion Hemocentro El paciente ha presentado 1 (un) donante de sangre""",Donacion_sangre
+""" Fundacion Hemoprovincia  paciente ha presentado un donante de sangre""",Donacion_sangre
+""" Fundacion Hemoprovincia  paciente ha presentado un donante de sangre""",Donacion_sangre
+""" Fundacion Hemoprovincia  paciente ha presentado un donante de sangre""",Donacion_sangre
+""" Defuncion - del libro de defunciones se encuentra inscripta la defuncion de  ocurrida a consecuencia de paro cardiorespiratorio no traumatico""",Duelo
+""" Defuncion - del libro de defunciones se encuentra inscripta la defuncion de  ocurrida a consecuencia de paro cardiorespiratorio no traumatico""",Duelo
+""" Defuncion - del libro de defunciones se encuentra inscripta la defuncion de  ocurrida a consecuencia de paro cardiorespiratorio no traumatico""",Duelo
+""" Defuncion - se halla inscripta la defuncion de - cuyo deceso ocurrio - con diagnostico sepsis c. meningitis ingesta de infusion casera""",Duelo
+""" Defuncion - se halla inscripta la defuncion de - cuyo deceso ocurrio - con diagnostico sepsis c. meningitis ingesta de infusion casera""",Duelo
+""" Defuncion - se halla inscripta la defuncion de - cuyo deceso ocurrio - con diagnostico sepsis c. meningitis ingesta de infusion casera""",Duelo
+""" defuncion - fallecio - siendo la causa de defuncion Paro cardiaco- Insuficiencia cardiaca aguda - arritmia cardiaca - """,Duelo
+""" defuncion - fallecio - siendo la causa de defuncion Paro cardiaco- Insuficiencia cardiaca aguda - arritmia cardiaca - """,Duelo
+""" defuncion - fallecio - siendo la causa de defuncion Paro cardiaco- Insuficiencia cardiaca aguda - arritmia cardiaca - """,Duelo
+"""defunciones , defunción , consecuencia """,Duelo
+"""defunciones , defunción , consecuencia """,Duelo
+"""defunciones , defunción , consecuencia """,Duelo
+"""defunción , deceso, diagnostico """,Duelo
+"""defunción , deceso, diagnostico """,Duelo
+"""defunción , deceso, diagnostico """,Duelo
+"""Defunción - Del libro de defunciones se encuentra inscripta la defunción de - ocurrida a consecuencia de paro cardiorespiratorio secundario a enfermedad coronaria crónica.""",Duelo
+"""Defunción - Del libro de defunciones se encuentra inscripta la defunción de - ocurrida a consecuencia de paro cardiorespiratorio secundario a enfermedad coronaria crónica.""",Duelo
+"""Defunción - Del libro de defunciones se encuentra inscripta la defunción de - ocurrida a consecuencia de paro cardiorespiratorio secundario a enfermedad coronaria crónica.""",Duelo
+"""Defunción - Se halla inscripta la defunción de - registrada a causa de paro cardiorrespiratorio asociado a insuficiencia respiratoria aguda.""",Duelo
+"""Defunción - Se halla inscripta la defunción de - registrada a causa de paro cardiorrespiratorio asociado a insuficiencia respiratoria aguda.""",Duelo
+"""Defunción - Se halla inscripta la defunción de - registrada a causa de paro cardiorrespiratorio asociado a insuficiencia respiratoria aguda.""",Duelo
+"""Defunción - Del libro de defunciones consta la inscripción del fallecimiento de - ocurrido por paro cardiorespiratorio con antecedentes de hipertensión arterial.""",Duelo
+"""Defunción - Del libro de defunciones consta la inscripción del fallecimiento de - ocurrido por paro cardiorespiratorio con antecedentes de hipertensión arterial.""",Duelo
+"""Defunción - Del libro de defunciones consta la inscripción del fallecimiento de - ocurrido por paro cardiorespiratorio con antecedentes de hipertensión arterial.""",Duelo
+"""Defunción - Se encuentra registrada la defunción de - con causa de muerte paro cardiorespiratorio por embolia pulmonar.""",Duelo
+"""Defunción - Se encuentra registrada la defunción de - con causa de muerte paro cardiorespiratorio por embolia pulmonar.""",Duelo
+"""Defunción - Se encuentra registrada la defunción de - con causa de muerte paro cardiorespiratorio por embolia pulmonar.""",Duelo
+""" Defunción - Se halla inscripta la defunción de - cuyo deceso ocurrió por sepsis grave asociada a neumonía bacteriana."" ",Duelo
+""" Defunción - Se halla inscripta la defunción de - cuyo deceso ocurrió por sepsis grave asociada a neumonía bacteriana."" ",Duelo
+""" Defunción - Se halla inscripta la defunción de - cuyo deceso ocurrió por sepsis grave asociada a neumonía bacteriana."" ",Duelo
+""" Defunción - Se encuentra registrada la defunción de - con diagnóstico de sepsis por infección urinaria complicada.""",Duelo
+""" Defunción - Se encuentra registrada la defunción de - con diagnóstico de sepsis por infección urinaria complicada.""",Duelo
+""" Defunción - Se encuentra registrada la defunción de - con diagnóstico de sepsis por infección urinaria complicada.""",Duelo
+"""Defunción - Del libro de defunciones consta la inscripción del deceso de - por sepsis secundaria a absceso hepático.""",Duelo
+"""Defunción - Del libro de defunciones consta la inscripción del deceso de - por sepsis secundaria a absceso hepático.""",Duelo
+"""Defunción - Del libro de defunciones consta la inscripción del deceso de - por sepsis secundaria a absceso hepático.""",Duelo
+"""Defunción - Se halla inscripta la defunción de - con diagnóstico de sepsis generalizada tras intervención quirúrgica reciente.""",Duelo
+"""Defunción - Se halla inscripta la defunción de - con diagnóstico de sepsis generalizada tras intervención quirúrgica reciente.""",Duelo
+"""Defunción - Se halla inscripta la defunción de - con diagnóstico de sepsis generalizada tras intervención quirúrgica reciente.""",Duelo
+"""Defunción - Falleció - siendo la causa de defunción paro cardíaco debido a insuficiencia coronaria aguda.""",Duelo
+"""Defunción - Falleció - siendo la causa de defunción paro cardíaco debido a insuficiencia coronaria aguda.""",Duelo
+"""Defunción - Falleció - siendo la causa de defunción paro cardíaco debido a insuficiencia coronaria aguda.""",Duelo
+"""Defunción - Se encuentra registrada la defunción de - con causa de muerte insuficiencia cardíaca congestiva.""",Duelo
+"""Defunción - Se encuentra registrada la defunción de - con causa de muerte insuficiencia cardíaca congestiva.""",Duelo
+"""Defunción - Se encuentra registrada la defunción de - con causa de muerte insuficiencia cardíaca congestiva.""",Duelo
+"""Defunción - Consta en el registro la defunción de - por arritmia cardíaca ventricular severa.""",Duelo
+"""Defunción - Consta en el registro la defunción de - por arritmia cardíaca ventricular severa.""",Duelo
+"""Defunción - Consta en el registro la defunción de - por arritmia cardíaca ventricular severa.""",Duelo
+"""Defunción - Falleció - siendo la causa de defunción paro cardíaco relacionado con infarto agudo de miocardio.""",Duelo
+"""Defunción - Falleció - siendo la causa de defunción paro cardíaco relacionado con infarto agudo de miocardio.""",Duelo
+"""Defunción - Falleció - siendo la causa de defunción paro cardíaco relacionado con infarto agudo de miocardio.""",Duelo
+"""Defunciones - Se encuentra inscripta la defunción de - fallecido por consecuencia de traumatismo craneoencefálico severo.""",Duelo
+"""Defunciones - Se encuentra inscripta la defunción de - fallecido por consecuencia de traumatismo craneoencefálico severo.""",Duelo
+"""Defunciones - Se encuentra inscripta la defunción de - fallecido por consecuencia de traumatismo craneoencefálico severo.""",Duelo
+"""Defunciones - Del registro consta la defunción de - cuyo deceso fue a causa de hemorragia digestiva masiva.""",Duelo
+"""Defunciones - Del registro consta la defunción de - cuyo deceso fue a causa de hemorragia digestiva masiva.""",Duelo
+"""Defunciones - Del registro consta la defunción de - cuyo deceso fue a causa de hemorragia digestiva masiva.""",Duelo
+"""Defunciones - Consta en el libro de defunciones la inscripción de - fallecido por consecuencias de insuficiencia multiorgánica.""",Duelo
+"""Defunciones - Consta en el libro de defunciones la inscripción de - fallecido por consecuencias de insuficiencia multiorgánica.""",Duelo
+"""Defunciones - Consta en el libro de defunciones la inscripción de - fallecido por consecuencias de insuficiencia multiorgánica.""",Duelo
+""" requiere asistencia permanente debido a una condición médica que le impide realizar actividades cotidianas de manera autónoma. Se sugiere que un familiar directo brinde soporte para garantizar su bienestar.""",Enfermedad _Asistencia
+""" requiere asistencia permanente debido a una condición médica que le impide realizar actividades cotidianas de manera autónoma. Se sugiere que un familiar directo brinde soporte para garantizar su bienestar.""",Enfermedad _Asistencia
+""" requiere asistencia permanente debido a una condición médica que le impide realizar actividades cotidianas de manera autónoma. Se sugiere que un familiar directo brinde soporte para garantizar su bienestar.""",Enfermedad _Asistencia
+""" sometida a un procedimiento quirúrgico mayor y requiere asistencia continua durante su proceso de recuperación. Recomiendo la presencia de un familiar que pueda colaborar en su cuidado y supervisión. Dr. .""",Enfermedad _Asistencia
+""" sometida a un procedimiento quirúrgico mayor y requiere asistencia continua durante su proceso de recuperación. Recomiendo la presencia de un familiar que pueda colaborar en su cuidado y supervisión. Dr. .""",Enfermedad _Asistencia
+""" sometida a un procedimiento quirúrgico mayor y requiere asistencia continua durante su proceso de recuperación. Recomiendo la presencia de un familiar que pueda colaborar en su cuidado y supervisión. Dr. .""",Enfermedad _Asistencia
+""" atencion de familiar enfermo , se presento a revision medica  acompañado de - se certifica que el paciente se encuentra - debiendo quedar al cuidado por el tiempo de reposo indicador del familiar que lo acompaña """,Enfermedad _Asistencia
+""" atencion de familiar enfermo , se presento a revision medica  acompañado de - se certifica que el paciente se encuentra - debiendo quedar al cuidado por el tiempo de reposo indicador del familiar que lo acompaña """,Enfermedad _Asistencia
+""" atencion de familiar enfermo , se presento a revision medica  acompañado de - se certifica que el paciente se encuentra - debiendo quedar al cuidado por el tiempo de reposo indicador del familiar que lo acompaña """,Enfermedad _Asistencia
+"""presenta una enfermedad infecciosa que requiere aislamiento y cuidados constantes por parte de un tutor legal. Se recomienda que uno de los padres o responsables esté presente durante el período estimado de recuperació Dr.""",Enfermedad _Asistencia
+"""presenta una enfermedad infecciosa que requiere aislamiento y cuidados constantes por parte de un tutor legal. Se recomienda que uno de los padres o responsables esté presente durante el período estimado de recuperació Dr.""",Enfermedad _Asistencia
+"""presenta una enfermedad infecciosa que requiere aislamiento y cuidados constantes por parte de un tutor legal. Se recomienda que uno de los padres o responsables esté presente durante el período estimado de recuperació Dr.""",Enfermedad _Asistencia
+""" necesita asistencia inmediata de un familiar debido a una complicación médica de carácter urgente que afecta su movilidad y autonomía. La duración del cuidado requerido será determinada tras una nueva evaluación en 7 días. Dr. .""",Enfermedad _Asistencia
+""" necesita asistencia inmediata de un familiar debido a una complicación médica de carácter urgente que afecta su movilidad y autonomía. La duración del cuidado requerido será determinada tras una nueva evaluación en 7 días. Dr. .""",Enfermedad _Asistencia
+""" necesita asistencia inmediata de un familiar debido a una complicación médica de carácter urgente que afecta su movilidad y autonomía. La duración del cuidado requerido será determinada tras una nueva evaluación en 7 días. Dr. .""",Enfermedad _Asistencia
+"""se encuentra atravesando un proceso de rehabilitación física que requiere la asistencia de un familiar cercano para llevar a cabo actividades diarias como la movilización y el acceso a consultas médicas. Se estima que la necesidad de soporte se prolongará por un período de 15 días, sujeto a evaluación posterior. Dr.""",Enfermedad _Asistencia
+"""se encuentra atravesando un proceso de rehabilitación física que requiere la asistencia de un familiar cercano para llevar a cabo actividades diarias como la movilización y el acceso a consultas médicas. Se estima que la necesidad de soporte se prolongará por un período de 15 días, sujeto a evaluación posterior. Dr.""",Enfermedad _Asistencia
+"""se encuentra atravesando un proceso de rehabilitación física que requiere la asistencia de un familiar cercano para llevar a cabo actividades diarias como la movilización y el acceso a consultas médicas. Se estima que la necesidad de soporte se prolongará por un período de 15 días, sujeto a evaluación posterior. Dr.""",Enfermedad _Asistencia
+"""padece una afección de salud que demanda cuidados especiales en su domicilio. Es imprescindible que un familiar directo la asista en la administración de tratamientos y otras actividades esenciales durante un lapso, el cual podrá ser extendido según evolución.""",Enfermedad _Asistencia
+"""padece una afección de salud que demanda cuidados especiales en su domicilio. Es imprescindible que un familiar directo la asista en la administración de tratamientos y otras actividades esenciales durante un lapso, el cual podrá ser extendido según evolución.""",Enfermedad _Asistencia
+"""padece una afección de salud que demanda cuidados especiales en su domicilio. Es imprescindible que un familiar directo la asista en la administración de tratamientos y otras actividades esenciales durante un lapso, el cual podrá ser extendido según evolución.""",Enfermedad _Asistencia
+"""necesita asistencia diaria de un familiar debido a una condición médica que limita su capacidad para realizar actividades básicas de manera independiente. Dra. .""",Enfermedad _Asistencia
+"""necesita asistencia diaria de un familiar debido a una condición médica que limita su capacidad para realizar actividades básicas de manera independiente. Dra. .""",Enfermedad _Asistencia
+"""necesita asistencia diaria de un familiar debido a una condición médica que limita su capacidad para realizar actividades básicas de manera independiente. Dra. .""",Enfermedad _Asistencia
+""" ha sido intervenida quirúrgicamente y requiere acompañamiento constante durante su período de recuperación. Se sugiere que un familiar directo colabore con sus cuidados básicos""",Enfermedad _Asistencia
+""" ha sido intervenida quirúrgicamente y requiere acompañamiento constante durante su período de recuperación. Se sugiere que un familiar directo colabore con sus cuidados básicos""",Enfermedad _Asistencia
+""" ha sido intervenida quirúrgicamente y requiere acompañamiento constante durante su período de recuperación. Se sugiere que un familiar directo colabore con sus cuidados básicos""",Enfermedad _Asistencia
+""" atencion de familiar enfermo , se presento a revision medica  acompañado de - se certifica que el paciente se encuentra - debiendo quedar al cuidado por el tiempo de reposo indicador del familiar que lo acompaña """,Enfermedad _Asistencia
+""" atencion de familiar enfermo , se presento a revision medica  acompañado de - se certifica que el paciente se encuentra - debiendo quedar al cuidado por el tiempo de reposo indicador del familiar que lo acompaña """,Enfermedad _Asistencia
+""" atencion de familiar enfermo , se presento a revision medica  acompañado de - se certifica que el paciente se encuentra - debiendo quedar al cuidado por el tiempo de reposo indicador del familiar que lo acompaña """,Enfermedad _Asistencia
+"""Consultorio Médico -  Cuadro de gripe con infección respiratoria alta . Reposo domiciliario, hidratación y paracetamol 500mg cada 8 horas - Incapacidad Laboral: 3 días -  Control: Reevaluación """,Enfermedad _Asistencia
+"""Consultorio Médico -  Cuadro de gripe con infección respiratoria alta . Reposo domiciliario, hidratación y paracetamol 500mg cada 8 horas - Incapacidad Laboral: 3 días -  Control: Reevaluación """,Enfermedad _Asistencia
+"""Consultorio Médico -  Cuadro de gripe con infección respiratoria alta . Reposo domiciliario, hidratación y paracetamol 500mg cada 8 horas - Incapacidad Laboral: 3 días -  Control: Reevaluación """,Enfermedad _Asistencia
+"""Hospital - Servicio de Clínica Médica - Hipertensión arterial descompensada  . Reposo  6 dias. Observaciones: Derivación a cardiología para ajuste terapéutico Dr  """,Enfermedad _Asistencia
+"""Hospital - Servicio de Clínica Médica - Hipertensión arterial descompensada  . Reposo  6 dias. Observaciones: Derivación a cardiología para ajuste terapéutico Dr  """,Enfermedad _Asistencia
+"""Hospital - Servicio de Clínica Médica - Hipertensión arterial descompensada  . Reposo  6 dias. Observaciones: Derivación a cardiología para ajuste terapéutico Dr  """,Enfermedad _Asistencia
+"""Clínica Privada -  Servicio de Traumatología   Postoperatorio de hernia discal L4-L5 - Intervención: Discectomía lumbar realizada el 20/08/2024 - Indicaciones: Reposo absoluto, kinesiología - Incapacidad Laboral""",Enfermedad _Asistencia
+"""Clínica Privada -  Servicio de Traumatología   Postoperatorio de hernia discal L4-L5 - Intervención: Discectomía lumbar realizada el 20/08/2024 - Indicaciones: Reposo absoluto, kinesiología - Incapacidad Laboral""",Enfermedad _Asistencia
+"""Clínica Privada -  Servicio de Traumatología   Postoperatorio de hernia discal L4-L5 - Intervención: Discectomía lumbar realizada el 20/08/2024 - Indicaciones: Reposo absoluto, kinesiología - Incapacidad Laboral""",Enfermedad _Asistencia
+""" presenta cuadro gripal con fiebre. Reposo 2 días.  Dr.""",Enfermedad _Asistencia
+""" presenta cuadro gripal con fiebre. Reposo 2 días.  Dr.""",Enfermedad _Asistencia
+""" presenta cuadro gripal con fiebre. Reposo 2 días.  Dr.""",Enfermedad _Asistencia
+"""Paciente: Ana María García DNI 32.456.789. Dolor lumbar. Reposo 3 días. Control si persiste. Dra. """,Enfermedad _Asistencia
+"""Paciente: Ana María García DNI 32.456.789. Dolor lumbar. Reposo 3 días. Control si persiste. Dra. """,Enfermedad _Asistencia
+"""Paciente: Ana María García DNI 32.456.789. Dolor lumbar. Reposo 3 días. Control si persiste. Dra. """,Enfermedad _Asistencia
+""" Postoperatorio. Reposo 1 semana. Dr.""",Enfermedad _Asistencia
+""" Postoperatorio. Reposo 1 semana. Dr.""",Enfermedad _Asistencia
+""" Postoperatorio. Reposo 1 semana. Dr.""",Enfermedad _Asistencia
+"""Consultorio Médico Sinusitis aguda- Síntomas: Congestión nasal, cefalea, fiebre de 37.8°C - Tratamiento: Reposo domiciliario, amoxicilina 500mg cada 12 horas durante 7 días . Control: """,Enfermedad _Asistencia
+"""Consultorio Médico Sinusitis aguda- Síntomas: Congestión nasal, cefalea, fiebre de 37.8°C - Tratamiento: Reposo domiciliario, amoxicilina 500mg cada 12 horas durante 7 días . Control: """,Enfermedad _Asistencia
+"""Consultorio Médico Sinusitis aguda- Síntomas: Congestión nasal, cefalea, fiebre de 37.8°C - Tratamiento: Reposo domiciliario, amoxicilina 500mg cada 12 horas durante 7 días . Control: """,Enfermedad _Asistencia
+"""Clínica  Lumbalgia aguda (CIE-10: M54.5) -  Dolor lumbar, limitación funcional moderada - Reposo relativo 7 dias , fisioterapia, ibuprofeno 400mg cada 8 horas -  """,Enfermedad _Asistencia
+"""Clínica  Lumbalgia aguda (CIE-10: M54.5) -  Dolor lumbar, limitación funcional moderada - Reposo relativo 7 dias , fisioterapia, ibuprofeno 400mg cada 8 horas -  """,Enfermedad _Asistencia
+"""Clínica  Lumbalgia aguda (CIE-10: M54.5) -  Dolor lumbar, limitación funcional moderada - Reposo relativo 7 dias , fisioterapia, ibuprofeno 400mg cada 8 horas -  """,Enfermedad _Asistencia
+"""Consultorio Médico . Migraña crónica con crisis aguda  Síntomas: Cefalea intensa unilateral, fotofobia, náuseas - Tratamiento: Reposo absoluto, sumatriptán 50mg al inicio del dolor, control del estrés - Incapacidad Laboral: 3 días """,Enfermedad _Asistencia
+"""Consultorio Médico . Migraña crónica con crisis aguda  Síntomas: Cefalea intensa unilateral, fotofobia, náuseas - Tratamiento: Reposo absoluto, sumatriptán 50mg al inicio del dolor, control del estrés - Incapacidad Laboral: 3 días """,Enfermedad _Asistencia
+"""Consultorio Médico . Migraña crónica con crisis aguda  Síntomas: Cefalea intensa unilateral, fotofobia, náuseas - Tratamiento: Reposo absoluto, sumatriptán 50mg al inicio del dolor, control del estrés - Incapacidad Laboral: 3 días """,Enfermedad _Asistencia
+"""Paciente: María Fernández  Diagnóstico: cefalea tensional. Descanso por 1 día. Consulta nuevamente si el dolor persiste. Dra. """,Enfermedad _Asistencia
+"""Paciente: María Fernández  Diagnóstico: cefalea tensional. Descanso por 1 día. Consulta nuevamente si el dolor persiste. Dra. """,Enfermedad _Asistencia
+"""Paciente: María Fernández  Diagnóstico: cefalea tensional. Descanso por 1 día. Consulta nuevamente si el dolor persiste. Dra. """,Enfermedad _Asistencia
+"""Paciente: Pedro Gómez  Dolor cervical agudo. Reposo indicado por 5 días. Control sugerido en caso de no mejorar. Dr. Torres """,Enfermedad _Asistencia
+"""Paciente: Pedro Gómez  Dolor cervical agudo. Reposo indicado por 5 días. Control sugerido en caso de no mejorar. Dr. Torres """,Enfermedad _Asistencia
+"""Paciente: Pedro Gómez  Dolor cervical agudo. Reposo indicado por 5 días. Control sugerido en caso de no mejorar. Dr. Torres """,Enfermedad _Asistencia
+"""Universidad  Facultad  EXAMEN  Carrera:  Materia:   Turno:  Tipo:  """,Estudios
+"""Universidad  Facultad  EXAMEN  Carrera:  Materia:   Turno:  Tipo:  """,Estudios
+"""Universidad  Facultad  EXAMEN  Carrera:  Materia:   Turno:  Tipo:  """,Estudios
+"""Universidad  - Facultad   EXAMEN FINAL Alumno:  Carrera:  Materia:    Modalidad:  "" ",Estudios
+"""Universidad  - Facultad   EXAMEN FINAL Alumno:  Carrera:  Materia:    Modalidad:  "" ",Estudios
+"""Universidad  - Facultad   EXAMEN FINAL Alumno:  Carrera:  Materia:    Modalidad:  "" ",Estudios
+"""Instituto EXAMEN Carrera: Materia: Calificación: Examen escrito con defensa oral  """,Estudios
+"""Instituto EXAMEN Carrera: Materia: Calificación: Examen escrito con defensa oral  """,Estudios
+"""Instituto EXAMEN Carrera: Materia: Calificación: Examen escrito con defensa oral  """,Estudios
+"""Universidad - Facultad  RENDIMIENTO Alumno: Carrera:  Materia:Tipo: Recuperatorio """,Estudios
+"""Universidad - Facultad  RENDIMIENTO Alumno: Carrera:  Materia:Tipo: Recuperatorio """,Estudios
+"""Universidad - Facultad  RENDIMIENTO Alumno: Carrera:  Materia:Tipo: Recuperatorio """,Estudios
+"""Instituto  EXAMEN ESPECIAL Carrera: Materia: """,Estudios
+"""Instituto  EXAMEN ESPECIAL Carrera: Materia: """,Estudios
+"""Instituto  EXAMEN ESPECIAL Carrera: Materia: """,Estudios
+"""Universidad  - Facultad  EXAMEN LIBRE Alumno: Carrera:  Materia: """,Estudios
+"""Universidad  - Facultad  EXAMEN LIBRE Alumno: Carrera:  Materia: """,Estudios
+"""Universidad  - Facultad  EXAMEN LIBRE Alumno: Carrera:  Materia: """,Estudios
+"""Escuela CERTIFICADO DE EXAMEN  Carrera:  Materia: Turno: Mañana""",Estudios
+"""Escuela CERTIFICADO DE EXAMEN  Carrera:  Materia: Turno: Mañana""",Estudios
+"""Escuela CERTIFICADO DE EXAMEN  Carrera:  Materia: Turno: Mañana""",Estudios
+"""Universidad  - Facultad  CERTIFICADO DE EXAMEN Alumno:  Carrera:  Materia:  """,Estudios
+"""Universidad  - Facultad  CERTIFICADO DE EXAMEN Alumno:  Carrera:  Materia:  """,Estudios
+"""Universidad  - Facultad  CERTIFICADO DE EXAMEN Alumno:  Carrera:  Materia:  """,Estudios
+"""Instituto  CERTIFICADO DE EXAMEN PRÁCTICO Carrera Materia:  """,Estudios
+"""Instituto  CERTIFICADO DE EXAMEN PRÁCTICO Carrera Materia:  """,Estudios
+"""Instituto  CERTIFICADO DE EXAMEN PRÁCTICO Carrera Materia:  """,Estudios
+"""Universidad  - Escuela  EXAMEN Carrera Materia:  Modalidad:  Nota: """,Estudios
+"""Universidad  - Escuela  EXAMEN Carrera Materia:  Modalidad:  Nota: """,Estudios
+"""Universidad  - Escuela  EXAMEN Carrera Materia:  Modalidad:  Nota: """,Estudios
+"""Conste que el/la alumno/ señor/ita  ha concurrido a esta Facultad  rendir examen parcial/final de la asignatura .""",Estudios
+"""Conste que el/la alumno/ señor/ita  ha concurrido a esta Facultad  rendir examen parcial/final de la asignatura .""",Estudios
+"""Conste que el/la alumno/ señor/ita  ha concurrido a esta Facultad  rendir examen parcial/final de la asignatura .""",Estudios
+"""El profesor de la asignatura:  de la carrera:  certifica que: ha rendido examen PARCIAL /FINAL """,Estudios
+"""El profesor de la asignatura:  de la carrera:  certifica que: ha rendido examen PARCIAL /FINAL """,Estudios
+"""El profesor de la asignatura:  de la carrera:  certifica que: ha rendido examen PARCIAL /FINAL """,Estudios
+"""Solicitud de constancia de examen: Se deja constancia de que el/la alumno/a ha rendido examen PARCIAL FINAL de la materia  correspondiente a la carrera de  en la sede""",Estudios
+"""Solicitud de constancia de examen: Se deja constancia de que el/la alumno/a ha rendido examen PARCIAL FINAL de la materia  correspondiente a la carrera de  en la sede""",Estudios
+"""Solicitud de constancia de examen: Se deja constancia de que el/la alumno/a ha rendido examen PARCIAL FINAL de la materia  correspondiente a la carrera de  en la sede""",Estudios
+"""Universidad  examen alumno/a: Nombre y Apellido: , ha rendido examen parcial/final de la asignatura: """,Estudios
+"""Universidad  examen alumno/a: Nombre y Apellido: , ha rendido examen parcial/final de la asignatura: """,Estudios
+"""Universidad  examen alumno/a: Nombre y Apellido: , ha rendido examen parcial/final de la asignatura: """,Estudios
+"""Constancia de presentacion a examen. El/La profesor/a que suscribe la presente CERTIFICA que el/la sr/sra   estudiante regular de la carrera con el Legajo  rendir el examen PARCIAL / FINAL de la asignatura """,Estudios
+"""Constancia de presentacion a examen. El/La profesor/a que suscribe la presente CERTIFICA que el/la sr/sra   estudiante regular de la carrera con el Legajo  rendir el examen PARCIAL / FINAL de la asignatura """,Estudios
+"""Constancia de presentacion a examen. El/La profesor/a que suscribe la presente CERTIFICA que el/la sr/sra   estudiante regular de la carrera con el Legajo  rendir el examen PARCIAL / FINAL de la asignatura """,Estudios
+"""Examen Final: se presento a rendir el siguiente examen: Ubicacion: campus. """,Estudios
+"""Examen Final: se presento a rendir el siguiente examen: Ubicacion: campus. """,Estudios
+"""Examen Final: se presento a rendir el siguiente examen: Ubicacion: campus. """,Estudios
+"""Universidad  - Facultad  CERTIFICADO DE EXAMEN Alumno:  Carrera:  Materia:  """,Estudios
+"""Universidad  - Facultad  CERTIFICADO DE EXAMEN Alumno:  Carrera:  Materia:  """,Estudios
+"""Universidad  - Facultad  CERTIFICADO DE EXAMEN Alumno:  Carrera:  Materia:  """,Estudios
+"""Instituto  CERTIFICADO DE EXAMEN PRÁCTICO Carrera Materia:  """,Estudios
+"""Instituto  CERTIFICADO DE EXAMEN PRÁCTICO Carrera Materia:  """,Estudios
+"""Instituto  CERTIFICADO DE EXAMEN PRÁCTICO Carrera Materia:  """,Estudios
+"""Universidad  - Escuela  EXAMEN Carrera Materia:  Modalidad:  Nota: """,Estudios
+"""Universidad  - Escuela  EXAMEN Carrera Materia:  Modalidad:  Nota: """,Estudios
+"""Universidad  - Escuela  EXAMEN Carrera Materia:  Modalidad:  Nota: """,Estudios
+"""Conste que el/la alumno/ señor/ita  ha concurrido a esta Facultad  rendir examen parcial/final de la asignatura .""",Estudios
+"""Conste que el/la alumno/ señor/ita  ha concurrido a esta Facultad  rendir examen parcial/final de la asignatura .""",Estudios
+"""Conste que el/la alumno/ señor/ita  ha concurrido a esta Facultad  rendir examen parcial/final de la asignatura .""",Estudios
+"""Constancia de Examen alumno: , con DNI N° 11222333, rindio examen en la materia: Organizacion del Computador comision N°2020, dictada por el docente """,Estudios
+"""Constancia de Examen alumno: , con DNI N° 11222333, rindio examen en la materia: Organizacion del Computador comision N°2020, dictada por el docente """,Estudios
+"""Constancia de Examen alumno: , con DNI N° 11222333, rindio examen en la materia: Organizacion del Computador comision N°2020, dictada por el docente """,Estudios
+"""inscribo el matrimonio de - cumplidas las formalidad legales y recibido el consentimiento de los contrayentes en nombre de la ley los declararé unidos en matrimonio ante los testigos -"" ",Matrimonial
+"""inscribo el matrimonio de - cumplidas las formalidad legales y recibido el consentimiento de los contrayentes en nombre de la ley los declararé unidos en matrimonio ante los testigos -"" ",Matrimonial
+"""inscribo el matrimonio de - cumplidas las formalidad legales y recibido el consentimiento de los contrayentes en nombre de la ley los declararé unidos en matrimonio ante los testigos -"" ",Matrimonial
+"""celebrado en el Registro Civil,  libro 13, folio 85,  contrayentes , acompañados por los testigos, siendo el oficial a cargo el Dr. juez de paz.""",Matrimonial
+"""celebrado en el Registro Civil,  libro 13, folio 85,  contrayentes , acompañados por los testigos, siendo el oficial a cargo el Dr. juez de paz.""",Matrimonial
+"""celebrado en el Registro Civil,  libro 13, folio 85,  contrayentes , acompañados por los testigos, siendo el oficial a cargo el Dr. juez de paz.""",Matrimonial
+"""El matrimonio civil celebrado en el Registro Civil  , libro , folio , contrayentes a , testigos ,  la oficial a cargo la Dra. , jueza de paz.""",Matrimonial
+"""El matrimonio civil celebrado en el Registro Civil  , libro , folio , contrayentes a , testigos ,  la oficial a cargo la Dra. , jueza de paz.""",Matrimonial
+"""El matrimonio civil celebrado en el Registro Civil  , libro , folio , contrayentes a , testigos ,  la oficial a cargo la Dra. , jueza de paz.""",Matrimonial
+"""Registro Civil  libro, folio ,  contrayentes , testigos y ,  oficial a cargo el Dr. , juez de paz.""",Matrimonial
+"""Registro Civil  libro, folio ,  contrayentes , testigos y ,  oficial a cargo el Dr. , juez de paz.""",Matrimonial
+"""Registro Civil  libro, folio ,  contrayentes , testigos y ,  oficial a cargo el Dr. , juez de paz.""",Matrimonial
+"""El matrimonio civil , Registro Civil , libro , folio , contrayentes, testigos   oficial Dra. , jueza de paz.""",Matrimonial
+"""El matrimonio civil , Registro Civil , libro , folio , contrayentes, testigos   oficial Dra. , jueza de paz.""",Matrimonial
+"""El matrimonio civil , Registro Civil , libro , folio , contrayentes, testigos   oficial Dra. , jueza de paz.""",Matrimonial
+""" Registro Civil de Rosario , libro 12, folio 78,  contrayentes , en un trámite express sin ceremonia, testigos  , oficial  Dr. juez de paz.""",Matrimonial
+""" Registro Civil de Rosario , libro 12, folio 78,  contrayentes , en un trámite express sin ceremonia, testigos  , oficial  Dr. juez de paz.""",Matrimonial
+""" Registro Civil de Rosario , libro 12, folio 78,  contrayentes , en un trámite express sin ceremonia, testigos  , oficial  Dr. juez de paz.""",Matrimonial
+"""El matrimonio civil ,  Registro Civil , libro , folio ,  contrayentes , testigos , oficial Dra.  jueza de paz.""",Matrimonial
+"""El matrimonio civil ,  Registro Civil , libro , folio ,  contrayentes , testigos , oficial Dra.  jueza de paz.""",Matrimonial
+"""El matrimonio civil ,  Registro Civil , libro , folio ,  contrayentes , testigos , oficial Dra.  jueza de paz.""",Matrimonial
+" Registro Civil libro , folio 12, contrayentes, testigos ,  oficial  Dra.   jueza de paz.""",Matrimonial
+" Registro Civil libro , folio 12, contrayentes, testigos ,  oficial  Dra.   jueza de paz.""",Matrimonial
+" Registro Civil libro , folio 12, contrayentes, testigos ,  oficial  Dra.   jueza de paz.""",Matrimonial
+"""El matrimonio civil , Registro Civil  libro , folio ,  contrayentes ,  testigos , oficial a cargo Dr. , juez de paz.""",Matrimonial
+"""El matrimonio civil , Registro Civil  libro , folio ,  contrayentes ,  testigos , oficial a cargo Dr. , juez de paz.""",Matrimonial
+"""El matrimonio civil , Registro Civil  libro , folio ,  contrayentes ,  testigos , oficial a cargo Dr. , juez de paz.""",Matrimonial
+"""Registro Civil libro , folio ,  contrayentes , testigos ,  oficial Dra. """,Matrimonial
+"""Registro Civil libro , folio ,  contrayentes , testigos ,  oficial Dra. """,Matrimonial
+"""Registro Civil libro , folio ,  contrayentes , testigos ,  oficial Dra. """,Matrimonial
+"""El matrimonio civil  Registro Civil libro 14, folio 90,  contrayentes ,  testigos , oficial , juez de paz.""",Matrimonial
+"""El matrimonio civil  Registro Civil libro 14, folio 90,  contrayentes ,  testigos , oficial , juez de paz.""",Matrimonial
+"""El matrimonio civil  Registro Civil libro 14, folio 90,  contrayentes ,  testigos , oficial , juez de paz.""",Matrimonial
+"""El matrimonio civil Registro Civil , libro 7B, folio 23,  contrayentes ,  testigos , oficial Dra.  jueza de paz.""",Matrimonial
+"""El matrimonio civil Registro Civil , libro 7B, folio 23,  contrayentes ,  testigos , oficial Dra.  jueza de paz.""",Matrimonial
+"""El matrimonio civil Registro Civil , libro 7B, folio 23,  contrayentes ,  testigos , oficial Dra.  jueza de paz.""",Matrimonial
+"""prematrimonial -  matrimonio - Entrevista prematrimonial - casamiento """,Matrimonial
+"""prematrimonial -  matrimonio - Entrevista prematrimonial - casamiento """,Matrimonial
+"""prematrimonial -  matrimonio - Entrevista prematrimonial - casamiento """,Matrimonial
+"""  prematrimoniales  - Contrayentes - matrimonio  - matrimonial  """,Matrimonial
+"""  prematrimoniales  - Contrayentes - matrimonio  - matrimonial  """,Matrimonial
+"""  prematrimoniales  - Contrayentes - matrimonio  - matrimonial  """,Matrimonial
+"""prematrimonial  - Matrimonio  """,Matrimonial
+"""prematrimonial  - Matrimonio  """,Matrimonial
+"""prematrimonial  - Matrimonio  """,Matrimonial
+"""prematrimonial  - Matrimonio  """,Matrimonial
+"""prematrimonial  - Matrimonio  """,Matrimonial
+"""prematrimonial  - Matrimonio  """,Matrimonial
+""" matrimonio -  Registro Civil  -  contrayentep - testigos """,Matrimonial
+""" matrimonio -  Registro Civil  -  contrayentep - testigos """,Matrimonial
+""" matrimonio -  Registro Civil  -  contrayentep - testigos """,Matrimonial
+""" casamiento - Registro Civil  -  contrayentes """,Matrimonial
+""" casamiento - Registro Civil  -  contrayentes """,Matrimonial
+""" casamiento - Registro Civil  -  contrayentes """,Matrimonial
+""" Registro Civil  matrimonio """,Matrimonial
+""" Registro Civil  matrimonio """,Matrimonial
+""" Registro Civil  matrimonio """,Matrimonial
+""" prematrimoniales - Matrimonio """,Matrimonial
+""" prematrimoniales - Matrimonio """,Matrimonial
+""" prematrimoniales - Matrimonio """,Matrimonial
+"""casamiento  Los contrayentes  """,Matrimonial
+"""casamiento  Los contrayentes  """,Matrimonial
+"""casamiento  Los contrayentes  """,Matrimonial
+""" matrimonio está   contrayentes """,Matrimonial
+""" matrimonio está   contrayentes """,Matrimonial
+""" matrimonio está   contrayentes """,Matrimonial
+""" prematrimoniales  - Matrimonio """,Matrimonial
+""" prematrimoniales  - Matrimonio """,Matrimonial
+""" prematrimoniales  - Matrimonio """,Matrimonial
+"""Registro Nacional de las Personas – CAMBIO DE DOMICILIO  ha efectuado el cambio de domicilio en el Documento Nacional de Identidad , registrando como nueva residencia la dirección:  fines administrativos y legales. RENAPER""",Mudanza
+"""Registro Nacional de las Personas – CAMBIO DE DOMICILIO  ha efectuado el cambio de domicilio en el Documento Nacional de Identidad , registrando como nueva residencia la dirección:  fines administrativos y legales. RENAPER""",Mudanza
+"""Registro Nacional de las Personas – CAMBIO DE DOMICILIO  ha efectuado el cambio de domicilio en el Documento Nacional de Identidad , registrando como nueva residencia la dirección:  fines administrativos y legales. RENAPER""",Mudanza
+"""CONTRATO DE LOCACIÓN DE VIVIENDA , se celebra contrato de locación por el inmueble  por un plazo de 24 meses. El inquilino declara que se trasladará a dicho domicilio , en carácter de vivienda permanente.  inmobiliaria: .""",Mudanza
+"""CONTRATO DE LOCACIÓN DE VIVIENDA , se celebra contrato de locación por el inmueble  por un plazo de 24 meses. El inquilino declara que se trasladará a dicho domicilio , en carácter de vivienda permanente.  inmobiliaria: .""",Mudanza
+"""CONTRATO DE LOCACIÓN DE VIVIENDA , se celebra contrato de locación por el inmueble  por un plazo de 24 meses. El inquilino declara que se trasladará a dicho domicilio , en carácter de vivienda permanente.  inmobiliaria: .""",Mudanza
+"""Escribanía N° 421 – ESCRITURA ha adquirido la propiedad ubicada  según consta en la escritura pública labrada ante mí, Escribano . La posesión del inmueble fue entregada , y el comprador ha informado su traslado inmediato a dicha vivienda.Esc. Legalizado por el Colegio de Escribanos """,Mudanza
+"""Escribanía N° 421 – ESCRITURA ha adquirido la propiedad ubicada  según consta en la escritura pública labrada ante mí, Escribano . La posesión del inmueble fue entregada , y el comprador ha informado su traslado inmediato a dicha vivienda.Esc. Legalizado por el Colegio de Escribanos """,Mudanza
+"""Escribanía N° 421 – ESCRITURA ha adquirido la propiedad ubicada  según consta en la escritura pública labrada ante mí, Escribano . La posesión del inmueble fue entregada , y el comprador ha informado su traslado inmediato a dicha vivienda.Esc. Legalizado por el Colegio de Escribanos """,Mudanza
+"""MUDANZAS CÓNDOR . – SERVICIO DE MUDANZ se realizó el servicio de mudanza desde su domicilio anterior hacia su nueva residencia. La prestación del servicio fue realizada en horario completo, con carga y descarga en ambos domicilios""",Mudanza
+"""MUDANZAS CÓNDOR . – SERVICIO DE MUDANZ se realizó el servicio de mudanza desde su domicilio anterior hacia su nueva residencia. La prestación del servicio fue realizada en horario completo, con carga y descarga en ambos domicilios""",Mudanza
+"""MUDANZAS CÓNDOR . – SERVICIO DE MUDANZ se realizó el servicio de mudanza desde su domicilio anterior hacia su nueva residencia. La prestación del servicio fue realizada en horario completo, con carga y descarga en ambos domicilios""",Mudanza
+"""contrato de alquiler - locador:  - locatario- inmueble:  garantía: depósito equivalente a un mes + garantía propietaria - cláusulas: prohibido subalquiler, mantenimiento a cargo del locatario -  escribano:""",Mudanza
+"""contrato de alquiler - locador:  - locatario- inmueble:  garantía: depósito equivalente a un mes + garantía propietaria - cláusulas: prohibido subalquiler, mantenimiento a cargo del locatario -  escribano:""",Mudanza
+"""contrato de alquiler - locador:  - locatario- inmueble:  garantía: depósito equivalente a un mes + garantía propietaria - cláusulas: prohibido subalquiler, mantenimiento a cargo del locatario -  escribano:""",Mudanza
+""" mudanza - notaría n° 15,- propietario: - inmueble:- de desocupación - estado del inmueble: pintura y limpieza general - """,Mudanza
+""" mudanza - notaría n° 15,- propietario: - inmueble:- de desocupación - estado del inmueble: pintura y limpieza general - """,Mudanza
+""" mudanza - notaría n° 15,- propietario: - inmueble:- de desocupación - estado del inmueble: pintura y limpieza general - """,Mudanza
+"""boleto de compraventa - vendedor: - comprador:  - inmueble:escrituración: 60 días - escribano interviniente:  - registro: rpba """,Mudanza
+"""boleto de compraventa - vendedor: - comprador:  - inmueble:escrituración: 60 días - escribano interviniente:  - registro: rpba """,Mudanza
+"""boleto de compraventa - vendedor: - comprador:  - inmueble:escrituración: 60 días - escribano interviniente:  - registro: rpba """,Mudanza
+"""El Registro Nacional de las Personas realizó el cambio de domicilio en su Documento Nacional de Identidad , indicando nueva dirección  """,Mudanza
+"""El Registro Nacional de las Personas realizó el cambio de domicilio en su Documento Nacional de Identidad , indicando nueva dirección  """,Mudanza
+"""El Registro Nacional de las Personas realizó el cambio de domicilio en su Documento Nacional de Identidad , indicando nueva dirección  """,Mudanza
+"""a contrato de locación por el inmueble ; el inquilino declara su traslado efectivo , destinando la vivienda como domicilio permanente. inmobiliaria:  """,Mudanza
+"""a contrato de locación por el inmueble ; el inquilino declara su traslado efectivo , destinando la vivienda como domicilio permanente. inmobiliaria:  """,Mudanza
+"""a contrato de locación por el inmueble ; el inquilino declara su traslado efectivo , destinando la vivienda como domicilio permanente. inmobiliaria:  """,Mudanza
+"""Escribanía . Escritura propiedad  y el comprador notificó su traslado inmediato. Esc. Pablo Aguirre, legalizado por el  Escribanos .""",Mudanza
+"""Escribanía . Escritura propiedad  y el comprador notificó su traslado inmediato. Esc. Pablo Aguirre, legalizado por el  Escribanos .""",Mudanza
+"""Escribanía . Escritura propiedad  y el comprador notificó su traslado inmediato. Esc. Pablo Aguirre, legalizado por el  Escribanos .""",Mudanza
+"""Mudanzas  servicio de mudanza """,Mudanza
+"""Mudanzas  servicio de mudanza """,Mudanza
+"""Mudanzas  servicio de mudanza """,Mudanza
+""" Alquiler  locador y como locataria, por el inmueble - un alquiler inicial de $250.000/mes con ajuste trimestral según ICL y condiciones de garantía que incluyen depósito equivalente a un mes y garantía propietaria.  Registro RPCBA """,Mudanza
+""" Alquiler  locador y como locataria, por el inmueble - un alquiler inicial de $250.000/mes con ajuste trimestral según ICL y condiciones de garantía que incluyen depósito equivalente a un mes y garantía propietaria.  Registro RPCBA """,Mudanza
+""" Alquiler  locador y como locataria, por el inmueble - un alquiler inicial de $250.000/mes con ajuste trimestral según ICL y condiciones de garantía que incluyen depósito equivalente a un mes y garantía propietaria.  Registro RPCBA """,Mudanza
+"""Registro Nacional de las Personas – CAMBIO DE DOMICILIO  ha efectuado el cambio de domicilio en el Documento Nacional de Identidad , registrando como nueva residencia la dirección:  fines administrativos y legales. RENAPER""",Mudanza
+"""Registro Nacional de las Personas – CAMBIO DE DOMICILIO  ha efectuado el cambio de domicilio en el Documento Nacional de Identidad , registrando como nueva residencia la dirección:  fines administrativos y legales. RENAPER""",Mudanza
+"""Registro Nacional de las Personas – CAMBIO DE DOMICILIO  ha efectuado el cambio de domicilio en el Documento Nacional de Identidad , registrando como nueva residencia la dirección:  fines administrativos y legales. RENAPER""",Mudanza
+"""CONTRATO DE LOCACIÓN DE VIVIENDA , se celebra contrato de locación por el inmueble  por un plazo de 24 meses. El inquilino declara que se trasladará a dicho domicilio , en carácter de vivienda permanente.  inmobiliaria: .""",Mudanza
+"""CONTRATO DE LOCACIÓN DE VIVIENDA , se celebra contrato de locación por el inmueble  por un plazo de 24 meses. El inquilino declara que se trasladará a dicho domicilio , en carácter de vivienda permanente.  inmobiliaria: .""",Mudanza
+"""CONTRATO DE LOCACIÓN DE VIVIENDA , se celebra contrato de locación por el inmueble  por un plazo de 24 meses. El inquilino declara que se trasladará a dicho domicilio , en carácter de vivienda permanente.  inmobiliaria: .""",Mudanza
+"""Escribanía N° 421 – ESCRITURA ha adquirido la propiedad ubicada  según consta en la escritura pública labrada ante mí, Escribano . La posesión del inmueble fue entregada , y el comprador ha informado su traslado inmediato a dicha vivienda.Esc. Legalizado por el Colegio de Escribanos """,Mudanza
+"""Escribanía N° 421 – ESCRITURA ha adquirido la propiedad ubicada  según consta en la escritura pública labrada ante mí, Escribano . La posesión del inmueble fue entregada , y el comprador ha informado su traslado inmediato a dicha vivienda.Esc. Legalizado por el Colegio de Escribanos """,Mudanza
+"""Escribanía N° 421 – ESCRITURA ha adquirido la propiedad ubicada  según consta en la escritura pública labrada ante mí, Escribano . La posesión del inmueble fue entregada , y el comprador ha informado su traslado inmediato a dicha vivienda.Esc. Legalizado por el Colegio de Escribanos """,Mudanza
+"""contrato de alquiler - locador:  - locatario- inmueble:  garantía: depósito equivalente a un mes + garantía propietaria - cláusulas: prohibido subalquiler, mantenimiento a cargo del locatario -  escribano:""",Mudanza
+"""contrato de alquiler - locador:  - locatario- inmueble:  garantía: depósito equivalente a un mes + garantía propietaria - cláusulas: prohibido subalquiler, mantenimiento a cargo del locatario -  escribano:""",Mudanza
+"""contrato de alquiler - locador:  - locatario- inmueble:  garantía: depósito equivalente a un mes + garantía propietaria - cláusulas: prohibido subalquiler, mantenimiento a cargo del locatario -  escribano:""",Mudanza
+""" mudanza - notaría n° 15,- propietario: - inmueble:- de desocupación - estado del inmueble: pintura y limpieza general - """,Mudanza
+""" mudanza - notaría n° 15,- propietario: - inmueble:- de desocupación - estado del inmueble: pintura y limpieza general - """,Mudanza
+""" mudanza - notaría n° 15,- propietario: - inmueble:- de desocupación - estado del inmueble: pintura y limpieza general - """,Mudanza
+"""boleto de compraventa - vendedor: - comprador:  - inmueble:escrituración: 60 días - escribano interviniente:  - registro: rpba """,Mudanza
+"""boleto de compraventa - vendedor: - comprador:  - inmueble:escrituración: 60 días - escribano interviniente:  - registro: rpba """,Mudanza
+"""boleto de compraventa - vendedor: - comprador:  - inmueble:escrituración: 60 días - escribano interviniente:  - registro: rpba """,Mudanza
+"""El Registro Nacional de las Personas realizó el cambio de domicilio en su Documento Nacional de Identidad , indicando nueva dirección  """,Mudanza
+"""El Registro Nacional de las Personas realizó el cambio de domicilio en su Documento Nacional de Identidad , indicando nueva dirección  """,Mudanza
+"""El Registro Nacional de las Personas realizó el cambio de domicilio en su Documento Nacional de Identidad , indicando nueva dirección  """,Mudanza
+"""a contrato de locación por el inmueble ; el inquilino declara su traslado efectivo , destinando la vivienda como domicilio permanente. inmobiliaria:  """,Mudanza
+"""a contrato de locación por el inmueble ; el inquilino declara su traslado efectivo , destinando la vivienda como domicilio permanente. inmobiliaria:  """,Mudanza
+"""a contrato de locación por el inmueble ; el inquilino declara su traslado efectivo , destinando la vivienda como domicilio permanente. inmobiliaria:  """,Mudanza
+"""Escribanía . Escritura propiedad  y el comprador notificó su traslado inmediato. Esc. Pablo Aguirre, legalizado por el  Escribanos .""",Mudanza
+"""Escribanía . Escritura propiedad  y el comprador notificó su traslado inmediato. Esc. Pablo Aguirre, legalizado por el  Escribanos .""",Mudanza
+"""Escribanía . Escritura propiedad  y el comprador notificó su traslado inmediato. Esc. Pablo Aguirre, legalizado por el  Escribanos .""",Mudanza
+"""Poder Judicial  – citación:  Expediente: Citación obligatoria en carácter de jurado titular en juicio oral por jurados, en cumplimiento de lo dispuesto por la Ley 14.543 – Sede: Tribunal en lo Criminal N.º 3 de La Plata – Calle 55 N.º 789, entre 9 y 10 – Juez a cargo: Dra. Mónica L. Figueroa –""",Obligacion_Publica/Gremial
+"""Poder Judicial  – citación:  Expediente: Citación obligatoria en carácter de jurado titular en juicio oral por jurados, en cumplimiento de lo dispuesto por la Ley 14.543 – Sede: Tribunal en lo Criminal N.º 3 de La Plata – Calle 55 N.º 789, entre 9 y 10 – Juez a cargo: Dra. Mónica L. Figueroa –""",Obligacion_Publica/Gremial
+"""Poder Judicial  – citación:  Expediente: Citación obligatoria en carácter de jurado titular en juicio oral por jurados, en cumplimiento de lo dispuesto por la Ley 14.543 – Sede: Tribunal en lo Criminal N.º 3 de La Plata – Calle 55 N.º 789, entre 9 y 10 – Juez a cargo: Dra. Mónica L. Figueroa –""",Obligacion_Publica/Gremial
+"""Juzgado Nacional en lo Criminal y Correccional N.º 21 –  Ciudadano citado:  Citación obligatoria en carácter de testigo en causa penal caratulada Gutiérrez Juez a cargo: Dr. Esteban Di Lorenzo """,Obligacion_Publica/Gremial
+"""Juzgado Nacional en lo Criminal y Correccional N.º 21 –  Ciudadano citado:  Citación obligatoria en carácter de testigo en causa penal caratulada Gutiérrez Juez a cargo: Dr. Esteban Di Lorenzo """,Obligacion_Publica/Gremial
+"""Juzgado Nacional en lo Criminal y Correccional N.º 21 –  Ciudadano citado:  Citación obligatoria en carácter de testigo en causa penal caratulada Gutiérrez Juez a cargo: Dr. Esteban Di Lorenzo """,Obligacion_Publica/Gremial
+"""comparecencia – Defensoría del Pueblo de la Nación –  Ciudadano citado - Motivo: Audiencia obligatoria en el marco del procedimiento de reclamo administrativo por prestación suspendida  -  Funcionario interviniente: Lic. Hernán Aguirre – """,Obligacion_Publica/Gremial
+"""comparecencia – Defensoría del Pueblo de la Nación –  Ciudadano citado - Motivo: Audiencia obligatoria en el marco del procedimiento de reclamo administrativo por prestación suspendida  -  Funcionario interviniente: Lic. Hernán Aguirre – """,Obligacion_Publica/Gremial
+"""comparecencia – Defensoría del Pueblo de la Nación –  Ciudadano citado - Motivo: Audiencia obligatoria en el marco del procedimiento de reclamo administrativo por prestación suspendida  -  Funcionario interviniente: Lic. Hernán Aguirre – """,Obligacion_Publica/Gremial
+""" Junta Electoral Nacional -  Ciudadano designado:  -  Designación obligatoria como Presidente de Mesa N.º 1052, , Elecciones Generales 2025 –   Funcionario interviniente: Dra. Laura R. Bianchi – Secretaria Electoral –""",Obligacion_Publica/Gremial
+""" Junta Electoral Nacional -  Ciudadano designado:  -  Designación obligatoria como Presidente de Mesa N.º 1052, , Elecciones Generales 2025 –   Funcionario interviniente: Dra. Laura R. Bianchi – Secretaria Electoral –""",Obligacion_Publica/Gremial
+""" Junta Electoral Nacional -  Ciudadano designado:  -  Designación obligatoria como Presidente de Mesa N.º 1052, , Elecciones Generales 2025 –   Funcionario interviniente: Dra. Laura R. Bianchi – Secretaria Electoral –""",Obligacion_Publica/Gremial
+"""  Administración Federal de Ingresos Públicos (AFIP)  Contribuyente citado - Citación obligatoria a entrevista personal en el marco de fiscalización impositiva anual – Dependencia: AFIP  Inspector actuante: Cdor. Pablo Herrera""",Obligacion_Publica/Gremial
+"""  Administración Federal de Ingresos Públicos (AFIP)  Contribuyente citado - Citación obligatoria a entrevista personal en el marco de fiscalización impositiva anual – Dependencia: AFIP  Inspector actuante: Cdor. Pablo Herrera""",Obligacion_Publica/Gremial
+"""  Administración Federal de Ingresos Públicos (AFIP)  Contribuyente citado - Citación obligatoria a entrevista personal en el marco de fiscalización impositiva anual – Dependencia: AFIP  Inspector actuante: Cdor. Pablo Herrera""",Obligacion_Publica/Gremial
+""" declaracion jurada AFIP administración federal de ingresos públicos (afip) - requerimiento n° 3344/2024 - contribuyente: comercio electrónico s.r.l. (cuit 30-12345678-9) - presentar declaración jurada de iva período 09/2024 antes del 20/10/2024 - multa por mora: 1% diario (art. 45 ley 11.683) - canal de presentación: web afip con clave fiscal - responsable: contador pablo méndez""",Obligacion_Publica/Gremial
+""" declaracion jurada AFIP administración federal de ingresos públicos (afip) - requerimiento n° 3344/2024 - contribuyente: comercio electrónico s.r.l. (cuit 30-12345678-9) - presentar declaración jurada de iva período 09/2024 antes del 20/10/2024 - multa por mora: 1% diario (art. 45 ley 11.683) - canal de presentación: web afip con clave fiscal - responsable: contador pablo méndez""",Obligacion_Publica/Gremial
+""" declaracion jurada AFIP administración federal de ingresos públicos (afip) - requerimiento n° 3344/2024 - contribuyente: comercio electrónico s.r.l. (cuit 30-12345678-9) - presentar declaración jurada de iva período 09/2024 antes del 20/10/2024 - multa por mora: 1% diario (art. 45 ley 11.683) - canal de presentación: web afip con clave fiscal - responsable: contador pablo méndez""",Obligacion_Publica/Gremial
+""" – Poder Judicial de la Provincia de Córdoba Ciudadano citado: Martínez, Laura Elena (DNI 29.567.891)  carácter de testigo en juicio oral por daño y perjuicio, según Ley 25.488 – Sede: Tribunal en lo Civil y Comercial N.º 5 de Córdoba  -  Juez a cargo: Dr. Eduardo R. Ponce """,Obligacion_Publica/Gremial
+""" – Poder Judicial de la Provincia de Córdoba Ciudadano citado: Martínez, Laura Elena (DNI 29.567.891)  carácter de testigo en juicio oral por daño y perjuicio, según Ley 25.488 – Sede: Tribunal en lo Civil y Comercial N.º 5 de Córdoba  -  Juez a cargo: Dr. Eduardo R. Ponce """,Obligacion_Publica/Gremial
+""" – Poder Judicial de la Provincia de Córdoba Ciudadano citado: Martínez, Laura Elena (DNI 29.567.891)  carácter de testigo en juicio oral por daño y perjuicio, según Ley 25.488 – Sede: Tribunal en lo Civil y Comercial N.º 5 de Córdoba  -  Juez a cargo: Dr. Eduardo R. Ponce """,Obligacion_Publica/Gremial
+"""Juzgado Nacional en lo Contencioso Administrativo Federal N.º 8  Citación en carácter de parte demandada en causa por incumplimiento contractual, caratulada Empresa Transportes del Sur c/ Ruiz, Sergio M.   Juez a cargo: Dra. Ana Belén Alvarado –""",Obligacion_Publica/Gremial
+"""Juzgado Nacional en lo Contencioso Administrativo Federal N.º 8  Citación en carácter de parte demandada en causa por incumplimiento contractual, caratulada Empresa Transportes del Sur c/ Ruiz, Sergio M.   Juez a cargo: Dra. Ana Belén Alvarado –""",Obligacion_Publica/Gremial
+"""Juzgado Nacional en lo Contencioso Administrativo Federal N.º 8  Citación en carácter de parte demandada en causa por incumplimiento contractual, caratulada Empresa Transportes del Sur c/ Ruiz, Sergio M.   Juez a cargo: Dra. Ana Belén Alvarado –""",Obligacion_Publica/Gremial
+"""Junta Electoral Nacional – Designación obligatoria como Suplente de Presidente de Mesa N.º 2035, Escuela Normal Nº 1, Elecciones Generales 2025 – – Funcionario interviniente: Lic. Adriana R. Castro Secretaria Electoral """,Obligacion_Publica/Gremial
+"""Junta Electoral Nacional – Designación obligatoria como Suplente de Presidente de Mesa N.º 2035, Escuela Normal Nº 1, Elecciones Generales 2025 – – Funcionario interviniente: Lic. Adriana R. Castro Secretaria Electoral """,Obligacion_Publica/Gremial
+"""Junta Electoral Nacional – Designación obligatoria como Suplente de Presidente de Mesa N.º 2035, Escuela Normal Nº 1, Elecciones Generales 2025 – – Funcionario interviniente: Lic. Adriana R. Castro Secretaria Electoral """,Obligacion_Publica/Gremial
+"""La Administración Federal de Ingresos Públicos (AFIP), a través del requerimiento , solicita a Servicios Integrales del Sur S.A. (CUIT 30-98765432-1) presentar la declaración jurada de Ganancias correspondiente al período 2024 antes del 31 de mayo de 2025, bajo pena de una multa por mora del 2% mensual según lo establecido en el Artículo 45 de la Ley 11.683; la presentación debe realizarse mediante el portal web de AFIP utilizando clave fiscal, y para mayor información se encuentra disponible, siendo la responsable de este requerimiento la Contadora Ana Gutiérrez,.""",Obligacion_Publica/Gremial
+"""La Administración Federal de Ingresos Públicos (AFIP), a través del requerimiento , solicita a Servicios Integrales del Sur S.A. (CUIT 30-98765432-1) presentar la declaración jurada de Ganancias correspondiente al período 2024 antes del 31 de mayo de 2025, bajo pena de una multa por mora del 2% mensual según lo establecido en el Artículo 45 de la Ley 11.683; la presentación debe realizarse mediante el portal web de AFIP utilizando clave fiscal, y para mayor información se encuentra disponible, siendo la responsable de este requerimiento la Contadora Ana Gutiérrez,.""",Obligacion_Publica/Gremial
+"""La Administración Federal de Ingresos Públicos (AFIP), a través del requerimiento , solicita a Servicios Integrales del Sur S.A. (CUIT 30-98765432-1) presentar la declaración jurada de Ganancias correspondiente al período 2024 antes del 31 de mayo de 2025, bajo pena de una multa por mora del 2% mensual según lo establecido en el Artículo 45 de la Ley 11.683; la presentación debe realizarse mediante el portal web de AFIP utilizando clave fiscal, y para mayor información se encuentra disponible, siendo la responsable de este requerimiento la Contadora Ana Gutiérrez,.""",Obligacion_Publica/Gremial
+"""comparecencia – Defensoría del Pueblo de la Provincia de Mendoza –  Audiencia obligatoria para resolución de queja por servicios públicos de agua – Unidad de Servicios Básicos – Funcionario interviniente: Dr. Mario Suárez""",Obligacion_Publica/Gremial
+"""comparecencia – Defensoría del Pueblo de la Provincia de Mendoza –  Audiencia obligatoria para resolución de queja por servicios públicos de agua – Unidad de Servicios Básicos – Funcionario interviniente: Dr. Mario Suárez""",Obligacion_Publica/Gremial
+"""comparecencia – Defensoría del Pueblo de la Provincia de Mendoza –  Audiencia obligatoria para resolución de queja por servicios públicos de agua – Unidad de Servicios Básicos – Funcionario interviniente: Dr. Mario Suárez""",Obligacion_Publica/Gremial
+"""reunión gremial - sindicato de empleados de comercio (sec) - delegado   orden   1) análisis de paritarias 2024, 2) condiciones de higiene en sucursales, 3) elección de nueva comisión interna -  credencial gremial -   """,Obligacion_Publica/Gremial
+"""reunión gremial - sindicato de empleados de comercio (sec) - delegado   orden   1) análisis de paritarias 2024, 2) condiciones de higiene en sucursales, 3) elección de nueva comisión interna -  credencial gremial -   """,Obligacion_Publica/Gremial
+"""reunión gremial - sindicato de empleados de comercio (sec) - delegado   orden   1) análisis de paritarias 2024, 2) condiciones de higiene en sucursales, 3) elección de nueva comisión interna -  credencial gremial -   """,Obligacion_Publica/Gremial
+""" sindicato de empleados de comercio - delegado/a: carlos alberto rodríguez  motivo: tratamiento de despidos injustificados en cadena de supermercados 'la económica' -  """,Obligacion_Publica/Gremial
+""" sindicato de empleados de comercio - delegado/a: carlos alberto rodríguez  motivo: tratamiento de despidos injustificados en cadena de supermercados 'la económica' -  """,Obligacion_Publica/Gremial
+""" sindicato de empleados de comercio - delegado/a: carlos alberto rodríguez  motivo: tratamiento de despidos injustificados en cadena de supermercados 'la económica' -  """,Obligacion_Publica/Gremial
+"""pre-asamblea informativa - sindicato de empleados de comercio - delegado/a tema: presentación de pliego paritario 2024 y estrategias de negociación - obligatoriedad: todos los afiliados según estatuto gremial - """,Obligacion_Publica/Gremial
+"""pre-asamblea informativa - sindicato de empleados de comercio - delegado/a tema: presentación de pliego paritario 2024 y estrategias de negociación - obligatoriedad: todos los afiliados según estatuto gremial - """,Obligacion_Publica/Gremial
+"""pre-asamblea informativa - sindicato de empleados de comercio - delegado/a tema: presentación de pliego paritario 2024 y estrategias de negociación - obligatoriedad: todos los afiliados según estatuto gremial - """,Obligacion_Publica/Gremial
+""" reunión extraordinaria - sindicato de empleados de comercio - delegado/a gremial - denuncia por incumplimiento de pagos de horas extras en empresa  - fundamento legal """,Obligacion_Publica/Gremial
+""" reunión extraordinaria - sindicato de empleados de comercio - delegado/a gremial - denuncia por incumplimiento de pagos de horas extras en empresa  - fundamento legal """,Obligacion_Publica/Gremial
+""" reunión extraordinaria - sindicato de empleados de comercio - delegado/a gremial - denuncia por incumplimiento de pagos de horas extras en empresa  - fundamento legal """,Obligacion_Publica/Gremial
+""" capacitación gremial centro de formación gremial - actualización en derechos laborales y seguridad social """,Obligacion_Publica/Gremial
+""" capacitación gremial centro de formación gremial - actualización en derechos laborales y seguridad social """,Obligacion_Publica/Gremial
+""" capacitación gremial centro de formación gremial - actualización en derechos laborales y seguridad social """,Obligacion_Publica/Gremial
+""" reunión gremial - Sindicato de Empleados de Comercio (SEC) Sindical   """,Obligacion_Publica/Gremial
+""" reunión gremial - Sindicato de Empleados de Comercio (SEC) Sindical   """,Obligacion_Publica/Gremial
+""" reunión gremial - Sindicato de Empleados de Comercio (SEC) Sindical   """,Obligacion_Publica/Gremial
+""" capacitación gremial centro de formación gremial - actualización en derechos laborales y seguridad social """,Obligacion_Publica/Gremial
+""" capacitación gremial centro de formación gremial - actualización en derechos laborales y seguridad social """,Obligacion_Publica/Gremial
+""" capacitación gremial centro de formación gremial - actualización en derechos laborales y seguridad social """,Obligacion_Publica/Gremial
+""" sindicato de empleados de comercio - delegado/a: carlos alberto rodríguez  motivo: tratamiento de despidos injustificados en cadena de supermercados 'la económica' -  """,Obligacion_Publica/Gremial
+""" sindicato de empleados de comercio - delegado/a: carlos alberto rodríguez  motivo: tratamiento de despidos injustificados en cadena de supermercados 'la económica' -  """,Obligacion_Publica/Gremial
+""" sindicato de empleados de comercio - delegado/a: carlos alberto rodríguez  motivo: tratamiento de despidos injustificados en cadena de supermercados 'la económica' -  """,Obligacion_Publica/Gremial
+"""Convocatoria a reunión extraordinaria - Sindicato de Empleados de Comercio - Delegado/a: -  Denuncia por incumplimiento de pagos de horas extras en empresa -  """,Obligacion_Publica/Gremial
+"""Convocatoria a reunión extraordinaria - Sindicato de Empleados de Comercio - Delegado/a: -  Denuncia por incumplimiento de pagos de horas extras en empresa -  """,Obligacion_Publica/Gremial
+"""Convocatoria a reunión extraordinaria - Sindicato de Empleados de Comercio - Delegado/a: -  Denuncia por incumplimiento de pagos de horas extras en empresa -  """,Obligacion_Publica/Gremial
+"""reunión gremial - sindicato de empleados de comercio (sec) - delegado   orden   1) análisis de paritarias 2024, 2) condiciones de higiene en sucursales, 3) elección de nueva comisión interna -  credencial gremial -   """,Obligacion_Publica/Gremial
+"""reunión gremial - sindicato de empleados de comercio (sec) - delegado   orden   1) análisis de paritarias 2024, 2) condiciones de higiene en sucursales, 3) elección de nueva comisión interna -  credencial gremial -   """,Obligacion_Publica/Gremial
+"""reunión gremial - sindicato de empleados de comercio (sec) - delegado   orden   1) análisis de paritarias 2024, 2) condiciones de higiene en sucursales, 3) elección de nueva comisión interna -  credencial gremial -   """,Obligacion_Publica/Gremial
+"""Bajo el acta tomo folio del libro de nacimientos se encuentra inscripto el nacimiento de  ocurrido - siendo de sexo - hijo de - y de - """,Nacimiento
+"""Bajo el acta tomo folio del libro de nacimientos se encuentra inscripto el nacimiento de  ocurrido - siendo de sexo - hijo de - y de - """,Nacimiento
+"""Bajo el acta tomo folio del libro de nacimientos se encuentra inscripto el nacimiento de  ocurrido - siendo de sexo - hijo de - y de - """,Nacimiento
+""" inscribo el NACIMIENTO de   - nacido el - hijo de - y de - "" ",Nacimiento
+""" inscribo el NACIMIENTO de   - nacido el - hijo de - y de - "" ",Nacimiento
+""" inscribo el NACIMIENTO de   - nacido el - hijo de - y de - "" ",Nacimiento
+"""Bajo el acta tomo folio del libro de nacimientos se encuentra inscripto el nacimiento de  ocurrido - siendo de sexo - hijo de - y de - """,Nacimiento
+"""Bajo el acta tomo folio del libro de nacimientos se encuentra inscripto el nacimiento de  ocurrido - siendo de sexo - hijo de - y de - """,Nacimiento
+"""Bajo el acta tomo folio del libro de nacimientos se encuentra inscripto el nacimiento de  ocurrido - siendo de sexo - hijo de - y de - """,Nacimiento
+""" inscribo el NACIMIENTO de   - nacido el - hijo de - y de - "" ",Nacimiento
+""" inscribo el NACIMIENTO de   - nacido el - hijo de - y de - "" ",Nacimiento
+""" inscribo el NACIMIENTO de   - nacido el - hijo de - y de - "" ",Nacimiento
+"""Bajo el acta tomo folio del libro de nacimientos se encuentra inscripto el nacimiento de  ocurrido - siendo de sexo - hijo de - y de - """,Nacimiento
+"""Bajo el acta tomo folio del libro de nacimientos se encuentra inscripto el nacimiento de  ocurrido - siendo de sexo - hijo de - y de - """,Nacimiento
+"""Bajo el acta tomo folio del libro de nacimientos se encuentra inscripto el nacimiento de  ocurrido - siendo de sexo - hijo de - y de - """,Nacimiento
+""" inscribo el NACIMIENTO de   - nacido el - hijo de - y de - "" ",Nacimiento
+""" inscribo el NACIMIENTO de   - nacido el - hijo de - y de - "" ",Nacimiento
+""" inscribo el NACIMIENTO de   - nacido el - hijo de - y de - "" ",Nacimiento
+"""Bajo el acta tomo folio del libro de nacimientos se encuentra inscripto el nacimiento de  ocurrido - siendo de sexo - hijo de - y de - """,Nacimiento
+"""Bajo el acta tomo folio del libro de nacimientos se encuentra inscripto el nacimiento de  ocurrido - siendo de sexo - hijo de - y de - """,Nacimiento
+"""Bajo el acta tomo folio del libro de nacimientos se encuentra inscripto el nacimiento de  ocurrido - siendo de sexo - hijo de - y de - """,Nacimiento
+""" inscribo el NACIMIENTO de   - nacido el - hijo de - y de - "" ",Nacimiento
+""" inscribo el NACIMIENTO de   - nacido el - hijo de - y de - "" ",Nacimiento
+""" inscribo el NACIMIENTO de   - nacido el - hijo de - y de - "" ",Nacimiento
+"""Bajo el acta tomo folio del libro de nacimientos se encuentra inscripto el nacimiento de  ocurrido - siendo de sexo - hijo de - y de - """,Nacimiento
+"""Bajo el acta tomo folio del libro de nacimientos se encuentra inscripto el nacimiento de  ocurrido - siendo de sexo - hijo de - y de - """,Nacimiento
+"""Bajo el acta tomo folio del libro de nacimientos se encuentra inscripto el nacimiento de  ocurrido - siendo de sexo - hijo de - y de - """,Nacimiento
+""" inscribo el NACIMIENTO de   - nacido el - hijo de - y de - "" ",Nacimiento
+""" inscribo el NACIMIENTO de   - nacido el - hijo de - y de - "" ",Nacimiento
+""" inscribo el NACIMIENTO de   - nacido el - hijo de - y de - "" ",Nacimiento
+"""Bajo el acta tomo folio del libro de nacimientos se encuentra inscripto el nacimiento de  ocurrido - siendo de sexo - hijo de - y de - """,Nacimiento
+"""Bajo el acta tomo folio del libro de nacimientos se encuentra inscripto el nacimiento de  ocurrido - siendo de sexo - hijo de - y de - """,Nacimiento
+"""Bajo el acta tomo folio del libro de nacimientos se encuentra inscripto el nacimiento de  ocurrido - siendo de sexo - hijo de - y de - """,Nacimiento
+""" inscribo el NACIMIENTO de   - nacido el - hijo de - y de - "" ",Nacimiento
+""" inscribo el NACIMIENTO de   - nacido el - hijo de - y de - "" ",Nacimiento
+""" inscribo el NACIMIENTO de   - nacido el - hijo de - y de - "" ",Nacimiento
+"""Bajo el acta tomo folio del libro de nacimientos se encuentra inscripto el nacimiento de  ocurrido - siendo de sexo - hijo de - y de - """,Nacimiento
+"""Bajo el acta tomo folio del libro de nacimientos se encuentra inscripto el nacimiento de  ocurrido - siendo de sexo - hijo de - y de - """,Nacimiento
+"""Bajo el acta tomo folio del libro de nacimientos se encuentra inscripto el nacimiento de  ocurrido - siendo de sexo - hijo de - y de - """,Nacimiento
+""" inscribo el NACIMIENTO de   - nacido el - hijo de - y de - "" ",Nacimiento
+""" inscribo el NACIMIENTO de   - nacido el - hijo de - y de - "" ",Nacimiento
+""" inscribo el NACIMIENTO de   - nacido el - hijo de - y de - "" ",Nacimiento
+"""Bajo el acta tomo folio del libro de nacimientos se encuentra inscripto el nacimiento de  ocurrido - siendo de sexo - hijo de - y de - """,Nacimiento
+"""Bajo el acta tomo folio del libro de nacimientos se encuentra inscripto el nacimiento de  ocurrido - siendo de sexo - hijo de - y de - """,Nacimiento
+"""Bajo el acta tomo folio del libro de nacimientos se encuentra inscripto el nacimiento de  ocurrido - siendo de sexo - hijo de - y de - """,Nacimiento
+""" inscribo el NACIMIENTO de   - nacido el - hijo de - y de - "" ",Nacimiento
+""" inscribo el NACIMIENTO de   - nacido el - hijo de - y de - "" ",Nacimiento
+""" inscribo el NACIMIENTO de   - nacido el - hijo de - y de - "" ",Nacimiento
+"""Bajo el acta tomo folio del libro de nacimientos se encuentra inscripto el nacimiento de  ocurrido - siendo de sexo - hijo de - y de - """,Nacimiento
+"""Bajo el acta tomo folio del libro de nacimientos se encuentra inscripto el nacimiento de  ocurrido - siendo de sexo - hijo de - y de - """,Nacimiento
+"""Bajo el acta tomo folio del libro de nacimientos se encuentra inscripto el nacimiento de  ocurrido - siendo de sexo - hijo de - y de - """,Nacimiento
+""" inscribo el NACIMIENTO de   - nacido el - hijo de - y de - "" ",Nacimiento
+""" inscribo el NACIMIENTO de   - nacido el - hijo de - y de - "" ",Nacimiento
+""" inscribo el NACIMIENTO de   - nacido el - hijo de - y de - "" ",Nacimiento
+"""Bajo el acta tomo folio del libro de nacimientos se encuentra inscripto el nacimiento de  ocurrido - siendo de sexo - hijo de - y de - """,Nacimiento
+"""Bajo el acta tomo folio del libro de nacimientos se encuentra inscripto el nacimiento de  ocurrido - siendo de sexo - hijo de - y de - """,Nacimiento
+"""Bajo el acta tomo folio del libro de nacimientos se encuentra inscripto el nacimiento de  ocurrido - siendo de sexo - hijo de - y de - """,Nacimiento
+""" inscribo el NACIMIENTO de   - nacido el - hijo de - y de - "" ",Nacimiento
+""" inscribo el NACIMIENTO de   - nacido el - hijo de - y de - "" ",Nacimiento
+""" inscribo el NACIMIENTO de   - nacido el - hijo de - y de - "" ",Nacimiento
+"""Se informa a los empleados que, por razones de urgencia, se convoca a una reunión gremial extraordinaria a realizarse. La presencia de todos los trabajadores es requerida de manera inmediata.Delegado Gremial.""",Reunion_Gremial
+"""Se informa a los empleados que, por razones de urgencia, se convoca a una reunión gremial extraordinaria a realizarse. La presencia de todos los trabajadores es requerida de manera inmediata.Delegado Gremial.""",Reunion_Gremial
+"""Se informa a los empleados que, por razones de urgencia, se convoca a una reunión gremial extraordinaria a realizarse. La presencia de todos los trabajadores es requerida de manera inmediata.Delegado Gremial.""",Reunion_Gremial
+"""Se comunica a los empleados que se llevará a cabo una reunión gremial extraordinaria , en la sala de reuniones de planta baja, debido a una emergencia que requiere tratamiento inmediato. Se solicita su asistencia puntual. Representante Sindical.""",Reunion_Gremial
+"""Se comunica a los empleados que se llevará a cabo una reunión gremial extraordinaria , en la sala de reuniones de planta baja, debido a una emergencia que requiere tratamiento inmediato. Se solicita su asistencia puntual. Representante Sindical.""",Reunion_Gremial
+"""Se comunica a los empleados que se llevará a cabo una reunión gremial extraordinaria , en la sala de reuniones de planta baja, debido a una emergencia que requiere tratamiento inmediato. Se solicita su asistencia puntual. Representante Sindical.""",Reunion_Gremial
+"""Por motivos de fuerza mayor, se cita a todos los trabajadores a una reunión gremial extraordinaria. Su participación es de carácter urgente.Oficial Gremial.""",Reunion_Gremial
+"""Por motivos de fuerza mayor, se cita a todos los trabajadores a una reunión gremial extraordinaria. Su participación es de carácter urgente.Oficial Gremial.""",Reunion_Gremial
+"""Por motivos de fuerza mayor, se cita a todos los trabajadores a una reunión gremial extraordinaria. Su participación es de carácter urgente.Oficial Gremial.""",Reunion_Gremial
+"""Se convoca a los empleados a una reunión gremial extraordinaria para tratar asuntos urgentes en el área administrativa. Se requiere su asistencia de forma inmediata. Delegado del Sindicato.""",Reunion_Gremial
+"""Se convoca a los empleados a una reunión gremial extraordinaria para tratar asuntos urgentes en el área administrativa. Se requiere su asistencia de forma inmediata. Delegado del Sindicato.""",Reunion_Gremial
+"""Se convoca a los empleados a una reunión gremial extraordinaria para tratar asuntos urgentes en el área administrativa. Se requiere su asistencia de forma inmediata. Delegado del Sindicato.""",Reunion_Gremial
+"""Por cuestiones de emergencia, se llama a todos los trabajadores a una reunión gremial extraordinaria . Encargado Gremial.""",Reunion_Gremial
+"""Por cuestiones de emergencia, se llama a todos los trabajadores a una reunión gremial extraordinaria . Encargado Gremial.""",Reunion_Gremial
+"""Por cuestiones de emergencia, se llama a todos los trabajadores a una reunión gremial extraordinaria . Encargado Gremial.""",Reunion_Gremial
+"""Se informa que se llevará a cabo una reunión gremial extraordinaria , en la sala de conferencias, debido a la necesidad de abordar un tema urgente. Se ruega su asistencia inmediata. Representante del Personal.""",Reunion_Gremial
+"""Se informa que se llevará a cabo una reunión gremial extraordinaria , en la sala de conferencias, debido a la necesidad de abordar un tema urgente. Se ruega su asistencia inmediata. Representante del Personal.""",Reunion_Gremial
+"""Se informa que se llevará a cabo una reunión gremial extraordinaria , en la sala de conferencias, debido a la necesidad de abordar un tema urgente. Se ruega su asistencia inmediata. Representante del Personal.""",Reunion_Gremial
+"""Se cita a los empleados a una reunión gremial extraordinaria con carácter de urgencia, en el hall central. Responsable Sindical.""",Reunion_Gremial
+"""Se cita a los empleados a una reunión gremial extraordinaria con carácter de urgencia, en el hall central. Responsable Sindical.""",Reunion_Gremial
+"""Se cita a los empleados a una reunión gremial extraordinaria con carácter de urgencia, en el hall central. Responsable Sindical.""",Reunion_Gremial
+"""Por una situación de emergencia gremial, se convoca a una reunión extraordinaria  . Delegado de Personal.""",Reunion_Gremial
+"""Por una situación de emergencia gremial, se convoca a una reunión extraordinaria  . Delegado de Personal.""",Reunion_Gremial
+"""Por una situación de emergencia gremial, se convoca a una reunión extraordinaria  . Delegado de Personal.""",Reunion_Gremial
+"""Se comunica que se realizará una reunión gremial extraordinaria con motivo de tratar un asunto urgente .Encargado del Sindicato.""",Reunion_Gremial
+"""Se comunica que se realizará una reunión gremial extraordinaria con motivo de tratar un asunto urgente .Encargado del Sindicato.""",Reunion_Gremial
+"""Se comunica que se realizará una reunión gremial extraordinaria con motivo de tratar un asunto urgente .Encargado del Sindicato.""",Reunion_Gremial
+"""Se informa a los empleados que se realizará una reunión gremial extraordinaria con carácter urgente. Delegado Gremial.""",Reunion_Gremial
+"""Se informa a los empleados que se realizará una reunión gremial extraordinaria con carácter urgente. Delegado Gremial.""",Reunion_Gremial
+"""Se informa a los empleados que se realizará una reunión gremial extraordinaria con carácter urgente. Delegado Gremial.""",Reunion_Gremial
+"""De acuerdo con el Convenio Colectivo de Trabajo 130/75, se notifica que el Sr. Juan Pérez, DNI 35.123.456, ha sido citado a la reunión gremial ordinaria semanal del Sindicato de Empleados de Comercio  en la sede gremial .  La reunión se desarrollará dentro del horario laboral, conforme a lo estipulado en el artículo correspondiente del convenio.  Secretario General, Marta González.""",Reunion_Gremial
+"""De acuerdo con el Convenio Colectivo de Trabajo 130/75, se notifica que el Sr. Juan Pérez, DNI 35.123.456, ha sido citado a la reunión gremial ordinaria semanal del Sindicato de Empleados de Comercio  en la sede gremial .  La reunión se desarrollará dentro del horario laboral, conforme a lo estipulado en el artículo correspondiente del convenio.  Secretario General, Marta González.""",Reunion_Gremial
+"""De acuerdo con el Convenio Colectivo de Trabajo 130/75, se notifica que el Sr. Juan Pérez, DNI 35.123.456, ha sido citado a la reunión gremial ordinaria semanal del Sindicato de Empleados de Comercio  en la sede gremial .  La reunión se desarrollará dentro del horario laboral, conforme a lo estipulado en el artículo correspondiente del convenio.  Secretario General, Marta González.""",Reunion_Gremial
+"""está convocada a participar en la reunión gremial ordinaria semanal .  auditorio del Sindicato de Comercio .  Delegado Gremial """,Reunion_Gremial
+"""está convocada a participar en la reunión gremial ordinaria semanal .  auditorio del Sindicato de Comercio .  Delegado Gremial """,Reunion_Gremial
+"""está convocada a participar en la reunión gremial ordinaria semanal .  auditorio del Sindicato de Comercio .  Delegado Gremial """,Reunion_Gremial
+"""deberá asistir a la reunión gremial ordinaria semanal.  Representante Sindical """,Reunion_Gremial
+"""deberá asistir a la reunión gremial ordinaria semanal.  Representante Sindical """,Reunion_Gremial
+"""deberá asistir a la reunión gremial ordinaria semanal.  Representante Sindical """,Reunion_Gremial
+""" reunión gremial ordinaria semanal  en las instalaciones de la sede gremial """,Reunion_Gremial
+""" reunión gremial ordinaria semanal  en las instalaciones de la sede gremial """,Reunion_Gremial
+""" reunión gremial ordinaria semanal  en las instalaciones de la sede gremial """,Reunion_Gremial
+""" asistir a la reunión gremial ordinaria semanal,  Sindicato de Comercio,  Representante Gremial .""",Reunion_Gremial
+""" asistir a la reunión gremial ordinaria semanal,  Sindicato de Comercio,  Representante Gremial .""",Reunion_Gremial
+""" asistir a la reunión gremial ordinaria semanal,  Sindicato de Comercio,  Representante Gremial .""",Reunion_Gremial
+"""Citar a reunión gremial - Sindicato de Empleados de Comercio - Delegado/a: Juan Pablo Díaz  Orden del día: 1) Revisión de beneficios sociales, 2) Ajustes en la jornada laboral, 3) Designación de delegados suplentes  - Presentarse con credencial gremial """,Reunion_Gremial
+"""Citar a reunión gremial - Sindicato de Empleados de Comercio - Delegado/a: Juan Pablo Díaz  Orden del día: 1) Revisión de beneficios sociales, 2) Ajustes en la jornada laboral, 3) Designación de delegados suplentes  - Presentarse con credencial gremial """,Reunion_Gremial
+"""Citar a reunión gremial - Sindicato de Empleados de Comercio - Delegado/a: Juan Pablo Díaz  Orden del día: 1) Revisión de beneficios sociales, 2) Ajustes en la jornada laboral, 3) Designación de delegados suplentes  - Presentarse con credencial gremial """,Reunion_Gremial
+"""Convocatoria urgente - Sindicato de Empleados de Comercio - Delegado/a:  Sede Sindical  - Motivo: Discusión sobre conflictos laborales en cadena de farmacias 'Vida Plena' -""",Reunion_Gremial
+"""Convocatoria urgente - Sindicato de Empleados de Comercio - Delegado/a:  Sede Sindical  - Motivo: Discusión sobre conflictos laborales en cadena de farmacias 'Vida Plena' -""",Reunion_Gremial
+"""Convocatoria urgente - Sindicato de Empleados de Comercio - Delegado/a:  Sede Sindical  - Motivo: Discusión sobre conflictos laborales en cadena de farmacias 'Vida Plena' -""",Reunion_Gremial
+"""Pre-asamblea informativa - Sindicato de Empleados de Comercio - Delegado/a: Auditorio Gremial -  Debate sobre escalas salariales 2024 y revisión de condiciones de contratación - Obligatoriedad: Todos los afiliados según estatuto gremial Alberto Fernández (Secretario Adjunto SEC Jujuy)""",Reunion_Gremial
+"""Pre-asamblea informativa - Sindicato de Empleados de Comercio - Delegado/a: Auditorio Gremial -  Debate sobre escalas salariales 2024 y revisión de condiciones de contratación - Obligatoriedad: Todos los afiliados según estatuto gremial Alberto Fernández (Secretario Adjunto SEC Jujuy)""",Reunion_Gremial
+"""Pre-asamblea informativa - Sindicato de Empleados de Comercio - Delegado/a: Auditorio Gremial -  Debate sobre escalas salariales 2024 y revisión de condiciones de contratación - Obligatoriedad: Todos los afiliados según estatuto gremial Alberto Fernández (Secretario Adjunto SEC Jujuy)""",Reunion_Gremial
+"""Convocatoria a reunión extraordinaria - Sindicato de Empleados de Comercio - Delegada: - Motivo: Análisis de casos de discriminación laboral en empresa 'Logística del Norte S.A.' - Fundamento legal: Art. 65 CCT 130/75 - Delegado General SEC Salta """,Reunion_Gremial
+"""Convocatoria a reunión extraordinaria - Sindicato de Empleados de Comercio - Delegada: - Motivo: Análisis de casos de discriminación laboral en empresa 'Logística del Norte S.A.' - Fundamento legal: Art. 65 CCT 130/75 - Delegado General SEC Salta """,Reunion_Gremial
+"""Convocatoria a reunión extraordinaria - Sindicato de Empleados de Comercio - Delegada: - Motivo: Análisis de casos de discriminación laboral en empresa 'Logística del Norte S.A.' - Fundamento legal: Art. 65 CCT 130/75 - Delegado General SEC Salta """,Reunion_Gremial
+"""Los sindicatos nos dirigimos a usted a fin de solicitar una reunion a la brevedad para iniciar la discusion paritaria.""",Reunion_Gremial
+"""Los sindicatos nos dirigimos a usted a fin de solicitar una reunion a la brevedad para iniciar la discusion paritaria.""",Reunion_Gremial
+"""Los sindicatos nos dirigimos a usted a fin de solicitar una reunion a la brevedad para iniciar la discusion paritaria.""",Reunion_Gremial
+""" gremial - Sindicato - Delegado/a:  Tema: Introducción a la Ley de Contrato de Trabajo y análisis de jurisprudencia reciente :  """,Reunion_Gremial
+""" gremial - Sindicato - Delegado/a:  Tema: Introducción a la Ley de Contrato de Trabajo y análisis de jurisprudencia reciente :  """,Reunion_Gremial
+""" gremial - Sindicato - Delegado/a:  Tema: Introducción a la Ley de Contrato de Trabajo y análisis de jurisprudencia reciente :  """,Reunion_Gremial
+"""Hospita control prenatal Servicio de Obstetricia  control clínico, ecografía obstétrica y laboratorio. Dra.  """,Salud_Materna
+"""Hospita control prenatal Servicio de Obstetricia  control clínico, ecografía obstétrica y laboratorio. Dra.  """,Salud_Materna
+"""Hospita control prenatal Servicio de Obstetricia  control clínico, ecografía obstétrica y laboratorio. Dra.  """,Salud_Materna
+"""Hospital - Servicio de Tocoginecología control prenatal  semana 24 de gestación  Parto   suplementación con hierro y ácido fólico . Dr.  """,Salud_Materna
+"""Hospital - Servicio de Tocoginecología control prenatal  semana 24 de gestación  Parto   suplementación con hierro y ácido fólico . Dr.  """,Salud_Materna
+"""Hospital - Servicio de Tocoginecología control prenatal  semana 24 de gestación  Parto   suplementación con hierro y ácido fólico . Dr.  """,Salud_Materna
+""" Hospital  Obstetricia certifica control prenatal de alto riesgo Diagnóstico: Diabetes Gestacional (estudio OGTT positivo) Dra.  """,Salud_Materna
+""" Hospital  Obstetricia certifica control prenatal de alto riesgo Diagnóstico: Diabetes Gestacional (estudio OGTT positivo) Dra.  """,Salud_Materna
+""" Hospital  Obstetricia certifica control prenatal de alto riesgo Diagnóstico: Diabetes Gestacional (estudio OGTT positivo) Dra.  """,Salud_Materna
+"""Clínica  paciente  control de embarazo suplementación con hierro.  Parto . Dr. """,Salud_Materna
+"""Clínica  paciente  control de embarazo suplementación con hierro.  Parto . Dr. """,Salud_Materna
+"""Clínica  paciente  control de embarazo suplementación con hierro.  Parto . Dr. """,Salud_Materna
+""" Clínica Maternidad paciente control prenatal semana 20 de gestación. ecografía Doppler y perfil bioquímico completo . Dr.  Dra. """,Salud_Materna
+""" Clínica Maternidad paciente control prenatal semana 20 de gestación. ecografía Doppler y perfil bioquímico completo . Dr.  Dra. """,Salud_Materna
+""" Clínica Maternidad paciente control prenatal semana 20 de gestación. ecografía Doppler y perfil bioquímico completo . Dr.  Dra. """,Salud_Materna
+"""Hospital  paciente  control prenatal en el Servicio de Obstetricia. Se realizó control clínico, ecografía obstétrica y laboratorio. Dra. """,Salud_Materna
+"""Hospital  paciente  control prenatal en el Servicio de Obstetricia. Se realizó control clínico, ecografía obstétrica y laboratorio. Dra. """,Salud_Materna
+"""Hospital  paciente  control prenatal en el Servicio de Obstetricia. Se realizó control clínico, ecografía obstétrica y laboratorio. Dra. """,Salud_Materna
+"""Hospital Servicio de Tocoginecología control (semana 24 de gestación). Fecha Probable de Parto .suplementación con hierro y ácido fólico Dr""",Salud_Materna
+"""Hospital Servicio de Tocoginecología control (semana 24 de gestación). Fecha Probable de Parto .suplementación con hierro y ácido fólico Dr""",Salud_Materna
+"""Hospital Servicio de Tocoginecología control (semana 24 de gestación). Fecha Probable de Parto .suplementación con hierro y ácido fólico Dr""",Salud_Materna
+"""El Hospital  Obstetricia control de alto riesgo de la paciente Diagnóstico: Diabetes Gestacional (estudio OGTT positivo). Se programó control multidisciplinario  Dra. """,Salud_Materna
+"""El Hospital  Obstetricia control de alto riesgo de la paciente Diagnóstico: Diabetes Gestacional (estudio OGTT positivo). Se programó control multidisciplinario  Dra. """,Salud_Materna
+"""El Hospital  Obstetricia control de alto riesgo de la paciente Diagnóstico: Diabetes Gestacional (estudio OGTT positivo). Se programó control multidisciplinario  Dra. """,Salud_Materna
+"""La Clínica  control de embarazo (semana 16). vacuna antigripal y se indicó suplementación con hierro. Fecha Probable de Parto Dr. """,Salud_Materna
+"""La Clínica  control de embarazo (semana 16). vacuna antigripal y se indicó suplementación con hierro. Fecha Probable de Parto Dr. """,Salud_Materna
+"""La Clínica  control de embarazo (semana 16). vacuna antigripal y se indicó suplementación con hierro. Fecha Probable de Parto Dr. """,Salud_Materna
+"""La Clínica control prenatal  semana 20 de gestación. Se realizó ecografía Doppler y perfil bioquímico completo, con resultados dentro de parámetros normale Dr  """,Salud_Materna
+"""La Clínica control prenatal  semana 20 de gestación. Se realizó ecografía Doppler y perfil bioquímico completo, con resultados dentro de parámetros normale Dr  """,Salud_Materna
+"""La Clínica control prenatal  semana 20 de gestación. Se realizó ecografía Doppler y perfil bioquímico completo, con resultados dentro de parámetros normale Dr  """,Salud_Materna
+""" embarazo -  Hospital Argerich. paciente  se encuentra embarazada con fecha de última menstruación el 15/05/2024 y fecha probable de parto el 22/02/2025. Actualmente cursa 12 semanas de gestación con control prenatal normal.  Dr. Luis Fernández""",Salud_Materna
+""" embarazo -  Hospital Argerich. paciente  se encuentra embarazada con fecha de última menstruación el 15/05/2024 y fecha probable de parto el 22/02/2025. Actualmente cursa 12 semanas de gestación con control prenatal normal.  Dr. Luis Fernández""",Salud_Materna
+""" embarazo -  Hospital Argerich. paciente  se encuentra embarazada con fecha de última menstruación el 15/05/2024 y fecha probable de parto el 22/02/2025. Actualmente cursa 12 semanas de gestación con control prenatal normal.  Dr. Luis Fernández""",Salud_Materna
+"""La Clínica  tiene una fecha probable de parto el 10/03/2025 y se encuentra en la semana 20 de gestación. Se indica licencia prenatal a partir del 10/02/2025 (8 semanas previas al parto), según normativa laboral vigente. Diagnóstico: embarazo único sin complicaciones.  Dra. """,Salud_Materna
+"""La Clínica  tiene una fecha probable de parto el 10/03/2025 y se encuentra en la semana 20 de gestación. Se indica licencia prenatal a partir del 10/02/2025 (8 semanas previas al parto), según normativa laboral vigente. Diagnóstico: embarazo único sin complicaciones.  Dra. """,Salud_Materna
+"""La Clínica  tiene una fecha probable de parto el 10/03/2025 y se encuentra en la semana 20 de gestación. Se indica licencia prenatal a partir del 10/02/2025 (8 semanas previas al parto), según normativa laboral vigente. Diagnóstico: embarazo único sin complicaciones.  Dra. """,Salud_Materna
+"""El Servicio de Obstetricia del Hospital  se encuentra en la semana 28 de gestación, con fecha probable de parto estimada para el 15/11/2024. Los controles prenatales muestran evolución normal sin complicaciones. Se recomienda iniciar licencia laboral a partir del 01/10/2024 (45 días previos al parto).  Dra. """,Salud_Materna
+"""El Servicio de Obstetricia del Hospital  se encuentra en la semana 28 de gestación, con fecha probable de parto estimada para el 15/11/2024. Los controles prenatales muestran evolución normal sin complicaciones. Se recomienda iniciar licencia laboral a partir del 01/10/2024 (45 días previos al parto).  Dra. """,Salud_Materna
+"""El Servicio de Obstetricia del Hospital  se encuentra en la semana 28 de gestación, con fecha probable de parto estimada para el 15/11/2024. Los controles prenatales muestran evolución normal sin complicaciones. Se recomienda iniciar licencia laboral a partir del 01/10/2024 (45 días previos al parto).  Dra. """,Salud_Materna
+"""La Clínica espera gemelos con fecha probable de parto el 10/12/2024. Por tratarse de un embarazo múltiple, se autoriza licencia prenatal extendida desde el 25/10/2024 . Control ecográfico normal. Dr. """,Salud_Materna
+"""La Clínica espera gemelos con fecha probable de parto el 10/12/2024. Por tratarse de un embarazo múltiple, se autoriza licencia prenatal extendida desde el 25/10/2024 . Control ecográfico normal. Dr. """,Salud_Materna
+"""La Clínica espera gemelos con fecha probable de parto el 10/12/2024. Por tratarse de un embarazo múltiple, se autoriza licencia prenatal extendida desde el 25/10/2024 . Control ecográfico normal. Dr. """,Salud_Materna
+""" por embarazo que la Sra. Gomez de 25 años DNI N° 32456765 se encuentra embarazada de 14 semanas de gestacion, con fecha probable de parto para el 4 de mayo de 2025. """,Salud_Materna
+""" por embarazo que la Sra. Gomez de 25 años DNI N° 32456765 se encuentra embarazada de 14 semanas de gestacion, con fecha probable de parto para el 4 de mayo de 2025. """,Salud_Materna
+""" por embarazo que la Sra. Gomez de 25 años DNI N° 32456765 se encuentra embarazada de 14 semanas de gestacion, con fecha probable de parto para el 4 de mayo de 2025. """,Salud_Materna
+"""El Centro de Salud fecha probable de parto el 20/01/2025, requiere reposo laboral anticipado desde el 01/12/2024 debido a diagnóstico de hipertensión gestacional (control ecográfico y laboratorio adjuntos) Dr """,Salud_Materna
+"""El Centro de Salud fecha probable de parto el 20/01/2025, requiere reposo laboral anticipado desde el 01/12/2024 debido a diagnóstico de hipertensión gestacional (control ecográfico y laboratorio adjuntos) Dr """,Salud_Materna
+"""El Centro de Salud fecha probable de parto el 20/01/2025, requiere reposo laboral anticipado desde el 01/12/2024 debido a diagnóstico de hipertensión gestacional (control ecográfico y laboratorio adjuntos) Dr """,Salud_Materna
+"""Hospital . La paciente María Laura Gómez  se encuentra embarazada con fecha de última menstruación el 15/05/2024 y fecha probable de parto el 22/02/2025. Actualmente cursa 12 semanas de gestación con control prenatal normal. por el Dr """,Salud_Materna
+"""Hospital . La paciente María Laura Gómez  se encuentra embarazada con fecha de última menstruación el 15/05/2024 y fecha probable de parto el 22/02/2025. Actualmente cursa 12 semanas de gestación con control prenatal normal. por el Dr """,Salud_Materna
+"""Hospital . La paciente María Laura Gómez  se encuentra embarazada con fecha de última menstruación el 15/05/2024 y fecha probable de parto el 22/02/2025. Actualmente cursa 12 semanas de gestación con control prenatal normal. por el Dr """,Salud_Materna
+"""La Clínica  parto ,  semana 20 de gestación. Se indica licencia prenatal (8 semanas previas al parto), embarazo único sin complicaciones Dra.""",Salud_Materna
+"""La Clínica  parto ,  semana 20 de gestación. Se indica licencia prenatal (8 semanas previas al parto), embarazo único sin complicaciones Dra.""",Salud_Materna
+"""La Clínica  parto ,  semana 20 de gestación. Se indica licencia prenatal (8 semanas previas al parto), embarazo único sin complicaciones Dra.""",Salud_Materna
+"""El Servicio de Obstetricia se encuentra en la semana 28 de gestación Los controles prenatales muestran evolución normal sin complicaciones. Se recomienda iniciar licencia laboral a partir del 01/10/2024 (45 días previos al parto).  Dra. """,Salud_Materna
+"""El Servicio de Obstetricia se encuentra en la semana 28 de gestación Los controles prenatales muestran evolución normal sin complicaciones. Se recomienda iniciar licencia laboral a partir del 01/10/2024 (45 días previos al parto).  Dra. """,Salud_Materna
+"""El Servicio de Obstetricia se encuentra en la semana 28 de gestación Los controles prenatales muestran evolución normal sin complicaciones. Se recomienda iniciar licencia laboral a partir del 01/10/2024 (45 días previos al parto).  Dra. """,Salud_Materna
+"""La Clínica espera gemelos  parto , embarazo múltiple , Control ecográfico normal. Dr. """,Salud_Materna
+"""La Clínica espera gemelos  parto , embarazo múltiple , Control ecográfico normal. Dr. """,Salud_Materna
+"""La Clínica espera gemelos  parto , embarazo múltiple , Control ecográfico normal. Dr. """,Salud_Materna
+""" Medico por embarazo: se encuentra embarazada de 14 semanas de gestacion, con fecha probable de parto """,Salud_Materna
+""" Medico por embarazo: se encuentra embarazada de 14 semanas de gestacion, con fecha probable de parto """,Salud_Materna
+""" Medico por embarazo: se encuentra embarazada de 14 semanas de gestacion, con fecha probable de parto """,Salud_Materna

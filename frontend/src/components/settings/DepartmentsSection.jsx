@@ -116,8 +116,8 @@ const DepartmentsSection = () => {
 
   return (
     <div className="bg-background p-6 rounded-lg shadow mb-6">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-bold text-foreground">Gestión de Departamentos</h2>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-3 md:gap-0">
+        <h2 className="text-lg sm:text-xl font-bold text-foreground">Gestión de Departamentos</h2>
         <button
           onClick={() => {
             setEditingDepartment(null);

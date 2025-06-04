@@ -74,6 +74,10 @@ const Header = ({ toggleDrawer }) => {
       localStorage.setItem('theme', 'light');
       document.documentElement.classList.remove('dark');
     }
+
+    window.dispatchEvent(new CustomEvent('themeChanged', {
+      detail: { theme: newMode ? 'dark' : 'light' }
+    }));
   };
 
   return (

@@ -117,7 +117,7 @@ const MyDataPage = () => {
   return (
     <div className="p-6 bg-background">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold flex items-center text-foreground">
+        <h1 className="text-xl sm:text-2xl font-bold flex items-center text-foreground">
           <FiUser className="mr-2" />
           Mis Datos
         </h1>
@@ -136,7 +136,7 @@ const MyDataPage = () => {
           </div>
         ) : !error && (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               {dataFields.map((data, index) => (
                 <div key={index} className="border-b border-border pb-4">
                   <div className="text-sm font-medium text-foreground flex items-center">
