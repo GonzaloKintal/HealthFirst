@@ -64,24 +64,20 @@ def anomalies_supervisors(data): #recibe un dataframe
 
 def create_dataframe_supervisor(start_date=None, end_date=None): # esto para lo que pide el admin
     supervisors = HealthFirstUser.objects.filter(role__name='supervisor')
-
-    # Base queryset de licencias (con posible filtro de fechas)
+    
     license_base = License.objects.filter(evaluator=OuterRef('pk'))
     if start_date and end_date:
         license_base = license_base.filter(status__evaluation_date__range=(start_date, end_date))
-
-    # Subqueries para contar evaluaciones
-    total_requests = license_base.annotate(c=Count('license_id')).values('c')[:1]
-    approved_requests = license_base.filter(status__name='approved').annotate(c=Count('license_id')).values('c')[:1]
-    rejected_requests = license_base.filter(status__name='rejected').annotate(c=Count('license_id')).values('c')[:1]
-
-    # Anotaciones al queryset de usuarios
+    
+    total_requests = license_base.order_by().values('evaluator').annotate(c=Count('pk')).values('c')[:1]
+    approved_requests = license_base.filter(status__name='approved').order_by().values('evaluator').annotate(c=Count('pk')).values('c')[:1]
+    rejected_requests = license_base.filter(status__name='rejected').order_by().values('evaluator').annotate(c=Count('pk')).values('c')[:1]
+    
     supervisors = supervisors.annotate(
         total_requests=Coalesce(Subquery(total_requests), Value(0, output_field=IntegerField())),
         approved_requests=Coalesce(Subquery(approved_requests), Value(0, output_field=IntegerField())),
         rejected_requests=Coalesce(Subquery(rejected_requests), Value(0, output_field=IntegerField()))
     )
-
     # Convertir a DataFrame
     df = pd.DataFrame(list(supervisors.values(
         'id', 'total_requests', 'approved_requests', 'rejected_requests'
