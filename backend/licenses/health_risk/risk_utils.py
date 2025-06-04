@@ -1,24 +1,23 @@
 import pandas as pd 
-import os
 import sys
+import os 
 import django
 from django.db.models import Q, Count
 from datetime import datetime, timedelta
 
-# Configuración Django
-BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.append(BASE_DIR)
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'settings.local')
 django.setup()
 
-from licenses.models import HealthFirstUser, Department
-
+from users.models import HealthFirstUser, Department
 def get_high_risk_department_ids():
     return list(
         Department.objects.filter(
             description__icontains='riesgo'
-        ).values_list('id', flat=True)
+        ).values_list('department_id', flat=True)
     )
+
 
 def generate_risk_dataset():
     # Fechas límites
@@ -32,7 +31,7 @@ def generate_risk_dataset():
         sickness_license_count=Count(
             'licenses', 
             filter=Q(
-                licenses__name='Enfermedad',
+                licenses__type__name='Enfermedad',
                 licenses__start_date__gte=a_year_ago,
                 licenses__status__name='Aprobada', 
                 licenses__is_deleted=False
@@ -41,7 +40,7 @@ def generate_risk_dataset():
         accident_license_count=Count(
             'licenses',
             filter=Q(
-                licenses__name='Accidente de Trabajo',
+                licenses__type__name='Accidente de Trabajo',
                 licenses__start_date__gte=a_year_ago,
                 licenses__status__name='Aprobada',
                 licenses__is_deleted=False
@@ -90,3 +89,7 @@ def generate_risk_dataset():
     
     return df
 
+"""-----------------------------------------------------------------------------------------"""
+if __name__ == "__main__":
+    print(generate_risk_dataset())
+    """print(get_high_risk_department_ids)"""

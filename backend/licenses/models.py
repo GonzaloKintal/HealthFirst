@@ -23,7 +23,7 @@ class Status(models.Model):
         return f"Estado {self.name} - Licencia {self.license.license_id}"  
 
 class LicenseType(models.Model):
-    name=models.CharField(primary_key=True,max_length=40,null=False, blank=False)
+    name=models.CharField(max_length=40,null=False, blank=False)
     description=models.CharField(max_length=100,null=False, blank=False)
     min_advance_notice_days=models.IntegerField(null=False, blank=False)
     certificate_require= models.BooleanField(default=True)
