@@ -238,3 +238,29 @@ export const exportLicensesToCSV = async (filters = {}) => {
     };
   }
 };
+
+// Obtener anomalías de supervisores
+export const getSupervisorAnomalies = async (filters = {}) => {
+  try {
+    const response = await api.get('/licenses/anomalies/supervisor', {
+      params: {
+        start_date: filters.start_date || null,
+        end_date: filters.end_date || null,
+        user_id: filters.user_id || null,
+        is_anomaly: filters.is_anomaly || null
+      }
+    });
+    
+    return {
+      success: true,
+      data: response.data.data || []
+    };
+  } catch (error) {
+    console.error('Error fetching supervisor anomalies:', error);
+    return {
+      success: false,
+      error: error.response?.data?.error || 'Error al obtener las anomalías de supervisores',
+      data: []
+    };
+  }
+};

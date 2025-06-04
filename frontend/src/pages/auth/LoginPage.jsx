@@ -156,7 +156,7 @@ const LoginPage = () => {
         </div>
 
         {/* Sección derecha - Formulario (siempre visible) */}
-        <div className="flex-1 flex items-center justify-center p-4 pt-16 lg:pt-0">
+        <div className="flex-1 flex items-center justify-center m-10 p-4 pt-16 lg:pt-0">
           <div className="w-full max-w-lg bg-background dark:bg-card p-8 rounded-lg shadow-lg border-2 border-border dark:border-border">
             <div className="flex justify-end lg:hidden">
               <button 

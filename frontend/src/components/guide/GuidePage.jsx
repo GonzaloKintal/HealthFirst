@@ -3,6 +3,7 @@ import { FiBook, FiFileText, FiSend } from 'react-icons/fi';
 import RequestLicense from './sections/RequestLicense';
 import LicenseTypes from './sections/LicenseTypes';
 import SectionBase from './sections/SectionBase';
+import React from 'react';
 
 const GuidePage = () => {
   const [activeSection, setActiveSection] = useState(0);
@@ -12,13 +13,13 @@ const GuidePage = () => {
     {
       id: 'solicitar-licencia',
       title: 'Cómo solicitar licencia',
-      icon: <FiSend className="mr-2" />,
+      icon: <FiSend className="mr-2 text-foreground" />,
       component: <RequestLicense />,
     },
     {
       id: 'tipos-licencia',
       title: 'Tipos de licencia disponibles',
-      icon: <FiFileText className="mr-2" />,
+      icon: <FiFileText className="mr-2 text-foreground" />,
       component: <LicenseTypes />,
     },
   ];
@@ -72,8 +73,10 @@ const GuidePage = () => {
                         : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-foreground'
                     }`}
                   >
-                    <div className={`flex items-center ${activeSection === index ? 'text-white' : 'text-foreground'}`}>
-                      {section.icon}
+                    <div className="flex items-center">
+                      {React.cloneElement(section.icon, {
+                        className: `mr-2 ${activeSection === index ? 'text-white' : 'text-foreground'}`
+                      })}
                       {section.title}
                     </div>
                   </button>
@@ -90,13 +93,14 @@ const GuidePage = () => {
               <h2 className="text-lg sm:text-xl font-semibold text-foreground mb-4">Bienvenido a la guía del sistema</h2>
             </div>
 
-            {/* Mostramos solo la sección activa */}
-            <SectionBase
-              id={guideSections[activeSection].id}
-              icon={guideSections[activeSection].icon}
-            >
-              {guideSections[activeSection].component}
-            </SectionBase>
+            <div className="flex items-center mb-4">
+              {guideSections[activeSection].icon}
+              <h3 className="text-lg font-medium text-foreground">
+                {guideSections[activeSection].title}
+              </h3>
+            </div>
+            
+            {guideSections[activeSection].component}
 
             <div className="mt-8 p-4 bg-special-light dark:bg-special-dark border-l-4 border-primary-border rounded">
               <p className="text-primary-text">

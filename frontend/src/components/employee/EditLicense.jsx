@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { FiCalendar, FiUpload, FiUser, FiFileText, FiSave } from 'react-icons/fi';
+import { FiCalendar, FiUpload, FiUser, FiFileText, FiSave, FiEdit } from 'react-icons/fi';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import Notification from '../utils/Notification';
 import { getLicenseDetail,
@@ -273,14 +273,18 @@ useEffect(() => {
         />
       )}
       
-      <div className="flex justify-between items-center mb-6">
+      {/* <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-foreground">Editar Licencia</h1>
-      </div>
+      </div> */}
+      <h1 className="text-xl sm:text-2xl mb-6 font-bold flex items-center text-foreground">
+        <FiEdit className="mr-2" />
+        Editar Licencia
+      </h1>
       
       <form onSubmit={handleSubmit} className="space-y-6" autoComplete='off'>
         {/* Sección de Datos Personales (solo lectura) */}
         <div className="bg-background p-6 rounded-lg shadow">
-          <h2 className="text-xl font-semibold mb-4 flex items-center text-foreground">
+          <h2 className="text-xl sm:text-2xl font-semibold mb-4 flex items-center text-foreground">
             <FiUser className="mr-2" /> Datos del Solicitante
           </h2>
           
@@ -349,7 +353,7 @@ useEffect(() => {
 
         {/* Sección de Detalles de la Licencia (editable) */}
         <div className="bg-background p-6 rounded-lg shadow">
-          <h2 className="text-xl font-semibold mb-4 flex items-center text-foreground">
+          <h2 className="text-xl sm:text-2xl font-semibold mb-4 flex items-center text-foreground">
             <FiCalendar className="mr-2" /> Detalles de la Licencia
           </h2>
           
@@ -431,7 +435,7 @@ useEffect(() => {
 
         {/* Sección de Documentación (editable) */}
         <div className="bg-background p-6 rounded-lg shadow">
-          <h2 className="text-xl font-semibold mb-4 flex items-center text-foreground">
+          <h2 className="text-xl sm:text-2xl font-semibold mb-4 flex items-center text-foreground">
             <FiUpload className="mr-2" /> Documentación Adjunta
           </h2>
           
@@ -443,7 +447,7 @@ useEffect(() => {
             {({ validateFile, error }) => (
               <div>
                 <label className="block text-sm font-medium text-foreground bg-background mb-1">
-                  Adjuntar Documento (opcional)
+                  Adjuntar Documento
                 </label>
                 
                 {existingDocument && !formData.documents && (
@@ -453,7 +457,7 @@ useEffect(() => {
                   </div>
                 )}
                 
-                <div className="mt-1 flex items-center">
+                <div className="mt-1 flex flex-col sm:flex-row items-start sm:items-center">
                   <label className="cursor-pointer bg-background py-2 px-3 border border-border rounded-md shadow-sm text-sm leading-4 font-medium text-foreground hover:bg-card focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-border">
                     <FiFileText className="inline mr-2 text-lg" />
                     {(formData.documents || existingDocument) ? 'Reemplazar archivo' : 'Seleccionar archivo'}
