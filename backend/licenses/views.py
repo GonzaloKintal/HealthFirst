@@ -6,6 +6,7 @@ from django.contrib.auth import get_user_model
 from xmlrpc.client import NOT_WELLFORMED_ERROR
 
 from .anomalies.isolation_forest import get_supervisor_anomalies
+from messaging.services.brevo_email import *
 from .models import *
 from django.http import JsonResponse, HttpResponse
 import json
