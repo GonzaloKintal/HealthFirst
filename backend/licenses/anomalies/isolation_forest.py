@@ -148,26 +148,26 @@ def generate_employees_csv(path_csv='employees_data_1000.csv', n=1000, semilla=4
     
     employee_id = np.arange(1, n+1)
 
-    # Total de solicitudes por empleado
+    #total de solicitudes por empleado
     total_requests = np.random.randint(5, 51, size=n)
 
-    # Total de días solicitados
+    #ttal de días solicitados
     required_days = np.random.randint(10, 201, size=n)
 
-    # Antigüedad aleatoria entre 1 mes y 10 años
+    #antiguedad aleatoria entre 1 mes y 10 años
     today = datetime.today()
     start_dates = [today - timedelta(days=int(np.random.uniform(30, 3650))) for _ in range(n)]
     seniority_days = [(today - d).days for d in start_dates]
 
-    # Cálculo inicial
+    #calculo inicial
     required_days_rate = required_days / total_requests
     days_per_year = required_days / (np.array(seniority_days) / 365 + 1e-3)
 
-    # Añadir anomalías al 5% de los empleados
+    #se agregan anomalias al 5% de los empleados
     num_anomalies = int(n * 0.05)
     anomaly_indices = np.random.choice(n, size=num_anomalies, replace=False)
 
-    # Aumentar artificialmente required_days_rate y/o days_per_year
+    #se aumentan required_days_rate y days_per_year
     for idx in anomaly_indices:
         if np.random.rand() < 0.5:
             required_days_rate[idx] *= np.random.uniform(2, 4)  # anómalo alto
@@ -176,12 +176,12 @@ def generate_employees_csv(path_csv='employees_data_1000.csv', n=1000, semilla=4
             days_per_year[idx] *= np.random.uniform(2, 4)  # anómalo alto
             required_days[idx] = int(days_per_year[idx] * (seniority_days[idx] / 365))
 
-    # Recalcular métricas después de modificar required_days
+    #calculo después de modificar required_days
     required_days = np.clip(required_days, 1, None)  # evitar valores negativos
     required_days_rate = required_days / total_requests
     days_per_year = required_days / (np.array(seniority_days) / 365 + 1e-3)
 
-    # Crear DataFrame final
+    #creo el dataFrame
     df = pd.DataFrame({
         'empleado_id': employee_id,
         'total_requests': total_requests,
@@ -199,11 +199,11 @@ def create_model_empleados(path_csv): # le paso el csv para el entreamiento
     data= pd.read_csv(path_csv)
     features = data[['total_requests', 'required_days', 'required_days_rate','seniority_days','days_per_year']]
 
-     # Entrenamiento del modelo Isolation Forest
+    #entrenamiento del modelo Isolation Forest
     model = IsolationForest(n_estimators=100, contamination=0.2, random_state=42)
     model.fit(features)
 
-    # Guardar el modelo en un archivo, ESTO ES LO CORRECTO
+    #se guardan el modelo en un archivo
     joblib.dump(model, MODEL_PATH_EMP)
 
     return model # NO deberia retornarlo, pero por ahora para pruebas lo dejo así
@@ -226,9 +226,25 @@ def create_dataFrame_empleados():
     #print(df)
     return df
 
+def anomalies_employees(data): #recibe un dataframe
+    #Cargo el modelo previamente guardado
+    model = joblib.load(MODEL_PATH_EMP)
+    #data= pd.read_csv(path_csv)
+    features = data[['total_requests', 'required_days', 'required_days_rate','seniority_days','days_per_year']]
+
+
+    data['anomaly_score'] = model.decision_function(features)
+    data['is_anomaly'] = model.predict(features)
+    data['is_anomaly'] = data['is_anomaly'].map({1: 0, -1: 1})  # 1 = Anómalo, 0 = Normal
+
+    #data['required_days_rate'] = (data['required_days_rate']*100).map("{:.2f}%".format)
+    #data['required_days_rate'] = (data['required_days_rate']*100).map("{:.2f}%".format)
+
+    return(data)
+
 #---------------------------------------------------------------------------------------------------------------
 #falta evaluar fechas de ingreso, es mas anomalo teniendo en cuenta la fecha en la que el supervisor comenzó a trabajr
-def dataframe_pruebas(): # para pruebas
+def dataframe_pruebas_sup(): # para pruebas
     data = pd.DataFrame({
     'evaluator_id': [6,7, 8, 9, 10, 11, 12,13],
     'total_requests': [0,40, 28, 35, 50, 20, 30,100],
@@ -236,18 +252,39 @@ def dataframe_pruebas(): # para pruebas
     'rejected_requests': [0,5, 4, 17, 2, 17, 20,50],
     })
 
-    # Calcular tasas
-    data['approval_rate'] = data.apply(
-    lambda row: row['approved_requests'] / row['total_requests'] if row['total_requests'] > 0 else 0,
-    axis=1
+    data['approval_rate'] = 0.0
+    data['rejection_rate'] = 0.0
+
+    data.loc[data['total_requests'] > 0, 'approval_rate'] = (
+        data.loc[data['total_requests'] > 0, 'approved_requests'] / data.loc[data['total_requests'] > 0, 'total_requests']
     )
 
-    data['rejection_rate'] = data.apply(
-        lambda row: row['rejected_requests'] / row['total_requests'] if row['total_requests'] > 0 else 0,
-        axis=1
+    data.loc[data['total_requests'] > 0, 'rejection_rate'] = (
+        data.loc[data['total_requests'] > 0, 'rejected_requests'] / data.loc[data['total_requests'] > 0, 'total_requests']
     )
     return data
+
+def dataframe_pruebas_emp(): # para pruebas
+    data = pd.DataFrame({
+    'employee_id':      [101, 102, 103, 104, 105, 106, 107, 108],
+    'total_requests':   [15,   20,   10,   5,   50,   30,   25,   8],
+    'required_days':    [30,   25,   12,   5,  120,   60,   50,   10],  # ahora mínimo = total_requests
+    'seniority_days':   [365, 730, 180,  90, 1095, 3650, 1460, 180]     # 1 a 10 años de antigüedad
+    })
+
+    data['required_days_rate'] = 0.0
+    data['days_per_year'] = 0.0
+
+    data.loc[data['total_requests'] > 0, 'required_days_rate'] = (
+        data.loc[data['total_requests'] > 0, 'required_days'] / data.loc[data['total_requests'] > 0, 'total_requests']
+    )
+    data['days_per_year'] = data['required_days'] / (data['seniority_days'] / 365 + 1e-3)  # evitar división por cero
+
+    return data
+
     
 #---------------------------------------------------------------------------------------------------------------
 #print(get_supervisor_anomalies())
-generate_empleados_csv()
+#generate_empleados_csv()
+create_model_empleados('employees_data_1000.csv')
+print(anomalies_employees(dataframe_pruebas_emp()))
