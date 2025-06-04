@@ -11,22 +11,22 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 FILE_PATH = BASE_DIR / 'health_risk'
 
 
-def assign_risk(edad, cant_cert_enfermedad, cant_cert_accidente, departamento):
+def assign_risk(edad, cant_lic_enfermedad, cant_lic_accidente, departamento):
     # Consideraciones de riesgo
     MAX_LIC_ENFERMEDAD = 3   
     MAX_LIC_ACCIDENTE = 2    
     EDAD_REFERENCIA = 60
     
     # Pesos
-    peso_edad = 0.3
+    peso_edad = 0.5
     peso_enfermedad = 0.4
     peso_accidente = 0.3
-    peso_departamento=0.5
+    peso_departamento=0.3
     
     # Normalizamos los valores
     edad_norm = min(edad / EDAD_REFERENCIA, 1)  
-    enfermedad_norm = min(cant_cert_enfermedad / MAX_LIC_ENFERMEDAD, 1) 
-    accidente_norm = min(cant_cert_accidente / MAX_LIC_ACCIDENTE, 1)  
+    enfermedad_norm = min(cant_lic_enfermedad / MAX_LIC_ENFERMEDAD, 1) 
+    accidente_norm = min(cant_lic_accidente / MAX_LIC_ACCIDENTE, 1)  
     
     # Calculamos score (0-10)
     score = (edad_norm * peso_edad + 
@@ -46,15 +46,15 @@ def generate_dataset(nro_empleados=500, seed=None):
 
     # Generación de datos aleatorios
     edad = np.random.randint(18, 71, nro_empleados)
-    cant_cert_enfermedad = np.random.randint(0, 4, nro_empleados)  # 0-3
-    cant_cert_accidente = np.random.randint(0, 3, nro_empleados)    # 0-2
+    cant_lic_enfermedad = np.random.randint(0, 5, nro_empleados)  # 0-3
+    cant_lic_accidente = np.random.randint(0, 4, nro_empleados)    # 0-2
     departamento = np.random.randint(0,2,nro_empleados)
 
     # Calculamos el riesgo para cada empleado
     riesgo = [
         assign_risk(ed, enf, acc, dep) 
         for ed, enf, acc, dep in zip(
-            edad, cant_cert_enfermedad, cant_cert_accidente, departamento
+            edad, cant_lic_enfermedad, cant_lic_accidente, departamento
         )
     ]
 
@@ -62,9 +62,9 @@ def generate_dataset(nro_empleados=500, seed=None):
     df = pd.DataFrame({
         'ID': range(1, nro_empleados + 1),
         'Edad': edad,
-        'Cant_licencias_enfermedad': cant_cert_enfermedad,
-        'Cant_licencias_accidente': cant_cert_accidente,
-        'Departamento': departamento,   
+        'Cant_licencias_enfermedad': cant_lic_enfermedad,
+        'Cant_licencias_accidente': cant_lic_accidente,
+        'Departamento_de_Riesgo': departamento,   
         'Riesgo': riesgo
     })
 

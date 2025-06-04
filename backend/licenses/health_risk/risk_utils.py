@@ -11,7 +11,14 @@ sys.path.append(BASE_DIR)
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'settings.local')
 django.setup()
 
-from licenses.models import HealthFirstUser
+from licenses.models import HealthFirstUser, Department
+
+def get_high_risk_department_ids():
+    return list(
+        Department.objects.filter(
+            description__icontains='riesgo'
+        ).values_list('id', flat=True)
+    )
 
 def generate_risk_dataset():
     # Fechas límites
@@ -53,6 +60,9 @@ def generate_risk_dataset():
     # Convertir a DataFrame
     df = pd.DataFrame.from_records(users)
     
+    #Definir si el departamento es o no de riesgo
+    high_risk_departments=get_high_risk_department_ids()
+    df['is_high_risk'] = df['department_id'].isin(high_risk_departments).astype(int)
     # Calcular edad
     df['age'] = (today - pd.to_datetime(df['date_of_birth'])).dt.days // 365
     
@@ -62,7 +72,7 @@ def generate_risk_dataset():
         'last_name', 
         'age', 
         'email', 
-        'department', 
+        'is_high_risk', 
         'sickness_license_count', 
         'accident_license_count'
     ]]
@@ -73,9 +83,10 @@ def generate_risk_dataset():
         'Apellido',
         'Edad',
         'Email',
-        'Departamento',
+        'Departamento_de_Riesgo',
         'Cant_licencias_enfermedad',
         'Cant_licencias_accidente'
     ]
     
     return df
+

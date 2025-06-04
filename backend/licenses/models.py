@@ -23,7 +23,7 @@ class Status(models.Model):
         return f"Estado {self.name} - Licencia {self.license.license_id}"  
 
 class LicenseType(models.Model):
-    name=models.CharField(max_length=40,null=False, blank=False)
+    name=models.CharField(primary_key=True,max_length=40,null=False, blank=False)
     description=models.CharField(max_length=100,null=False, blank=False)
     min_advance_notice_days=models.IntegerField(null=False, blank=False)
     certificate_require= models.BooleanField(default=True)
@@ -49,9 +49,6 @@ class License(models.Model):
     information = models.TextField(blank=True, null=True)
     request_date = models.DateField()
     closing_date = models.DateField(blank=True, null=True)
-    justified = models.BooleanField(default=False)
-    certificate_need = models.BooleanField(default=False)
-    certificate_immediate = models.BooleanField(default=False)
     deleted_at = models.DateTimeField(blank=True, null=True)
     is_deleted = models.BooleanField(default=False)
     evaluator=models.ForeignKey(HealthFirstUser, on_delete=models.SET_NULL, null=True, blank=True, related_name='evaluator')
