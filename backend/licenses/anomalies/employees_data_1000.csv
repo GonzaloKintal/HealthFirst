@@ -1,4 +1,4 @@
-empleado_id,total_requests,required_days,required_days_rate,seniority_days,days_per_year
+employee_id,total_requests,required_days,required_days_rate,seniority_days,days_per_year
 1,43,73,1.697674418604651,884,30.128962588976275
 2,33,159,4.818181818181818,296,195.82271860712297
 3,19,69,3.6315789473684212,644,39.084990649709404
