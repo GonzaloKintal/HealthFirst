@@ -1,16 +1,18 @@
 import pandas as pd 
-import sys
-import os 
-import django
 from django.db.models import Q, Count
 from datetime import datetime, timedelta
+import sys
+import os
+import django
 
-BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 sys.path.append(BASE_DIR)
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'settings.local')
 django.setup()
 
-from users.models import HealthFirstUser, Department
+from users.models import HealthFirstUser,Department
+
+
 def get_high_risk_department_ids():
     return list(
         Department.objects.filter(
@@ -61,7 +63,7 @@ def generate_risk_dataset():
     
     #Definir si el departamento es o no de riesgo
     high_risk_departments=get_high_risk_department_ids()
-    df['is_high_risk'] = df['department_id'].isin(high_risk_departments).astype(int)
+    df['is_high_risk'] = df['department'].isin(high_risk_departments).astype(int)
     # Calcular edad
     df['age'] = (today - pd.to_datetime(df['date_of_birth'])).dt.days // 365
     
