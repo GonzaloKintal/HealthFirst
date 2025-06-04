@@ -5,26 +5,29 @@ import numpy as np
 import pandas as pd
 from sklearn.ensemble import IsolationForest
 import joblib
-from django.db.models import Min, Max
 
 import django
-from django.db.models import Sum,Count,Q
-#sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+from django.db.models import Sum,Count,OuterRef,Subquery ,IntegerField,Value
+from django.db.models.functions import Coalesce
+
+
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 sys.path.append(BASE_DIR)
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'settings.local')
 django.setup()
 
-from licenses.models import License
-
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MODEL_PATH_SUP = os.path.join(BASE_DIR, 'isolation_forest_sup_model.pkl')
 MODEL_PATH_EMP = os.path.join(BASE_DIR, 'isolation_forest_emp_model.pkl')
-import pandas as pd
+
 
 pd.set_option("display.max_columns", None)  # Mostrar todas las columnas
 pd.set_option("display.max_rows", None)     # Mostrar todas las filas
 pd.set_option("display.width", 0)           # Autoajuste al ancho de consola
+
+from licenses.models import License
+from users.models import HealthFirstUser
+import pandas as pd
 
 
 #ANOMALIAS SOBRE SUPERVISORES------------------------------------------------------------------------------------
@@ -60,20 +63,30 @@ def anomalies_supervisors(data): #recibe un dataframe
 
 
 def create_dataframe_supervisor(start_date=None, end_date=None): # esto para lo que pide el admin
-    qs = License.objects.filter(evaluator__isnull=False)
+    supervisors = HealthFirstUser.objects.filter(role__name='supervisor')
 
+    # Base queryset de licencias (con posible filtro de fechas)
+    license_base = License.objects.filter(evaluator=OuterRef('pk'))
     if start_date and end_date:
-        qs = qs.filter(status__evaluation_date__range=(start_date, end_date))
+        license_base = license_base.filter(status__evaluation_date__range=(start_date, end_date))
 
-    qs = qs.values('evaluator_id').annotate(
-        total_requests=Count('license_id'),
-        approved_requests=Count('license_id', filter=Q(status__name='approved')),
-        rejected_requests=Count('license_id', filter=Q(status__name='rejected'))
+    # Subqueries para contar evaluaciones
+    total_requests = license_base.annotate(c=Count('license_id')).values('c')[:1]
+    approved_requests = license_base.filter(status__name='approved').annotate(c=Count('license_id')).values('c')[:1]
+    rejected_requests = license_base.filter(status__name='rejected').annotate(c=Count('license_id')).values('c')[:1]
+
+    # Anotaciones al queryset de usuarios
+    supervisors = supervisors.annotate(
+        total_requests=Coalesce(Subquery(total_requests), Value(0, output_field=IntegerField())),
+        approved_requests=Coalesce(Subquery(approved_requests), Value(0, output_field=IntegerField())),
+        rejected_requests=Coalesce(Subquery(rejected_requests), Value(0, output_field=IntegerField()))
     )
 
-    df = pd.DataFrame(list(qs))
-    #print(df.head())
-    #print(df.dtypes)
+    # Convertir a DataFrame
+    df = pd.DataFrame(list(supervisors.values(
+        'id', 'first_name', 'last_name', 'total_requests', 'approved_requests', 'rejected_requests'
+    )))
+    df = df.rename(columns={'id': 'evaluator_id'})
 
     if df.empty:
         return df
@@ -130,15 +143,15 @@ def get_supervisor_anomalies(start_date=None, end_date=None): #FUNCION PRINCIPAL
     global_rejection_rate = dataframe['rejection_rate'].mean()
     total_requests_sum = dataframe['total_requests'].sum()
 
-    dataframe['approval_rate_diff'] = dataframe['approval_rate'] - global_approval_rate
-    dataframe['rejection_rate_diff'] = dataframe['rejection_rate'] - global_rejection_rate
-    dataframe['total_requests_percent'] = dataframe['total_requests'] / total_requests_sum 
+    #dataframe['approval_rate_diff'] = dataframe['approval_rate'] - global_approval_rate
+    #dataframe['rejection_rate_diff'] = dataframe['rejection_rate'] - global_rejection_rate
+    #dataframe['total_requests_percent'] = dataframe['total_requests'] / total_requests_sum 
 
     dataframe['approval_rate'] = (dataframe['approval_rate']*100).map("{:.2f}%".format)
     dataframe['rejection_rate'] = (dataframe['rejection_rate']*100).map("{:.2f}%".format)
-    dataframe['approval_rate_diff'] = (dataframe['approval_rate_diff']*100).map("{:+.2f}%".format)
-    dataframe['rejection_rate_diff'] = (dataframe['rejection_rate_diff']*100).map("{:+.2f}%".format)
-    dataframe['total_requests_percent'] = (dataframe['total_requests_percent']*100).map("{:.2f}%".format)
+    #dataframe['approval_rate_diff'] = (dataframe['approval_rate_diff']*100).map("{:+.2f}%".format)
+    #dataframe['rejection_rate_diff'] = (dataframe['rejection_rate_diff']*100).map("{:+.2f}%".format)
+    #dataframe['total_requests_percent'] = (dataframe['total_requests_percent']*100).map("{:.2f}%".format)
 
     return dataframe
 
@@ -266,7 +279,7 @@ def dataframe_pruebas_sup(): # para pruebas
 
 def dataframe_pruebas_emp(): # para pruebas
     data = pd.DataFrame({
-    'employee_id':      [101, 102, 103, 104, 105, 106, 107, 108],
+    'employee_id':      [0, 1, 2, 3, 4, 5, 6, 7],
     'total_requests':   [15,   20,   10,   5,   50,   30,   25,   8],
     'required_days':    [30,   25,   12,   5,  120,   60,   50,   10],  # ahora mínimo = total_requests
     'seniority_days':   [365, 730, 180,  90, 1095, 3650, 1460, 180]     # 1 a 10 años de antigüedad
@@ -286,5 +299,6 @@ def dataframe_pruebas_emp(): # para pruebas
 #---------------------------------------------------------------------------------------------------------------
 #print(get_supervisor_anomalies())
 #generate_empleados_csv()
-create_model_empleados('employees_data_1000.csv')
-print(anomalies_employees(dataframe_pruebas_emp()))
+#create_model_empleados('employees_data_1000.csv')
+#print(anomalies_employees(dataframe_pruebas_emp()))
+#print(anomalies_supervisors(dataframe_pruebas_sup()))
