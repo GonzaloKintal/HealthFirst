@@ -5,6 +5,7 @@ from django.utils.timezone import now
 from django.contrib.auth import get_user_model
 from xmlrpc.client import NOT_WELLFORMED_ERROR
 
+from .anomalies.isolation_forest import get_supervisor_anomalies
 from messaging.services.brevo_email import *
 from .models import *
 from django.http import JsonResponse, HttpResponse
@@ -616,3 +617,39 @@ def export_licenses_to_csv(request):
 
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
+
+
+##################### API Anomalias #########################
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+@api_view(['GET'])
+def supervisor_anomalies(request):
+    start_date = request.GET.get('start_date') or None
+    end_date = request.GET.get('end_date') or None
+    evaluator_id = request.GET.get('user_id') or None
+    is_anomaly = request.GET.get('is_anomaly') or None
+
+    try:
+        df = get_supervisor_anomalies(start_date, end_date)
+
+        if evaluator_id:
+            df = df[df['evaluator_id'] == int(evaluator_id)]
+
+        if is_anomaly is not None:
+            # Suponiendo que la columna 'is_anomaly' es booleana
+            # Convierte el string recibido a booleano
+            if is_anomaly.lower() in ['true', '1', 'yes']:
+                anomaly_flag = True
+            elif is_anomaly.lower() in ['false', '0', 'no']:
+                anomaly_flag = False
+            else:
+                anomaly_flag = None
+
+            if anomaly_flag is not None:
+                df = df[df['is_anomaly'] == anomaly_flag]
+
+        data = df.to_dict(orient='records')
+        return JsonResponse({'data': data}, status=200)
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
