@@ -21,6 +21,7 @@ import PublicRoute from './PublicRoute';
 import GuidePage from '../components/guide/GuidePage';
 import NotFoundPage from '../pages/shared/NotFoundPage';
 import PredictionsPage from '../pages/analyst/PredictionsPage';
+import MessagingPage from '../pages/admin/MessagingPage';
 
 const AppRoutes = () => {
   return (
@@ -83,20 +84,29 @@ const AppRoutes = () => {
           } 
         />
 
-      <Route 
+        <Route 
           path="/edit-user/:id" 
           element={
             <ProtectedRoute allowedRoles={['admin']}>
               <EditUser />
             </ProtectedRoute>
           } 
-      />
+        />
 
-      <Route 
+        <Route 
           path="/settings" 
           element={
             <ProtectedRoute allowedRoles={['admin', 'supervisor', 'analyst', 'employee']}>
               <SettingsPage />
+            </ProtectedRoute>
+          } 
+        />
+
+        <Route 
+          path="/messaging" 
+          element={
+            <ProtectedRoute allowedRoles={['admin', 'supervisor', 'analyst', 'employee']}>
+              <MessagingPage />
             </ProtectedRoute>
           } 
         />

@@ -6,13 +6,14 @@ import {
   FiUser,
   FiPlus,
   FiHelpCircle,
-  FiActivity
+  FiActivity,
+  FiMail
 } from 'react-icons/fi';
 import { useContext } from 'react';
 import { AuthContext } from '../../context/AuthContext';
 import { Link, useLocation } from 'react-router-dom';
 
-const Sidebar = ({ isOpen }) => {
+const Sidebar = ({ isOpen, onItemClick }) => {
   const { user } = useContext(AuthContext);
   const location = useLocation();
 
@@ -24,15 +25,17 @@ const Sidebar = ({ isOpen }) => {
       { text: 'Licencias', icon: <FileText className="h-5 w-5 text-primary-border" />, path: '/licenses' },
       { text: 'Predicciones', icon: <FiActivity className="h-5 w-5 text-primary-border" />, path: '/predictions' },
       { text: 'Mis Datos', icon: <FiUser className="h-5 w-5 text-primary-border" />, path: '/my-data' },
-      { text: 'Ayuda', icon: <FiHelpCircle className="h-5 w-5 text-primary-border" />, path: '/guide' },
+      { text: 'Mensajeria', icon: <FiMail className="h-5 w-5 text-primary-border" />, path: '/messaging' },
       { text: 'Configuración', icon: <Settings className="h-5 w-5 text-primary-border" />, path: '/settings' },
+      { text: 'Ayuda', icon: <FiHelpCircle className="h-5 w-5 text-primary-border" />, path: '/guide' },
     ],
     supervisor: [
       { text: 'Home', icon: <Dashboard className="h-5 w-5 text-primary-border" />, path: '/dashboard' },
       { text: 'Licencias', icon: <FileText className="h-5 w-5 text-primary-border" />, path: '/licenses' },
       { text: 'Mis Datos', icon: <FiUser className="h-5 w-5 text-primary-border" />, path: '/my-data' },
-      { text: 'Ayuda', icon: <FiHelpCircle className="h-5 w-5 text-primary-border" />, path: '/guide' },
+      { text: 'Mensajeria', icon: <FiMail className="h-5 w-5 text-primary-border" />, path: '/messaging' },
       { text: 'Configuración', icon: <Settings className="h-5 w-5 text-primary-border" />, path: '/settings' },
+      { text: 'Ayuda', icon: <FiHelpCircle className="h-5 w-5 text-primary-border" />, path: '/guide' },
     ],
     employee: [
       { text: 'Home', icon: <Dashboard className="h-5 w-5 text-primary-border" />, path: '/dashboard' },
@@ -44,16 +47,18 @@ const Sidebar = ({ isOpen }) => {
         isHighlighted: true
       },
       { text: 'Mis Datos', icon: <FiUser className="h-5 w-5 text-primary-border" />, path: '/my-data' },
-      { text: 'Ayuda', icon: <FiHelpCircle className="h-5 w-5 text-primary-border" />, path: '/guide' },
+      { text: 'Mensajeria', icon: <FiMail className="h-5 w-5 text-primary-border" />, path: '/messaging' },
       { text: 'Configuración', icon: <Settings className="h-5 w-5 text-primary-border" />, path: '/settings' },
+      { text: 'Ayuda', icon: <FiHelpCircle className="h-5 w-5 text-primary-border" />, path: '/guide' },
     ],
     analyst: [
       { text: 'Dashboard', icon: <Dashboard className="h-5 w-5 text-primary-border" />, path: '/dashboard' },
       { text: 'Mis Licencias', icon: <FileText className="h-5 w-5 text-primary-border" />, path: '/licenses' },
       { text: 'Predicciones', icon: <FiActivity className="h-5 w-5 text-primary-border" />, path: '/predictions' },
       { text: 'Mis Datos', icon: <FiUser className="h-5 w-5 text-primary-border" />, path: '/my-data' },
-      { text: 'Ayuda', icon: <FiHelpCircle className="h-5 w-5 text-primary-border" />, path: '/guide' },
+      { text: 'Mensajeria', icon: <FiMail className="h-5 w-5 text-primary-border" />, path: '/messaging' },
       { text: 'Configuración', icon: <Settings className="h-5 w-5 text-primary-border" />, path: '/settings' },
+      { text: 'Ayuda', icon: <FiHelpCircle className="h-5 w-5 text-primary-border" />, path: '/guide' },
     ]
   };
 
@@ -83,6 +88,7 @@ const Sidebar = ({ isOpen }) => {
                         ? 'bg-special-light text-primary-text hover:bg-blue-100 dark:bg-special-dark dark:hover:bg-blue-900'
                         : 'text-foreground hover:bg-gray-100 dark:hover:bg-gray-700'
                   }`}
+                  onClick={onItemClick}
                 >
                   <span className={`${
                     item.isHighlighted 
@@ -93,7 +99,13 @@ const Sidebar = ({ isOpen }) => {
                   }`}>
                     {item.icon}
                   </span>
-                  {isOpen && <span className="ml-3 font-medium">{item.text}</span>}
+
+                  <span className={`ml-3 font-medium ${
+                    isOpen ? 'opacity-100' : 'opacity-0'
+                  } transition-opacity duration-300 delay-100`}>
+                    {item.text}
+                  </span>
+                  
                 </Link>
               </li>
             );
