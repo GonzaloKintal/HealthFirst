@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime, timedelta
 import sys
 import os
 import numpy as np
@@ -105,7 +105,7 @@ def generate_supervisors_csv(path_csv='supervisors_data_1000.csv', n=1000, semil
     
     approved_requests = (approval_rate_base * total_requests).round().astype(int)
     rejected_requests = total_requests - approved_requests
-    
+  
     df = pd.DataFrame({
         'evaluator_id': evaluator_id,
         'total_requests': total_requests,
@@ -142,12 +142,62 @@ def get_supervisor_anomalies(start_date=None, end_date=None): #FUNCION PRINCIPAL
 
     return dataframe
 
-print(get_supervisor_anomalies())
-
 #ANOMALIAS SOBRE EMPLEADOS(solicitudes de licencias)------------------------------------------------------------------------------------
+def generate_employees_csv(path_csv='employees_data_1000.csv', n=1000, semilla=42):
+    np.random.seed(semilla)
+    
+    employee_id = np.arange(1, n+1)
+
+    # Total de solicitudes por empleado
+    total_requests = np.random.randint(5, 51, size=n)
+
+    # Total de días solicitados
+    required_days = np.random.randint(10, 201, size=n)
+
+    # Antigüedad aleatoria entre 1 mes y 10 años
+    today = datetime.today()
+    start_dates = [today - timedelta(days=int(np.random.uniform(30, 3650))) for _ in range(n)]
+    seniority_days = [(today - d).days for d in start_dates]
+
+    # Cálculo inicial
+    required_days_rate = required_days / total_requests
+    days_per_year = required_days / (np.array(seniority_days) / 365 + 1e-3)
+
+    # Añadir anomalías al 5% de los empleados
+    num_anomalies = int(n * 0.05)
+    anomaly_indices = np.random.choice(n, size=num_anomalies, replace=False)
+
+    # Aumentar artificialmente required_days_rate y/o days_per_year
+    for idx in anomaly_indices:
+        if np.random.rand() < 0.5:
+            required_days_rate[idx] *= np.random.uniform(2, 4)  # anómalo alto
+            required_days[idx] = int(required_days_rate[idx] * total_requests[idx])
+        else:
+            days_per_year[idx] *= np.random.uniform(2, 4)  # anómalo alto
+            required_days[idx] = int(days_per_year[idx] * (seniority_days[idx] / 365))
+
+    # Recalcular métricas después de modificar required_days
+    required_days = np.clip(required_days, 1, None)  # evitar valores negativos
+    required_days_rate = required_days / total_requests
+    days_per_year = required_days / (np.array(seniority_days) / 365 + 1e-3)
+
+    # Crear DataFrame final
+    df = pd.DataFrame({
+        'empleado_id': employee_id,
+        'total_requests': total_requests,
+        'required_days': required_days,
+        'required_days_rate': required_days_rate,
+        'seniority_days': seniority_days,
+        'days_per_year': days_per_year
+    })
+
+    df.to_csv(path_csv, index=False)
+    df.head(20)
+    return df
+
 def create_model_empleados(path_csv): # le paso el csv para el entreamiento
     data= pd.read_csv(path_csv)
-    features = data[['total_requests', 'required_days', 'required_days_rate']]
+    features = data[['total_requests', 'required_days', 'required_days_rate','seniority_days','days_per_year']]
 
      # Entrenamiento del modelo Isolation Forest
     model = IsolationForest(n_estimators=100, contamination=0.2, random_state=42)
@@ -197,10 +247,7 @@ def dataframe_pruebas(): # para pruebas
         axis=1
     )
     return data
-
-
-
-def pruebas():
-    dataframe= anomalies_supervisors(dataframe_pruebas())
-    top_anomalies = dataframe.sort_values(by='anomaly_score').head(2).reset_index(drop=True)
-    return top_anomalies
+    
+#---------------------------------------------------------------------------------------------------------------
+#print(get_supervisor_anomalies())
+generate_empleados_csv()
