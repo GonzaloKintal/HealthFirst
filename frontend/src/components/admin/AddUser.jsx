@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { FiUser, FiSave, FiBriefcase, FiLock, FiEye, FiEyeOff } from 'react-icons/fi';
+import { FiUser, FiSave, FiBriefcase, FiLock, FiEye, FiEyeOff, FiPlus } from 'react-icons/fi';
 import { Link, useNavigate } from 'react-router-dom';
 import Notification from '../utils/Notification';
 import { addUser } from '../../services/userService';
@@ -245,13 +245,16 @@ const AddUser = () => {
       )}
       
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Crear Nuevo Usuario</h1>
+        <h1 className="text-xl sm:text-2xl font-bold text-foreground">
+          <FiPlus className="inline mr-2" />
+          Crear Nuevo Usuario
+        </h1>
       </div>
       
       <form onSubmit={handleSubmit} className="space-y-6" autoComplete='off'>
         {/* Sección de Información Personal */}
         <div className="bg-background p-6 rounded-lg shadow">
-          <h2 className="text-xl font-semibold mb-4 flex items-center text-foreground">
+          <h2 className="text-xl sm:text-2xl font-semibold mb-4 flex items-center text-foreground">
             <FiUser className="mr-2" /> Información Personal
           </h2>
           
@@ -424,7 +427,7 @@ const AddUser = () => {
 
         {/* Sección de Credenciales */}
         <div className="bg-background p-6 rounded-lg shadow">
-          <h2 className="text-xl font-semibold mb-4 flex items-center text-foreground">
+          <h2 className="text-xl sm:text-2xl font-semibold mb-4 flex items-center text-foreground">
             <FiLock className="mr-2" /> Credenciales de Acceso
           </h2>
           
@@ -491,7 +494,7 @@ const AddUser = () => {
 
         {/* Sección de Rol */}
         <div className="bg-background p-6 rounded-lg shadow">
-          <h2 className="text-xl font-semibold mb-4 flex items-center text-foreground">
+          <h2 className="text-xl sm:text-2xl font-semibold mb-4 flex items-center text-foreground">
             <FiBriefcase className="mr-2" /> Rol y Permisos
           </h2>
           

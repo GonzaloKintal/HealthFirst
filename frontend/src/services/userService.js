@@ -78,3 +78,42 @@ export const getUsersByFilter = async (page = 1, filter = '', pageSize = 5) => {
         throw error;
     }
 };
+
+
+export const addTelegramSubscription = async (userId, telegramId) => {
+    try {
+        const response = await api.post('/messaging/add_telegram_suscription', {
+            user_id: userId,
+            telegram_id: telegramId
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error adding Telegram subscription:', error);
+        throw error;
+    }
+};
+
+export const removeTelegramSubscription = async (userId) => {
+    try {
+        const response = await api.delete(`/messaging/remove_telegram_suscription/${userId}`, {
+            data: { user_id: userId }
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error removing Telegram subscription:', error);
+        throw error;
+    }
+};
+
+export const getTelegramSubscription = async (userId) => {
+    try {
+        const response = await api.get(`/messaging/get_telegram_suscription/${userId}`);
+        return {
+            isSubscribed: response.data.is_subscribed,
+            telegramId: response.data.telegram_id
+        };
+    } catch (error) {
+        console.error('Error fetching Telegram subscription:', error);
+        throw error;
+    }
+};
