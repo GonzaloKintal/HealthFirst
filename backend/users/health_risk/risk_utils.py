@@ -16,10 +16,9 @@ from users.models import HealthFirstUser,Department
 def get_high_risk_department_ids():
     return list(
         Department.objects.filter(
-            description__icontains='riesgo'
+            is_high_risk_department=True
         ).values_list('department_id', flat=True)
     )
-
 
 def generate_risk_dataset():
     # Fechas límites
@@ -94,4 +93,4 @@ def generate_risk_dataset():
 """-----------------------------------------------------------------------------------------"""
 if __name__ == "__main__":
     print(generate_risk_dataset())
-    """print(get_high_risk_department_ids)"""
+    print(get_high_risk_department_ids())

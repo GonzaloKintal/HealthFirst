@@ -257,6 +257,7 @@ def create_department(request):
         data = json.loads(request.body)
         name = data.get('name', None)
         description = data.get('description', None)
+        is_high_risk_department = data.get('is_high_risk_department', False)
 
         if not name:
             response_data = {'error': 'El nombre es requerido.'}
@@ -265,7 +266,7 @@ def create_department(request):
             response_data = {'error': 'El nombre del departamento ya existe.'}
             status_code = 400
         else:
-            Department.objects.create(name=name, description=description)
+            Department.objects.create(name=name, description=description,is_high_risk_department=is_high_risk_department)
             response_data = {'ok': True}
             status_code = 200
     except Exception as e:
