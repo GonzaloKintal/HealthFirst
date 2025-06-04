@@ -30,10 +30,7 @@ class MessengerService:
             "¡Gracias por confiar en nosotros!\n"
             "Equipo Health First"
         )
-        send_email(subject, message, user.email)
-        if user.is_telegram_suscriptor:
-            TelegramService.send_message(chat_id=user.telegram_id, message=message)
-
+        MessengerService.send_personalized_message(user, subject, message)
 
 
 
@@ -46,10 +43,7 @@ class MessengerService:
             "¡Gracias por confiar en nosotros!\n"
             "Equipo Health First"
         )
-        send_email(subject, message, user.email)
-        if user.is_telegram_suscriptor:
-            TelegramService.send_message(
-                chat_id=user.telegram_id,message=message)
+        MessengerService.send_personalized_message(user, subject, message)
 
 
 
@@ -64,9 +58,7 @@ class MessengerService:
             "¡Gracias por confiar en nosotros!\n"
             "Equipo Health First"
         )
-        send_email(subject, message, user.email)
-        if user.is_telegram_suscriptor:
-            TelegramService.send_message(chat_id=user.telegram_id,message=message)
+        MessengerService.send_personalized_message(user, subject, message)
 
 
     def send_license_expired_tomorrow(license):
@@ -80,9 +72,7 @@ class MessengerService:
             "¡Gracias por confiar en nosotros!\n"
             "Equipo Health First"
         )
-        send_email(subject, message, user.email)
-        if user.is_telegram_suscriptor:
-            TelegramService.send_message(chat_id=user.telegram_id, message=message)
+        MessengerService.send_personalized_message(user, subject, message)
 
     def send_last_day_to_upload_certificate_message(license):
         user = license.user
@@ -95,6 +85,10 @@ class MessengerService:
             "¡Gracias por confiar en nosotros!\n"
             "Equipo Health First"
         )
+        MessengerService.send_personalized_message(user, subject, message)
+
+
+    def send_personalized_message(user, subject, message):
         send_email(subject, message, user.email)
         if user.is_telegram_suscriptor:
             TelegramService.send_message(chat_id=user.telegram_id, message=message)
