@@ -35,11 +35,8 @@ def training_model(df):
 
     # Separamos datos en variables independientes (X) y objetivo (y)
     X = df[["Edad", "Cant_licencias_enfermedad", "Cant_licencias_accidente",
-            "Departamento"]]
+            "Departamento_de_Riesgo"]]
     y = df["Riesgo"]
-
-    encoder = LabelEncoder()
-    X["Departamento"] = encoder.fit_transform(X["Departamento"]) #Para que el departamento sea en numeros como categorias
 
     # Escalamos las características
     scaler = StandardScaler()
@@ -99,10 +96,7 @@ def predict_risk(df):
 
     # copia del dataframe original para obtener la prediccion
     X = df[["Edad", "Cant_licencias_enfermedad", "Cant_licencias_accidente",
-              "Departamento"]].copy()
-    
-    # Codificar variable categórica
-    X["Departamento"] = encoder.transform(X["Departamento"])
+              "Departamento_de_Riesgo"]].copy()
     
     # Escalar características
     X_scaled = scaler.transform(X)
