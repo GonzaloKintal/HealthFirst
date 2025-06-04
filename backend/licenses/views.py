@@ -5,6 +5,8 @@ from django.utils.timezone import now
 from django.contrib.auth import get_user_model
 from xmlrpc.client import NOT_WELLFORMED_ERROR
 
+from messaging.services.messenger import MessengerService
+
 from .anomalies.isolation_forest import get_supervisor_anomalies
 from messaging.services.brevo_email import *
 from .models import *
@@ -23,9 +25,7 @@ from .analisis import license_analysis
 from licenses.utils.file_utils import *
 from licenses.utils.coherence_model_ml import predict_top_3
 from django.db.models import Q
-from urllib.parse import unquote
 import csv
-from django.views.decorators.csrf import csrf_exempt
 
 
 # LICENSES API
@@ -390,9 +390,9 @@ def evaluate_license(request, id):
         license.save()
 
         if license_status == Status.StatusChoices.REJECTED:
-            send_rejected_license(license)
+            MessengerService.send_rejected_license_message(license)
         if license_status == Status.StatusChoices.APPROVED:
-            send_approved_license(license)
+            MessengerService.send_approved_license_message(license)
 
         evaluator= f"{request.user.first_name} {request.user.last_name}"
 
