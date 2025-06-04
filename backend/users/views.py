@@ -1,4 +1,6 @@
 from xmlrpc.client import NOT_WELLFORMED_ERROR
+
+from messaging.services.messenger import MessengerService
 from .models import *
 from django.http import JsonResponse
 import json
@@ -46,7 +48,7 @@ def register_user(request):
         
         user.save()
 
-        send_welcome_email(user)
+        MessengerService.send_welcome_message(user)
 
     except IntegrityError:
         error_messages.append("El email ya esta registrado.")

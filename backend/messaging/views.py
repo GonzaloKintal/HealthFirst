@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from messaging.services.messenger import MessengerService
 from users.models import HealthFirstUser
 from django.http import JsonResponse, HttpResponse
 import json
@@ -107,4 +108,49 @@ def get_email_events(request):
 
     return JsonResponse({"events": events}, status=200)
     
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def get_user_email_events(request, id):
+    user=HealthFirstUser.objects.get(id=id, is_deleted=False)
+
+    if not user:
+        return JsonResponse({"error": "El usuario no existe"}, status=404)
+    try:
+        events=get_user_activity(user.email)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+    return JsonResponse({"events": events}, status=200)
     
+
+@api_view(['POST'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def send_personalized_message(request):
+    try:
+        status=200
+        response_data={}
+        data= json.loads(request.body)
+        subject= data.get('subject')
+        message= data.get('message')
+
+        if not all([data.get('user_id'), subject, message]):
+             raise ValueError("Los campos email, subject y message son requeridos")
+
+        user= HealthFirstUser.objects.get(id=data.get('user_id'))
+        
+        MessengerService.send_personalized_message(user, subject, message)
+
+        response_data={"ok": True}
+    except Exception as e:
+        status=500
+        response_data={"error": str(e)}
+
+    return JsonResponse(response_data, status=status)
+
+        
+
+
+
+            
