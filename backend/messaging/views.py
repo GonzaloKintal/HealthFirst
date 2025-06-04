@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from messaging.services.messenger import MessengerService
 from users.models import HealthFirstUser
 from django.http import JsonResponse, HttpResponse
 import json
@@ -122,3 +123,34 @@ def get_user_email_events(request, id):
 
     return JsonResponse({"events": events}, status=200)
     
+
+@api_view(['POST'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def send_personalized_message(request):
+    try:
+        status=200
+        response_data={}
+        data= json.loads(request.body)
+        subject= data.get('subject')
+        message= data.get('message')
+
+        if not all([data.get('user_id'), subject, message]):
+             raise ValueError("Los campos email, subject y message son requeridos")
+
+        user= HealthFirstUser.objects.get(id=data.get('user_id'))
+        
+        MessengerService.send_personalized_message(user, subject, message)
+
+        response_data={"ok": True}
+    except Exception as e:
+        status=500
+        response_data={"error": str(e)}
+
+    return JsonResponse(response_data, status=status)
+
+        
+
+
+
+            
