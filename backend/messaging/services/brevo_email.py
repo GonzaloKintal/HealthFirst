@@ -49,8 +49,11 @@ def get_brevo_events(days=7, email=None, event_type=None):
     
     response = requests.get(url, headers=headers, params=params)
     if response.status_code == 200:
-        return response.json()
-    return None
+        events = response.json().get('events', [])
+        # Filtrar para excluir eventos de tipo "requests"
+        filtered_events = [event for event in events if event.get('event') != 'requests']
+        return {'events': filtered_events}
+    return {'events': []}
 
 def get_all_brevo_events(days=7, email=None, event_type=None):
     """
