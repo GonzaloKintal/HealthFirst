@@ -1,15 +1,13 @@
 import { useState, useEffect } from 'react';
 import { FiMail, FiRefreshCw } from 'react-icons/fi';
 import Notification from '../../components/utils/Notification';
-import { getEmailStats, getEmailEvents } from '../../services/messagingService';
+import { getUserEmailEvents } from '../../services/messagingService';
+import useAuth from '../../hooks/useAuth';
 
-const MessagingPage = () => {
-  const [stats, setStats] = useState(null);
+const UserMessagesPage = () => {
+  const { user } = useAuth();
   const [events, setEvents] = useState([]);
-  const [loading, setLoading] = useState({
-    stats: true,
-    events: true
-  });
+  const [loading, setLoading] = useState(true);
   const [notification, setNotification] = useState({
     show: false,
     type: '',
@@ -24,28 +22,18 @@ const MessagingPage = () => {
   const fetchData = async () => {
     try {
       setError(null);
-      setLoading({ stats: true, events: true });
-      
-      // Obtener estadísticas
-      const statsResponse = await getEmailStats();
-      if (statsResponse.success) {
-        setStats(statsResponse.stats);
+      setLoading(true);
+      const response = await getUserEmailEvents(user.id);
+      if (response.success) {
+        setEvents(response.events);
       } else {
-        setError(statsResponse.error);
-      }
-      
-      // Obtener eventos
-      const eventsResponse = await getEmailEvents();
-      if (eventsResponse.success) {
-        setEvents(eventsResponse.events);
-      } else {
-        setError(eventsResponse.error);
+        setError(response.error || 'Error al cargar los eventos de correo');
       }
     } catch (error) {
-      setError('Error al cargar los datos de mensajería. Por favor intenta nuevamente.');
+      setError('Error al cargar los eventos de correo. Por favor intenta nuevamente.');
       console.error(error);
     } finally {
-      setLoading({ stats: false, events: false });
+      setLoading(false);
     }
   };
 
@@ -58,7 +46,7 @@ const MessagingPage = () => {
 
   const handleRefresh = async () => {
     await fetchData();
-    showNotification('success', 'Datos actualizados correctamente');
+    showNotification('success', 'Eventos actualizados correctamente');
   };
 
   const formatDate = (dateString) => {
@@ -72,10 +60,17 @@ const MessagingPage = () => {
     let hours = date.getHours();
     const ampm = hours >= 12 ? 'PM' : 'AM';
     hours = hours % 12;
-    hours = hours ? hours : 12; // La hora 0 debería ser 12
+    hours = hours ? hours : 12;
     const minutes = date.getMinutes().toString().padStart(2, '0');
     
     return `${day}/${month}/${year} ${hours}:${minutes} ${ampm}`;
+  };
+
+  const formatSender = (sender) => {
+    if (sender === 'healthfirst.voxdei@9335019.brevosend.com') {
+      return 'Equipo VoxDei';
+    }
+    return sender;
   };
 
   return (
@@ -84,15 +79,18 @@ const MessagingPage = () => {
         <div>
             <h1 className="text-xl sm:text-2xl font-bold flex items-center text-foreground">
               <FiMail className="inline mr-2" />
-              Estadísticas de Mensajería
+              Mis Mensajes
             </h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              Historial de eventos de correo electrónico para {user.email}
+            </p>
         </div>
         <button
           onClick={handleRefresh}
           className="bg-primary text-white px-4 py-2 rounded-md flex items-center hover:bg-primary-hover transition"
-          disabled={loading.stats || loading.events}
+          disabled={loading}
         >
-          <FiRefreshCw className={`mr-2 ${(loading.stats || loading.events) ? 'animate-spin' : ''}`} />
+          <FiRefreshCw className={`mr-2 ${loading ? 'animate-spin' : ''}`} />
           Actualizar
         </button>
       </div>
@@ -104,63 +102,11 @@ const MessagingPage = () => {
         </div>
       )}
 
-      {/* Sección de Estadísticas */}
-      <div className="mb-8">
-        <h2 className="text-md font-semibold mb-4 text-center">Resumen de Correos</h2>
-        
-        {loading.stats ? (
-          <div className="flex justify-center items-center min-h-[100px]">
-            <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500"></div>
-          </div>
-        ) : stats ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {/* Tarjeta de Envíos */}
-            <div className="bg-card p-4 rounded-lg border border-border text-center">
-              <h4 className="text-sm font-medium text-muted-foreground">Enviados</h4>
-              <p className="text-2xl font-bold">{stats.requests}</p>
-            </div>
-            
-            {/* Tarjeta de Entregados */}
-            <div className="bg-card p-4 rounded-lg border border-border text-center">
-              <h4 className="text-sm font-medium text-muted-foreground">Entregados</h4>
-              <p className="text-2xl font-bold">{stats.delivered}</p>
-              <p className="text-sm text-muted-foreground mt-1">
-                {stats.requests > 0 ? 
-                  `${Math.round((stats.delivered / stats.requests) * 100)}% tasa de entrega` : 
-                  '0% tasa de entrega'}
-              </p>
-            </div>
-            
-            {/* Tarjeta de Aperturas */}
-            <div className="bg-card p-4 rounded-lg border border-border text-center">
-              <h4 className="text-sm font-medium text-muted-foreground">Aperturas</h4>
-              <p className="text-2xl font-bold">{stats.uniqueOpens}</p>
-              <p className="text-sm text-muted-foreground mt-1">
-                {stats.delivered > 0 ? 
-                  `${Math.round((stats.uniqueOpens / stats.delivered) * 100)}% tasa de apertura` : 
-                  '0% tasa de apertura'}
-              </p>
-            </div>
-            
-            {/* Tarjeta de Rebotes */}
-            <div className="bg-card p-4 rounded-lg border border-border text-center">
-              <h4 className="text-sm font-medium text-muted-foreground">Rebotes</h4>
-              <p className="text-2xl font-bold">{stats.hardBounces + stats.softBounces}</p>
-              <p className="text-sm text-muted-foreground mt-1">
-                {stats.hardBounces} hard, {stats.softBounces} soft
-              </p>
-            </div>
-          </div>
-        ) : (
-          <p className="text-center">No hay datos de estadísticas disponibles</p>
-        )}
-      </div>
-
       {/* Sección de Eventos */}
       <div>
-        <h2 className="text-md font-semibold mb-4 text-center">Eventos Recientes</h2>
+        <h2 className="text-md font-semibold mb-4 text-center">Eventos de Correo</h2>
         
-        {loading.events ? (
+        {loading ? (
           <div className="flex justify-center items-center min-h-[200px]">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
           </div>
@@ -170,7 +116,7 @@ const MessagingPage = () => {
               <thead className="bg-card">
                 <tr>
                   <th className="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider">
-                    Email
+                    Remitente
                   </th>
                   <th className="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider">
                     Fecha
@@ -188,7 +134,7 @@ const MessagingPage = () => {
                   <tr key={index} className="hover:bg-card">
                     <td className="px-6 py-4 whitespace-nowrap text-center">
                       <div className="text-sm font-medium">
-                        {event.email}
+                        {formatSender(event.from)}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-center">
@@ -214,6 +160,8 @@ const MessagingPage = () => {
                             ? 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-100' :
                           event.event === 'softBounces' 
                             ? 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-100' :
+                          event.event === 'requests'
+                            ? 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200' :
                           'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
                         }`}>
                           {event.event === 'delivered' ? 'Entregado' :
@@ -221,6 +169,7 @@ const MessagingPage = () => {
                           event.event === 'hardBounces' ? 'Rebote duro' :
                           event.event === 'blocked' ? 'Bloqueado' :
                           event.event === 'softBounces' ? 'Rebote suave' :
+                          event.event === 'requests' ? 'Solicitado' :
                           event.event}
                         </span>
                       </div>
@@ -246,4 +195,4 @@ const MessagingPage = () => {
   );
 };
 
-export default MessagingPage;
+export default UserMessagesPage;

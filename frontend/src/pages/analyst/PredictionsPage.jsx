@@ -19,7 +19,7 @@ const PredictionsPage = () => {
       <div className="mb-6 overflow-hidden rounded-lg shadow-sm border border-border">
         <button
           onClick={() => setExpandedSection(expandedSection === 'anomalies' ? '' : 'anomalies')}
-          className="w-full flex justify-between items-center p-4 bg-card hover:bg-card-hover transition-colors"
+          className="w-full flex justify-between items-center p-4 bg-background transition-colors"
         >
           <div className="flex items-center">
             <FiAlertTriangle className="mr-2 text-blue-500" />
@@ -45,7 +45,7 @@ const PredictionsPage = () => {
       <div className="overflow-hidden rounded-lg shadow-sm border border-border">
         <button
           onClick={() => setExpandedSection(expandedSection === 'health' ? '' : 'health')}
-          className="w-full flex justify-between items-center p-4 bg-card hover:bg-card-hover transition-colors"
+          className="w-full flex justify-between items-center p-4 bg-background transition-colors"
         >
           <div className="flex items-center">
             <FiHeart className="mr-2 text-green-500" />

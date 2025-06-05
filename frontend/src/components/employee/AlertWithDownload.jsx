@@ -20,7 +20,6 @@ const AlertWithDownload = ({ onDownload }) => {
         onDownload();
       }
       
-      console.log("Descarga iniciada correctamente");
     } catch (error) {
       console.error("Error al descargar el formato:", error);
     }

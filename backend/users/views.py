@@ -315,6 +315,7 @@ def update_department(request, id):
         data = json.loads(request.body)
         name = data.get('name', None)
         description = data.get('description', None)
+        is_high_risk_department = data.get('is_high_risk_department', None)
 
         if not Department.objects.filter(department_id=id).exists():
             response_data = {'error': 'El departamento no existe.'}
@@ -323,7 +324,7 @@ def update_department(request, id):
 
         department = Department.objects.get(department_id=id)
 
-        if not name and not description:
+        if not name and not description and is_high_risk_department is None:
             response_data = {'error': 'Debe enviar al menos un campo.'}
             status_code = 400
         else:
@@ -335,6 +336,8 @@ def update_department(request, id):
                     department.name = name
                 if description:
                     department.description = description
+                if is_high_risk_department is not None:
+                    department.is_high_risk_department = is_high_risk_department
                 
                 department.save()
                 response_data = {'ok': True}
