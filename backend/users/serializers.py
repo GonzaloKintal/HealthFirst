@@ -49,4 +49,4 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 class DepartmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Department
-        fields = ['department_id', 'name','description'] 
+        fields = ['department_id', 'name','description', 'is_high_risk_department'] 

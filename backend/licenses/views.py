@@ -151,8 +151,7 @@ def create_license(request):
                 end_date=end_date_parsed,
                 required_days=required_days,
                 information=information,
-                request_date=datetime.now(),
-                justified=False,
+                request_date=datetime.now()
             )
             license_analysis(license)
 
@@ -436,7 +435,6 @@ def get_license_detail(request, id):
             "request_date": license.request_date,
             "closing_date": license.closing_date,
             "required_days": (license.end_date - license.start_date).days + 1,
-            "justified": license.justified,
             "information": license.information,
             "evaluator": (license.evaluator.first_name + ' ' + license.evaluator.last_name) if license.evaluator else "",
             "evaluator_role": license.evaluator.role.name if license.evaluator else "",

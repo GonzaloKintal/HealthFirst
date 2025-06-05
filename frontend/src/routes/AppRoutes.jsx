@@ -22,6 +22,7 @@ import GuidePage from '../components/guide/GuidePage';
 import NotFoundPage from '../pages/shared/NotFoundPage';
 import PredictionsPage from '../pages/analyst/PredictionsPage';
 import MessagingPage from '../pages/admin/MessagingPage';
+import UserMessagesPage from '../pages/employee/UserMesaggesPage';
 
 const AppRoutes = () => {
   return (
@@ -105,8 +106,17 @@ const AppRoutes = () => {
         <Route 
           path="/messaging" 
           element={
-            <ProtectedRoute allowedRoles={['admin', 'supervisor', 'analyst', 'employee']}>
+            <ProtectedRoute allowedRoles={['admin', 'supervisor', 'analyst']}>
               <MessagingPage />
+            </ProtectedRoute>
+          } 
+        />
+
+        <Route 
+          path="/my-messages" 
+          element={
+            <ProtectedRoute allowedRoles={['employee']}>
+              <UserMessagesPage />
             </ProtectedRoute>
           } 
         />
