@@ -17,14 +17,16 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'settings.local')
 django.setup()
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-MODEL_PATH_SUP = os.path.join(BASE_DIR, 'isolation_forest_sup_model.pkl')
+#MODEL_PATH_SUP = os.path.join(BASE_DIR, 'isolation_forest_sup_model.pkl')
+MODEL_PATH_SUP = os.path.join(BASE_DIR, 'isolation_forest_sup_model_v2.pkl')
+
 MODEL_PATH_EMP = os.path.join(BASE_DIR, 'isolation_forest_emp_model.pkl')
 
-
+'''
 pd.set_option("display.max_columns", None)  # Mostrar todas las columnas
 pd.set_option("display.max_rows", None)     # Mostrar todas las filas
 pd.set_option("display.width", 0)           # Autoajuste al ancho de consola
-
+'''
 from licenses.models import License
 from users.models import HealthFirstUser
 import pandas as pd
@@ -33,14 +35,21 @@ import pandas as pd
 #ANOMALIAS SOBRE SUPERVISORES------------------------------------------------------------------------------------
 def create_model_supervisor(path_csv): # le paso el csv para el entreamiento
     data= pd.read_csv(path_csv)
-    features = data[['total_requests', 'approved_requests', 'rejected_requests', 'approval_rate', 'rejection_rate']]
+    features = data[['total_requests', 'approved_requests', 'rejected_requests']].copy()
 
      # Entrenamiento del modelo Isolation Forest
-    model = IsolationForest(n_estimators=100, contamination=0.2, random_state=42)
+    model = IsolationForest(
+        n_estimators=200,
+        contamination=0.05,
+        max_samples=100,
+        max_features=0.8,
+        random_state=42,
+    )
     model.fit(features)
 
     # Guardar el modelo en un archivo, ESTO ES LO CORRECTO
-    joblib.dump(model, MODEL_PATH_SUP)
+    #joblib.dump(model, MODEL_PATH_SUP)
+    joblib.dump(model,'isolation_forest_sup_model_v2.pkl')
 
     return model # NO deberia retornarlo, pero por ahora para pruebas lo dejo así
 
@@ -49,14 +58,13 @@ def anomalies_supervisors(data): #recibe un dataframe
     #Cargo el modelo previamente guardado
     model = joblib.load(MODEL_PATH_SUP)
     #data= pd.read_csv(path_csv)
-    features = data[['total_requests', 'approved_requests', 'rejected_requests', 'approval_rate', 'rejection_rate']]
+    features = data[['total_requests', 'approved_requests', 'rejected_requests']]
 
 
     data['anomaly_score'] = model.decision_function(features)
     data['is_anomaly'] = model.predict(features)
     data['is_anomaly'] = data['is_anomaly'].map({1: 0, -1: 1})  # 1 = Anómalo, 0 = Normal
-    data['approval_rate'] = (data['approval_rate'])
-    data['rejection_rate'] = (data['rejection_rate'])
+
 
     return(data)
 
@@ -139,15 +147,15 @@ def get_supervisor_anomalies(start_date=None, end_date=None): #FUNCION PRINCIPAL
     global_rejection_rate = dataframe['rejection_rate'].mean()
     total_requests_sum = dataframe['total_requests'].sum()
 
-    #dataframe['approval_rate_diff'] = dataframe['approval_rate'] - global_approval_rate
-    #dataframe['rejection_rate_diff'] = dataframe['rejection_rate'] - global_rejection_rate
-    #dataframe['total_requests_percent'] = dataframe['total_requests'] / total_requests_sum 
+    dataframe['approval_rate_diff'] = dataframe['approval_rate'] - global_approval_rate #NUEVA INFO
+    dataframe['rejection_rate_diff'] = dataframe['rejection_rate'] - global_rejection_rate#NUEVA INFO
+    dataframe['total_requests_percent'] = dataframe['total_requests'] / total_requests_sum #NUEVA INFO
 
     dataframe['approval_rate'] = (dataframe['approval_rate']*100).map("{:.2f}%".format)
     dataframe['rejection_rate'] = (dataframe['rejection_rate']*100).map("{:.2f}%".format)
-    #dataframe['approval_rate_diff'] = (dataframe['approval_rate_diff']*100).map("{:+.2f}%".format)
-    #dataframe['rejection_rate_diff'] = (dataframe['rejection_rate_diff']*100).map("{:+.2f}%".format)
-    #dataframe['total_requests_percent'] = (dataframe['total_requests_percent']*100).map("{:.2f}%".format)
+    dataframe['approval_rate_diff'] = (dataframe['approval_rate_diff']*100).map("{:+.2f}%".format) #NUEVA INFO
+    dataframe['rejection_rate_diff'] = (dataframe['rejection_rate_diff']*100).map("{:+.2f}%".format) #NUEVA INFO
+    dataframe['total_requests_percent'] = (dataframe['total_requests_percent']*100).map("{:.2f}%".format)#NUEVA INFO
 
     return dataframe
 
@@ -255,10 +263,10 @@ def anomalies_employees(data): #recibe un dataframe
 #falta evaluar fechas de ingreso, es mas anomalo teniendo en cuenta la fecha en la que el supervisor comenzó a trabajr
 def dataframe_pruebas_sup(): # para pruebas
     data = pd.DataFrame({
-    'evaluator_id': [6,7, 8, 9, 10, 11, 12,13],
-    'total_requests': [0,40, 28, 35, 50, 20, 30,100],
-    'approved_requests': [0,35, 24, 18, 48, 3, 10,50],
-    'rejected_requests': [0,5, 4, 17, 2, 17, 20,50],
+    'evaluator_id': [6, 7, 8, 9, 10, 11, 12],
+    'total_requests': [0, 40, 28, 35, 50, 20, 30],
+    'approved_requests': [0, 35, 24, 18, 48, 3, 10],
+    'rejected_requests': [0, 5, 4, 17, 2, 17, 20]
     })
 
     data['approval_rate'] = 0.0
@@ -292,9 +300,17 @@ def dataframe_pruebas_emp(): # para pruebas
     return data
 
     
-#---------------------------------------------------------------------------------------------------------------
-print(get_supervisor_anomalies())
+#-pruebas sup------------------------------------------------------------------------------------------------------
+
+#print(get_supervisor_anomalies())
+
+
+#create_model_supervisor('supervisors_data_1000.csv')
+#print(anomalies_supervisors(dataframe_pruebas_sup()))
+#print(get_supervisor_anomalies())
+
+#pruebas emp-------------------------------------------------------------------------------------------------------
+
 #generate_empleados_csv()
 #create_model_empleados('employees_data_1000.csv')
 #print(anomalies_employees(dataframe_pruebas_emp()))
-#print(anomalies_supervisors(dataframe_pruebas_sup()))
