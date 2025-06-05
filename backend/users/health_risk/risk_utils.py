@@ -14,13 +14,15 @@ from users.models import HealthFirstUser,Department
 
 
 def get_high_risk_department_ids():
+    """Devuelve el id de los departamentos considerados como de riesgo"""
     return list(
         Department.objects.filter(
             is_high_risk_department=True
         ).values_list('department_id', flat=True)
     )
 
-def generate_risk_dataset():
+def generate_risk_dataframe():
+    """Genera el dataframe de la base de datos"""
     # Fechas límites
     today = datetime.now()
     a_year_ago = today - timedelta(days=365)
@@ -92,5 +94,5 @@ def generate_risk_dataset():
 
 """-----------------------------------------------------------------------------------------"""
 if __name__ == "__main__":
-    print(generate_risk_dataset())
+    print(generate_risk_dataframe())
     print(get_high_risk_department_ids())
