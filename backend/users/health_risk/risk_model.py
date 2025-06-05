@@ -1,9 +1,10 @@
 import pandas as pd
+import numpy as np
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
-from django.conf import settings
 from sklearn.preprocessing import StandardScaler
+from risk_utils import generate_risk_dataframe
 import joblib
 import os
 from pathlib import Path
@@ -88,12 +89,14 @@ def load_trained_model():
     
 
 # Método para predecir el riesgo
-def predict_risk(df):
-    """Predice el riesgo del dataframe que se le pasa"""
-    #Realiza predicciones con el modelo entrenado
+def predict_risk():
+    """Devuelve el JSON asociado a la prediccion de riesgo de salud"""
+    df=generate_risk_dataframe() #Obtenemos el dataframe con la informacion de la base de datos
+
+    #Cargamos el scaler y el modelo de prediccion
     model, scaler = load_trained_model()
 
-    # Copia del dataframe original para obtener la prediccion
+    #Hacemos copia del dataframe original, atributos que sirven para la prediccion
     X = df[["Edad", "Cant_licencias_enfermedad", "Cant_licencias_accidente",
               "Departamento_de_Riesgo"]].copy()
     
@@ -102,11 +105,16 @@ def predict_risk(df):
     
     # Hacer predicciones
     predictions = model.predict(X_scaled)
-    
-    return predictions
+    df['Riesgo']=predictions
+    df['Riesgo'] = np.where(predictions == 1, 'Alto Riesgo', 'Bajo Riesgo')
+
+    #Pasamos a JSON para que lo levante Front
+    json_results= df.to_json(orient='records')
+
+    print(json_results)
+    return json_results
 
 """--------------------------------"""
-df = pd.read_csv("HealthFirst/backend/users/health_risk/test_health_risk.csv")
-df_training=pd.read_csv("HealthFirst/backend/users/health_risk/dataset_risk.csv")
-training_model(df_training)
-predict_risk(df)
+#df_training=pd.read_csv("HealthFirst/backend/users/health_risk/dataset_risk.csv")
+#training_model(df_training)
+#predict_risk()
