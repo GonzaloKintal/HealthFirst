@@ -1,7 +1,6 @@
 from django.core.mail import send_mail
 import requests
 from django.conf import settings
-from datetime import datetime, timedelta
     
 def send_email(subject,message, to_email):
     send_mail(
@@ -109,49 +108,3 @@ def get_user_activity(email, days=30):
     return get_all_brevo_events(days=days, email=email)
 
 
-def send_welcome_email(user):
-    subject = "Bienvenido a Health First"
-    message = f"""
-    ¡Bienvenido/a a Health First, {user.first_name} {user.last_name}!
-
-    Por este medio te mantendremos informado/a sobre tus novedades.  
-    Además, puedes suscribirte a nuestro canal de Telegram para recibir notificaciones instantáneas:  
-    👉 aca va el link 
-
-    ¡Gracias por confiar en nosotros!  
-    Equipo Health First  
-    """
-    send_email(subject, message, user.email)
-
-
-def send_rejected_license(license):
-    user=license.user
-    subject = "Licencia rechazada"
-    message = f"""
-    ¡Hola {user.first_name} {user.last_name}!
-
-    Lanmentamos informarte que hemos rechazado tu licencia de {license.type.name}.
-
-    Motivo:
-        {license.status.evaluation_comment}
-
-    Para mas detalles contactate con tu supervisor.
-
-    ¡Gracias por confiar en nosotros!  
-    Equipo Health First  
-    """
-    send_email(subject, message, user.email)
-
-
-def send_approved_license(license):
-    user=license.user
-    subject = "Licencia aprobada"
-    message = f"""
-    ¡Hola {user.first_name} {user.last_name}!
-
-    Es de nuestro gusto informarte que hemos aprobado tu licencia de {license.type.name}.
-
-    ¡Gracias por confiar en nosotros!  
-    Equipo Health First  
-    """
-    send_email(subject, message, user.email)

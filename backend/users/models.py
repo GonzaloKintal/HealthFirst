@@ -64,8 +64,7 @@ class HealthFirstUser(AbstractUser):
     delete_at=models.DateTimeField(null=True, blank=True,default=None)
     employment_start_date=models.DateField(null=True, blank=True)
     is_telegram_suscriptor = models.BooleanField(default=False)
-    telegram_id=models.IntegerField(null=True, blank=True)
-
+    telegram_id=models.BigIntegerField(null=True, blank=True)
 
     def save(self, *args, **kwargs):
         # Asegurar campos de tipo `date`

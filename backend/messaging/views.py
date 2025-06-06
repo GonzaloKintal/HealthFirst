@@ -107,4 +107,18 @@ def get_email_events(request):
 
     return JsonResponse({"events": events}, status=200)
     
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def get_user_email_events(request, id):
+    user=HealthFirstUser.objects.get(id=id, is_deleted=False)
+
+    if not user:
+        return JsonResponse({"error": "El usuario no existe"}, status=404)
+    try:
+        events=get_user_activity(user.email)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+    return JsonResponse({"events": events}, status=200)
     
