@@ -117,4 +117,4 @@ def predict_risk():
 """--------------------------------"""
 #df_training=pd.read_csv("HealthFirst/backend/users/health_risk/dataset_risk.csv")
 #training_model(df_training)
-#predict_risk()
+predict_risk()
