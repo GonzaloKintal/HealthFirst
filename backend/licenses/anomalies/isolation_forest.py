@@ -226,21 +226,42 @@ def create_model_empleados(path_csv): # le paso el csv para el entreamiento
     return model # NO deberia retornarlo, pero por ahora para pruebas lo dejo así
 
 #--proximamente para anomalias en empleados
-def create_dataFrame_empleados():
-    #agrupo licencias por empleado
-    licencias = License.objects.values('user_id').annotate(
-        total_days_requested=Sum('required_days'),
-        num_requests=Count('license_id')
+def create_dataFrame_empleados(start_date=None, end_date=None):
+    employees = HealthFirstUser.objects.filter(role__name='employee', is_deleted=False)
+
+    license_base = License.objects.filter(user=OuterRef('pk'))
+    if start_date and end_date:
+        license_base = license_base.filter(request_date__range=(start_date, end_date))
+
+    total_requests = license_base.order_by().values('user').annotate(c=Count('pk')).values('c')[:1]
+    required_days = license_base.order_by().values('user').annotate(s=Sum('required_days')).values('s')[:1]
+
+    employees = employees.annotate(
+        total_requests=Coalesce(Subquery(total_requests), Value(0, output_field=IntegerField())),
+        required_days=Coalesce(Subquery(required_days), Value(0, output_field=IntegerField()))
     )
 
-    #convertir a DataFrame
-    df = pd.DataFrame(list(licencias))
+    df = pd.DataFrame(list(employees.values('id', 'total_requests', 'required_days', 'employment_start_date')))
+    df = df.rename(columns={'id': 'employee_id'})
 
-    # Calcular promedio de días por solicitud
-    df['prom_days_request'] = df['total_days_requested'] / df['num_requests']
+    if df.empty:
+        return df
 
+    # Calcular días de antigüedad
+    today = date.today()
+    df['seniority_days'] = df['employment_start_date'].apply(lambda d: (today - d).days if d else 0)
 
-    #print(df)
+    # Indicadores derivados
+    df['required_days_rate'] = df.apply(
+        lambda row: row['required_days'] / row['total_requests'] if row['total_requests'] > 0 else 0,
+        axis=1
+    )
+    df['days_per_year'] = df.apply(
+        lambda row: row['required_days'] / (row['seniority_days'] / 365) if row['seniority_days'] > 0 else 0,
+        axis=1
+    )
+    df.drop(columns=['employment_start_date'], inplace=True)
+            
     return df
 
 def anomalies_employees(data): #recibe un dataframe
@@ -258,6 +279,10 @@ def anomalies_employees(data): #recibe un dataframe
     #data['required_days_rate'] = (data['required_days_rate']*100).map("{:.2f}%".format)
 
     return(data)
+
+def get_empleoyee_anomalies(start_date=None, end_date=None): #FUNCION PRINCIPAL QUE SE USARA EN EL FRONT
+    df = create_dataFrame_empleados(start_date, end_date)
+    return df;
 
 #---------------------------------------------------------------------------------------------------------------
 #falta evaluar fechas de ingreso, es mas anomalo teniendo en cuenta la fecha en la que el supervisor comenzó a trabajr
@@ -314,3 +339,5 @@ def dataframe_pruebas_emp(): # para pruebas
 #generate_empleados_csv()
 #create_model_empleados('employees_data_1000.csv')
 #print(anomalies_employees(dataframe_pruebas_emp()))
+
+#print(create_dataFrame_empleados())
