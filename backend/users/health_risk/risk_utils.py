@@ -26,7 +26,7 @@ def generate_risk_dataframe():
     # Fechas límites
     today = datetime.now()
     a_year_ago = today - timedelta(days=365)
-    
+
     # Query optimizada
     users = HealthFirstUser.objects.filter(
         is_deleted=False
@@ -36,16 +36,16 @@ def generate_risk_dataframe():
             filter=Q(
                 licenses__type__name='Enfermedad',
                 licenses__start_date__gte=a_year_ago,
-                licenses__status__name='Aprobada', 
+                licenses__status__name='approved', 
                 licenses__is_deleted=False
             )
         ),
         accident_license_count=Count(
             'licenses',
             filter=Q(
-                licenses__type__name='Accidente de Trabajo',
+                licenses__type__name='Accidente de trabajo',
                 licenses__start_date__gte=a_year_ago,
-                licenses__status__name='Aprobada',
+                licenses__status__name='approved',
                 licenses__is_deleted=False
             )
         )
@@ -95,4 +95,3 @@ def generate_risk_dataframe():
 """-----------------------------------------------------------------------------------------"""
 if __name__ == "__main__":
     print(generate_risk_dataframe())
-    print(get_high_risk_department_ids())
