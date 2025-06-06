@@ -1,38 +1,29 @@
+
 import { useState, useEffect } from 'react';
-import { FiRefreshCw, FiPieChart, FiUser, FiBarChart2 } from 'react-icons/fi';
+import { FiRefreshCw, FiPieChart, FiUser, FiBarChart2, FiFilter, FiX, FiActivity } from 'react-icons/fi';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title } from 'chart.js';
 import { Pie, Bar } from 'react-chartjs-2';
 import { getSupervisorAnomalies } from '../../services/licenseService';
 import { getUsers } from '../../services/userService';
+import StyledDatePicker from '../utils/StyledDatePicker';
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title);
 
 const SupervisorAnomalies = () => {
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [supervisors, setSupervisors] = useState([]);
   const [anomaliesData, setAnomaliesData] = useState(null);
   const [error, setError] = useState(null);
   const [isDarkMode, setIsDarkMode] = useState(false);
-
-  // Cargar datos iniciales (supervisores)
-  useEffect(() => {
-    const fetchSupervisors = async () => {
-      try {
-        setIsLoading(true);
-        const response = await getUsers(1, '', 'supervisor');
-        console.log('Supervisores cargados:', response);
-        setSupervisors(response.users || []);
-      } catch (err) {
-        setError(err.message || 'Error al cargar supervisores');
-        console.error('Error fetching supervisors:', err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchSupervisors();
-  }, []);
+  const [showFilters, setShowFilters] = useState(false);
+  const [hasAnalyzed, setHasAnalyzed] = useState(false);
+  const [filters, setFilters] = useState({
+    start_date: null,
+    end_date: null,
+    user_id: '',
+    is_anomaly: ''
+  });
 
   // Detectar modo oscuro
   useEffect(() => {
@@ -55,14 +46,29 @@ const SupervisorAnomalies = () => {
       setIsAnalyzing(true);
       setError(null);
       
-      const result = await getSupervisorAnomalies();
-      console.log('Datos de anomalías recibidos:', result.data);
+      // Primero cargar los supervisores si no están cargados
+      if (supervisors.length === 0) {
+        setIsLoading(true);
+        const response = await getUsers(1, '', 'supervisor');
+        setSupervisors(response.users || []);
+        setIsLoading(false);
+      }
+
+      // Luego cargar las anomalías con los filtros
+      const result = await getSupervisorAnomalies({
+        start_date: filters.start_date ? filters.start_date.toISOString().split('T')[0] : null,
+        end_date: filters.end_date ? filters.end_date.toISOString().split('T')[0] : null,
+        user_id: filters.user_id || null,
+        is_anomaly: filters.is_anomaly || null
+      });
+
       if (!result.success) {
         throw new Error(result.error || 'Error al analizar anomalías');
       }
 
       const transformedData = transformApiData(result.data);
       setAnomaliesData(transformedData);
+      setHasAnalyzed(true);
     } catch (err) {
       setError(err.message);
       console.error('Error analyzing anomalies:', err);
@@ -107,13 +113,11 @@ const SupervisorAnomalies = () => {
   const getChartData = () => {
     if (!anomaliesData) return null;
     
-    // Gráfico de distribución de anomalías
     const anomalyCount = anomaliesData.reduce((acc, item) => {
       acc[item.is_anomaly ? 'Anomalías' : 'Normales']++;
       return acc;
     }, { 'Anomalías': 0, 'Normales': 0 });
 
-    // Gráfico de tasas de aprobación
     const approvalRates = anomaliesData.map(item => ({
       name: getNameById(item.evaluator_id),
       rate: item.approval_rate
@@ -216,15 +220,50 @@ const SupervisorAnomalies = () => {
     })
   });
 
+  const handleFilterChange = (e) => {
+    const { name, value } = e.target;
+    setFilters(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleDateChange = (date, field) => {
+    setFilters(prev => ({
+      ...prev,
+      [field]: date
+    }));
+  };
+
+  const resetFilters = () => {
+    setFilters({
+      start_date: null,
+      end_date: null,
+      user_id: '',
+      is_anomaly: ''
+    });
+  };
+
+  const applyFilters = () => {
+    setShowFilters(false);
+    if (hasAnalyzed) {
+      handleAnalyzeAnomalies();
+    }
+  };
+
   const chartData = getChartData();
 
   return (
-    <>
-      <div className="flex justify-start mt-4">
+    <div className="pt-2">
+      <div className="flex justify-between items-start mt-4 gap-4">
         <button
           onClick={handleAnalyzeAnomalies}
-          disabled={isAnalyzing || isLoading}
-          className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-hover flex items-center cursor-pointer disabled:bg-blue-500 dark:disabled:bg-blue-700"
+          disabled={isAnalyzing || hasAnalyzed}
+          className={`px-4 py-2 rounded-md flex items-center ${
+            isAnalyzing || hasAnalyzed
+              ? 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed'
+              : 'bg-primary text-white hover:bg-primary-hover cursor-pointer'
+          }`}
         >
           {isAnalyzing ? (
             <>
@@ -241,6 +280,110 @@ const SupervisorAnomalies = () => {
             </>
           )}
         </button>
+
+        <div className="relative">
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            disabled={!hasAnalyzed}
+            className={`px-4 py-2 rounded-md flex items-center border ${
+              hasAnalyzed
+                ? 'bg-card dark:bg-card-dark text-foreground dark:text-foreground-dark hover:bg-card-hover dark:hover:bg-card-hover-dark border-border dark:border-border-dark cursor-pointer'
+                : 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 border-gray-200 dark:border-gray-600 cursor-not-allowed'
+            }`}
+          >
+            <FiFilter className="mr-2" />
+            Filtros
+            {hasAnalyzed && Object.values(filters).some(val => val !== '' && val !== null) && (
+              <span className="ml-2 w-2 h-2 rounded-full bg-blue-600"></span>
+            )}
+          </button>
+
+          {showFilters && hasAnalyzed && (
+            <div className="absolute right-0 mt-2 w-72 bg-card dark:bg-card-dark rounded-lg shadow-lg border border-border dark:border-border-dark z-10 p-4">
+              <div className="flex justify-between items-center mb-3">
+                <h3 className="font-medium text-foreground dark:text-foreground-dark">Filtrar resultados</h3>
+                <button onClick={() => setShowFilters(false)} className="text-foreground dark:text-muted-foreground-dark">
+                  <FiX />
+                </button>
+              </div>
+
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-foreground dark:text-foreground-dark">Supervisor</label>
+                  <select
+                    name="user_id"
+                    value={filters.user_id}
+                    onChange={handleFilterChange}
+                    className="w-full p-2 border border-border dark:border-border-dark rounded bg-background dark:bg-background-dark text-foreground dark:text-foreground-dark"
+                  >
+                    <option value="">Todos los supervisores</option>
+                    {supervisors.map(supervisor => (
+                      <option key={supervisor.id} value={supervisor.id}>
+                        {supervisor.full_name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-foreground dark:text-foreground-dark">Estado</label>
+                  <select
+                    name="is_anomaly"
+                    value={filters.is_anomaly}
+                    onChange={handleFilterChange}
+                    className="w-full p-2 border border-border dark:border-border-dark rounded bg-background dark:bg-background-dark text-foreground dark:text-foreground-dark"
+                  >
+                    <option value="">Todos</option>
+                    <option value="true">Solo anomalías</option>
+                    <option value="false">Solo normales</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-foreground dark:text-foreground-dark">Fecha desde</label>
+                  <StyledDatePicker
+                    selected={filters.start_date}
+                    onChange={(date) => handleDateChange(date, 'start_date')}
+                    selectsStart
+                    startDate={filters.start_date}
+                    endDate={filters.end_date}
+                    placeholderText="Seleccione fecha"
+                    className="w-full"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-foreground dark:text-foreground-dark">Fecha hasta</label>
+                  <StyledDatePicker
+                    selected={filters.end_date}
+                    onChange={(date) => handleDateChange(date, 'end_date')}
+                    selectsEnd
+                    startDate={filters.start_date}
+                    endDate={filters.end_date}
+                    minDate={filters.start_date}
+                    placeholderText="Seleccione fecha"
+                    className="w-full"
+                  />
+                </div>
+
+                <div className="flex justify-between pt-2">
+                  <button
+                    onClick={resetFilters}
+                    className="px-3 py-1 text-sm text-foreground dark:hover:text-foreground-dark"
+                  >
+                    Limpiar filtros
+                  </button>
+                  <button
+                    onClick={applyFilters}
+                    className="px-3 py-1 bg-primary text-white text-sm rounded hover:bg-primary-hover"
+                  >
+                    Aplicar
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       {error && (
@@ -321,9 +464,7 @@ const SupervisorAnomalies = () => {
             </div>
           </div>
 
-          {/* Sección de gráficos */}
           <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Gráfico de distribución de anomalías */}
             <div className="bg-background dark:bg-card-dark p-4 rounded-lg shadow border border-border dark:border-border-dark">
               <div className="flex items-center mb-4 text-foreground dark:text-foreground-dark">
                 <FiPieChart className="mr-2 text-primary-text dark:text-primary-text-dark" />
@@ -337,7 +478,6 @@ const SupervisorAnomalies = () => {
               </div>
             </div>
 
-            {/* Gráfico de tasas de aprobación */}
             <div className="bg-background dark:bg-card-dark p-4 rounded-lg shadow border border-border dark:border-border-dark">
               <div className="flex items-center mb-4 text-foreground dark:text-foreground-dark">
                 <FiBarChart2 className="mr-2 text-primary-text dark:text-primary-text-dark" />
@@ -370,7 +510,7 @@ const SupervisorAnomalies = () => {
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 };
 
