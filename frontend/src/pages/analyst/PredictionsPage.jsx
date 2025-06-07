@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { FiActivity, FiAlertTriangle, FiHeart } from 'react-icons/fi';
+import { FiActivity, FiAlertTriangle, FiHeart, FiChevronDown, FiChevronUp } from 'react-icons/fi';
 import Anomalies from './Anomalies';
 import HealthPredictions from './HealthPredictions';
 
@@ -19,16 +19,14 @@ const PredictionsPage = () => {
       <div className="mb-6 overflow-hidden rounded-lg shadow-sm border border-border">
         <button
           onClick={() => setExpandedSection(expandedSection === 'anomalies' ? '' : 'anomalies')}
-          className="w-full flex justify-between items-center p-4 bg-background transition-colors"
+          className="w-full flex justify-between items-center p-4 bg-background transition-colors hover:bg-card"
         >
           <div className="flex items-center">
             <FiAlertTriangle className="mr-2 text-blue-500" />
             <h2 className="text-lg font-semibold text-foreground">Análisis de Anomalías</h2>
           </div>
-          <span className={`transform transition-transform duration-200 text-foreground ${
-            expandedSection === 'anomalies' ? 'rotate-0' : '-rotate-90'
-          }`}>
-            ▼
+          <span className="text-foreground">
+            {expandedSection === 'anomalies' ? <FiChevronUp /> : <FiChevronDown />}
           </span>
         </button>
         
@@ -45,16 +43,14 @@ const PredictionsPage = () => {
       <div className="overflow-hidden rounded-lg shadow-sm border border-border">
         <button
           onClick={() => setExpandedSection(expandedSection === 'health' ? '' : 'health')}
-          className="w-full flex justify-between items-center p-4 bg-background transition-colors"
+          className="w-full flex justify-between items-center p-4 bg-background transition-colors hover:bg-card"
         >
           <div className="flex items-center">
             <FiHeart className="mr-2 text-green-500" />
             <h2 className="text-lg font-semibold text-foreground">Predicciones de Salud Laboral</h2>
           </div>
-          <span className={`transform transition-transform duration-200 text-foreground ${
-            expandedSection === 'health' ? 'rotate-0' : '-rotate-90'
-          }`}>
-            ▼
+          <span className="text-foreground">
+            {expandedSection === 'health' ? <FiChevronUp /> : <FiChevronDown />}
           </span>
         </button>
         

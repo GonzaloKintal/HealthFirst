@@ -97,27 +97,37 @@ def get_email_stats(request):
     return JsonResponse({"stats": stats}, status=200)
 
 
-@api_view(['GET'])
+@api_view(['POST'])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
 def get_email_events(request):
     try:
-        events=get_brevo_events()
+        data= json.loads(request.body)
+        limit=data.get('limit',10)
+        offset=data.get('offset', 0)
+        events=get_brevo_events(limit=limit, offset=offset)
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
 
     return JsonResponse({"events": events}, status=200)
     
-@api_view(['GET'])
+@api_view(['POST'])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
-def get_user_email_events(request, id):
-    user=HealthFirstUser.objects.get(id=id, is_deleted=False)
-
-    if not user:
-        return JsonResponse({"error": "El usuario no existe"}, status=404)
+def get_user_email_events(request):
+    data= json.loads(request.body)
+    id=data.get('user_id')
+    limit=data.get('limit',10)
+    offset=data.get('offset', 0)
+    if not id:
+        return JsonResponse({"error": "El id del usuario es requerido"}, status=400)
     try:
-        events=get_user_activity(user.email)
+        user = HealthFirstUser.objects.get(id=id, is_deleted=False)
+    except HealthFirstUser.DoesNotExist:
+        return JsonResponse({"error": "El usuario no existe"}, status=404)
+    
+    try:
+        events = get_user_activity(email=user.email, limit=limit, offset=offset)
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
 

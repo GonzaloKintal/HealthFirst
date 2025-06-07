@@ -21,7 +21,7 @@ def get_brevo_stats():
         return response.json()  
     return None
 
-def get_brevo_events(days=7, email=None, event_type=None):
+def get_brevo_events(days=7, email=None, event_type=None,limit=10, offset=0):
     """
     Obtiene eventos recientes de Brevo
     
@@ -38,7 +38,8 @@ def get_brevo_events(days=7, email=None, event_type=None):
     
     params = {
         "days": days,
-        "limit": 100  # Máximo por llamada
+        "limit": limit,
+        "offset": offset
     }
     
     # Agregar filtros opcionales
@@ -50,64 +51,11 @@ def get_brevo_events(days=7, email=None, event_type=None):
     response = requests.get(url, headers=headers, params=params)
     if response.status_code == 200:
         events = response.json().get('events', [])
-        # Filtrar para excluir eventos de tipo "requests"
-        filtered_events = [event for event in events if event.get('event') != 'requests']
-        return {'events': filtered_events}
+        return {'events': events}
     return {'events': []}
-
-def get_all_brevo_events(days=7, email=None, event_type=None):
-    """
-    Obtiene TODOS los eventos usando paginación automática
-    """
-    all_events = []
-    offset = 0
     
-    while True:
-        url = "https://api.brevo.com/v3/smtp/statistics/events"
-        headers = {
-            "accept": "application/json",
-            "api-key": settings.BREVO_API_KEY,
-        }
-        
-        params = {
-            "days": days,
-            "limit": 100,
-            "offset": offset
-        }
-        
-        if email:
-            params["email"] = email
-        if event_type:
-            params["event"] = event_type
-        
-        response = requests.get(url, headers=headers, params=params)
-        
-        if response.status_code != 200:
-            break
-            
-        data = response.json()
-        events = data.get('events', [])
-        
-        if not events:
-            break
-            
-        all_events.extend(events)
-        
-        # Si recibimos menos de 100, ya no hay más
-        if len(events) < 100:
-            break
-            
-        offset += 100
-    
-    return all_events
-
-def get_recent_opens(days=7):
-    """Obtiene solo los eventos de apertura"""
-    return get_all_brevo_events(days=days, event_type="opened")
-
-
-def get_user_activity(email, days=30):
+def get_user_activity(email, days=30,offset=0,limit=10):
     """Obtiene toda la actividad de un usuario específico"""
-    return get_all_brevo_events(days=days, email=email)
+    return get_brevo_events(days=days, email=email,offset=offset,limit=limit)
 
 
