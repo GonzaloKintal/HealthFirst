@@ -428,7 +428,7 @@ const LicensesPage = () => {
                 <tbody className="bg-background divide-y divide-border">
                   {licenses.length > 0 ? (
                     licenses.map((license) => (
-                      <tr key={license.id} className='text-center'>
+                      <tr key={license.id} className='text-center hover:bg-card'>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="font-medium text-foreground">{license.employee}</div>
                         </td>
