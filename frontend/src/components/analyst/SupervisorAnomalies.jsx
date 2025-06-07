@@ -1,13 +1,13 @@
 
 import { useState, useEffect } from 'react';
-import { FiRefreshCw, FiPieChart, FiUser, FiBarChart2, FiFilter, FiX, FiActivity } from 'react-icons/fi';
-import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title } from 'chart.js';
-import { Pie, Bar } from 'react-chartjs-2';
+import { FiRefreshCw, FiPieChart, FiUser, FiFilter, FiX, FiAlertTriangle, FiTrendingUp, FiTrendingDown } from 'react-icons/fi';
+import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, PointElement, ScatterController } from 'chart.js';
+import { Pie, Scatter } from 'react-chartjs-2';
 import { getSupervisorAnomalies } from '../../services/licenseService';
 import { getUsers } from '../../services/userService';
 import StyledDatePicker from '../utils/StyledDatePicker';
 
-ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title);
+ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, PointElement, ScatterController);
 
 const SupervisorAnomalies = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -24,6 +24,8 @@ const SupervisorAnomalies = () => {
     user_id: '',
     is_anomaly: ''
   });
+  const [hoveredRow, setHoveredRow] = useState(null);
+  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
 
   // Detectar modo oscuro
   useEffect(() => {
@@ -77,6 +79,18 @@ const SupervisorAnomalies = () => {
     }
   };
 
+  const handleRowMouseEnter = (event, index) => {
+    setTooltipPosition({
+      x: event.clientX,
+      y: event.clientY
+    });
+    setHoveredRow(index);
+  };
+
+  const handleRowMouseLeave = () => {
+    setHoveredRow(null);
+  };
+
   // Transformar datos de la API al formato esperado
   const transformApiData = (apiData) => {
     return apiData.map(item => ({
@@ -86,7 +100,10 @@ const SupervisorAnomalies = () => {
       rejected_requests: item.rejected_requests,
       approval_rate: parseFloat(item.approval_rate) || 0,
       rejection_rate: parseFloat(item.rejection_rate) || 0,
-      is_anomaly: item.is_anomaly
+      is_anomaly: item.is_anomaly,
+      approval_rate_diff: item.approval_rate_diff || '0%',
+      rejection_rate_diff: item.rejection_rate_diff || '0%',
+      total_requests_percent: item.total_requests_percent || '0%'
     }));
   };
 
@@ -118,40 +135,38 @@ const SupervisorAnomalies = () => {
       return acc;
     }, { 'Anomalías': 0, 'Normales': 0 });
 
-    const approvalRates = anomaliesData.map(item => ({
-      name: getNameById(item.evaluator_id),
-      rate: item.approval_rate
-    })).sort((a, b) => b.rate - a.rate);
-
     return {
       anomalyDistribution: {
         labels: ['Normales', 'Anomalías'],
         datasets: [
           {
             data: [anomalyCount.Normales, anomalyCount.Anomalías],
-            backgroundColor: ['#3B82F6', '#EF4444'],
+            backgroundColor: ['#3B82F6', '#FA6464'],
             borderColor: ['#2563EB', '#DC2626'],
             borderWidth: 1,
           },
         ],
       },
-      approvalRates: {
-        labels: approvalRates.map(item => item.name),
-        datasets: [
-          {
-            label: 'Tasa de Aprobación (%)',
-            data: approvalRates.map(item => item.rate),
-            backgroundColor: '#3B82F6',
-            borderColor: '#1D4ED8',
-            borderWidth: 1,
-          },
-        ],
-      },
+      scatterData: {
+        datasets: anomaliesData.map(item => ({
+          label: getNameById(item.evaluator_id),
+          data: [{
+            x: item.total_requests,
+            y: item.approval_rate,
+            r: 10
+          }],
+          backgroundColor: item.is_anomaly 
+            ? 'rgba(239, 68, 68, 0.7)' 
+            : 'rgba(59, 130, 246, 0.7)',
+          borderColor: item.is_anomaly ? '#DC2626' : '#2563EB',
+          borderWidth: 1
+        }))
+      }
     };
   };
 
-  // Opciones para los gráficos
-  const getChartOptions = (isPie = false) => ({
+  // Opciones para el gráfico de torta (Pie Chart)
+  const getPieChartOptions = () => ({
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
@@ -159,65 +174,73 @@ const SupervisorAnomalies = () => {
         position: 'bottom',
         labels: {
           color: isDarkMode ? '#ffffff' : '#1f2937',
-          font: {
-            family: "'Inter', sans-serif",
-          },
         },
       },
       tooltip: {
-        backgroundColor: isDarkMode ? 'rgba(17, 24, 39, 0.95)' : 'rgba(249, 250, 251, 0.95)',
-        titleColor: isDarkMode ? '#f3f4f6' : '#1f2937',
-        bodyColor: isDarkMode ? '#f3f4f6' : '#1f2937',
-        borderColor: isDarkMode ? '#6b7280' : '#e5e7eb',
-        borderWidth: 2,
-        displayColors: true,
-        bodyFont: {
-          weight: 'bold',
-        },
-        callbacks: isPie ? {
+        callbacks: {
           label: function(context) {
-            return `${context.label}: ${context.raw} (${Math.round(context.parsed)}%)`;
+            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+            const value = context.raw || 0;
+            const percentage = Math.round((value / total) * 100);
+            return `${context.label}: ${value} (${percentage}%)`;
           }
-        } : undefined
-      },
-    },
-    ...(isPie ? {
-      elements: {
-        arc: {
-          borderWidth: isDarkMode ? 2 : 1,
-          borderColor: isDarkMode ? '#111827' : '#ffffff',
         }
       }
-    } : {
-      scales: {
-        y: {
-          beginAtZero: true,
-          max: 100,
-          title: {
-            display: true,
-            text: 'Porcentaje (%)',
-            color: isDarkMode ? '#ffffff' : '#1f2937',
-          },
-          grid: {
-            color: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
-          },
-          ticks: {
-            color: isDarkMode ? '#ffffff' : '#1f2937',
-          },
+    }
+  });
+
+  // Opciones para el gráfico de dispersión (Scatter Chart)
+  const getScatterOptions = () => ({
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      y: {
+        title: { 
+          display: true, 
+          text: 'Tasa de Aprobación (%)',
+          color: isDarkMode ? '#ffffff' : '#1f2937'
         },
-        x: {
-          ticks: {
-            autoSkip: false,
-            maxRotation: 45,
-            minRotation: 45,
-            color: isDarkMode ? '#ffffff' : '#1f2937',
-          },
-          grid: {
-            color: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
-          },
+        min: 0,
+        max: 100,
+        grid: {
+          color: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
         },
+        ticks: {
+          color: isDarkMode ? '#ffffff' : '#1f2937',
+        }
+      },
+      x: {
+        title: { 
+          display: true, 
+          text: 'Total de Solicitudes',
+          color: isDarkMode ? '#ffffff' : '#1f2937'
+        },
+        grid: {
+          color: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+        },
+        ticks: {
+          color: isDarkMode ? '#ffffff' : '#1f2937',
+        }
       }
-    })
+    },
+    plugins: {
+      tooltip: {
+        callbacks: {
+          label: (ctx) => {
+            const item = anomaliesData[ctx.datasetIndex];
+            return [
+              `Supervisor: ${getNameById(item.evaluator_id)}`,
+              `Solicitudes: ${ctx.parsed.x}`,
+              `Aprobación: ${ctx.parsed.y}%`,
+              `Desviación: ${item.approval_rate_diff}`
+            ];
+          }
+        }
+      },
+      legend: {
+        display: false
+      }
+    }
   });
 
   const handleFilterChange = (e) => {
@@ -287,7 +310,7 @@ const SupervisorAnomalies = () => {
             disabled={!hasAnalyzed}
             className={`px-4 py-2 rounded-md flex items-center border ${
               hasAnalyzed
-                ? 'bg-card dark:bg-card-dark text-foreground dark:text-foreground-dark hover:bg-card-hover dark:hover:bg-card-hover-dark border-border dark:border-border-dark cursor-pointer'
+                ? 'bg-card dark:bg-card-dark text-foreground  hover:bg-card-hover dark:hover:bg-card-hover-dark border-border dark:border-border-dark cursor-pointer'
                 : 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 border-gray-200 dark:border-gray-600 cursor-not-allowed'
             }`}
           >
@@ -301,20 +324,20 @@ const SupervisorAnomalies = () => {
           {showFilters && hasAnalyzed && (
             <div className="absolute right-0 mt-2 w-72 bg-card dark:bg-card-dark rounded-lg shadow-lg border border-border dark:border-border-dark z-10 p-4">
               <div className="flex justify-between items-center mb-3">
-                <h3 className="font-medium text-foreground dark:text-foreground-dark">Filtrar resultados</h3>
-                <button onClick={() => setShowFilters(false)} className="text-foreground dark:text-muted-foreground-dark">
+                <h3 className="font-medium text-foreground ">Filtrar resultados</h3>
+                <button onClick={() => setShowFilters(false)} className="text-foreground ">
                   <FiX />
                 </button>
               </div>
 
               <div className="space-y-3">
                 <div>
-                  <label className="block text-sm font-medium mb-1 text-foreground dark:text-foreground-dark">Supervisor</label>
+                  <label className="block text-sm font-medium mb-1 text-foreground ">Supervisor</label>
                   <select
                     name="user_id"
                     value={filters.user_id}
                     onChange={handleFilterChange}
-                    className="w-full p-2 border border-border dark:border-border-dark rounded bg-background dark:bg-background-dark text-foreground dark:text-foreground-dark"
+                    className="w-full p-2 border border-border dark:border-border-dark rounded bg-background dark:bg-background-dark text-foreground "
                   >
                     <option value="">Todos los supervisores</option>
                     {supervisors.map(supervisor => (
@@ -326,12 +349,12 @@ const SupervisorAnomalies = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-1 text-foreground dark:text-foreground-dark">Estado</label>
+                  <label className="block text-sm font-medium mb-1 text-foreground ">Estado</label>
                   <select
                     name="is_anomaly"
                     value={filters.is_anomaly}
                     onChange={handleFilterChange}
-                    className="w-full p-2 border border-border dark:border-border-dark rounded bg-background dark:bg-background-dark text-foreground dark:text-foreground-dark"
+                    className="w-full p-2 border border-border dark:border-border-dark rounded bg-background dark:bg-background-dark text-foreground "
                   >
                     <option value="">Todos</option>
                     <option value="true">Solo anomalías</option>
@@ -340,7 +363,7 @@ const SupervisorAnomalies = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-1 text-foreground dark:text-foreground-dark">Fecha desde</label>
+                  <label className="block text-sm font-medium mb-1 text-foreground ">Fecha desde</label>
                   <StyledDatePicker
                     selected={filters.start_date}
                     onChange={(date) => handleDateChange(date, 'start_date')}
@@ -353,7 +376,7 @@ const SupervisorAnomalies = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-1 text-foreground dark:text-foreground-dark">Fecha hasta</label>
+                  <label className="block text-sm font-medium mb-1 text-foreground ">Fecha hasta</label>
                   <StyledDatePicker
                     selected={filters.end_date}
                     onChange={(date) => handleDateChange(date, 'end_date')}
@@ -394,6 +417,132 @@ const SupervisorAnomalies = () => {
 
       {anomaliesData ? (
         <>
+          {/* Panel de métricas clave */}
+          <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-background dark:bg-card-dark p-4 rounded-lg shadow border border-border dark:border-border-dark">
+              <div className="flex items-center">
+                <FiAlertTriangle className="text-red-500 dark:text-red-400 mr-2" />
+                <h4 className="font-medium text-foreground ">Anomalías Detectadas</h4>
+              </div>
+              <div className="mt-2 text-3xl font-bold text-red-600 dark:text-red-400">
+                {anomaliesData.filter(d => d.is_anomaly).length}
+              </div>
+              <div className="text-sm text-foreground ">
+                {(() => {
+                  const anomalyCount = anomaliesData.filter(d => d.is_anomaly).length;
+                  const totalCount = anomaliesData.length;
+                  return `${((anomalyCount / totalCount) * 100).toFixed(1)}% del total`;
+                })()}
+              </div>
+            </div>
+
+            <div className="bg-background dark:bg-card-dark p-4 rounded-lg shadow border border-border dark:border-border-dark">
+              <div className="flex items-center">
+                <FiTrendingUp className="text-green-500 mr-2" />
+                <h4 className="font-medium text-foreground ">Mayor Aprobación</h4>
+              </div>
+              {anomaliesData.length > 0 && (
+                <>
+                  <div className="mt-2 text-xl font-bold text-foreground ">
+                    {getNameById(anomaliesData.reduce((prev, current) => 
+                      (prev.approval_rate > current.approval_rate) ? prev : current
+                    ).evaluator_id)}
+                  </div>
+                  <div className="text-sm text-green-600 dark:text-green-400 flex items-center">
+                    {anomaliesData.reduce((prev, current) => 
+                      (prev.approval_rate > current.approval_rate) ? prev : current
+                    ).approval_rate.toFixed(1)}%
+                  </div>
+                </>
+              )}
+            </div>
+
+            <div className="bg-background dark:bg-card-dark p-4 rounded-lg shadow border border-border dark:border-border-dark">
+              <div className="flex items-center">
+                <FiTrendingDown className="text-red-500 mr-2" />
+                <h4 className="font-medium text-foreground ">Menor Aprobación</h4>
+              </div>
+              {anomaliesData.length > 0 && (
+                <>
+                  <div className="mt-2 text-xl font-bold text-foreground ">
+                    {getNameById(anomaliesData.reduce((prev, current) => 
+                      (prev.approval_rate < current.approval_rate) ? prev : current
+                    ).evaluator_id)}
+                  </div>
+                  <div className="text-sm text-red-600 dark:text-red-400 flex items-center">
+                    {anomaliesData.reduce((prev, current) => 
+                      (prev.approval_rate < current.approval_rate) ? prev : current
+                    ).approval_rate.toFixed(1)}%
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+
+          {hoveredRow !== null && (
+            <div 
+              className="fixed z-50 w-64 p-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg pointer-events-none transition-opacity duration-200"
+              style={{
+                left: `${tooltipPosition.x + 15}px`,
+                top: `${tooltipPosition.y - 30}px`,
+              }}
+            >
+              <div className="text-sm text-gray-700 dark:text-gray-300 space-y-2">
+                <div className="font-semibold text-base pb-2 border-b border-gray-200 dark:border-gray-700">
+                  {getNameById(anomaliesData[hoveredRow].evaluator_id)}
+                </div>
+
+                <div>
+                  <div className="flex items-center">
+                    <span className="font-semibold mr-1">Aprobación:</span>
+                    <span className={`font-medium ${
+                      anomaliesData[hoveredRow].approval_rate_diff.startsWith('+') 
+                        ? 'text-green-600 dark:text-green-400' 
+                        : 'text-red-600 dark:text-red-400'
+                    }`}>
+                      {anomaliesData[hoveredRow].approval_rate_diff}
+                    </span>
+                  </div>
+                  <p className="text-xs mt-1 text-gray-500 dark:text-gray-400">
+                    {anomaliesData[hoveredRow].approval_rate_diff.startsWith('+') 
+                      ? `Aprueba un ${anomaliesData[hoveredRow].approval_rate_diff.replace('+', '')} más que el promedio`
+                      : `Aprueba un ${anomaliesData[hoveredRow].approval_rate_diff.replace('-', '')} menos que el promedio`}
+                  </p>
+                </div>
+                
+                <div>
+                  <div className="flex items-center">
+                    <span className="font-semibold mr-1">Rechazo:</span>
+                    <span className={`font-medium ${
+                      anomaliesData[hoveredRow].rejection_rate_diff.startsWith('+') 
+                        ? 'text-red-600 dark:text-red-400' 
+                        : 'text-green-600 dark:text-green-400'
+                    }`}>
+                      {anomaliesData[hoveredRow].rejection_rate_diff}
+                    </span>
+                  </div>
+                  <p className="text-xs mt-1 text-gray-500 dark:text-gray-400">
+                    {anomaliesData[hoveredRow].rejection_rate_diff.startsWith('+') 
+                      ? `Rechaza un ${anomaliesData[hoveredRow].rejection_rate_diff.replace('+', '')} más que el promedio`
+                      : `Rechaza un ${anomaliesData[hoveredRow].rejection_rate_diff.replace('-', '')} menos que el promedio`}
+                  </p>
+                </div>
+                
+                <div>
+                  <div className="flex items-center">
+                    <span className="font-semibold mr-1">Participación:</span>
+                    <span className="font-medium text-blue-600 dark:text-blue-400">
+                      {anomaliesData[hoveredRow].total_requests_percent}
+                    </span>
+                  </div>
+                  <p className="text-xs mt-1 text-gray-500 dark:text-gray-400">
+                    Gestionó el {anomaliesData[hoveredRow].total_requests_percent} de todas las solicitudes analizadas.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className="mt-6 bg-background dark:bg-background-dark rounded-lg shadow overflow-hidden border border-border dark:border-border-dark">
             <div 
               className="overflow-x-auto overflow-y-auto" 
@@ -405,47 +554,52 @@ const SupervisorAnomalies = () => {
               <table className="min-w-full divide-y divide-border dark:divide-border-dark">
                 <thead className="bg-card dark:bg-card-dark sticky top-0">
                   <tr>
-                    <th className="px-6 py-3 text-center text-xs font-medium text-foreground dark:text-foreground-dark uppercase tracking-wider">
+                    <th className="px-6 py-3 text-center text-xs font-medium text-foreground  uppercase tracking-wider">
                       Supervisor
                     </th>
-                    <th className="px-6 py-3 text-center text-xs font-medium text-foreground dark:text-foreground-dark uppercase tracking-wider">
+                    <th className="px-6 py-3 text-center text-xs font-medium text-foreground  uppercase tracking-wider">
                       Evaluaciones
                     </th>
-                    <th className="px-6 py-3 text-center text-xs font-medium text-foreground dark:text-foreground-dark uppercase tracking-wider">
+                    <th className="px-6 py-3 text-center text-xs font-medium text-foreground  uppercase tracking-wider">
                       Aprobadas
                     </th>
-                    <th className="px-6 py-3 text-center text-xs font-medium text-foreground dark:text-foreground-dark uppercase tracking-wider">
+                    <th className="px-6 py-3 text-center text-xs font-medium text-foreground  uppercase tracking-wider">
                       Rechazadas
                     </th>
-                    <th className="px-6 py-3 text-center text-xs font-medium text-foreground dark:text-foreground-dark uppercase tracking-wider">
+                    <th className="px-6 py-3 text-center text-xs font-medium text-foreground  uppercase tracking-wider">
                       Tasa Aprobación
                     </th>
-                    <th className="px-6 py-3 text-center text-xs font-medium text-foreground dark:text-foreground-dark uppercase tracking-wider">
+                    <th className="px-6 py-3 text-center text-xs font-medium text-foreground  uppercase tracking-wider">
                       Es Anomalía
                     </th>
                   </tr>
                 </thead>
                 <tbody className="bg-background dark:bg-background-dark divide-y divide-border dark:divide-border-dark overflow-y-auto">
                   {anomaliesData.map((item, index) => (
-                    <tr key={index} className="hover:bg-card dark:hover:bg-card-dark">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground dark:text-foreground-dark text-center">
+                    <tr 
+                      key={index}
+                      className="hover:bg-card dark:hover:bg-card-dark"
+                      onMouseEnter={(e) => handleRowMouseEnter(e, index)}
+                      onMouseLeave={handleRowMouseLeave}
+                    >
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground  text-center">
                         <div className="font-medium">{getNameById(item.evaluator_id)}</div>
                         {!isLoading && !error && (
-                          <div className="text-xs text-muted-foreground dark:text-muted-foreground-dark">
+                          <div className="text-xs text-foreground ">
                             {getDepartmentById(item.evaluator_id)}
                           </div>
                         )}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground dark:text-foreground-dark text-center">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground  text-center">
                         {item.total_requests}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground dark:text-foreground-dark text-center">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground  text-center">
                         {item.approved_requests}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground dark:text-foreground-dark text-center">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground  text-center">
                         {item.rejected_requests}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground dark:text-foreground-dark text-center">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground  text-center">
                         {item.approval_rate.toFixed(2)}%
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-center">
@@ -466,27 +620,27 @@ const SupervisorAnomalies = () => {
 
           <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="bg-background dark:bg-card-dark p-4 rounded-lg shadow border border-border dark:border-border-dark">
-              <div className="flex items-center mb-4 text-foreground dark:text-foreground-dark">
+              <div className="flex items-center mb-4 text-foreground ">
                 <FiPieChart className="mr-2 text-primary-text dark:text-primary-text-dark" />
                 <h3 className="font-medium">Distribución de Anomalías</h3>
               </div>
               <div className="h-64">
                 <Pie 
                   data={chartData.anomalyDistribution}
-                  options={getChartOptions(true)}
+                  options={getPieChartOptions()}
                 />
               </div>
             </div>
 
             <div className="bg-background dark:bg-card-dark p-4 rounded-lg shadow border border-border dark:border-border-dark">
-              <div className="flex items-center mb-4 text-foreground dark:text-foreground-dark">
-                <FiBarChart2 className="mr-2 text-primary-text dark:text-primary-text-dark" />
-                <h3 className="font-medium">Tasas de Aprobación</h3>
+              <div className="flex items-center mb-4 text-foreground ">
+                <FiAlertTriangle className="mr-2 text-primary-text dark:text-primary-text-dark" />
+                <h3 className="font-medium">Análisis de Patrones</h3>
               </div>
               <div className="h-64">
-                <Bar
-                  data={chartData.approvalRates}
-                  options={getChartOptions()}
+                <Scatter
+                  data={chartData.scatterData}
+                  options={getScatterOptions()}
                 />
               </div>
             </div>
@@ -496,10 +650,10 @@ const SupervisorAnomalies = () => {
         <div className="mt-6 bg-background dark:bg-background-dark rounded-lg shadow p-6 border border-border dark:border-border-dark">
           <div className="text-center py-12">
             <FiUser className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" />
-            <h3 className="mt-2 text-lg font-medium text-foreground dark:text-foreground-dark">
+            <h3 className="mt-2 text-lg font-medium text-foreground ">
               Análisis de supervisores
             </h3>
-            <p className="mt-1 text-sm text-foreground dark:text-foreground-dark">
+            <p className="mt-1 text-sm text-foreground ">
               Presiona el botón "Analizar supervisores" para evaluar los patrones de aprobación.
             </p>
             {isLoading && (
