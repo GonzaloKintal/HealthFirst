@@ -33,7 +33,7 @@ def assign_risk(edad, cant_lic_enfermedad, cant_lic_accidente, departamento):
         accidente_norm * peso_accidente+
         departamento*peso_departamento)*10
     
-    return "Alto Riesgo" if score > 8 else "Bajo Riesgo"
+    return "High Risk" if score > 8 else "Low Risk"
 
 
 def generate_dataset(nro_empleados=500, seed=None):
@@ -59,22 +59,23 @@ def generate_dataset(nro_empleados=500, seed=None):
 
     # Creamos el DataFrame
     df = pd.DataFrame({
-        'ID': range(1, nro_empleados + 1),
-        'Edad': edad,
-        'Cant_licencias_enfermedad': cant_lic_enfermedad,
-        'Cant_licencias_accidente': cant_lic_accidente,
-        'Departamento_de_Riesgo': departamento,   
-        'Riesgo': riesgo
+        'id': range(1, nro_empleados + 1),
+        'age': edad,
+        'sickness_license_count': cant_lic_enfermedad,
+        'accident_license_count': cant_lic_accidente,
+        'in_high_risk_department': departamento,   
+        'risk': riesgo
     })
 
-    df["Riesgo"] = df["Riesgo"].map({"Alto Riesgo": 1, "Bajo Riesgo": 0})
+
+    df["risk"] = df["risk"].map({"High Risk": 1, "Low Risk": 0})
 
     # Guardamos el archivo
     file_name = 'dataset_risk.csv'
     
     # Guardamos el CSV
     full_path=os.path.join(FILE_PATH,file_name)
-    # Crear directorio si no existe (¡importante!)
+
     os.makedirs(FILE_PATH, exist_ok=True)
     df.to_csv(str(full_path), index=False)
     
