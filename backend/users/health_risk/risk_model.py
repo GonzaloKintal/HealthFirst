@@ -4,7 +4,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 from sklearn.preprocessing import StandardScaler
-from risk_utils import generate_risk_dataframe
+from .risk_utils import generate_risk_dataframe
 import joblib
 import os
 from pathlib import Path
