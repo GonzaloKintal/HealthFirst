@@ -36,9 +36,9 @@ def training_model(df):
     model=get_model()
 
     # Separamos datos en variables independientes (X) y objetivo (y)
-    X = df[["Edad", "Cant_licencias_enfermedad", "Cant_licencias_accidente",
-            "Departamento_de_Riesgo"]]
-    y = df["Riesgo"]
+    X = df[["age", "sickness_license_count", "accident_license_count",
+            "in_high_risk_department"]]
+    y = df["risk"]
 
     # Escalamos las características para poder trabajar con el modelo de regresión logística
     scaler = StandardScaler()
@@ -97,16 +97,17 @@ def predict_risk():
     model, scaler = load_trained_model()
 
     #Hacemos copia del dataframe original, atributos que sirven para la prediccion
-    X = df[["Edad", "Cant_licencias_enfermedad", "Cant_licencias_accidente",
-              "Departamento_de_Riesgo"]].copy()
+    X = df[["age", "sickness_license_count", "accident_license_count",
+              "in_high_risk_department"]].copy()
     
+
     # Escalar características
     X_scaled = scaler.transform(X)
     
     # Hacer predicciones
     predictions = model.predict(X_scaled)
-    df['Riesgo']=predictions
-    df['Riesgo'] = np.where(predictions == 1, 'Alto Riesgo', 'Bajo Riesgo')
+    df['risk']=predictions
+    df['risk'] = np.where(predictions == 1, 'high risk', 'low risk')
 
     #Pasamos a JSON para que lo levante Front
     json_results= df.to_json(orient='records')
@@ -115,6 +116,6 @@ def predict_risk():
     return json_results
 
 """--------------------------------"""
-#df_training=pd.read_csv("HealthFirst/backend/users/health_risk/dataset_risk.csv")
-#training_model(df_training)
+df_training=pd.read_csv("HealthFirst/backend/users/health_risk/dataset_risk.csv")
+training_model(df_training)
 predict_risk()
