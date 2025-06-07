@@ -112,16 +112,19 @@ def get_email_events(request):
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
 def get_user_email_events(request, id):
-    user=HealthFirstUser.objects.get(id=id, is_deleted=False)
-
-    if not user:
-        return JsonResponse({"error": "El usuario no existe"}, status=404)
     try:
-        events=get_user_activity(user.email)
+        user = HealthFirstUser.objects.get(id=id, is_deleted=False)
+    except HealthFirstUser.DoesNotExist:
+        return JsonResponse({"error": "El usuario no existe"}, status=404)
+    
+    try:
+        events = get_user_activity(user.email)
+        # Filto para excluir eventos de tipo "requests"
+        filtered_events = [event for event in events if event.get('event') != 'requests']
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
 
-    return JsonResponse({"events": events}, status=200)
+    return JsonResponse({"events": filtered_events}, status=200)
     
 
 @api_view(['POST'])
