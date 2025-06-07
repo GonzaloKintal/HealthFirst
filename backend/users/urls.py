@@ -19,4 +19,6 @@ urlpatterns = [
     path('department/delete/<int:id>', delete_department, name='delete_department'),
     path('get_departments', get_departments, name='get_departments'),    
 
+
+    path('predict_health_risk', predict_health_risk, name='predict_health_risk'),
 ]
