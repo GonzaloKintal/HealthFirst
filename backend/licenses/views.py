@@ -178,6 +178,10 @@ def create_license(request):
                 )
 
             license.assign_status()
+            if license.type and license.type.certificate_require and certificate_data is None:
+                MessengerService.send_upload_license_without_certificate_message(license)
+            else:
+                MessengerService.send_upload_license_message(license)
 
         return JsonResponse({'message': 'Licencia solicitada exitosamente.'}, status=200)
 
