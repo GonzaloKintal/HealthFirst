@@ -64,7 +64,7 @@ def generate_risk_dataframe():
     
     #Definir si el departamento es o no de riesgo
     high_risk_departments=get_high_risk_department_ids()
-    df['is_high_risk'] = df['department'].isin(high_risk_departments).astype(int)
+    df['in_high_risk_department'] = df['department'].isin(high_risk_departments).astype(int)
     # Calcular edad
     df['age'] = (today - pd.to_datetime(df['date_of_birth'])).dt.days // 365
     
@@ -74,21 +74,10 @@ def generate_risk_dataframe():
         'last_name', 
         'age', 
         'email', 
-        'is_high_risk', 
+        'in_high_risk_department', 
         'sickness_license_count', 
         'accident_license_count'
     ]]
-    
-    # Renombrar columnas a español
-    df.columns = [
-        'Nombre',
-        'Apellido',
-        'Edad',
-        'Email',
-        'Departamento_de_Riesgo',
-        'Cant_licencias_enfermedad',
-        'Cant_licencias_accidente'
-    ]
     
     return df
 
