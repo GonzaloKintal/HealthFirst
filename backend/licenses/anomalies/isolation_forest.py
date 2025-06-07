@@ -22,11 +22,11 @@ MODEL_PATH_SUP = os.path.join(BASE_DIR, 'isolation_forest_sup_model_v2.pkl')
 
 MODEL_PATH_EMP = os.path.join(BASE_DIR, 'isolation_forest_emp_model.pkl')
 
-'''
+
 pd.set_option("display.max_columns", None)  # Mostrar todas las columnas
 pd.set_option("display.max_rows", None)     # Mostrar todas las filas
 pd.set_option("display.width", 0)           # Autoajuste al ancho de consola
-'''
+
 from licenses.models import License
 from users.models import HealthFirstUser
 import pandas as pd
@@ -223,30 +223,40 @@ def create_model_empleados(path_csv): # le paso el csv para el entreamiento
     #se guardan el modelo en un archivo
     joblib.dump(model, MODEL_PATH_EMP)
 
-    return model # NO deberia retornarlo, pero por ahora para pruebas lo dejo así
+def create_dataFrame_empleados(start_date=None, end_date=None):
+    employees = HealthFirstUser.objects.filter(role__name='employee', is_deleted=False)
 
-#--proximamente para anomalias en empleados
-def create_dataFrame_empleados():
-    #agrupo licencias por empleado
-    licencias = License.objects.values('user_id').annotate(
-        total_days_requested=Sum('required_days'),
-        num_requests=Count('license_id')
+    license_base = License.objects.filter(user=OuterRef('pk'))
+    if start_date and end_date:
+        license_base = license_base.filter(request_date__range=(start_date, end_date))
+
+    total_requests = license_base.order_by().values('user').annotate(c=Count('pk')).values('c')[:1]
+    required_days = license_base.order_by().values('user').annotate(s=Sum('required_days')).values('s')[:1]
+
+    employees = employees.annotate(
+        total_requests=Coalesce(Subquery(total_requests), Value(0, output_field=IntegerField())),
+        required_days=Coalesce(Subquery(required_days), Value(0, output_field=IntegerField()))
     )
 
-    #convertir a DataFrame
-    df = pd.DataFrame(list(licencias))
+    df = pd.DataFrame(list(employees.values('id', 'total_requests', 'required_days', 'employment_start_date')))
+    df = df.rename(columns={'id': 'employee_id'})
 
-    # Calcular promedio de días por solicitud
-    df['prom_days_request'] = df['total_days_requested'] / df['num_requests']
+    if df.empty:
+        return df
 
+    today = date.today()
 
-    #print(df)
+    df['required_days_rate'] = df.apply(lambda row: row['required_days'] / row['total_requests'] if row['total_requests'] > 0 else 0,axis=1)
+    df['seniority_days'] = df['employment_start_date'].apply(lambda d: (today - d).days if d else 0)
+    df['days_per_year'] = df.apply(lambda row: row['required_days'] / (row['seniority_days'] / 365) if row['seniority_days'] > 0 else 0,axis=1)
+    
+    df.drop(columns=['employment_start_date'], inplace=True)
+            
     return df
 
 def anomalies_employees(data): #recibe un dataframe
     #Cargo el modelo previamente guardado
     model = joblib.load(MODEL_PATH_EMP)
-    #data= pd.read_csv(path_csv)
     features = data[['total_requests', 'required_days', 'required_days_rate','seniority_days','days_per_year']]
 
 
@@ -254,10 +264,36 @@ def anomalies_employees(data): #recibe un dataframe
     data['is_anomaly'] = model.predict(features)
     data['is_anomaly'] = data['is_anomaly'].map({1: 0, -1: 1})  # 1 = Anómalo, 0 = Normal
 
-    #data['required_days_rate'] = (data['required_days_rate']*100).map("{:.2f}%".format)
-    #data['required_days_rate'] = (data['required_days_rate']*100).map("{:.2f}%".format)
-
     return(data)
+
+def get_empleoyee_anomalies(start_date=None, end_date=None): #FUNCION PRINCIPAL QUE SE USARA EN EL FRONT
+    df = create_dataFrame_empleados(start_date, end_date)
+    if df.empty:
+        cols = ['employee_id','total_requests', 'required_days', 'required_days_rate','seniority_days','days_per_year']
+        return pd.DataFrame(columns=cols)
+    dataframe =  anomalies_employees(df)
+
+   # Promedios globales
+    global_required_days = dataframe['required_days'].mean()
+    global_total_requests = dataframe['total_requests'].mean()
+    global_days_per_year = dataframe['days_per_year'].mean()
+    global_required_days_rate = dataframe['required_days_rate'].mean()
+    total_required_days_sum = dataframe['required_days'].sum()
+
+    dataframe['required_days_diff'] = dataframe['required_days'] - global_required_days
+    dataframe['total_requests_diff'] = dataframe['total_requests'] - global_total_requests
+    dataframe['days_per_year_diff'] = dataframe['days_per_year'] - global_days_per_year
+    dataframe['required_days_rate_diff'] = dataframe['required_days_rate'] - global_required_days_rate
+
+    dataframe['required_days_percent'] = dataframe['required_days'] / total_required_days_sum
+
+    dataframe['required_days_diff'] = dataframe['required_days_diff'].map("{:+.2f}".format)
+    dataframe['total_requests_diff'] = dataframe['total_requests_diff'].map("{:+.2f}".format)
+    dataframe['days_per_year_diff'] = dataframe['days_per_year_diff'].map("{:+.2f}".format)
+    dataframe['required_days_rate_diff'] = dataframe['required_days_rate_diff'].map("{:+.2f}".format)
+    dataframe['required_days_percent'] = (dataframe['required_days_percent'] * 100).map("{:.2f}%".format)
+
+    return dataframe
 
 #---------------------------------------------------------------------------------------------------------------
 #falta evaluar fechas de ingreso, es mas anomalo teniendo en cuenta la fecha en la que el supervisor comenzó a trabajr
@@ -314,3 +350,7 @@ def dataframe_pruebas_emp(): # para pruebas
 #generate_empleados_csv()
 #create_model_empleados('employees_data_1000.csv')
 #print(anomalies_employees(dataframe_pruebas_emp()))
+
+#print(create_dataFrame_empleados())
+
+#print(get_empleoyee_anomalies())
