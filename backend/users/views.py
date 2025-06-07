@@ -18,6 +18,8 @@ from licenses.utils.file_utils import *
 from messaging.services.brevo_email import *
 from .health_risk.risk_model import predict_risk
 from django.views.decorators.csrf import csrf_exempt
+from django.core.cache import cache
+from rest_framework.pagination import LimitOffsetPagination
 
 
 class CustomTokenObtainPairView(TokenObtainPairView):
@@ -370,11 +372,16 @@ def get_departments(request):
 @permission_classes([IsAuthenticated])
 def predict_health_risk(request):
     try:
-        risk_list=json.loads(predict_risk())
+        risk_list = cache.get("cached_risk_list")
+
+        if not risk_list:
+            risk_list = json.loads(predict_risk())
+            cache.set("cached_risk_list", risk_list, timeout=300) 
+
     except Exception as e:
         return JsonResponse({"Error inesperado al predecir riesgo": str(e)}, status=500)
 
-    return JsonResponse({"risk": risk_list}, status=200)
+    paginator = LimitOffsetPagination()
+    paginated_data = paginator.paginate_queryset(risk_list, request)
 
-
-  
+    return paginator.get_paginated_response(paginated_data)
