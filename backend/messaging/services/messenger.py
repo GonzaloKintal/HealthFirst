@@ -28,6 +28,7 @@ class MessengerService:
             f"Motivo:\n{license.status.evaluation_comment}\n\n"
             "Para más detalles contactate con tu supervisor.\n\n"
             "ID de licencia: " + str(license.license_id) + "\n\n"
+            "Fecha de solicitud: " + str(license.request_date) + "\n\n"
             "¡Gracias por confiar en nosotros!\n"
             "Equipo Health First"
         )
@@ -42,6 +43,8 @@ class MessengerService:
             f"¡Hola {user.first_name} {user.last_name}!\n\n"
             f"Es de nuestro gusto informarte que hemos aprobado tu licencia de {license.type.name}.\n\n"
             f"ID de licencia: " + str(license.license_id) + "\n\n"
+            "Fecha de solicitud: " + str(license.request_date) + "\n\n"
+            "Fecha de inicio: " + str(license.start_date) + "\n\n"
             "¡Gracias por confiar en nosotros!\n"
             "Equipo Health First"
         )
@@ -58,6 +61,7 @@ class MessengerService:
             "debido a que no cargaste tu certificado en el tiempo requerido.\n"
             "Cualquier duda contactate con tu supervisor.\n\n"
             f"ID de licencia: " + str(license.license_id) + "\n\n"
+            f"Fecha de solicitud: " + str(license.request_date) + "\n\n"
             "¡Gracias por confiar en nosotros!\n"
             "Equipo Health First"
         )
@@ -73,6 +77,7 @@ class MessengerService:
             "Tenes entre hoy y mañana para cargar tu certificado.\n"
             "Cualquier duda contactate con tu supervisor.\n\n"
             f"ID de licencia: " + str(license.license_id) + "\n\n"
+            f"Fecha de solicitud: " + str(license.request_date) + "\n\n"
             "¡Gracias por confiar en nosotros!\n"
             "Equipo Health First"
         )
@@ -80,13 +85,14 @@ class MessengerService:
 
     def send_last_day_to_upload_certificate_message(license):
         user = license.user
-        subject = "Tu solicitud de licencia con id {license.license_id} expira hoy"
+        subject = f"Tu solicitud de licencia con id {license.license_id} expira hoy"
         message = (
             f"¡Hola {user.first_name} {user.last_name}!\n\n"
             f"Te informamos que tu solicitud de licencia de {license.type.name} vence hoy.\n"
             "Hoy es el último día para cargar tu certificado.\n"
             "Cualquier duda contactate con tu supervisor.\n\n"
             f"ID de licencia: " + str(license.license_id) + "\n\n"
+            f"Fecha de solicitud: " + str(license.request_date) + "\n\n"
             "¡Gracias por confiar en nosotros!\n"
             "Equipo Health First"
         )
@@ -101,6 +107,7 @@ class MessengerService:
             "Recuerda que tenes que cargar tu certificado para que la puedan aprobar.\n"
             "Verifica los dias de tolerancia en las politicas de la empresa.\n\n"
             f"ID de licencia: " + str(license.license_id) + "\n\n"
+            f"Fecha de solicitud: " + str(license.request_date) + "\n\n"
             "¡Gracias por confiar en nosotros!\n"
             "Equipo Health First"
         )
@@ -109,12 +116,13 @@ class MessengerService:
 
     def send_upload_license_message(license):
         user = license.user
-        subject = f"Solicutid de licencia {license.license_id}, certificado cargado"
+        subject = f"Solicitud de licencia {license.license_id}, certificado cargado"
         message = (
             f"¡Hola {user.first_name} {user.last_name}!\n\n"
             f"Te informamos que tu solicitud de licencia de {license.type.name} se registro con exito.\n"
             "Te avisaremos cuando tu licencia sea evaluada por un supervisor\n"
             f"ID de licencia: " + str(license.license_id) + "\n\n"
+            f"Fecha de solicitud: " + str(license.request_date) + "\n\n"
             "¡Gracias por confiar en nosotros!\n"
             "Equipo Health First"   
         )

@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 from datetime import timedelta
+import os
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -174,3 +175,32 @@ EMAIL_HEALTH_FIRST='healthfirst.voxdei@gmail.com'
 
 
 TELEGRAM_BOT_TOKEN="7667764437:AAEWI4LDMF0JlgZlUvdR5VvIh5CuEL_XxNg"
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False, 
+    'formatters': {
+        'verbose': {
+            'format': '{asctime} [{levelname}] - {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': { 
+            'class': 'logging.StreamHandler',
+        },
+        'file': { 
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs', 'licenses.log'),
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        'licenses.management.commands.check_licenses_expired': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    },
+}
