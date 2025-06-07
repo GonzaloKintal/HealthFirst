@@ -1,4 +1,4 @@
-ID,Edad,Cant_licencias_enfermedad,Cant_licencias_accidente,Departamento_de_Riesgo,Riesgo
+id,age,sickness_license_count,accident_license_count,in_high_risk_department,risk
 1,56,4,0,0,1
 2,69,0,1,0,0
 3,46,1,1,0,0

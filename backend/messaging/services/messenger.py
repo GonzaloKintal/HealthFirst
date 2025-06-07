@@ -88,8 +88,8 @@ class MessengerService:
         MessengerService.send_personalized_message(user, subject, message)
 
 
-    def send_personalized_message(user, subject, message):
-        send_email(subject, message, user.email)
-        if user.is_telegram_suscriptor:
-            TelegramService.send_message(chat_id=user.telegram_id, message=message)
+#    def send_personalized_message(user, subject, message):
+#        send_email(subject, message, user.email)
+#        if user.is_telegram_suscriptor:
+#            TelegramService.send_message(chat_id=user.telegram_id, message=message)
 
