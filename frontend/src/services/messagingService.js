@@ -53,3 +53,24 @@ export const getUserEmailEvents = async (id) => {
     };
   }
 };
+
+
+export const sendPersonalizedMessage = async (userId, subject, message) => {
+  try {
+    const response = await api.post('/messaging/send_personalized_message', {
+      user_id: userId,
+      subject,
+      message
+    });
+    return {
+      success: true,
+      data: response.data
+    };
+  } catch (error) {
+    console.error('Error sending personalized message:', error);
+    return {
+      success: false,
+      error: error.response?.data?.error || 'Error al enviar el mensaje personalizado'
+    };
+  }
+};
