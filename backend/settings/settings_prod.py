@@ -12,7 +12,6 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 from datetime import timedelta
-import os
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -60,7 +59,6 @@ INSTALLED_APPS = [
     'users',
     'licenses',
     'metabase',
-    'messaging',
 ]
 
 MIDDLEWARE = [
@@ -165,44 +163,3 @@ AUTH_USER_MODEL = 'users.HealthFirstUser'
 
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp-relay.brevo.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = '8e70eb001@smtp-brevo.com'  # Remitente autorizado en Brevo
-EMAIL_HOST_PASSWORD = '9rZH07cAL3VF4tPj'
-
-EMAIL_HEALTH_FIRST='healthfirst.voxdei@gmail.com'
-
-BREVO_API_KEY= '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'
-
-TELEGRAM_BOT_TOKEN="7667764437:AAEWI4LDMF0JlgZlUvdR5VvIh5CuEL_XxNg"
-
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False, 
-    'formatters': {
-        'verbose': {
-            'format': '{asctime} [{levelname}] - {message}',
-            'style': '{',
-        },
-    },
-    'handlers': {
-        'console': { 
-            'class': 'logging.StreamHandler',
-        },
-        'file': { 
-            'level': 'INFO',
-            'class': 'logging.FileHandler',
-            'filename': os.path.join(BASE_DIR, 'logs', 'licenses.log'),
-            'formatter': 'verbose',
-        },
-    },
-    'loggers': {
-        'licenses.management.commands.check_licenses_expired': {
-            'handlers': ['console', 'file'],
-            'level': 'INFO',
-            'propagate': False,
-        },
-    },
-}
