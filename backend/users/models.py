@@ -1,5 +1,4 @@
 from datetime import datetime
-from this import d
 from django.utils import timezone
 from django.conf import settings
 from django.db import models
@@ -28,6 +27,7 @@ class Department(models.Model):
     department_id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True, null=True)
+    is_high_risk_department=models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
@@ -64,8 +64,7 @@ class HealthFirstUser(AbstractUser):
     delete_at=models.DateTimeField(null=True, blank=True,default=None)
     employment_start_date=models.DateField(null=True, blank=True)
     is_telegram_suscriptor = models.BooleanField(default=False)
-    telegram_id=models.IntegerField(null=True, blank=True)
-
+    telegram_id=models.BigIntegerField(null=True, blank=True)
 
     def save(self, *args, **kwargs):
         # Asegurar campos de tipo `date`

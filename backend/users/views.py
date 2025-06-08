@@ -1,4 +1,6 @@
 from xmlrpc.client import NOT_WELLFORMED_ERROR
+
+from messaging.services.messenger import MessengerService
 from .models import *
 from django.http import JsonResponse
 import json
@@ -14,6 +16,11 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from licenses.utils.file_utils import *
 from messaging.services.brevo_email import *
+from .health_risk.risk_model import predict_risk
+from django.views.decorators.csrf import csrf_exempt
+from django.core.cache import cache
+from rest_framework.pagination import LimitOffsetPagination
+
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
@@ -46,7 +53,7 @@ def register_user(request):
         
         user.save()
 
-        send_welcome_email(user)
+        MessengerService.send_welcome_message(user)
 
     except IntegrityError:
         error_messages.append("El email ya esta registrado.")
@@ -257,6 +264,7 @@ def create_department(request):
         data = json.loads(request.body)
         name = data.get('name', None)
         description = data.get('description', None)
+        is_high_risk_department = data.get('is_high_risk_department', False)
 
         if not name:
             response_data = {'error': 'El nombre es requerido.'}
@@ -265,7 +273,7 @@ def create_department(request):
             response_data = {'error': 'El nombre del departamento ya existe.'}
             status_code = 400
         else:
-            Department.objects.create(name=name, description=description)
+            Department.objects.create(name=name, description=description,is_high_risk_department=is_high_risk_department)
             response_data = {'ok': True}
             status_code = 200
     except Exception as e:
@@ -312,6 +320,7 @@ def update_department(request, id):
         data = json.loads(request.body)
         name = data.get('name', None)
         description = data.get('description', None)
+        is_high_risk_department = data.get('is_high_risk_department', None)
 
         if not Department.objects.filter(department_id=id).exists():
             response_data = {'error': 'El departamento no existe.'}
@@ -320,7 +329,7 @@ def update_department(request, id):
 
         department = Department.objects.get(department_id=id)
 
-        if not name and not description:
+        if not name and not description and is_high_risk_department is None:
             response_data = {'error': 'Debe enviar al menos un campo.'}
             status_code = 400
         else:
@@ -332,6 +341,8 @@ def update_department(request, id):
                     department.name = name
                 if description:
                     department.description = description
+                if is_high_risk_department is not None:
+                    department.is_high_risk_department = is_high_risk_department
                 
                 department.save()
                 response_data = {'ok': True}
@@ -356,5 +367,21 @@ def get_departments(request):
         return JsonResponse({"error": str(e)}, status=500)
        
 
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def predict_health_risk(request):
+    try:
+        risk_list = cache.get("cached_risk_list")
 
-  
+        if not risk_list:
+            risk_list = json.loads(predict_risk())
+            cache.set("cached_risk_list", risk_list, timeout=300) 
+
+    except Exception as e:
+        return JsonResponse({"Error inesperado al predecir riesgo": str(e)}, status=500)
+
+    paginator = LimitOffsetPagination()
+    paginated_data = paginator.paginate_queryset(risk_list, request)
+
+    return paginator.get_paginated_response(paginated_data)
