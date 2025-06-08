@@ -44,8 +44,8 @@ class Command(BaseCommand):
                     license.status.save()
                     expired_licenses+=1
             
-            logger.info(f"Licencias vencidas actualizadas: {expired_licenses}")
-            logger.info(f"Licencias expirando manana: {licenses_expiring_tomorrow}")
-            logger.info(f"Licencias expirando hoy: {licenses_expiring_today}")
+            logger.info(f"Licencias vencidas que se actualizaron: {expired_licenses}")
+            logger.info(f"Licencias que expiran mañana: {licenses_expiring_tomorrow}")
+            logger.info(f"Licencias que expiran hoy: {licenses_expiring_today}")
         except Exception as e:
             logger.info(f"Error actualizando licencias vencidas: {e}")
