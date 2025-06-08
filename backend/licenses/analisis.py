@@ -61,9 +61,10 @@ def license_analysis(license): #se le pasa la licencia
         "Mudanza"
     ]
 
+    # REVISAR PORQUE NO EXISTE MÁS 'certificate_need'
     #validar si el certificado subido corresponde con la licencia(evalua:fechas,dni,nombre y apellido)
-    if license.certificate_need and license.type.name not in licenses_types and not validar_datos_certificado(license.certificate.file, license, license.user):
-         raise LicenseValidationError ("El certificado asociado no es coherente con la licencia pedida")
+    # if license.certificate_need and license.type.name not in licenses_types and not validar_datos_certificado(license.certificate.file, license, license.user):
+    #      raise LicenseValidationError ("El certificado asociado no es coherente con la licencia pedida")
 
 def calculate_total_vacation_days(user): # se obtienen el total de dias para las vacaciones
 

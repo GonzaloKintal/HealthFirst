@@ -12,7 +12,6 @@ def metabase_iframe_url(request):
     request_date = request.GET.get("request_date")
     license_type = request.GET.get("license_type")
     user = request.GET.get("user")
-    justified = request.GET.get("justified")
     evaluator = request.GET.get("evaluator")
 
     params = {}
@@ -22,8 +21,6 @@ def metabase_iframe_url(request):
         params["License Type"] = license_type
     if user:
         params["User"] = user
-    if justified:
-        params["Justified"] = justified
     if evaluator:
         params["Evaluator"] = evaluator
 

@@ -5,6 +5,9 @@ from django.utils.timezone import now
 from django.contrib.auth import get_user_model
 from xmlrpc.client import NOT_WELLFORMED_ERROR
 
+from messaging.services.messenger import MessengerService
+
+from .anomalies.isolation_forest import get_employee_anomalies, get_supervisor_anomalies
 from messaging.services.brevo_email import *
 from .models import *
 from django.http import JsonResponse, HttpResponse
@@ -22,9 +25,7 @@ from .analisis import license_analysis
 from licenses.utils.file_utils import *
 from licenses.utils.coherence_model_ml import predict_top_3
 from django.db.models import Q
-from urllib.parse import unquote
 import csv
-from django.views.decorators.csrf import csrf_exempt
 
 
 # LICENSES API
@@ -150,8 +151,7 @@ def create_license(request):
                 end_date=end_date_parsed,
                 required_days=required_days,
                 information=information,
-                request_date=datetime.now(),
-                justified=False,
+                request_date=datetime.now()
             )
             license_analysis(license)
 
@@ -178,6 +178,10 @@ def create_license(request):
                 )
 
             license.assign_status()
+            if license.type and license.type.certificate_require and certificate_data is None:
+                MessengerService.send_upload_license_without_certificate_message(license)
+            else:
+                MessengerService.send_upload_license_message(license)
 
         return JsonResponse({'message': 'Licencia solicitada exitosamente.'}, status=200)
 
@@ -389,9 +393,9 @@ def evaluate_license(request, id):
         license.save()
 
         if license_status == Status.StatusChoices.REJECTED:
-            send_rejected_license(license)
+            MessengerService.send_rejected_license_message(license)
         if license_status == Status.StatusChoices.APPROVED:
-            send_approved_license(license)
+            MessengerService.send_approved_license_message(license)
 
         evaluator= f"{request.user.first_name} {request.user.last_name}"
 
@@ -435,7 +439,6 @@ def get_license_detail(request, id):
             "request_date": license.request_date,
             "closing_date": license.closing_date,
             "required_days": (license.end_date - license.start_date).days + 1,
-            "justified": license.justified,
             "information": license.information,
             "evaluator": (license.evaluator.first_name + ' ' + license.evaluator.last_name) if license.evaluator else "",
             "evaluator_role": license.evaluator.role.name if license.evaluator else "",
@@ -616,3 +619,68 @@ def export_licenses_to_csv(request):
 
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
+
+
+##################### API Anomalias #########################
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+@api_view(['GET'])
+def supervisor_anomalies(request):
+    start_date = request.GET.get('start_date') or None
+    end_date = request.GET.get('end_date') or None
+    evaluator_id = request.GET.get('user_id') or None
+    is_anomaly = request.GET.get('is_anomaly') or None
+
+    try:
+        df = get_supervisor_anomalies(start_date, end_date)
+
+        if evaluator_id:
+            df = df[df['evaluator_id'] == int(evaluator_id)]
+
+        if is_anomaly is not None:
+            # Suponiendo que la columna 'is_anomaly' es booleana
+            # Convierte el string recibido a booleano
+            if is_anomaly.lower() in ['true', '1', 'yes']:
+                anomaly_flag = True
+            elif is_anomaly.lower() in ['false', '0', 'no']:
+                anomaly_flag = False
+            else:
+                anomaly_flag = None
+
+            if anomaly_flag is not None:
+                df = df[df['is_anomaly'] == anomaly_flag]
+
+        data = df.to_dict(orient='records')
+        return JsonResponse({'data': data}, status=200)
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+    
+
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+@api_view(['GET'])
+def employee_anomalies(request):
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+    employee_id = request.GET.get('employee_id')
+    is_anomaly = request.GET.get('is_anomaly')
+
+    try:
+        df = get_employee_anomalies(start_date, end_date)
+
+        # FILTRO PARA EXCLUIR REGISTROS SIN SOLICITUDES
+        df = df[df['total_requests'] > 0]
+
+        if employee_id:
+            df = df[df['employee_id'] == int(employee_id)]
+
+        if is_anomaly is not None:
+            anomaly_flag = is_anomaly.lower() in ['true', '1', 'yes']
+            df = df[df['is_anomaly'] == int(anomaly_flag)]
+
+        data = df.to_dict(orient='records')
+        return JsonResponse({'data': data}, status=200)
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)

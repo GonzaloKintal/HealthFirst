@@ -18,7 +18,8 @@ const DepartmentsSection = () => {
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
-    description: ''
+    description: '',
+    is_high_risk_department: false
   });
   const [notification, setNotification] = useState({
     show: false,
@@ -45,10 +46,12 @@ const DepartmentsSection = () => {
   };
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: type === 'checkbox' ? checked : 
+              type === 'radio' ? value === 'true' : 
+              value
     }));
   };
 
@@ -65,7 +68,7 @@ const DepartmentsSection = () => {
       }
       setShowForm(false);
       setEditingDepartment(null);
-      setFormData({ name: '', description: '' });
+      setFormData({ name: '', description: '', is_high_risk_department: false });
       fetchDepartments();
     } catch (error) {
       showNotification('error', error.message);
@@ -82,7 +85,8 @@ const DepartmentsSection = () => {
     setEditingDepartment(department);
     setFormData({
       name: department.name,
-      description: department.description
+      description: department.description,
+      is_high_risk_department: department.is_high_risk_department || false
     });
     setShowForm(true);
   };
@@ -121,7 +125,7 @@ const DepartmentsSection = () => {
         <button
           onClick={() => {
             setEditingDepartment(null);
-            setFormData({ name: '', description: '' });
+            setFormData({ name: '', description: '', is_high_risk_department: false });
             setShowForm(!showForm);
           }}
           className="bg-primary text-white px-4 py-2 rounded-md flex items-center hover:bg-primary-hover transition"
@@ -167,6 +171,35 @@ const DepartmentsSection = () => {
                   className="w-full p-2 border border-border rounded-md focus:ring-primary focus:border-primary text-foreground bg-background"
                 />
               </div>
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  ¿Es un departamento de riesgo? *
+                </label>
+                <div className="flex items-center space-x-4">
+                  <label className="inline-flex items-center">
+                    <input
+                      type="radio"
+                      name="is_high_risk_department"
+                      value="true"
+                      checked={formData.is_high_risk_department === true}
+                      onChange={handleInputChange}
+                      className="h-4 w-4 text-primary focus:ring-primary border-border"
+                    />
+                    <span className="ml-2 text-sm text-foreground">Sí</span>
+                  </label>
+                  <label className="inline-flex items-center">
+                    <input
+                      type="radio"
+                      name="is_high_risk_department"
+                      value="false"
+                      checked={formData.is_high_risk_department === false}
+                      onChange={handleInputChange}
+                      className="h-4 w-4 text-primary focus:ring-primary border-border"
+                    />
+                    <span className="ml-2 text-sm text-foreground">No</span>
+                  </label>
+                </div>
+              </div>
             </div>
             <div className="flex justify-end">
               <button
@@ -210,6 +243,9 @@ const DepartmentsSection = () => {
                   Descripción
                 </th>
                 <th className="px-6 py-3 text-center text-xs font-medium text-foreground uppercase tracking-wider">
+                  ¿Es de riesgo?
+                </th>
+                <th className="px-6 py-3 text-center text-xs font-medium text-foreground uppercase tracking-wider">
                   Acciones
                 </th>
               </tr>
@@ -226,6 +262,19 @@ const DepartmentsSection = () => {
                     <td className="px-6 py-4">
                       <div className="text-sm text-foreground">
                         {department.description || '-'}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-foreground">
+                        {department.is_high_risk_department ? (
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100">
+                            Sí
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100">
+                            No
+                          </span>
+                        )}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
@@ -248,7 +297,7 @@ const DepartmentsSection = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="3" className="px-6 py-4 text-center text-foreground">
+                  <td colSpan="4" className="px-6 py-4 text-center text-foreground">
                     No hay departamentos registrados
                   </td>
                 </tr>

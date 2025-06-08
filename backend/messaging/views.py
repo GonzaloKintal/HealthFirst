@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from messaging.services.messenger import MessengerService
 from users.models import HealthFirstUser
 from django.http import JsonResponse, HttpResponse
 import json
@@ -64,6 +65,29 @@ def remove_telegram_suscription(request,id):
 @api_view(['GET'])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
+def get_telegram_suscription(request, id):
+    try:
+        status = 200
+        try:
+            user = HealthFirstUser.objects.get(id=id)
+        except HealthFirstUser.DoesNotExist:
+            raise Exception("El usuario no existe")
+
+        response_data = {
+            "is_subscribed": user.is_telegram_suscriptor,
+            "telegram_id": user.telegram_id if user.is_telegram_suscriptor else None
+        }
+
+    except Exception as e:
+        status = 500
+        response_data = {"error": str(e)}
+
+    return JsonResponse(response_data, status=status)
+
+
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
 def get_email_stats(request):
     try:
         stats=get_brevo_stats()
@@ -73,15 +97,70 @@ def get_email_stats(request):
     return JsonResponse({"stats": stats}, status=200)
 
 
-@api_view(['GET'])
+@api_view(['POST'])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
 def get_email_events(request):
     try:
-        events=get_brevo_events()
+        data= json.loads(request.body)
+        limit=data.get('limit',10)
+        offset=data.get('offset', 0)
+        events=get_brevo_events(limit=limit, offset=offset)
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
 
     return JsonResponse({"events": events}, status=200)
     
+@api_view(['POST'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def get_user_email_events(request):
+    data= json.loads(request.body)
+    id=data.get('user_id')
+    limit=data.get('limit',10)
+    offset=data.get('offset', 0)
+    if not id:
+        return JsonResponse({"error": "El id del usuario es requerido"}, status=400)
+    try:
+        user = HealthFirstUser.objects.get(id=id, is_deleted=False)
+    except HealthFirstUser.DoesNotExist:
+        return JsonResponse({"error": "El usuario no existe"}, status=404)
     
+    try:
+        events = get_user_activity(email=user.email, limit=limit, offset=offset)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+    return JsonResponse({"events": events}, status=200)
+    
+
+@api_view(['POST'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def send_personalized_message(request):
+    try:
+        status=200
+        response_data={}
+        data= json.loads(request.body)
+        subject= data.get('subject')
+        message= data.get('message')
+
+        if not all([data.get('user_id'), subject, message]):
+             raise ValueError("Los campos email, subject y message son requeridos")
+
+        user= HealthFirstUser.objects.get(id=data.get('user_id'))
+        
+        MessengerService.send_personalized_message(user, subject, message)
+
+        response_data={"ok": True}
+    except Exception as e:
+        status=500
+        response_data={"error": str(e)}
+
+    return JsonResponse(response_data, status=status)
+
+        
+
+
+
+            
