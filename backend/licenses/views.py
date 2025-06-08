@@ -7,7 +7,7 @@ from xmlrpc.client import NOT_WELLFORMED_ERROR
 
 from messaging.services.messenger import MessengerService
 
-from .anomalies.isolation_forest import get_supervisor_anomalies
+from .anomalies.isolation_forest import get_employee_anomalies, get_supervisor_anomalies
 from messaging.services.brevo_email import *
 from .models import *
 from django.http import JsonResponse, HttpResponse
@@ -649,6 +649,35 @@ def supervisor_anomalies(request):
 
             if anomaly_flag is not None:
                 df = df[df['is_anomaly'] == anomaly_flag]
+
+        data = df.to_dict(orient='records')
+        return JsonResponse({'data': data}, status=200)
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+    
+
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+@api_view(['GET'])
+def employee_anomalies(request):
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+    employee_id = request.GET.get('employee_id')
+    is_anomaly = request.GET.get('is_anomaly')
+
+    try:
+        df = get_employee_anomalies(start_date, end_date)
+
+        # FILTRO PARA EXCLUIR REGISTROS SIN SOLICITUDES
+        df = df[df['total_requests'] > 0]
+
+        if employee_id:
+            df = df[df['employee_id'] == int(employee_id)]
+
+        if is_anomaly is not None:
+            anomaly_flag = is_anomaly.lower() in ['true', '1', 'yes']
+            df = df[df['is_anomaly'] == int(anomaly_flag)]
 
         data = df.to_dict(orient='records')
         return JsonResponse({'data': data}, status=200)
