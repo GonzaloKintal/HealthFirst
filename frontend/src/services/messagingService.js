@@ -19,9 +19,13 @@ export const getEmailStats = async () => {
 };
 
 // Obtener eventos de emails con paginación y filtros
-export const getEmailEvents = async () => {
+export const getEmailEvents = async (limit = 10, offset = 0) => {
   try {
-    const response = await api.get('/messaging/get_email_events');
+    const response = await api.post('/messaging/get_email_events', {
+      limit: limit,
+      offset: offset
+    });
+    
     return {
       success: true,
       events: response.data.events?.events || []

@@ -1,6 +1,9 @@
-import { FiRefreshCw } from 'react-icons/fi';
 
-const MessagingStats = ({ stats, events, loading, onRefresh }) => {
+import { useState } from 'react';
+import { FiRefreshCw, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
+
+const MessagingStats = ({ stats, events, loading, onRefresh, onPageChange, pagination }) => {
+
   const formatDate = (dateString) => {
     if (!dateString) return '';
     const date = new Date(dateString);
@@ -16,6 +19,16 @@ const MessagingStats = ({ stats, events, loading, onRefresh }) => {
     const minutes = date.getMinutes().toString().padStart(2, '0');
     
     return `${day}/${month}/${year} ${hours}:${minutes} ${ampm}`;
+  };
+
+  const handleNextPage = () => {
+    const newOffset = pagination.offset + pagination.limit;
+    onPageChange(newOffset);
+  };
+
+  const handlePrevPage = () => {
+    const newOffset = Math.max(0, pagination.offset - pagination.limit);
+    onPageChange(newOffset);
   };
 
   return (
@@ -128,6 +141,8 @@ const MessagingStats = ({ stats, events, loading, onRefresh }) => {
                                 ? 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-100' :
                               event.event === 'softBounces' 
                                 ? 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-100' :
+                              event.event === 'requests'
+                                ? 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200' :
                               'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
                             }`}>
                               {event.event === 'delivered' ? 'Entregado' :
@@ -135,6 +150,7 @@ const MessagingStats = ({ stats, events, loading, onRefresh }) => {
                               event.event === 'hardBounces' ? 'Rebote duro' :
                               event.event === 'blocked' ? 'Bloqueado' :
                               event.event === 'softBounces' ? 'Rebote suave' :
+                              event.event === 'requests' ? 'Solicitado' :
                               event.event}
                             </span>
                           </div>
@@ -144,9 +160,31 @@ const MessagingStats = ({ stats, events, loading, onRefresh }) => {
                   </tbody>
                 </table>
               </div>
+              
             ) : (
               <p className="text-center">No hay eventos registrados</p>
             )}
+
+          </div>
+           {/* Paginación */}
+          <div className="flex justify-center mt-6">
+            <nav className="inline-flex rounded-md shadow">
+              <button
+                onClick={handlePrevPage}
+                disabled={pagination.offset === 0 || loading.events}
+                className="px-3 py-2 rounded-l-md border border-border bg-background text-sm font-medium text-foreground hover:bg-card disabled:opacity-50 flex items-center"
+              >
+                <FiChevronLeft className="mr-1" /> Anterior
+              </button>
+              
+              <button
+                onClick={handleNextPage}
+                disabled={!pagination.hasMore || loading.events}
+                className="px-3 py-2 rounded-r-md border border-border bg-background text-sm font-medium text-foreground hover:bg-card disabled:opacity-50 flex items-center"
+              >
+                Siguiente <FiChevronRight className="ml-1" />
+              </button>
+            </nav>
           </div>
         </>
       ) : (
