@@ -271,7 +271,7 @@ def anomalies_employees(data): #recibe un dataframe
 
     return(data)
 
-def get_empleoyee_anomalies(start_date=None, end_date=None): #FUNCION PRINCIPAL QUE SE USARA EN EL FRONT
+def get_employee_anomalies(start_date=None, end_date=None): #FUNCION PRINCIPAL QUE SE USARA EN EL FRONT
     df = create_dataFrame_empleados(start_date, end_date)
     if df.empty:
         cols = ['employee_id','total_requests', 'required_days', 'required_days_rate','seniority_days','days_per_year']

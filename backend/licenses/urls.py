@@ -16,5 +16,6 @@ urlpatterns = [
 
     path('certificate/coherence', upload_base64_file,name='upload_base64_file'),
 
-    path('anomalies/supervisor', supervisor_anomalies, name='get_anomalies_view')     
+    path('anomalies/supervisor', supervisor_anomalies, name='get_supervisor_anomalies_view'),
+    path('anomalies/employee', employee_anomalies, name='get_employee_anomalies_view')         
 ]
