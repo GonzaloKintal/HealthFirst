@@ -55,11 +55,8 @@ const LicensesPage = () => {
             id: license.license_id,
             employee: license.user.first_name + ' ' + license.user.last_name,
             type: license.type,
-            // startDate: license.start_date,
-            // endDate: license.end_date,
-            startDate: formatSimpleDate(license.start_date), // Formatear aquí
-            endDate: formatSimpleDate(license.end_date),     // Formatear aquí
-            days: license.days,
+            startDate: formatSimpleDate(license.start_date),
+            endDate: formatSimpleDate(license.end_date),
             status: license.status,
             requestedOn: license.created_at || '',
           }));
