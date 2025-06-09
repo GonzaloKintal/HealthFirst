@@ -18,7 +18,8 @@ django.setup()
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 #MODEL_PATH_SUP = os.path.join(BASE_DIR, 'isolation_forest_sup_model.pkl')
-MODEL_PATH_SUP = os.path.join(BASE_DIR, 'isolation_forest_sup_model_v2.pkl')
+#MODEL_PATH_SUP = os.path.join(BASE_DIR, 'isolation_forest_sup_model_v2.pkl')
+MODEL_PATH_SUP = os.path.join(BASE_DIR, 'isolation_forest_sup_model_v3.pkl')
 
 MODEL_PATH_EMP = os.path.join(BASE_DIR, 'isolation_forest_emp_model.pkl')
 
@@ -49,7 +50,7 @@ def create_model_supervisor(path_csv): # le paso el csv para el entreamiento
 
     # Guardar el modelo en un archivo, ESTO ES LO CORRECTO
     #joblib.dump(model, MODEL_PATH_SUP)
-    joblib.dump(model,'isolation_forest_sup_model_v2.pkl')
+    joblib.dump(model,'isolation_forest_sup_model_v3.pkl')
 
     return model # NO deberia retornarlo, pero por ahora para pruebas lo dejo así
 
@@ -88,7 +89,7 @@ def create_dataframe_supervisor(start_date=None, end_date=None): # esto para lo 
     )
     # Convertir a DataFrame
     df = pd.DataFrame(list(supervisors.values(
-        'id', 'total_requests', 'approved_requests', 'rejected_requests'
+        'id', 'total_requests', 'approved_requests', 'rejected_requests', 'employment_start_date',
     )))
     df = df.rename(columns={'id': 'evaluator_id'})
 
@@ -105,6 +106,9 @@ def create_dataframe_supervisor(start_date=None, end_date=None): # esto para lo 
     df.loc[df['total_requests'] > 0, 'rejection_rate'] = (
         df.loc[df['total_requests'] > 0, 'rejected_requests'] / df.loc[df['total_requests'] > 0, 'total_requests']
     )
+
+    df['seniority_days'] = df['employment_start_date'].apply(lambda d: (today - d).days if d else 0)
+    df.drop(columns=['employment_start_date'], inplace=True)
     #print(df)
     return df
 
@@ -132,6 +136,7 @@ def generate_supervisors_csv(path_csv='supervisors_data_1000.csv', n=1000, semil
     
     df['approval_rate'] = df['approved_requests'] / df['total_requests']
     df['rejection_rate'] = df['rejected_requests'] / df['total_requests']
+    df['seniority_days'] = np.random.randint(0, 2000, size=n)
     
     df.to_csv(path_csv, index=False)
     return df
@@ -340,16 +345,16 @@ def dataframe_pruebas_emp(): # para pruebas
 
 #print(get_supervisor_anomalies())
 
-
-#create_model_supervisor('supervisors_data_1000.csv')
+generate_supervisors_csv()
+create_model_supervisor('supervisors_data_1000.csv')
 #print(anomalies_supervisors(dataframe_pruebas_sup()))
-#print(get_supervisor_anomalies())
+print(get_supervisor_anomalies())
 
 #pruebas emp-------------------------------------------------------------------------------------------------------
 
 #generate_empleados_csv()
 #create_model_empleados('employees_data_1000.csv')
-#print(anomalies_employees(dataframe_pruebas_emp()))
+#print(anomalies_employees())
 
 #print(create_dataFrame_empleados())
 
