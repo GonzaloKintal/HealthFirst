@@ -36,12 +36,12 @@ import pandas as pd
 #ANOMALIAS SOBRE SUPERVISORES------------------------------------------------------------------------------------
 def create_model_supervisor(path_csv): # le paso el csv para el entreamiento
     data= pd.read_csv(path_csv)
-    features = data[['total_requests', 'approved_requests', 'rejected_requests']].copy()
+    features = data[['total_requests', 'approved_requests', 'rejected_requests','seniority_days']].copy()
 
      # Entrenamiento del modelo Isolation Forest
     model = IsolationForest(
         n_estimators=200,
-        contamination=0.05,
+        contamination=0.04,
         max_samples=100,
         max_features=0.8,
         random_state=42,
@@ -59,7 +59,7 @@ def anomalies_supervisors(data): #recibe un dataframe
     #Cargo el modelo previamente guardado
     model = joblib.load(MODEL_PATH_SUP)
     #data= pd.read_csv(path_csv)
-    features = data[['total_requests', 'approved_requests', 'rejected_requests']]
+    features = data[['total_requests', 'approved_requests', 'rejected_requests', 'seniority_days']]
 
 
     data['anomaly_score'] = model.decision_function(features)
@@ -107,6 +107,8 @@ def create_dataframe_supervisor(start_date=None, end_date=None): # esto para lo 
         df.loc[df['total_requests'] > 0, 'rejected_requests'] / df.loc[df['total_requests'] > 0, 'total_requests']
     )
 
+    today = date.today()
+
     df['seniority_days'] = df['employment_start_date'].apply(lambda d: (today - d).days if d else 0)
     df.drop(columns=['employment_start_date'], inplace=True)
     #print(df)
@@ -116,35 +118,57 @@ def create_dataframe_supervisor(start_date=None, end_date=None): # esto para lo 
 
 def generate_supervisors_csv(path_csv='supervisors_data_1000.csv', n=1000, semilla=42):
     np.random.seed(semilla)
-    
-    evaluator_id = np.arange(1, n+1)
-    total_requests = np.random.randint(5, 51, size=n)
-    
-    approval_rate_base = np.random.uniform(0.7, 0.95, size=n)
-    anomaly_indices = np.random.choice(n, size=int(n*0.05), replace=False)
-    approval_rate_base[anomaly_indices] = np.random.uniform(0, 0.4, size=len(anomaly_indices))
-    
-    approved_requests = (approval_rate_base * total_requests).round().astype(int)
+
+    pct_new_normal = 0.05       # Nuevos con 0 evaluaciones (normales)
+    pct_old_zero_anomaly = 0.05 # Viejos con 0 evaluaciones (potencialmente anómalos)
+    n_new = int(n * pct_new_normal)
+    n_old_zero = int(n * pct_old_zero_anomaly)
+    n_regular = n - n_new - n_old_zero
+
+    total_requests = np.random.randint(5, 51, size=n_regular)
+    approval_rate = np.random.uniform(0.7, 0.95, size=n_regular)
+    approved_requests = (approval_rate * total_requests).astype(int)
     rejected_requests = total_requests - approved_requests
-  
-    df = pd.DataFrame({
-        'evaluator_id': evaluator_id,
+    seniority_days = np.random.randint(180, 2000, size=n_regular)
+
+    df_regular = pd.DataFrame({
+        'evaluator_id': range(1, n_regular + 1),
         'total_requests': total_requests,
         'approved_requests': approved_requests,
         'rejected_requests': rejected_requests,
+        'seniority_days': seniority_days,
     })
-    
-    df['approval_rate'] = df['approved_requests'] / df['total_requests']
-    df['rejection_rate'] = df['rejected_requests'] / df['total_requests']
-    df['seniority_days'] = np.random.randint(0, 2000, size=n)
-    
+
+    df_new = pd.DataFrame({
+        'evaluator_id': range(n_regular + 1, n_regular + n_new + 1),
+        'total_requests': 0,
+        'approved_requests': 0,
+        'rejected_requests': 0,
+        'seniority_days': np.random.randint(0, 366, size=n_new),
+    })
+
+    df_old_zero = pd.DataFrame({
+        'evaluator_id': range(n_regular + n_new + 1, n + 1),
+        'total_requests': 0,
+        'approved_requests': 0,
+        'rejected_requests': 0,
+        'seniority_days': np.random.randint(366, 2000, size=n_old_zero),
+    })
+
+    df = pd.concat([df_regular, df_new, df_old_zero], ignore_index=True)
+
+    df['approval_rate'] = df.apply(
+        lambda row: row['approved_requests'] / row['total_requests'] if row['total_requests'] > 0 else 0, axis=1)
+    df['rejection_rate'] = df.apply(
+        lambda row: row['rejected_requests'] / row['total_requests'] if row['total_requests'] > 0 else 0, axis=1)
+
     df.to_csv(path_csv, index=False)
     return df
 
 def get_supervisor_anomalies(start_date=None, end_date=None): #FUNCION PRINCIPAL QUE SE USARA EN EL FRONT
     df = create_dataframe_supervisor(start_date, end_date)
     if df.empty:
-        cols = ['evaluator_id', 'total_requests', 'approved_requests', 'rejected_requests', 'approval_rate', 'rejection_rate']
+        cols = ['evaluator_id', 'total_requests', 'approved_requests', 'rejected_requests', 'approval_rate', 'rejection_rate','seniority_days']
         return pd.DataFrame(columns=cols)
     dataframe =  anomalies_supervisors(df)
     
@@ -162,6 +186,8 @@ def get_supervisor_anomalies(start_date=None, end_date=None): #FUNCION PRINCIPAL
     dataframe['rejection_rate_diff'] = (dataframe['rejection_rate_diff']*100).map("{:+.2f}%".format) #NUEVA INFO
     dataframe['total_requests_percent'] = (dataframe['total_requests_percent']*100).map("{:.2f}%".format)#NUEVA INFO
 
+    print(dataframe)
+    dataframe = dataframe.drop(columns=['seniority_days'])
     return dataframe
 
 #ANOMALIAS SOBRE EMPLEADOS(solicitudes de licencias)------------------------------------------------------------------------------------
@@ -345,10 +371,10 @@ def dataframe_pruebas_emp(): # para pruebas
 
 #print(get_supervisor_anomalies())
 
-generate_supervisors_csv()
-create_model_supervisor('supervisors_data_1000.csv')
+#generate_supervisors_csv()
+#create_model_supervisor('supervisors_data_1000.csv')
 #print(anomalies_supervisors(dataframe_pruebas_sup()))
-print(get_supervisor_anomalies())
+get_supervisor_anomalies()
 
 #pruebas emp-------------------------------------------------------------------------------------------------------
 
