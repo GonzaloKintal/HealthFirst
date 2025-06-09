@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { FiMail, FiSend, FiChevronDown, FiChevronUp } from 'react-icons/fi';
-import Notification from '../../components/utils/Notification';
 import { getEmailStats, getEmailEvents } from '../../services/messagingService';
 import SendMessageForm from '../../components/supervisor/SendMessageForm';
 import MessagingStats from '../../components/supervisor/MessagingStats';
@@ -19,18 +18,24 @@ const MessagingPage = () => {
   });
   const [error, setError] = useState(null);
   const [expandedSection, setExpandedSection] = useState(null);
+  const [pagination, setPagination] = useState({
+    limit: 10,
+    offset: 0,
+    currentPage: 1,
+    hasMore: true
+  });
 
   useEffect(() => {
     fetchData();
   }, []);
 
-  const fetchData = async () => {
+  const fetchData = async (newOffset = 0, limit = 10) => {
     try {
       setError(null);
       setLoading({ stats: true, events: true });
       
       const statsResponse = await getEmailStats();
-      const eventsResponse = await getEmailEvents();
+      const eventsResponse = await getEmailEvents(limit, newOffset);
       
       if (statsResponse.success) {
         setStats(statsResponse.stats);
@@ -40,6 +45,12 @@ const MessagingPage = () => {
       
       if (eventsResponse.success) {
         setEvents(eventsResponse.events);
+        // Actualiza si hay más páginas disponibles
+        setPagination(prev => ({
+          ...prev,
+          offset: newOffset,
+          hasMore: eventsResponse.events.length >= limit
+        }));
       } else {
         setError(eventsResponse.error);
       }
@@ -51,6 +62,10 @@ const MessagingPage = () => {
     }
   };
 
+  const handlePageChange = (newOffset) => {
+    fetchData(newOffset, pagination.limit);
+  };
+
   const showNotification = (type, message) => {
     setNotification({ show: true, type, message });
     setTimeout(() => {
@@ -59,8 +74,7 @@ const MessagingPage = () => {
   };
 
   const handleRefresh = () => {
-    fetchData();
-    showNotification('success', 'Datos actualizados correctamente');
+    fetchData(0);
   };
 
   return (
@@ -99,11 +113,13 @@ const MessagingPage = () => {
           expandedSection === 'stats' ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'
         }`}>
           <div className="p-4 bg-background border-t border-border">
-            <MessagingStats 
+           <MessagingStats 
               stats={stats} 
               events={events} 
               loading={loading} 
-              onRefresh={handleRefresh} 
+              onRefresh={handleRefresh}
+              onPageChange={handlePageChange}
+              pagination={pagination}
             />
           </div>
         </div>
@@ -135,14 +151,6 @@ const MessagingPage = () => {
           </div>
         </div>
       </div>
-
-      {notification.show && (
-        <Notification 
-          type={notification.type} 
-          message={notification.message} 
-          onClose={() => setNotification(prev => ({ ...prev, show: false }))}
-        />
-      )}
     </div>
   );
 };
