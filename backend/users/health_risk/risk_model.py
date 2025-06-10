@@ -114,3 +114,7 @@ def predict_risk():
 
     print(json_results)
     return json_results
+
+    # df_training=pd.read_csv("HealthFirst/backend/users/health_risk/dataset_risk.csv")
+    # training_model(df_training)
+    predict_risk()
