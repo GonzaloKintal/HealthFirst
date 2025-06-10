@@ -21,7 +21,8 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 #MODEL_PATH_SUP = os.path.join(BASE_DIR, 'isolation_forest_sup_model_v2.pkl')
 MODEL_PATH_SUP = os.path.join(BASE_DIR, 'isolation_forest_sup_model_v3.pkl')
 
-MODEL_PATH_EMP = os.path.join(BASE_DIR, 'isolation_forest_emp_model.pkl')
+#MODEL_PATH_EMP = os.path.join(BASE_DIR, 'isolation_forest_emp_model.pkl')
+MODEL_PATH_EMP = os.path.join(BASE_DIR, 'isolation_forest_emp_model_v2.pkl')
 
 
 pd.set_option("display.max_columns", None)  # Mostrar todas las columnas
@@ -248,7 +249,13 @@ def create_model_empleados(path_csv): # le paso el csv para el entreamiento
     features = data[['total_requests', 'required_days', 'required_days_rate','seniority_days','days_per_year']]
 
     #entrenamiento del modelo Isolation Forest
-    model = IsolationForest(n_estimators=100, contamination=0.2, random_state=42)
+    model = IsolationForest(
+        n_estimators=200,
+        contamination=0.05,
+        max_samples=100,
+        max_features=0.8,
+        random_state=42,
+    )
     model.fit(features)
 
     #se guardan el modelo en un archivo
@@ -257,32 +264,34 @@ def create_model_empleados(path_csv): # le paso el csv para el entreamiento
 def create_dataFrame_empleados(start_date=None, end_date=None):
     employees = HealthFirstUser.objects.filter(role__name='employee', is_deleted=False)
 
-    license_base = License.objects.filter(user=OuterRef('pk'))
-    if start_date and end_date:
-        license_base = license_base.filter(request_date__range=(start_date, end_date))
-
-    total_requests = license_base.order_by().values('user').annotate(c=Count('pk')).values('c')[:1]
-    required_days = license_base.order_by().values('user').annotate(s=Sum('required_days')).values('s')[:1]
-
-    employees = employees.annotate(
-        total_requests=Coalesce(Subquery(total_requests), Value(0, output_field=IntegerField())),
-        required_days=Coalesce(Subquery(required_days), Value(0, output_field=IntegerField()))
-    )
-
-    df = pd.DataFrame(list(employees.values('id', 'total_requests', 'required_days', 'employment_start_date')))
+    df = pd.DataFrame(list(employees.values('id', 'employment_start_date')))
     df = df.rename(columns={'id': 'employee_id'})
 
     if df.empty:
         return df
 
-    today = date.today()
+    licenses = License.objects.all()
+    if start_date and end_date:
+        licenses = licenses.filter(request_date__range=(start_date, end_date))
 
-    df['required_days_rate'] = df.apply(lambda row: row['required_days'] / row['total_requests'] if row['total_requests'] > 0 else 0,axis=1)
+    lic_df = pd.DataFrame(list(
+        licenses.values('user_id').annotate(
+            total_requests=Count('*'),
+            required_days=Sum('required_days')
+        )
+    )).rename(columns={'user_id': 'employee_id'})
+
+    df = df.merge(lic_df, on='employee_id', how='left')
+    df['total_requests'] = df['total_requests'].fillna(0).astype(int)
+    df['required_days'] = df['required_days'].fillna(0).astype(int)
+
+    today = date.today()
+    df['required_days_rate'] = df.apply(lambda row: row['required_days'] / row['total_requests'] if row['total_requests'] > 0 else 0, axis=1)
     df['seniority_days'] = df['employment_start_date'].apply(lambda d: (today - d).days if d else 0)
-    df['days_per_year'] = df.apply(lambda row: row['required_days'] / (row['seniority_days'] / 365) if row['seniority_days'] > 0 else 0,axis=1)
-    
+    df['days_per_year'] = df.apply(lambda row: row['required_days'] / (row['seniority_days'] / 365) if row['seniority_days'] > 0 else 0, axis=1)
+
     df.drop(columns=['employment_start_date'], inplace=True)
-            
+
     return df
 
 def anomalies_employees(data): #recibe un dataframe
@@ -384,4 +393,4 @@ def dataframe_pruebas_emp(): # para pruebas
 
 #print(create_dataFrame_empleados())
 
-#print(get_empleoyee_anomalies())
+print(get_employee_anomalies())
