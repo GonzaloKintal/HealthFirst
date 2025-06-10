@@ -15,4 +15,6 @@ urlpatterns = [
     path('get_user_email_events', get_user_email_events,name='get-user-email-events'),  
 
     path('send_personalized_message', send_personalized_message,name='send-personalized-message'),
+    path('telegram-webhook/', telegram_webhook, name='telegram_webhook'),
+
 ]

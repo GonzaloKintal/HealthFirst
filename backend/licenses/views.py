@@ -44,6 +44,7 @@ def licenses_list(request):
         employee_name = data.get('employee_name', '').strip()
         page_number = data.get('page', 1)
         page_size = data.get('page_size', 10)
+        license_type= data.get('type', None)
 
         if not user_id:
             return JsonResponse({'error': 'El campo user_id es requerido.'}, status=400)
@@ -62,6 +63,9 @@ def licenses_list(request):
             Q(user__first_name__icontains=employee_name) | 
             Q(user__last_name__icontains=employee_name)
         )
+
+        if license_type:
+            queryset = queryset.filter(type__name=license_type)
 
         # Filtro por estado
         if status_filter:
