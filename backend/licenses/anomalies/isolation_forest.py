@@ -369,6 +369,8 @@ def get_employee_anomalies(start_date=None, end_date=None): #FUNCION PRINCIPAL Q
     dataframe['required_days_rate_diff'] = dataframe['required_days_rate_diff'].map("{:+.2f}".format)
     dataframe['required_days_percent'] = (dataframe['required_days_percent'] * 100).map("{:.2f}%".format)
 
+    dataframe = dataframe.drop(columns=['mon_fri_requests'])
+
     return dataframe
 
 #---------------------------------------------------------------------------------------------------------------
@@ -497,10 +499,10 @@ def dataframe_pruebas_emp(): # para pruebas
 #pruebas emp-------------------------------------------------------------------------------------------------------
 
 #generate_employees_csv()
-generate_small_training_csv()
-create_model_empleados('small_training_employees.csv')
-print(anomalies_employees(dataframe_pruebas_emp()))
+#generate_small_training_csv()
+#create_model_empleados('small_training_employees.csv')
+#print(anomalies_employees(dataframe_pruebas_emp()))
 
 #print(create_dataFrame_empleados())
 
-print(get_employee_anomalies())
+#print(get_employee_anomalies())
