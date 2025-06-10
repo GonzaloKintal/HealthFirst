@@ -94,6 +94,14 @@ class License(models.Model):
             evaluation_comment='Nueva solicitud.'
         )
 
+    def get_info_for_message(self):
+        status=self.status.get_name_display()
+        return f"Licencia {self.license_id} :({status})"
+
+
+    def get_detail_for_message(self):
+        return f"Licencia {self.license_id} - {self.user} - fecha de solicitud: {self.request_date} - estado: {self.status.get_name_display()}- fecha de inicio: {self.start_date} - fecha de fin: {self.end_date}"
+
 
 
 class Certificate(models.Model):
