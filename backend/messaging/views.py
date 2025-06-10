@@ -7,6 +7,10 @@ from messaging.services.brevo_email import *
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from django.views.decorators.csrf import csrf_exempt
+from messaging.services.telegram import TelegramService
+from licenses.models import License
+
 
 # Create your views here.
 @api_view(['POST'])
@@ -160,7 +164,47 @@ def send_personalized_message(request):
     return JsonResponse(response_data, status=status)
 
         
-
-
-
+@csrf_exempt
+def telegram_webhook(request):
+    if request.method == 'POST':
+        try:
+            update = json.loads(request.body.decode('utf-8'))
             
+            chat_id = update['message']['chat']['id']
+            text = update['message'].get('text', '')
+            
+            if text == '/start':
+                response_text = "¡Hola! Bienvenido a Health First. \n\n"
+                response_text += "Envie /licenses para obtener tus licencias"
+            elif text=='/licenses':
+
+                user = HealthFirstUser.objects.filter(telegram_id=chat_id).last()
+            
+                licenses=License.objects.filter(user=user).order_by("license_id")
+                response_text = "Tus licencias:\n\n"
+                for lic in licenses:
+                    response_text += lic.get_info_for_message() + "\n"
+
+
+                response_text += "Envie license seguido del id para obtener mas informacion sobre una licencia.\nn ejemplo: license 1234"
+
+            elif text.startswith('license '):
+                license_id = text.split()[1]
+                license = License.objects.filter(license_id=license_id).first()
+                if license:
+                    response_text = license.get_detail_for_message()
+                else:
+                    response_text = "Licencia no encontrada."
+            else:
+                response_text = "Comando no reconocido."
+            
+            TelegramService.send_message(chat_id, response_text)
+            
+            return JsonResponse({'status': 'ok'})
+        
+
+        #se devuelve siempre 200 porque sino telegram reintenta la peticion 
+        except Exception as e:
+            print(e)
+            return JsonResponse({'error': str(e)}, status=200)
+    
