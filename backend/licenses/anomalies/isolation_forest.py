@@ -187,7 +187,7 @@ def get_supervisor_anomalies(start_date=None, end_date=None): #FUNCION PRINCIPAL
     dataframe['rejection_rate_diff'] = (dataframe['rejection_rate_diff']*100).map("{:+.2f}%".format) #NUEVA INFO
     dataframe['total_requests_percent'] = (dataframe['total_requests_percent']*100).map("{:.2f}%".format)#NUEVA INFO
 
-    #print(dataframe)
+    print(dataframe)
     dataframe = dataframe.drop(columns=['seniority_days'])
     return dataframe
 
@@ -251,7 +251,7 @@ def create_model_empleados(path_csv): # le paso el csv para el entreamiento
     #entrenamiento del modelo Isolation Forest
     model = IsolationForest(
         n_estimators=200,
-        contamination=0.05,
+        contamination=0.04,
         max_samples=100,
         max_features=0.8,
         random_state=42,
@@ -265,7 +265,7 @@ def create_dataFrame_empleados(start_date=None, end_date=None):
     employees = HealthFirstUser.objects.filter(role__name='employee', is_deleted=False)
 
     df = pd.DataFrame(list(employees.values('id', 'employment_start_date')))
-    df = df.rename(columns={'id': 'employee_id'})
+    df.rename(columns={'id': 'employee_id'}, inplace=True)
 
     if df.empty:
         return df
@@ -274,21 +274,32 @@ def create_dataFrame_empleados(start_date=None, end_date=None):
     if start_date and end_date:
         licenses = licenses.filter(request_date__range=(start_date, end_date))
 
-    lic_df = pd.DataFrame(list(
-        licenses.values('user_id').annotate(
-            total_requests=Count('*'),
-            required_days=Sum('required_days')
-        )
-    )).rename(columns={'user_id': 'employee_id'})
+    lic_data = licenses.values('user_id').annotate(
+        total_requests=Count('license_id'),
+        required_days=Sum('required_days')
+    )
+    lic_df = pd.DataFrame(list(lic_data))
+
+    if not lic_df.empty and 'user_id' in lic_df.columns:
+        lic_df.rename(columns={'user_id': 'employee_id'}, inplace=True)
+    else:
+        #lic_df está vacío o no contiene 'user_id'")
+        lic_df = pd.DataFrame(columns=['employee_id', 'total_requests', 'required_days'])
 
     df = df.merge(lic_df, on='employee_id', how='left')
     df['total_requests'] = df['total_requests'].fillna(0).astype(int)
     df['required_days'] = df['required_days'].fillna(0).astype(int)
 
     today = date.today()
-    df['required_days_rate'] = df.apply(lambda row: row['required_days'] / row['total_requests'] if row['total_requests'] > 0 else 0, axis=1)
-    df['seniority_days'] = df['employment_start_date'].apply(lambda d: (today - d).days if d else 0)
-    df['days_per_year'] = df.apply(lambda row: row['required_days'] / (row['seniority_days'] / 365) if row['seniority_days'] > 0 else 0, axis=1)
+    df['required_days_rate'] = df.apply(
+        lambda row: row['required_days'] / row['total_requests'] if row['total_requests'] > 0 else 0, axis=1
+    )
+    df['seniority_days'] = df['employment_start_date'].apply(
+        lambda d: (today - d).days if d else 0
+    )
+    df['days_per_year'] = df.apply(
+        lambda row: row['required_days'] / (row['seniority_days'] / 365) if row['seniority_days'] > 0 else 0, axis=1
+    )
 
     df.drop(columns=['employment_start_date'], inplace=True)
 
@@ -393,4 +404,4 @@ def dataframe_pruebas_emp(): # para pruebas
 
 #print(create_dataFrame_empleados())
 
-print(get_employee_anomalies())
+#print(get_employee_anomalies(date(2025, 6, 3),date(2025, 6, 4)))
