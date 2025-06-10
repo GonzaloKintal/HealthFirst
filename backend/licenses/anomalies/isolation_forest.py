@@ -186,7 +186,7 @@ def get_supervisor_anomalies(start_date=None, end_date=None): #FUNCION PRINCIPAL
     dataframe['rejection_rate_diff'] = (dataframe['rejection_rate_diff']*100).map("{:+.2f}%".format) #NUEVA INFO
     dataframe['total_requests_percent'] = (dataframe['total_requests_percent']*100).map("{:.2f}%".format)#NUEVA INFO
 
-    print(dataframe)
+    #print(dataframe)
     dataframe = dataframe.drop(columns=['seniority_days'])
     return dataframe
 
@@ -374,7 +374,7 @@ def dataframe_pruebas_emp(): # para pruebas
 #generate_supervisors_csv()
 #create_model_supervisor('supervisors_data_1000.csv')
 #print(anomalies_supervisors(dataframe_pruebas_sup()))
-get_supervisor_anomalies()
+#get_supervisor_anomalies()
 
 #pruebas emp-------------------------------------------------------------------------------------------------------
 
