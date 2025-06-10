@@ -52,7 +52,6 @@ def get_brevo_events(days=7, email=None, event_type=None,limit=10, offset=0):
     if response.status_code == 200:
         events = response.json().get('events', [])
         return {'events': events}
-    return {'events': []}
     
 def get_user_activity(email, days=30,offset=0,limit=10):
     """Obtiene toda la actividad de un usuario específico"""
