@@ -4,7 +4,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 from sklearn.preprocessing import StandardScaler
-from .risk_utils import generate_risk_dataframe
+from .risk_utils import generate_risk_dataframe, generate_employ_risk_dataframe
 import joblib
 import os
 from pathlib import Path
@@ -88,7 +88,27 @@ def load_trained_model():
         return None, None
     
 
-# Método para predecir el riesgo
+def predict_employ_risk(employ_id):
+    """Devuelve el riesgo asociado a empleado consultado"""
+    df=generate_employ_risk_dataframe(employ_id)
+    model, scaler=load_trained_model()
+    X = df[["age", "sickness_license_count", "accident_license_count",
+              "in_high_risk_department"]].copy()
+    
+    # Escalar características
+    X_scaled = scaler.transform(X)
+
+    # Hacer predicciones
+    predictions = model.predict(X_scaled)
+    df['risk']=predictions
+    df['risk'] = np.where(predictions == 1, 'high risk', 'low risk')
+
+    #Pasamos a JSON para que lo levante Front
+    json_results= df.to_json(orient='records')
+
+    print(json_results)
+    return json_results
+
 def predict_risk():
     """Devuelve el JSON asociado a la prediccion de riesgo de salud"""
     df=generate_risk_dataframe() #Obtenemos el dataframe con la informacion de la base de datos
@@ -115,6 +135,8 @@ def predict_risk():
     print(json_results)
     return json_results
 
+
+
     # df_training=pd.read_csv("HealthFirst/backend/users/health_risk/dataset_risk.csv")
     # training_model(df_training)
-    predict_risk()
+    #predict_risk()
