@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { FiRefreshCw, FiPieChart, FiUsers, FiFilter, FiX, FiAlertTriangle, FiTrendingUp, FiTrendingDown, FiInfo } from 'react-icons/fi';
+import { FiRefreshCw, FiPieChart, FiUsers, FiFilter, FiX, FiAlertTriangle, FiTrendingUp, FiTrendingDown, FiInfo, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, PointElement, ScatterController } from 'chart.js';
 import { Pie, Scatter } from 'react-chartjs-2';
 import { getEmployeeAnomalies } from '../../services/licenseService';
@@ -10,7 +10,7 @@ import EmployeeSelector from '../supervisor/EmployeeSelector';
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, PointElement, ScatterController);
 
-const EmployeeAnomalies = ({ employees: propEmployees, isLoadingData: propIsLoadingData, dataError: propDataError }) => {
+const EmployeeAnomalies = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [employees, setEmployees] = useState({});
@@ -26,9 +26,22 @@ const EmployeeAnomalies = ({ employees: propEmployees, isLoadingData: propIsLoad
     employee_id: '',
     is_anomaly: ''
   });
+  const [appliedFilters, setAppliedFilters] = useState({
+    start_date: null,
+    end_date: null,
+    employee_id: '',
+    is_anomaly: ''
+  });
   const [hoveredRow, setHoveredRow] = useState(null);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
   const [showInfoModal, setShowInfoModal] = useState(false);
+  const [pagination, setPagination] = useState({
+    count: 0,
+    next: null,
+    previous: null,
+    limit: 5,
+    offset: 0
+  });
 
   // Detect dark mode
   useEffect(() => {
@@ -46,28 +59,63 @@ const EmployeeAnomalies = ({ employees: propEmployees, isLoadingData: propIsLoad
     return () => observer.disconnect();
   }, []);
 
-  const handleAnalyzeAnomalies = async () => {
+  const handleAnalyzeAnomalies = async (params = {}) => {
     try {
       setIsAnalyzing(true);
-      setError(null);
       setIsLoading(true);
+      setError(null);
 
-      // Fetch global anomalies data (without filters)
-      const globalResult = await getEmployeeAnomalies({});
-      
-      if (!globalResult.success) {
-        throw new Error(globalResult.error || 'Error al analizar anomalías');
+      const limit = params.limit || pagination.limit;
+      const offset = params.offset !== undefined ? params.offset : pagination.offset;
+      const start_date = params.start_date || appliedFilters.start_date ? appliedFilters.start_date.toISOString().split('T')[0] : null;
+      const end_date = params.end_date || appliedFilters.end_date ? appliedFilters.end_date.toISOString().split('T')[0] : null;
+      const employee_id = params.employee_id || appliedFilters.employee_id || null;
+      const is_anomaly = params.is_anomaly || appliedFilters.is_anomaly || null;
+
+      // Fetch global anomalies data if not already fetched
+      if (!globalAnomaliesData) {
+        const globalResult = await getEmployeeAnomalies({
+          limit: 1000,
+          offset: 0
+        });
+
+        if (!globalResult.success) {
+          throw new Error(globalResult.error || 'Error al analizar anomalías globales');
+        }
+
+        const transformedGlobalData = transformApiData(globalResult.data);
+        setGlobalAnomaliesData(transformedGlobalData);
+
+        // Fetch employee data for unique employee IDs in global data
+        const globalEmployeeIds = [...new Set(transformedGlobalData.map(item => item.employee_id))];
+        const employeePromises = globalEmployeeIds.map(async (id) => {
+          if (!employees[id]) {
+            try {
+              const employeeData = await getUser(id);
+              return { id, employee_id: employeeData.id, ...employeeData };
+            } catch (err) {
+              console.error(`Error fetching employee ${id}:`, err);
+              return { id, employee_id: id, name: `Empleado (ID: ${id})`, department: 'Sin departamento' };
+            }
+          }
+          return null;
+        });
+
+        const fetchedEmployees = (await Promise.all(employeePromises)).filter(emp => emp !== null);
+        setEmployees(prev => ({
+          ...prev,
+          ...fetchedEmployees.reduce((acc, emp) => ({ ...acc, [emp.id]: emp }), {})
+        }));
       }
-
-      const transformedGlobalData = transformApiData(globalResult.data);
-      setGlobalAnomaliesData(transformedGlobalData);
 
       // Fetch filtered anomalies data
       const filteredResult = await getEmployeeAnomalies({
-        start_date: filters.start_date ? filters.start_date.toISOString().split('T')[0] : null,
-        end_date: filters.end_date ? filters.end_date.toISOString().split('T')[0] : null,
-        employee_id: filters.employee_id || null,
-        is_anomaly: filters.is_anomaly || null
+        start_date,
+        end_date,
+        employee_id,
+        is_anomaly,
+        limit,
+        offset
       });
 
       if (!filteredResult.success) {
@@ -77,23 +125,13 @@ const EmployeeAnomalies = ({ employees: propEmployees, isLoadingData: propIsLoad
       const transformedFilteredData = transformApiData(filteredResult.data);
       setAnomaliesData(transformedFilteredData);
 
-      // Fetch employee data for unique employee IDs in both global and filtered data
-      const allEmployeeIds = [
-        ...new Set([
-          ...transformedGlobalData.map(item => item.employee_id),
-          ...transformedFilteredData.map(item => item.employee_id)
-        ])
-      ];
-
-      const employeePromises = allEmployeeIds.map(async (id) => {
+      // Fetch employee data for unique employee IDs in filtered data (if not already fetched)
+      const filteredEmployeeIds = [...new Set(transformedFilteredData.map(item => item.employee_id))];
+      const employeePromises = filteredEmployeeIds.map(async (id) => {
         if (!employees[id]) {
           try {
             const employeeData = await getUser(id);
-            return { 
-              id, 
-              employee_id: employeeData.id,
-              ...employeeData 
-            };
+            return { id, employee_id: employeeData.id, ...employeeData };
           } catch (err) {
             console.error(`Error fetching employee ${id}:`, err);
             return { id, employee_id: id, name: `Empleado (ID: ${id})`, department: 'Sin departamento' };
@@ -108,13 +146,35 @@ const EmployeeAnomalies = ({ employees: propEmployees, isLoadingData: propIsLoad
         ...fetchedEmployees.reduce((acc, emp) => ({ ...acc, [emp.id]: emp }), {})
       }));
 
+      setPagination({
+        count: filteredResult.count || 0,
+        next: filteredResult.next || null,
+        previous: filteredResult.previous || null,
+        limit,
+        offset: Number(offset)
+      });
+
       setHasAnalyzed(true);
     } catch (err) {
-      setError(err.message);
+      setError(err.message || 'Error al analizar anomalías');
       console.error('Error analyzing anomalies:', err);
+      setAnomaliesData([]);
     } finally {
       setIsAnalyzing(false);
       setIsLoading(false);
+    }
+  };
+
+  const handlePrevPage = () => {
+    const newOffset = Math.max(0, Number(pagination.offset) - pagination.limit);
+    handleAnalyzeAnomalies({ offset: newOffset });
+  };
+
+  const handleNextPage = () => {
+    if (pagination.next) {
+      const url = new URL(pagination.next);
+      const offset = Number(url.searchParams.get('offset') || pagination.offset + pagination.limit);
+      handleAnalyzeAnomalies({ offset });
     }
   };
 
@@ -130,7 +190,6 @@ const EmployeeAnomalies = ({ employees: propEmployees, isLoadingData: propIsLoad
     setHoveredRow(null);
   };
 
-  // Transform API data to expected format
   const transformApiData = (apiData) => {
     return apiData.map(item => ({
       employee_id: item.employee_id,
@@ -145,9 +204,8 @@ const EmployeeAnomalies = ({ employees: propEmployees, isLoadingData: propIsLoad
     }));
   };
 
-  // Obtener el nombre del empleado por ID
-  const getNameById = (id) => {
-    if (isLoading) return 'Cargando datos de empleados...';
+  const getNameById = (id, ignoreLoading = false) => {
+    // if (!ignoreLoading && isLoading) return 'Cargando...';
     if (error) return `Empleado (ID: ${id})`;
 
     const employee = employees[id];
@@ -157,20 +215,18 @@ const EmployeeAnomalies = ({ employees: propEmployees, isLoadingData: propIsLoad
     return employee.name || employee.full_name || `(${id})`;
   };
 
-  // Obtener el departamento por ID
   const getDepartmentById = (id) => {
-    if (isLoading) return 'Cargando datos de empleados...';
+    // if (isLoading) return 'Cargando...';
     if (error) return 'Sin departamento';
 
     const employee = employees[id];
     return employee?.department || 'Sin departamento';
   };
 
-  // Chart data
   const getChartData = () => {
-    if (!anomaliesData) return null;
+    if (!globalAnomaliesData) return null;
 
-    const anomalyCount = anomaliesData.reduce((acc, item) => ({
+    const anomalyCount = globalAnomaliesData.reduce((acc, item) => ({
       ...acc,
       [item.is_anomaly ? 'Anomalías' : 'Normales']: (acc[item.is_anomaly ? 'Anomalías' : 'Normales'] || 0) + 1
     }), { 'Anomalías': 0, 'Normales': 0 });
@@ -188,15 +244,15 @@ const EmployeeAnomalies = ({ employees: propEmployees, isLoadingData: propIsLoad
         ],
       },
       scatterData: {
-        datasets: anomaliesData.length > 0 ? anomaliesData.map(item => ({
-          label: getNameById(item.employee_id),
+        datasets: globalAnomaliesData.length > 0 ? globalAnomaliesData.map(item => ({
+          label: getNameById(item.employee_id, true),
           data: [{
             x: item.total_requests,
             y: item.required_days_rate,
             r: 10
           }],
-          backgroundColor: item.is_anomaly 
-            ? 'rgba(239, 68, 68, 0.7)' 
+          backgroundColor: item.is_anomaly
+            ? 'rgba(239, 68, 68, 0.7)'
             : 'rgba(59, 130, 246, 0.7)',
           borderColor: item.is_anomaly ? '#DC2626' : '#2563EB',
           borderWidth: 1
@@ -205,7 +261,6 @@ const EmployeeAnomalies = ({ employees: propEmployees, isLoadingData: propIsLoad
     };
   };
 
-  // Pie chart options
   const getPieChartOptions = () => ({
     responsive: true,
     maintainAspectRatio: false,
@@ -217,7 +272,7 @@ const EmployeeAnomalies = ({ employees: propEmployees, isLoadingData: propIsLoad
         },
       },
       tooltip: {
-        enabled: anomaliesData && anomaliesData.length > 0,
+        enabled: globalAnomaliesData && globalAnomaliesData.length > 0,
         callbacks: {
           label: function(context) {
             const total = context.dataset.data.reduce((a, b) => a + b, 0);
@@ -230,14 +285,13 @@ const EmployeeAnomalies = ({ employees: propEmployees, isLoadingData: propIsLoad
     }
   });
 
-  // Scatter chart options
   const getScatterOptions = () => ({
     responsive: true,
     maintainAspectRatio: false,
     scales: {
       y: {
-        title: { 
-          display: true, 
+        title: {
+          display: true,
           text: 'Días Promedio por Solicitud',
           color: isDarkMode ? '#ffffff' : '#1f2937'
         },
@@ -250,8 +304,8 @@ const EmployeeAnomalies = ({ employees: propEmployees, isLoadingData: propIsLoad
         }
       },
       x: {
-        title: { 
-          display: true, 
+        title: {
+          display: true,
           text: 'Total de Solicitudes',
           color: isDarkMode ? '#ffffff' : '#1f2937'
         },
@@ -267,10 +321,10 @@ const EmployeeAnomalies = ({ employees: propEmployees, isLoadingData: propIsLoad
     },
     plugins: {
       tooltip: {
-        enabled: anomaliesData && anomaliesData.length > 0,
+        enabled: globalAnomaliesData && globalAnomaliesData.length > 0,
         callbacks: {
           label: (ctx) => {
-            const item = anomaliesData[ctx.datasetIndex];
+            const item = globalAnomaliesData[ctx.datasetIndex];
             return [
               `Empleado: ${getNameById(item.employee_id)}`,
               `Solicitudes: ${ctx.parsed.x}`,
@@ -308,23 +362,30 @@ const EmployeeAnomalies = ({ employees: propEmployees, isLoadingData: propIsLoad
       employee_id: '',
       is_anomaly: ''
     });
+    setAppliedFilters({
+      start_date: null,
+      end_date: null,
+      employee_id: '',
+      is_anomaly: ''
+    });
   };
 
   const applyFilters = () => {
+    setAppliedFilters({ ...filters });
     setShowFilters(false);
     if (hasAnalyzed) {
-      handleAnalyzeAnomalies();
+      handleAnalyzeAnomalies({ offset: 0 });
     }
   };
 
-  const chartData = anomaliesData !== null ? getChartData() : null;
+  const chartData = getChartData();
 
   return (
     <div className="pt-2">
       <div className="flex flex-col sm:flex-row justify-between items-start mt-4 gap-4">
         <div className="flex items-center gap-2">
           <button
-            onClick={handleAnalyzeAnomalies}
+            onClick={() => handleAnalyzeAnomalies({ offset: 0 })}
             disabled={isAnalyzing}
             className={`px-4 py-2 rounded-md flex items-center ${
               isAnalyzing
@@ -348,7 +409,7 @@ const EmployeeAnomalies = ({ employees: propEmployees, isLoadingData: propIsLoad
             )}
           </button>
 
-          <button 
+          <button
             onClick={() => setShowInfoModal(!showInfoModal)}
             className="p-2 rounded-xl bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 border border-gray-300 dark:border-gray-600 transition-colors duration-200"
           >
@@ -368,7 +429,7 @@ const EmployeeAnomalies = ({ employees: propEmployees, isLoadingData: propIsLoad
           >
             <FiFilter className="mr-2" />
             Filtros
-            {hasAnalyzed && Object.values(filters).some(val => val !== '' && val !== null) && (
+            {hasAnalyzed && Object.values(appliedFilters).some(val => val !== '' && val !== null) && (
               <span className="ml-2 w-2 h-2 rounded-full bg-blue-600"></span>
             )}
           </button>
@@ -448,7 +509,6 @@ const EmployeeAnomalies = ({ employees: propEmployees, isLoadingData: propIsLoad
               </div>
             </div>
           )}
-          
         </div>
       </div>
 
@@ -459,21 +519,23 @@ const EmployeeAnomalies = ({ employees: propEmployees, isLoadingData: propIsLoad
           </h3>
           <div className="text-sm text-blue-700 dark:text-blue-300 space-y-3">
             <p>
-              Nuestro sistema evalúa las anomalías mediante un modelo avanzado que analiza múltiples factores:
+              Nuestro sistema identifica comportamientos atípicos en el uso de licencias mediante un modelo avanzado de análisis que evalúa múltiples dimensiones:
             </p>
 
             <div className="space-y-2">
               <p className="font-semibold text-blue-800 dark:text-blue-100">Factores considerados:</p>
               <ul className="list-disc pl-5 space-y-1">
-                <li><strong>?:</strong> Comming soon</li>
-                <li><strong>?:</strong> Comming soon</li>
-                <li><strong>?:</strong> Comming soon</li>
-                <li><strong>?:</strong> Comming soon</li>
+                <li><strong>Solicitudes totales:</strong> Mide la frecuencia con la que un empleado solicita licencias en comparación al promedio general.</li>
+                <li><strong>Cantidad de días solicitados:</strong> Evalúa si el total de días de licencia acumulados es significativamente alto.</li>
+                <li><strong>Días por solicitud:</strong> Analiza si las licencias son, en promedio, más extensas que lo habitual.</li>
+                <li><strong>Antigüedad:</strong> Considera si un empleado con poco tiempo en la organización ya ha solicitado muchas licencias.</li>
+                <li><strong>Días por año trabajado:</strong> Para medir si un empleado está usando más días de licencia de lo que sería razonable según el tiempo que lleva en la organización.</li>
+                <li><strong>Porcentaje del total de días:</strong> Indica qué parte del total de días de licencia solicitados corresponde a este empleado, lo que ayuda a detectar casos con uso excesivo del sistema.</li>
               </ul>
             </div>
 
             <p className="text-xs italic pt-2 border-t border-blue-200 dark:border-blue-700">
-              Nota: El modelo utiliza un algoritmo de ¿?
+              Nota: El modelo utiliza un algoritmo de Isolation Forest, una técnica no supervisada que detecta automáticamente comportamientos inusuales sin reglas predefinidas.
             </p>
           </div>
         </div>
@@ -487,7 +549,6 @@ const EmployeeAnomalies = ({ employees: propEmployees, isLoadingData: propIsLoad
 
       {hasAnalyzed && anomaliesData !== null ? (
         <>
-          {/* Panel de métricas clave - USANDO DATOS GLOBALES */}
           <div className="mt-6 text-xs italic text-foreground">
             Nota: Las estadísticas muestran datos globales y no se ven afectadas por los filtros aplicados.
           </div>
@@ -515,12 +576,15 @@ const EmployeeAnomalies = ({ employees: propEmployees, isLoadingData: propIsLoad
               {globalAnomaliesData && globalAnomaliesData.length > 0 ? (
                 <>
                   <div className="mt-2 text-xl font-bold text-foreground">
-                    {getNameById(globalAnomaliesData.reduce((prev, current) => 
-                      (prev.total_requests > current.total_requests) ? prev : current
-                    ).employee_id)}
+                    {getNameById(
+                      globalAnomaliesData.reduce((prev, current) => 
+                        (prev.total_requests > current.total_requests) ? prev : current
+                      ).employee_id,
+                      true
+                    )}
                   </div>
                   <div className="text-sm text-green-600 dark:text-green-400 flex items-center">
-                    {globalAnomaliesData.reduce((prev, current) => 
+                    {globalAnomaliesData.reduce((prev, current) =>
                       (prev.total_requests > current.total_requests) ? prev : current
                     ).total_requests} solicitudes
                   </div>
@@ -541,12 +605,14 @@ const EmployeeAnomalies = ({ employees: propEmployees, isLoadingData: propIsLoad
               {globalAnomaliesData && globalAnomaliesData.length > 0 ? (
                 <>
                   <div className="mt-2 text-xl font-bold text-foreground">
-                    {getNameById(globalAnomaliesData.reduce((prev, current) => 
+                    {getNameById(globalAnomaliesData.reduce((prev, current) =>
                       (prev.total_requests < current.total_requests) ? prev : current
-                    ).employee_id)}
+                    ).employee_id,
+                      true
+                    )}
                   </div>
                   <div className="text-sm text-red-600 dark:text-red-400 flex items-center">
-                    {globalAnomaliesData.reduce((prev, current) => 
+                    {globalAnomaliesData.reduce((prev, current) =>
                       (prev.total_requests < current.total_requests) ? prev : current
                     ).total_requests} solicitudes
                   </div>
@@ -561,7 +627,7 @@ const EmployeeAnomalies = ({ employees: propEmployees, isLoadingData: propIsLoad
           </div>
 
           {hoveredRow !== null && anomaliesData[hoveredRow] && (
-            <div 
+            <div
               className="fixed z-50 w-64 p-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg pointer-events-none transition-opacity duration-200"
               style={{
                 left: `${tooltipPosition.x + 15}px`,
@@ -572,43 +638,40 @@ const EmployeeAnomalies = ({ employees: propEmployees, isLoadingData: propIsLoad
                 <div className="font-semibold text-base pb-2 border-b border-gray-200 dark:border-gray-700">
                   {getNameById(anomaliesData[hoveredRow].employee_id)}
                 </div>
-
                 <div>
                   <div className="flex items-center">
                     <span className="font-semibold mr-1">Días Requeridos:</span>
                     <span className={`font-medium ${
-                      anomaliesData[hoveredRow].required_days_diff.startsWith('+') 
-                        ? 'text-red-600 dark:text-red-400' 
+                      anomaliesData[hoveredRow].required_days_diff.startsWith('+')
+                        ? 'text-red-600 dark:text-red-400'
                         : 'text-green-600 dark:text-green-400'
                     }`}>
                       {anomaliesData[hoveredRow].required_days_diff}
                     </span>
                   </div>
                   <p className="text-xs mt-1 text-gray-500 dark:text-gray-400">
-                    {anomaliesData[hoveredRow].required_days_diff.startsWith('+') 
+                    {anomaliesData[hoveredRow].required_days_diff.startsWith('+')
                       ? `Solicita ${anomaliesData[hoveredRow].required_days_diff.replace('+', '')} días más que el promedio`
                       : `Solicita ${anomaliesData[hoveredRow].required_days_diff.replace('-', '')} días menos que el promedio`}
                   </p>
                 </div>
-                
                 <div>
                   <div className="flex items-center">
                     <span className="font-semibold mr-1">Solicitudes:</span>
                     <span className={`font-medium ${
-                      anomaliesData[hoveredRow].total_requests_diff.startsWith('+') 
-                        ? 'text-red-600 dark:text-red-400' 
+                      anomaliesData[hoveredRow].total_requests_diff.startsWith('+')
+                        ? 'text-red-600 dark:text-red-400'
                         : 'text-green-600 dark:text-green-400'
                     }`}>
                       {anomaliesData[hoveredRow].total_requests_diff}
                     </span>
                   </div>
                   <p className="text-xs mt-1 text-gray-500 dark:text-gray-400">
-                    {anomaliesData[hoveredRow].total_requests_diff.startsWith('+') 
+                    {anomaliesData[hoveredRow].total_requests_diff.startsWith('+')
                       ? `Tiene ${anomaliesData[hoveredRow].total_requests_diff.replace('+', '')} solicitudes más que el promedio`
                       : `Tiene ${anomaliesData[hoveredRow].total_requests_diff.replace('-', '')} solicitudes menos que el promedio`}
                   </p>
                 </div>
-                
                 <div>
                   <div className="flex items-center">
                     <span className="font-semibold mr-1">Participación:</span>
@@ -625,7 +688,13 @@ const EmployeeAnomalies = ({ employees: propEmployees, isLoadingData: propIsLoad
           )}
 
           <div className="mt-6 bg-background dark:bg-background-dark rounded-lg shadow overflow-hidden border border-border dark:border-border-dark">
-            <div className="overflow-x-auto">
+            <div
+              className="overflow-x-auto overflow-y-auto"
+              style={{
+                maxHeight: 'calc(100vh - 400px)',
+                minHeight: '300px'
+              }}
+            >
               <table className="min-w-full divide-y divide-border dark:divide-border-dark">
                 <thead className="bg-card dark:bg-card-dark sticky top-0">
                   <tr>
@@ -649,10 +718,10 @@ const EmployeeAnomalies = ({ employees: propEmployees, isLoadingData: propIsLoad
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-background dark:bg-background-dark divide-y divide-border dark:divide-border-dark overflow-y-auto">
+                <tbody className="bg-background dark:bg-background-dark divide-y divide-border dark:divide-border-dark">
                   {anomaliesData.length > 0 ? (
                     anomaliesData.map((item, index) => (
-                      <tr 
+                      <tr
                         key={item.employee_id}
                         className="hover:bg-card dark:hover:bg-card-dark"
                         onMouseEnter={(e) => handleRowMouseEnter(e, index)}
@@ -680,8 +749,8 @@ const EmployeeAnomalies = ({ employees: propEmployees, isLoadingData: propIsLoad
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-center">
                           <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                            item.is_anomaly 
-                              ? 'bg-red-100 text-red-800 dark:bg-red-600/50 dark:text-red-100' 
+                            item.is_anomaly
+                              ? 'bg-red-100 text-red-800 dark:bg-red-600/50 dark:text-red-100'
                               : 'bg-green-100 text-green-800 dark:bg-green-600/50 dark:text-green-100'
                           }`}>
                             {item.is_anomaly ? 'Sí' : 'No'}
@@ -701,6 +770,28 @@ const EmployeeAnomalies = ({ employees: propEmployees, isLoadingData: propIsLoad
             </div>
           </div>
 
+          <div className="flex justify-center mt-6">
+            <nav className="inline-flex rounded-md shadow">
+              <button
+                onClick={handlePrevPage}
+                disabled={!pagination.previous || isLoading}
+                className="px-3 py-2 rounded-l-md border border-border bg-background text-sm font-medium text-foreground hover:bg-card disabled:opacity-50 flex items-center"
+              >
+                <FiChevronLeft className="mr-1" /> Anterior
+              </button>
+              <div className="px-4 py-2 border-t border-b border-border bg-background text-sm font-medium text-foreground">
+                Página {Math.floor(pagination.offset / pagination.limit) + 1} de {Math.ceil(pagination.count / pagination.limit)}
+              </div>
+              <button
+                onClick={handleNextPage}
+                disabled={!pagination.next || isLoading}
+                className="px-3 py-2 rounded-r-md border border-border bg-background text-sm font-medium text-foreground hover:bg-card disabled:opacity-50 flex items-center"
+              >
+                Siguiente <FiChevronRight className="ml-1" />
+              </button>
+            </nav>
+          </div>
+
           <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="bg-background dark:bg-card-dark p-4 rounded-lg shadow border border-border dark:border-border-dark">
               <div className="flex items-center mb-4 text-foreground">
@@ -708,8 +799,8 @@ const EmployeeAnomalies = ({ employees: propEmployees, isLoadingData: propIsLoad
                 <h3 className="font-medium">Distribución de Anomalías</h3>
               </div>
               <div className="h-64">
-                {chartData && anomaliesData.length > 0 ? (
-                  <Pie 
+                {chartData && globalAnomaliesData.length > 0 ? (
+                  <Pie
                     data={chartData.anomalyDistribution}
                     options={getPieChartOptions()}
                   />
@@ -727,7 +818,7 @@ const EmployeeAnomalies = ({ employees: propEmployees, isLoadingData: propIsLoad
                 <h3 className="font-medium">Análisis de Patrones</h3>
               </div>
               <div className="h-64">
-                {chartData && anomaliesData.length > 0 ? (
+                {chartData && globalAnomaliesData.length > 0 ? (
                   <Scatter
                     data={chartData.scatterData}
                     options={getScatterOptions()}

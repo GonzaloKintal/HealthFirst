@@ -14,12 +14,19 @@ import {
   FiChevronLeft,
   FiChevronRight,
 } from 'react-icons/fi';
+import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
+import { Doughnut } from 'react-chartjs-2';
 import { getHealthRiskPredictions } from '../../services/userService';
+import EmployeeSelector from '../supervisor/EmployeeSelector';
+import IndividualEmployeeAnalysis from './IndividualEmployeeAnalysis';
+
+ChartJS.register(ArcElement, Tooltip, Legend);
 
 const HealthPredictions = ({ isHealthSectionExpanded }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [healthData, setHealthData] = useState(null);
+  const [globalHealthData, setGlobalHealthData] = useState(null);
   const [pagination, setPagination] = useState({
     count: 0,
     next: null,
@@ -32,15 +39,32 @@ const HealthPredictions = ({ isHealthSectionExpanded }) => {
   const [hasAnalyzed, setHasAnalyzed] = useState(false);
   const [filters, setFilters] = useState({
     risk_level: '',
-    department: ''
+    user_id: ''
   });
   const [appliedFilters, setAppliedFilters] = useState({
     risk_level: '',
-    department: ''
+    user_id: ''
   });
   const [hoveredRow, setHoveredRow] = useState(null);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
   const [showRiskInfo, setShowRiskInfo] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  // Detectar modo oscuro
+  useEffect(() => {
+    const checkDarkMode = () => {
+      setIsDarkMode(document.documentElement.classList.contains('dark'));
+    };
+
+    checkDarkMode();
+    const observer = new MutationObserver(checkDarkMode);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class']
+    });
+
+    return () => observer.disconnect();
+  }, []);
 
   // Mapear los datos de la API al formato esperado
   const mapApiData = (apiData) => {
@@ -70,39 +94,6 @@ const HealthPredictions = ({ isHealthSectionExpanded }) => {
     });
   };
 
-  // const fetchHealthData = async (params = {}) => {
-  //   try {
-  //     setIsLoading(true);
-  //     setError(null);
-
-  //     const response = await getHealthRiskPredictions({
-  //       limit: params.limit || pagination.limit,
-  //       offset: params.offset || pagination.offset
-  //     });
-      
-  //     if (!response) {
-  //       throw new Error('No se recibió respuesta de la API');
-  //     }
-      
-  //     const mappedData = mapApiData(response.results);
-  //     setHealthData(mappedData);
-  //     zation({
-  //       count: response.count,
-  //       next: response.next,
-  //       previous: response.previous,
-  //       limit: params.limit || pagination.limit,
-  //       offset: params.offset || pagination.offset
-  //     });
-  //     setHasAnalyzed(true);
-  //   } catch (err) {
-  //     const errorMessage = err.message || 'Error al obtener datos de riesgo de salud';
-  //     setError(errorMessage);
-  //     console.error('Error fetching health data:', err);
-  //     setHealthData([]);
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // };
   const fetchHealthData = async (params = {}) => {
     try {
       setIsLoading(true);
@@ -110,16 +101,36 @@ const HealthPredictions = ({ isHealthSectionExpanded }) => {
 
       const limit = params.limit || pagination.limit;
       const offset = params.offset !== undefined ? params.offset : pagination.offset;
+      const user_id = params.user_id || appliedFilters.user_id || null;
+      const risk_level = params.risk_level || appliedFilters.risk_level || null;
 
+      // Fetch global data if not already fetched
+      if (!globalHealthData) {
+        const globalResponse = await getHealthRiskPredictions({
+          limit: 1000,
+          offset: 0
+        });
+
+        if (!globalResponse) {
+          throw new Error('No se recibió respuesta de la API para datos globales');
+        }
+
+        const mappedGlobalData = mapApiData(globalResponse.results);
+        setGlobalHealthData(mappedGlobalData);
+      }
+
+      // Fetch filtered data
       const response = await getHealthRiskPredictions({
         limit,
-        offset
+        offset,
+        user_id,
+        risk_level: risk_level === 'healthy' ? 'low risk' : risk_level === 'critical' ? 'high risk' : null
       });
-      
+
       if (!response) {
         throw new Error('No se recibió respuesta de la API');
       }
-      
+
       const mappedData = mapApiData(response.results);
       setHealthData(mappedData);
 
@@ -154,7 +165,6 @@ const HealthPredictions = ({ isHealthSectionExpanded }) => {
     }
   };
 
-  // Analizar riesgos
   const handleAnalyze = async () => {
     try {
       setIsAnalyzing(true);
@@ -198,7 +208,7 @@ const HealthPredictions = ({ isHealthSectionExpanded }) => {
   const resetFilters = () => {
     setFilters({
       risk_level: '',
-      department: ''
+      user_id: ''
     });
   };
 
@@ -206,7 +216,7 @@ const HealthPredictions = ({ isHealthSectionExpanded }) => {
     setAppliedFilters({ ...filters });
     setShowFilters(false);
     if (hasAnalyzed) {
-      fetchHealthData(filters);
+      fetchHealthData({ offset: 0 });
     }
   };
 
@@ -215,10 +225,9 @@ const HealthPredictions = ({ isHealthSectionExpanded }) => {
       (appliedFilters.risk_level === 'healthy' && employee.health_status === 'healthy') ||
       (appliedFilters.risk_level === 'critical' && employee.health_status === 'critical');
     
-    const matchesDepartment = !appliedFilters.department || 
-      employee.department.toLowerCase().includes(appliedFilters.department.toLowerCase());
+    const matchesEmployee = !appliedFilters.user_id || employee.id === appliedFilters.user_id;
     
-    return matchesRisk && matchesDepartment;
+    return matchesRisk && matchesEmployee;
   }) : [];
 
   const getHealthStatusStyle = (status) => {
@@ -246,16 +255,16 @@ const HealthPredictions = ({ isHealthSectionExpanded }) => {
   };
 
   const getMetrics = () => {
-    if (!healthData || !Array.isArray(healthData)) return null;
+    if (!globalHealthData || !Array.isArray(globalHealthData)) return null;
     
-    const criticalCount = healthData.filter(e => e.health_status === 'critical').length;
-    const healthyCount = healthData.filter(e => e.health_status === 'healthy').length;
+    const criticalCount = globalHealthData.filter(e => e.health_status === 'critical').length;
+    const healthyCount = globalHealthData.filter(e => e.health_status === 'healthy').length;
     
-    const avgSickLeaves = healthData.length > 0 
-      ? healthData.reduce((sum, e) => sum + e.sickLeaves, 0) / healthData.length 
+    const avgSickLeaves = globalHealthData.length > 0 
+      ? globalHealthData.reduce((sum, e) => sum + e.sickLeaves, 0) / globalHealthData.length 
       : 0;
-    const avgAccidentLeaves = healthData.length > 0 
-      ? healthData.reduce((sum, e) => sum + e.accidentLeaves, 0) / healthData.length 
+    const avgAccidentLeaves = globalHealthData.length > 0 
+      ? globalHealthData.reduce((sum, e) => sum + e.accidentLeaves, 0) / globalHealthData.length 
       : 0;
     
     return {
@@ -263,16 +272,70 @@ const HealthPredictions = ({ isHealthSectionExpanded }) => {
       healthyCount,
       avgSickLeaves: avgSickLeaves.toFixed(1),
       avgAccidentLeaves: avgAccidentLeaves.toFixed(1),
-      highestRisk: healthData.length > 0 ? healthData.reduce((prev, current) => 
+      highestRisk: globalHealthData.length > 0 ? globalHealthData.reduce((prev, current) => 
         (prev.health_status === 'critical') ? prev : current
       ) : null,
-      lowestRisk: healthData.length > 0 ? healthData.reduce((prev, current) => 
+      lowestRisk: globalHealthData.length > 0 ? globalHealthData.reduce((prev, current) => 
         (prev.health_status === 'healthy') ? prev : current
       ) : null
     };
   };
 
+  const getChartData = () => {
+    if (!globalHealthData) return null;
+
+    const riskCount = globalHealthData.reduce((acc, item) => {
+      acc[item.health_status === 'healthy' ? 'Bajo Riesgo' : 'Alto Riesgo'] = 
+        (acc[item.health_status === 'healthy' ? 'Bajo Riesgo' : 'Alto Riesgo'] || 0) + 1;
+      return acc;
+    }, { 'Bajo Riesgo': 0, 'Alto Riesgo': 0 });
+
+    return {
+      riskDistribution: {
+        labels: ['Bajo Riesgo', 'Alto Riesgo'],
+        datasets: [
+          {
+            data: [riskCount['Bajo Riesgo'], riskCount['Alto Riesgo']],
+            backgroundColor: ['#3B82F6', '#FA6464'],
+            borderColor: ['#2563EB', '#DC2626'],
+            borderWidth: 1,
+          },
+        ],
+      },
+    };
+  };
+
+  const getDoughnutChartOptions = () => ({
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'bottom',
+        labels: {
+          color: isDarkMode ? '#ffffff' : '#1f2937',
+          boxWidth: 20,
+          padding: 30,
+          font: {
+            size: 12
+          }
+        }
+      },
+      tooltip: {
+        enabled: globalHealthData && globalHealthData.length > 0,
+        callbacks: {
+          label: function(context) {
+            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+            const value = context.raw || 0;
+            const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+            return `${context.label}: ${value} (${percentage}%)`;
+          }
+        }
+      }
+    }
+  });
+
   const metrics = getMetrics();
+  const chartData = getChartData();
 
   return (
     <div className="pt-2">
@@ -309,7 +372,6 @@ const HealthPredictions = ({ isHealthSectionExpanded }) => {
           >
             <FiInfo className="text-gray-700 dark:text-gray-200 text-lg" />
           </button>
-
         </div>
 
         <div className="relative">
@@ -354,14 +416,11 @@ const HealthPredictions = ({ isHealthSectionExpanded }) => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-1 text-foreground">Departamento</label>
-                  <input
-                    type="text"
-                    name="department"
-                    value={filters.department}
-                    onChange={handleFilterChange}
-                    placeholder="Filtrar por departamento"
-                    className="w-full p-2 border border-border dark:border-border-dark rounded bg-background dark:bg-background-dark text-foreground"
+                  <EmployeeSelector
+                    selectedEmployee={filters.user_id}
+                    onEmployeeSelected={(value) => setFilters(prev => ({ ...prev, user_id: value }))}
+                    initialEmployees={globalHealthData ? globalHealthData.map(emp => ({ id: emp.id, name: emp.name })) : []}
+                    roles={['employee']}
                   />
                 </div>
 
@@ -420,6 +479,9 @@ const HealthPredictions = ({ isHealthSectionExpanded }) => {
 
       {healthData ? (
         <>
+          <div className="mt-6 text-xs italic text-foreground">
+            Nota: Las estadísticas muestran datos globales y no se ven afectadas por los filtros aplicados.
+          </div>
           <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="bg-background dark:bg-card-dark p-4 rounded-lg shadow border border-border dark:border-border-dark">
               <div className="flex items-center">
@@ -430,7 +492,7 @@ const HealthPredictions = ({ isHealthSectionExpanded }) => {
                 {metrics?.criticalCount || 0}
               </div>
               <div className="text-sm text-foreground">
-                {healthData.length > 0 ? ((metrics?.criticalCount / healthData.length) * 100).toFixed(1) : '0.0'}% del total
+                {globalHealthData && globalHealthData.length > 0 ? ((metrics?.criticalCount / globalHealthData.length) * 100).toFixed(1) : '0.0'}% del total
               </div>
             </div>
 
@@ -457,22 +519,6 @@ const HealthPredictions = ({ isHealthSectionExpanded }) => {
               </div>
               <div className="text-sm text-red-600 dark:text-red-400">
                 {metrics?.highestRisk?.riskLevel || 'N/A'}
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="bg-background dark:bg-card-dark p-4 rounded-lg shadow border border-border dark:border-border-dark">
-              <h4 className="font-medium text-foreground mb-4">Licencias por Enfermedad (promedio)</h4>
-              <div className="text-2xl font-bold text-foreground">
-                {metrics?.avgSickLeaves || '0.0'}
-              </div>
-            </div>
-
-            <div className="bg-background dark:bg-card-dark p-4 rounded-lg shadow border border-border dark:border-border-dark">
-              <h4 className="font-medium text-foreground mb-4">Licencias por Accidente (promedio)</h4>
-              <div className="text-2xl font-bold text-foreground">
-                {metrics?.avgAccidentLeaves || '0.0'}
               </div>
             </div>
           </div>
@@ -562,7 +608,7 @@ const HealthPredictions = ({ isHealthSectionExpanded }) => {
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-foreground">
                             {employee.age}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-foreground">
+                          <td className="px-6 py-3 whitespace-nowrap text-sm text-center text-foreground">
                             {employee.department}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-foreground">
@@ -614,20 +660,95 @@ const HealthPredictions = ({ isHealthSectionExpanded }) => {
               </button>
             </nav>
           </div>
+
+          <div className="mt-8 bg-background dark:bg-card-dark rounded-lg shadow overflow-hidden border border-border dark:border-border-dark">
+            <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="relative" style={{ height: '300px' }}>
+                <h4 className="text-base font-medium text-foreground mb-4">Distribución de Riesgos</h4>
+                {chartData && globalHealthData.length > 0 ? (
+                  <Doughnut 
+                    data={chartData.riskDistribution}
+                    options={getDoughnutChartOptions()}
+                    className='mb-10 md:mb-0'
+                  />
+                ) : (
+                  <div className="h-full w-full flex flex-col items-center justify-center bg-gray-100 dark:bg-gray-800 rounded">
+                    <span className="text-gray-600 dark:text-gray-300">Sin datos para mostrar</span>
+                  </div>
+                )}
+              </div>
+
+              <div className="bg-gray-50 dark:bg-gray-800/50 p-6 rounded-lg h-full border border-gray-200 dark:border-gray-700">
+                <h4 className="text-lg font-medium text-foreground mb-6">Estadísticas Globales</h4>
+                <div className="space-y-6">
+                  <div className="bg-white dark:bg-gray-700/50 p-4 rounded-lg shadow-sm border border-gray-100 dark:border-gray-600">
+                    <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">Total Empleados</div>
+                    <div className="text-2xl font-bold text-foreground">
+                      {globalHealthData ? globalHealthData.length : '0'}
+                    </div>
+                  </div>
+
+                  <div className="bg-white dark:bg-gray-700/50 p-4 rounded-lg shadow-sm border border-gray-100 dark:border-gray-600">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">Bajo Riesgo</div>
+                        <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+                          {metrics?.healthyCount || '0'}
+                        </div>
+                      </div>
+                      {globalHealthData && globalHealthData.length > 0 && (
+                        <span className="text-sm bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 px-2 py-1 rounded">
+                          {((metrics?.healthyCount / globalHealthData.length) * 100).toFixed(1)}%
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="bg-white dark:bg-gray-700/50 p-4 rounded-lg shadow-sm border border-gray-100 dark:border-gray-600">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">Alto Riesgo</div>
+                        <div className="text-2xl font-bold text-red-600 dark:text-red-400">
+                          {metrics?.criticalCount || '0'}
+                        </div>
+                      </div>
+                      {globalHealthData && globalHealthData.length > 0 && (
+                        <span className="text-sm bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200 px-2 py-1 rounded">
+                          {((metrics?.criticalCount / globalHealthData.length) * 100).toFixed(1)}%
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <IndividualEmployeeAnalysis
+            employees={globalHealthData || []}
+            isDarkMode={isDarkMode}
+          />
         </>
       ) : (
         <div className="mt-6 bg-background dark:bg-background-dark rounded-lg shadow p-6 border border-border dark:border-border-dark">
-          <div className="text-center py-12">
+          <div className="text-center py-8">
             <FiUser className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" />
-            <h3 className="mt-2 text-lg font-medium text-foreground">
+            <h3 className="mt-3 text-lg font-medium text-foreground">
               Evaluación de Riesgo de Salud
             </h3>
-            <p className="mt-1 text-sm text-foreground">
+            <p className="mt-2 text-sm text-foreground">
               {isLoading ? 'Cargando datos de empleados...' : 'Presiona el botón "Actualizar análisis" para evaluar los riesgos de salud'}
             </p>
           </div>
+
+          
         </div>
       )}
+
+      <IndividualEmployeeAnalysis
+        employees={globalHealthData || []}
+        isDarkMode={isDarkMode}
+      />
+
     </div>
   );
 };
