@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { sendPersonalizedMessage } from '../../services/messagingService';
 import EmployeeSelector from './EmployeeSelector';
 
-const SendMessageForm = ({ onSuccess }) => {
+const SendMessageForm = ({ onSuccess, onError }) => {
   const [formData, setFormData] = useState({
     selectedEmployee: '',
     subject: '',
@@ -16,6 +16,7 @@ const SendMessageForm = ({ onSuccess }) => {
     
     if (!formData.selectedEmployee || !formData.subject || !formData.message) {
       setError('Todos los campos son requeridos');
+      onError?.('Todos los campos son requeridos');
       return;
     }
 
@@ -37,10 +38,14 @@ const SendMessageForm = ({ onSuccess }) => {
         });
         onSuccess();
       } else {
-        setError(response.error || 'Error al enviar el mensaje');
+        const errorMsg = response.error || 'Error al enviar el mensaje';
+        setError(errorMsg);
+        onError?.(errorMsg);
       }
     } catch (error) {
-      setError('Error al enviar el mensaje');
+      const errorMsg = 'Error al enviar el mensaje';
+      setError(errorMsg);
+      onError?.(errorMsg);
       console.error(error);
     } finally {
       setLoading(false);
@@ -91,7 +96,7 @@ const SendMessageForm = ({ onSuccess }) => {
           name="message"
           value={formData.message}
           onChange={handleChange}
-          className="w-full px-3 py-2 border border-border rounded-md focus:ring-primary-border focus:border-primary-border bg-background text-foreground min-h-[150px]"
+          className="resize-none w-full px-3 py-2 border border-border rounded-md focus:ring-primary-border focus:border-primary-border bg-background text-foreground min-h-[150px]"
           required
         />
       </div>

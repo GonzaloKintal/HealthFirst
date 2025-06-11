@@ -127,6 +127,8 @@ export const getHealthRiskPredictions = async (params = {}) => {
         offset: params.offset,
       }
     });
+    console.log('Health risk predictions response:', response.data);
+    
     return response.data;
   } catch (error) {
     console.error('Error fetching health risk predictions:', error);
