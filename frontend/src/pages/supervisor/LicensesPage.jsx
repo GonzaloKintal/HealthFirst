@@ -100,6 +100,7 @@ const LicensesPage = () => {
             startDate: formatSimpleDate(license.start_date),
             endDate: formatSimpleDate(license.end_date),
             status: license.status,
+            days: license.days,
             requestedOn: license.created_at || '',
           }));
           
