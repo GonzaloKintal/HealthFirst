@@ -1,7 +1,7 @@
 
 
 import { useState, useEffect } from 'react';
-import { FiRefreshCw, FiPieChart, FiUser, FiFilter, FiX, FiAlertTriangle, FiTrendingUp, FiTrendingDown, FiInfo } from 'react-icons/fi';
+import { FiRefreshCw, FiPieChart, FiUser, FiFilter, FiX, FiAlertTriangle, FiTrendingUp, FiTrendingDown, FiInfo, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, PointElement, ScatterController } from 'chart.js';
 import { Pie, Scatter } from 'react-chartjs-2';
 import { getSupervisorAnomalies } from '../../services/licenseService';
@@ -27,9 +27,22 @@ const SupervisorAnomalies = () => {
     user_id: '',
     is_anomaly: ''
   });
+  const [appliedFilters, setAppliedFilters] = useState({
+    start_date: null,
+    end_date: null,
+    user_id: '',
+    is_anomaly: ''
+  });
   const [hoveredRow, setHoveredRow] = useState(null);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
   const [showInfoModal, setShowInfoModal] = useState(false);
+  const [pagination, setPagination] = useState({
+    count: 0,
+    next: null,
+    previous: null,
+    limit: 5,
+    offset: 0
+  });
 
   // Detectar modo oscuro
   useEffect(() => {
@@ -47,26 +60,63 @@ const SupervisorAnomalies = () => {
     return () => observer.disconnect();
   }, []);
 
-  const handleAnalyzeAnomalies = async () => {
+  const handleAnalyzeAnomalies = async (params = {}) => {
     try {
       setIsAnalyzing(true);
-      setError(null);
       setIsLoading(true);
+      setError(null);
 
-      const globalResult = await getSupervisorAnomalies({});
-      
-      if (!globalResult.success) {
-        throw new Error(globalResult.error || 'Error al analizar anomalías');
+      const limit = params.limit || pagination.limit;
+      const offset = params.offset !== undefined ? params.offset : pagination.offset;
+      const start_date = params.start_date || appliedFilters.start_date ? appliedFilters.start_date.toISOString().split('T')[0] : null;
+      const end_date = params.end_date || appliedFilters.end_date ? appliedFilters.end_date.toISOString().split('T')[0] : null;
+      const user_id = params.user_id || appliedFilters.user_id || null;
+      const is_anomaly = params.is_anomaly || appliedFilters.is_anomaly || null;
+
+      // Fetch global anomalies data if not already fetched
+      if (!globalAnomaliesData) {
+        const globalResult = await getSupervisorAnomalies({
+          limit: 1000,
+          offset: 0
+        });
+
+        if (!globalResult.success) {
+          throw new Error(globalResult.error || 'Error al analizar anomalías globales');
+        }
+
+        const transformedGlobalData = transformApiData(globalResult.data);
+        setGlobalAnomaliesData(transformedGlobalData);
+
+        // Fetch supervisor data for unique supervisor IDs in global data
+        const globalSupervisorIds = [...new Set(transformedGlobalData.map(item => item.evaluator_id))];
+        const supervisorPromises = globalSupervisorIds.map(async (id) => {
+          if (!supervisors[id]) {
+            try {
+              const supervisorData = await getUser(id);
+              return { id, ...supervisorData };
+            } catch (err) {
+              console.error(`Error fetching supervisor ${id}:`, err);
+              return { id, name: `Supervisor (ID: ${id})`, department: 'Sin departamento' };
+            }
+          }
+          return null;
+        });
+
+        const fetchedSupervisors = (await Promise.all(supervisorPromises)).filter(sup => sup !== null);
+        setSupervisors(prev => ({
+          ...prev,
+          ...fetchedSupervisors.reduce((acc, sup) => ({ ...acc, [sup.id]: sup }), {})
+        }));
       }
 
-      const transformedGlobalData = transformApiData(globalResult.data);
-      setGlobalAnomaliesData(transformedGlobalData);
-
+      // Fetch filtered anomalies data
       const filteredResult = await getSupervisorAnomalies({
-        start_date: filters.start_date ? filters.start_date.toISOString().split('T')[0] : null,
-        end_date: filters.end_date ? filters.end_date.toISOString().split('T')[0] : null,
-        user_id: filters.user_id || null,
-        is_anomaly: filters.is_anomaly || null
+        start_date,
+        end_date,
+        user_id,
+        is_anomaly,
+        limit,
+        offset
       });
 
       if (!filteredResult.success) {
@@ -76,14 +126,9 @@ const SupervisorAnomalies = () => {
       const transformedFilteredData = transformApiData(filteredResult.data);
       setAnomaliesData(transformedFilteredData);
 
-      const allSupervisorIds = [
-        ...new Set([
-          ...transformedGlobalData.map(item => item.evaluator_id),
-          ...transformedFilteredData.map(item => item.evaluator_id)
-        ])
-      ];
-
-      const supervisorPromises = allSupervisorIds.map(async (id) => {
+      // Fetch supervisor data for unique supervisor IDs in filtered data
+      const filteredSupervisorIds = [...new Set(transformedFilteredData.map(item => item.evaluator_id))];
+      const supervisorPromises = filteredSupervisorIds.map(async (id) => {
         if (!supervisors[id]) {
           try {
             const supervisorData = await getUser(id);
@@ -102,13 +147,35 @@ const SupervisorAnomalies = () => {
         ...fetchedSupervisors.reduce((acc, sup) => ({ ...acc, [sup.id]: sup }), {})
       }));
 
+      setPagination({
+        count: filteredResult.count || 0,
+        next: filteredResult.next || null,
+        previous: filteredResult.previous || null,
+        limit,
+        offset: Number(offset)
+      });
+
       setHasAnalyzed(true);
     } catch (err) {
-      setError(err.message);
+      setError(err.message || 'Error al analizar anomalías');
       console.error('Error analyzing anomalies:', err);
+      setAnomaliesData([]);
     } finally {
       setIsAnalyzing(false);
       setIsLoading(false);
+    }
+  };
+
+  const handlePrevPage = () => {
+    const newOffset = Math.max(0, Number(pagination.offset) - pagination.limit);
+    handleAnalyzeAnomalies({ offset: newOffset });
+  };
+
+  const handleNextPage = () => {
+    if (pagination.next) {
+      const url = new URL(pagination.next);
+      const offset = Number(url.searchParams.get('offset') || pagination.offset + pagination.limit);
+      handleAnalyzeAnomalies({ offset });
     }
   };
 
@@ -139,8 +206,8 @@ const SupervisorAnomalies = () => {
     }));
   };
 
-  const getNameById = (id) => {
-    if (isLoading) return 'Cargando...';
+  const getNameById = (id, ignoreLoading = false) => {
+    if (!ignoreLoading && isLoading) return 'Cargando...';
     if (error) return `Supervisor (ID: ${id})`;
 
     const supervisor = supervisors[id];
@@ -151,7 +218,7 @@ const SupervisorAnomalies = () => {
   };
 
   const getDepartmentById = (id) => {
-    if (isLoading) return 'Cargando datos de supervisores...';
+    if (isLoading) return 'Cargando...';
     if (error) return 'Sin departamento';
 
     const supervisor = supervisors[id];
@@ -159,9 +226,9 @@ const SupervisorAnomalies = () => {
   };
 
   const getChartData = () => {
-    if (!anomaliesData) return null;
+    if (!globalAnomaliesData) return null;
 
-    const anomalyCount = anomaliesData.reduce((acc, item) => {
+    const anomalyCount = globalAnomaliesData.reduce((acc, item) => {
       acc[item.is_anomaly ? 'Anomalías' : 'Normales'] = (acc[item.is_anomaly ? 'Anomalías' : 'Normales'] || 0) + 1;
       return acc;
     }, { 'Anomalías': 0, 'Normales': 0 });
@@ -179,8 +246,8 @@ const SupervisorAnomalies = () => {
         ],
       },
       scatterData: {
-        datasets: anomaliesData.length > 0 ? anomaliesData.map(item => ({
-          label: getNameById(item.evaluator_id),
+        datasets: globalAnomaliesData.length > 0 ? globalAnomaliesData.map(item => ({
+          label: getNameById(item.evaluator_id, true),
           data: [{
             x: item.total_requests,
             y: item.approval_rate,
@@ -207,7 +274,7 @@ const SupervisorAnomalies = () => {
         },
       },
       tooltip: {
-        enabled: anomaliesData && anomaliesData.length > 0,
+        enabled: globalAnomaliesData && globalAnomaliesData.length > 0,
         callbacks: {
           label: function(context) {
             const total = context.dataset.data.reduce((a, b) => a + b, 0);
@@ -256,10 +323,10 @@ const SupervisorAnomalies = () => {
     },
     plugins: {
       tooltip: {
-        enabled: anomaliesData && anomaliesData.length > 0,
+        enabled: globalAnomaliesData && globalAnomaliesData.length > 0,
         callbacks: {
           label: (ctx) => {
-            const item = anomaliesData[ctx.datasetIndex];
+            const item = globalAnomaliesData[ctx.datasetIndex];
             return [
               `Supervisor: ${getNameById(item.evaluator_id)}`,
               `Solicitudes: ${ctx.parsed.x}`,
@@ -297,23 +364,30 @@ const SupervisorAnomalies = () => {
       user_id: '',
       is_anomaly: ''
     });
+    setAppliedFilters({
+      start_date: null,
+      end_date: null,
+      user_id: '',
+      is_anomaly: ''
+    });
   };
 
   const applyFilters = () => {
+    setAppliedFilters({ ...filters });
     setShowFilters(false);
     if (hasAnalyzed) {
-      handleAnalyzeAnomalies();
+      handleAnalyzeAnomalies({ offset: 0 });
     }
   };
 
-  const chartData = anomaliesData !== null ? getChartData() : null;
+  const chartData = getChartData();
 
   return (
     <div className="pt-2">
       <div className="flex flex-col sm:flex-row justify-between items-start mt-4 gap-4">
         <div className="flex items-center gap-2">
           <button
-            onClick={handleAnalyzeAnomalies}
+            onClick={() => handleAnalyzeAnomalies({ offset: 0 })}
             disabled={isAnalyzing}
             className={`px-4 py-2 rounded-md flex items-center ${
               isAnalyzing
@@ -357,7 +431,7 @@ const SupervisorAnomalies = () => {
           >
             <FiFilter className="mr-2" />
             Filtros
-            {hasAnalyzed && Object.values(filters).some(val => val !== '' && val !== null) && (
+            {hasAnalyzed && Object.values(appliedFilters).some(val => val !== '' && val !== null) && (
               <span className="ml-2 w-2 h-2 rounded-full bg-blue-600"></span>
             )}
           </button>
@@ -423,13 +497,13 @@ const SupervisorAnomalies = () => {
                 <div className="flex justify-between pt-2">
                   <button
                     onClick={resetFilters}
-                    className="px-3 py-1 text-sm text-foreground dark:hover:text-gray-800"
+                    className="px-3 py-1 text-sm text-foreground dark:hover:text-foreground-dark"
                   >
                     Limpiar
                   </button>
                   <button
                     onClick={applyFilters}
-                    className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
+                    className="px-3 py-1 bg-primary text-white text-sm rounded hover:bg-primary-hover"
                   >
                     Aplicar
                   </button>
@@ -444,26 +518,25 @@ const SupervisorAnomalies = () => {
         <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg">
           <h3 className="text-lg font-medium text-blue-800 dark:text-blue-200 mb-2">
             Criterios de Evaluación de Anomalías para Supervisores
-            <div className="text-sm text-blue-700 dark:text-blue-300 space-y-3">
-              <div className="text-sm">
-                <p>Nuestro sistema evalúa las anomalías mediante un modelo avanzado que analiza múltiples factores:</p>
-
-                <div className="space-y-2">
-                  <p className="font-semibold text-blue-800 dark:text-blue-100">Factores considerados:</p>
-                  <ul className="list-disc pl-5 space-y-1">
-                    <li><strong>?:</strong> Comming soon</li>
-                    <li><strong>?:</strong> Comming soon</li>
-                    <li><strong>?:</strong> Comming soon</li>
-                    <li><strong>?:</strong> Comming soon</li>
-                  </ul>
-                </div>
-
-                <p className="text-xs italic pt-2 border-t border-blue-200 dark:border-blue-700">
-                  Nota: El modelo utiliza un algoritmo de ¿?
-                </p>
-              </div>
-            </div>
           </h3>
+          <div className="text-sm text-blue-700 dark:text-blue-300 space-y-3">
+            <p>
+              Nuestro sistema identifica comportamientos atípicos en el uso de licencias mediante un modelo avanzado de análisis que evalúa múltiples dimensiones:
+            </p>
+
+            <div className="space-y-2">
+              <p className="font-semibold text-blue-800 dark:text-blue-100">Factores considerados:</p>
+              <ul className="list-disc pl-5 space-y-1">
+                <li><strong>Solicitudes gestionadas:</strong> Evalúa si el supervisor participa en una cantidad anormalmente alta o baja de solicitudes.</li>
+                <li><strong>Tasa de Aprobación:</strong> Identifica si el supervisor aprueba solicitudes con una frecuencia inusualmente alta (o baja), en comparación con el promedio.</li>
+                <li><strong>Tasa de Rechazo:</strong> Detecta si la proporción de rechazos es atípicamente elevada o baja.</li>
+              </ul>
+            </div>
+
+            <p className="text-xs italic pt-2 border-t border-blue-200 dark:border-blue-700">
+              Nota: El modelo utiliza un algoritmo de Isolation Forest, una técnica no supervisada que detecta automáticamente comportamientos inusuales sin reglas predefinidas.
+            </p>
+          </div>
         </div>
       )}
 
@@ -475,7 +548,6 @@ const SupervisorAnomalies = () => {
 
       {hasAnalyzed && anomaliesData !== null ? (
         <>
-          {/* Panel de métricas clave - USANDO DATOS GLOBALES */}
           <div className="mt-6 text-xs italic text-foreground">
             Nota: Las estadísticas muestran datos globales y no se ven afectadas por los filtros aplicados.
           </div>
@@ -503,9 +575,12 @@ const SupervisorAnomalies = () => {
               {globalAnomaliesData && globalAnomaliesData.length > 0 ? (
                 <>
                   <div className="mt-2 text-xl font-bold text-foreground">
-                    {getNameById(globalAnomaliesData.reduce((prev, current) => 
-                      (prev.approval_rate > current.approval_rate) ? prev : current
-                    ).evaluator_id)}
+                    {getNameById(
+                      globalAnomaliesData.reduce((prev, current) => 
+                        (prev.approval_rate > current.approval_rate) ? prev : current
+                      ).evaluator_id,
+                      true
+                    )}
                   </div>
                   <div className="text-sm text-green-600 dark:text-green-400 flex items-center">
                     {globalAnomaliesData.reduce((prev, current) => 
@@ -529,9 +604,12 @@ const SupervisorAnomalies = () => {
               {globalAnomaliesData && globalAnomaliesData.length > 0 ? (
                 <>
                   <div className="mt-2 text-xl font-bold text-foreground">
-                    {getNameById(globalAnomaliesData.reduce((prev, current) => 
-                      (prev.approval_rate < current.approval_rate) ? prev : current
-                    ).evaluator_id)}
+                    {getNameById(
+                      globalAnomaliesData.reduce((prev, current) => 
+                        (prev.approval_rate < current.approval_rate) ? prev : current
+                      ).evaluator_id,
+                      true
+                    )}
                   </div>
                   <div className="text-sm text-red-600 dark:text-red-400 flex items-center">
                     {globalAnomaliesData.reduce((prev, current) => 
@@ -548,7 +626,7 @@ const SupervisorAnomalies = () => {
             </div>
           </div>
 
-          {hoveredRow !== null && anomaliesData && anomaliesData[hoveredRow] && (
+          {hoveredRow !== null && anomaliesData[hoveredRow] && (
             <div 
               className="fixed z-50 w-64 p-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg pointer-events-none transition-opacity duration-200"
               style={{
@@ -613,7 +691,13 @@ const SupervisorAnomalies = () => {
           )}
 
           <div className="mt-6 bg-background dark:bg-background-dark rounded-lg shadow overflow-hidden border border-border dark:border-border-dark">
-            <div className="overflow-x-auto">
+            <div
+              className="overflow-x-auto overflow-y-auto"
+              style={{
+                maxHeight: 'calc(100vh - 400px)',
+                minHeight: '300px'
+              }}
+            >
               <table className="min-w-full divide-y divide-border dark:divide-border-dark">
                 <thead className="bg-card dark:bg-card-dark sticky top-0">
                   <tr>
@@ -689,6 +773,28 @@ const SupervisorAnomalies = () => {
             </div>
           </div>
 
+          <div className="flex justify-center mt-6">
+            <nav className="inline-flex rounded-md shadow">
+              <button
+                onClick={handlePrevPage}
+                disabled={!pagination.previous || isLoading}
+                className="px-3 py-2 rounded-l-md border border-border bg-background text-sm font-medium text-foreground hover:bg-card disabled:opacity-50 flex items-center"
+              >
+                <FiChevronLeft className="mr-1" /> Anterior
+              </button>
+              <div className="px-4 py-2 border-t border-b border-border bg-background text-sm font-medium text-foreground">
+                Página {Math.floor(pagination.offset / pagination.limit) + 1} de {Math.ceil(pagination.count / pagination.limit)}
+              </div>
+              <button
+                onClick={handleNextPage}
+                disabled={!pagination.next || isLoading}
+                className="px-3 py-2 rounded-r-md border border-border bg-background text-sm font-medium text-foreground hover:bg-card disabled:opacity-50 flex items-center"
+              >
+                Siguiente <FiChevronRight className="ml-1" />
+              </button>
+            </nav>
+          </div>
+
           <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="bg-background dark:bg-card-dark p-4 rounded-lg shadow border border-border dark:border-border-dark">
               <div className="flex items-center mb-4 text-foreground">
@@ -696,7 +802,7 @@ const SupervisorAnomalies = () => {
                 <h3 className="font-medium">Distribución de Anomalías</h3>
               </div>
               <div className="h-64">
-                {chartData && anomaliesData.length > 0 ? (
+                {chartData && globalAnomaliesData.length > 0 ? (
                   <Pie 
                     data={chartData.anomalyDistribution}
                     options={getPieChartOptions()}
@@ -715,7 +821,7 @@ const SupervisorAnomalies = () => {
                 <h3 className="font-medium">Análisis de Patrones</h3>
               </div>
               <div className="h-64">
-                {chartData && anomaliesData.length > 0 ? (
+                {chartData && globalAnomaliesData.length > 0 ? (
                   <Scatter
                     data={chartData.scatterData}
                     options={getScatterOptions()}

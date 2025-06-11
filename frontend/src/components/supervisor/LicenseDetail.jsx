@@ -295,7 +295,7 @@ const LicenseDetail = () => {
   if (error) {
     return (
       <div className="p-6">
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+        <div className="mt-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded dark:bg-red-900 dark:border-red-700 dark:text-red-100">
           <strong className="font-bold">Error!</strong>
           <span className="block sm:inline"> {error}</span>
         </div>
@@ -351,14 +351,24 @@ const LicenseDetail = () => {
 
               {showRejectionInput && (
               <div className="space-y-2">
-                <textarea
+                <select
                   value={rejectionReason}
                   onChange={(e) => setRejectionReason(e.target.value)}
-                  placeholder="Ingrese el motivo del rechazo..."
-                  className="w-full p-2 border bg-background border-border rounded-md focus:ring-primary-border focus:border-primary-border resize-none text-foreground"
-                  rows={3}
+                  className="w-full mt-2 mb-2 p-2 border bg-background border-border rounded-md focus:ring-primary-border focus:border-primary-border text-foreground"
                   required
-                />
+                >
+                  <option value="">Seleccione un motivo de rechazo...</option>
+                  <option value="Certificado falso">Certificado falso</option>
+                  <option value="Certificado con inconsistencias evidentes">Certificado con inconsistencias evidentes</option>
+                  <option value="Certificado ilegible">Certificado ilegible</option>
+                  <option value="Certificado incompleto">Certificado incompleto</option>
+                  <option value="Fecha del certificado fuera del período solicitado">Fecha del certificado fuera del período solicitado</option>
+                  <option value="Duración de la licencia no respaldada por el certificado médico">Duración de la licencia no respaldada por el certificado médico</option>
+                  <option value="Motivo no justificado en el documento adjuntado">Motivo no justificado en el documento adjuntado</option>
+                  <option value="Tipo de licencia no respaldado por la documentación">Tipo de licencia no respaldado por la documentación</option>
+                  <option value="Inconsistencias entre datos del empleado y lo declarado en el certificado">Inconsistencias entre datos del empleado y lo declarado en el certificado</option>
+                </select>
+
                 <div className="flex space-x-2">
                   <button
                     onClick={() => {
@@ -366,7 +376,7 @@ const LicenseDetail = () => {
                         setNotification({
                           show: true,
                           type: 'error',
-                          message: 'Por favor ingrese un motivo de rechazo'
+                          message: 'Por favor seleccione un motivo de rechazo'
                         });
                         return;
                       }

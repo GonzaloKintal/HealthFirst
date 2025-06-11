@@ -52,7 +52,7 @@ def base64_to_text(base64_pdf, is_image=False):
                     if page_text:
                         text += page_text
         else:
-            os.environ['TESSDATA_PREFIX'] = '/usr/share/tesseract-ocr/5/tessdata'
+            # os.environ['TESSDATA_PREFIX'] = '/usr/share/tesseract-ocr/5/tessdata'
             images = convert_from_path("temp.pdf")
             for img in images:
                 text += pytesseract.image_to_string(img, lang='spa')  # si tenés soporte
