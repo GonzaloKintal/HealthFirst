@@ -39,7 +39,7 @@ const UsersPage = () => {
         const response = await getUsersByFilter(
           pagination.currentPage, 
           filterToSend,
-          5
+          10
         );
         
         const transformedUsers = response.users.map(user => ({

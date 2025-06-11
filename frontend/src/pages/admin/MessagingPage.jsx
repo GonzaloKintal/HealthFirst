@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { FiMail, FiSend, FiChevronDown, FiChevronUp } from 'react-icons/fi';
-import Notification from '../../components/utils/Notification';
 import { getEmailStats, getEmailEvents } from '../../services/messagingService';
 import SendMessageForm from '../../components/supervisor/SendMessageForm';
 import MessagingStats from '../../components/supervisor/MessagingStats';
+import Notification from '../../components/utils/Notification';
 
 const MessagingPage = () => {
   const [stats, setStats] = useState(null);
@@ -12,25 +12,37 @@ const MessagingPage = () => {
     stats: true,
     events: true
   });
-  const [notification, setNotification] = useState({
-    show: false,
-    type: '',
-    message: ''
-  });
+  const [notification, setNotification] = useState(null);
   const [error, setError] = useState(null);
   const [expandedSection, setExpandedSection] = useState(null);
+  const [pagination, setPagination] = useState({
+    limit: 10,
+    offset: 0,
+    currentPage: 1,
+    hasMore: true
+  });
 
   useEffect(() => {
     fetchData();
   }, []);
 
-  const fetchData = async () => {
+  useEffect(() => {
+    if (notification) {
+      const timer = setTimeout(() => {
+        setNotification(null);
+      }, 3000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [notification]);
+
+  const fetchData = async (newOffset = 0, limit = 10) => {
     try {
       setError(null);
       setLoading({ stats: true, events: true });
       
       const statsResponse = await getEmailStats();
-      const eventsResponse = await getEmailEvents();
+      const eventsResponse = await getEmailEvents(limit, newOffset);
       
       if (statsResponse.success) {
         setStats(statsResponse.stats);
@@ -40,6 +52,11 @@ const MessagingPage = () => {
       
       if (eventsResponse.success) {
         setEvents(eventsResponse.events);
+        setPagination(prev => ({
+          ...prev,
+          offset: newOffset,
+          hasMore: eventsResponse.events.length >= limit
+        }));
       } else {
         setError(eventsResponse.error);
       }
@@ -51,20 +68,26 @@ const MessagingPage = () => {
     }
   };
 
-  const showNotification = (type, message) => {
-    setNotification({ show: true, type, message });
-    setTimeout(() => {
-      setNotification(prev => ({ ...prev, show: false }));
-    }, 5000);
+  const handlePageChange = (newOffset) => {
+    fetchData(newOffset, pagination.limit);
   };
 
   const handleRefresh = () => {
-    fetchData();
-    showNotification('success', 'Datos actualizados correctamente');
+    fetchData(0);
   };
 
   return (
     <div className="bg-background p-6 rounded-lg shadow text-foreground">
+
+      {notification && (
+        <Notification
+          type={notification.type}
+          message={notification.message}
+          onClose={() => setNotification(null)}
+          duration={3000}
+        />
+      )}
+
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-3 md:gap-0">
         <div>
           <h1 className="text-xl sm:text-2xl font-bold flex items-center text-foreground">
@@ -99,11 +122,13 @@ const MessagingPage = () => {
           expandedSection === 'stats' ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'
         }`}>
           <div className="p-4 bg-background border-t border-border">
-            <MessagingStats 
+           <MessagingStats 
               stats={stats} 
               events={events} 
               loading={loading} 
-              onRefresh={handleRefresh} 
+              onRefresh={handleRefresh}
+              onPageChange={handlePageChange}
+              pagination={pagination}
             />
           </div>
         </div>
@@ -128,21 +153,24 @@ const MessagingPage = () => {
           expandedSection === 'send' ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'
         }`}>
           <div className="p-4 bg-background border-t border-border">
-            <SendMessageForm onSuccess={() => {
-              showNotification('success', 'Mensaje enviado correctamente');
-              fetchData();
-            }} />
+            <SendMessageForm 
+              onSuccess={() => {
+                setNotification({
+                  type: 'success',
+                  message: 'Mensaje enviado correctamente'
+                });
+                fetchData()
+              }} 
+              onError={(error) => {
+                setNotification({
+                  type: 'error',
+                  message: error || 'Error al enviar el mensaje'
+                });
+              }}
+            />
           </div>
         </div>
       </div>
-
-      {notification.show && (
-        <Notification 
-          type={notification.type} 
-          message={notification.message} 
-          onClose={() => setNotification(prev => ({ ...prev, show: false }))}
-        />
-      )}
     </div>
   );
 };

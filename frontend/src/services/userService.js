@@ -117,3 +117,21 @@ export const getTelegramSubscription = async (userId) => {
         throw error;
     }
 };
+
+
+export const getHealthRiskPredictions = async (params = {}) => {
+  try {
+    const response = await api.get('/users/predict_health_risk/', {
+      params: {
+        limit: params.limit,
+        offset: params.offset,
+      }
+    });
+    console.log('Health risk predictions response:', response.data);
+    
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching health risk predictions:', error);
+    throw error;
+  }
+};

@@ -1,12 +1,11 @@
 
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FiSearch, FiFilter, FiDownload, FiEdit, FiTrash2, FiEye, FiPlus, FiFileText, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import useAuth from '../../hooks/useAuth';
 import Confirmation from '../../components/utils/Confirmation';
 import { Link } from 'react-router-dom';
-import { getLicenses, deleteLicense, exportLicensesToCSV } from '../../services/licenseService';
+import { getLicenses, deleteLicense, exportLicensesToCSV, getLicenseTypes } from '../../services/licenseService';
 import Notification from '../../components/utils/Notification';
 import { formatSimpleDate } from '../../components/utils/FormattedDate';
 
@@ -14,10 +13,12 @@ const LicensesPage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [licenses, setLicenses] = useState([]);
+  const [licenseTypes, setLicenseTypes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState('all');
+  const [typeFilter, setTypeFilter] = useState('all');
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [showExportConfirmation, setShowExportConfirmation] = useState(false);
   const [licenseToDelete, setLicenseToDelete] = useState(null);
@@ -34,17 +35,58 @@ const LicensesPage = () => {
     totalLicenses: 0
   });
 
-  // Obtener licencias del backend con paginación
+  // Auto-dismiss notifications after 3 seconds, like RequestLicense
+  useEffect(() => {
+    if (notification.show) {
+      const timer = setTimeout(() => {
+        setNotification({ show: false, type: '', message: '' });
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [notification.show]);
+
+  // Fetch license types
+  useEffect(() => {
+    const fetchLicenseTypes = async () => {
+      try {
+        const response = await getLicenseTypes();
+        if (response.success) {
+          setLicenseTypes(response.data.types);
+        } else {
+          console.error('Error al obtener tipos de licencia:', response.error);
+          setNotification({
+            show: true,
+            type: 'error',
+            message: 'Error al cargar los tipos de licencia disponibles'
+          });
+          setLicenseTypes([]);
+        }
+      } catch (error) {
+        console.error('Error fetching license types:', error);
+        setNotification({
+          show: true,
+          type: 'error',
+          message: 'Error al cargar los tipos de licencia'
+        });
+        setLicenseTypes([]);
+      }
+    };
+
+    fetchLicenseTypes();
+  }, []);
+
+  // Fetch licenses with pagination
   useEffect(() => {
     const fetchLicenses = async () => {
       try {
-        setLoading(true)
+        setLoading(true);
         setError(null);
         const shouldShowAll = ['admin', 'supervisor'].includes(user?.role);
         const response = await getLicenses({ 
           user_id: user?.id,
           show_all_users: shouldShowAll,
           status: filter !== 'all' ? filter : null,
+          type: typeFilter !== 'all' ? typeFilter : null,
           employee_name: searchQuery,
           page: pagination.currentPage,
           page_size: 10
@@ -55,12 +97,10 @@ const LicensesPage = () => {
             id: license.license_id,
             employee: license.user.first_name + ' ' + license.user.last_name,
             type: license.type,
-            // startDate: license.start_date,
-            // endDate: license.end_date,
-            startDate: formatSimpleDate(license.start_date), // Formatear aquí
-            endDate: formatSimpleDate(license.end_date),     // Formatear aquí
-            days: license.days,
+            startDate: formatSimpleDate(license.start_date),
+            endDate: formatSimpleDate(license.end_date),
             status: license.status,
+            days: license.days,
             requestedOn: license.created_at || '',
           }));
           
@@ -97,9 +137,9 @@ const LicensesPage = () => {
     if (user?.id) {
       fetchLicenses();
     }
-  }, [user, filter, pagination.currentPage, searchQuery]);
+  }, [user, filter, typeFilter, pagination.currentPage, searchQuery]);
 
-  // Función para búsqueda manual (con Enter o botón)
+  // Handle manual search (Enter or button)
   const handleSearch = () => {
     try {
       setError(null);
@@ -111,14 +151,14 @@ const LicensesPage = () => {
     }
   };
   
-  // Manejar la tecla Enter
+  // Handle Enter key
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
       handleSearch();
     }
   };
 
-  // Cambiar de página
+  // Change page
   const handlePageChange = (newPage) => {
     if (newPage >= 1 && newPage <= pagination.totalPages && newPage !== pagination.currentPage) {
       setPagination(prev => ({
@@ -141,7 +181,7 @@ const LicensesPage = () => {
       previousLicenses = [...licenses];
       previousPagination = {...pagination};
       
-      // Actualización optimista
+      // Optimistic update
       setLicenses(previousLicenses.filter(license => license.id !== licenseToDelete));
       setPagination(prev => ({
         ...prev,
@@ -150,7 +190,7 @@ const LicensesPage = () => {
       
       await deleteLicense(licenseToDelete);
       
-      // Si la página queda vacía y no estamos en la primera página, retroceder
+      // If page is empty and not on first page, go back
       const licensesLeftInPage = previousLicenses.filter(license => license.id !== licenseToDelete).length;
       if (licensesLeftInPage === 0 && previousPagination.currentPage > 1) {
         setPagination(prev => ({
@@ -197,6 +237,7 @@ const LicensesPage = () => {
         user_id: user?.id,
         show_all_users: shouldShowAll,
         status: filter !== 'all' ? filter : null,
+        type: typeFilter !== 'all' ? typeFilter : null,
         employee_name: searchQuery
       };
   
@@ -284,7 +325,7 @@ const LicensesPage = () => {
         text: `${lightColors.pending.text} ${darkColors.pending.text}`
       },
       missing_doc: {
-        bg: `${lightColors.missing_doc.bg} ${darkColors.missing_doc.bg}`,
+        bg: `${lightColors.missing_doc.bg} ${darkColors.missing_doc}`,
         text: `${lightColors.missing_doc.text} ${darkColors.missing_doc.text}`
       },
       expired: {
@@ -313,39 +354,47 @@ const LicensesPage = () => {
 
   return (
     <div className="p-6 relative">
-        {/* Contenido principal - siempre visible */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-3 md:gap-0">
-          {/* Título - siempre a la izquierda */}
-          <h1 className="text-xl sm:text-2xl font-bold flex items-center text-foreground">
-            <FiFileText className="mr-2" />
-            Gestión de Licencias
-          </h1>
+      {/* Contenido principal - siempre visible */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-3 md:gap-0">
+        {/* Título - siempre a la izquierda */}
+        <h1 className="text-xl sm:text-2xl font-bold flex items-center text-foreground">
+          <FiFileText className="mr-2" />
+          Gestión de Licencias
+        </h1>
 
-          {/* Contenedor derecho - horizontal siempre */}
-          <div className="flex flex-row items-center gap-3 w-full md:w-auto flex-wrap">
-            {/* Botón Solicitar Nueva */}
-            <Link
-              to="/request-license"
-              className="flex items-center px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-hover whitespace-nowrap"
+        {/* Contenedor derecho - horizontal siempre */}
+        <div className="flex flex-row items-center gap-3 w-full md:w-auto flex-wrap">
+          {/* Botón Solicitar Nueva */}
+          <Link
+            to="/request-license"
+            className="flex items-center px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-hover whitespace-nowrap"
+          >
+            <FiPlus className="mr-2" />
+            Solicitar Nueva
+          </Link>
+
+          {/* Botón Exportar */}
+          {(user?.role === 'admin' || user?.role === 'supervisor') && (
+            <button 
+              onClick={handleExportClick}
+              className="flex items-center px-4 py-2 bg-primary text-white font-medium rounded-md cursor-pointer hover:bg-primary-hover transition duration-200 whitespace-nowrap"
+              disabled={licenses.length === 0 || loading}
             >
-              <FiPlus className="mr-2" />
-              Solicitar Nueva
-            </Link>
-
-            {/* Botón Exportar */}
-            {(user?.role === 'admin' || user?.role === 'supervisor') && (
-              <button 
-                onClick={handleExportClick}
-                className="flex items-center px-4 py-2 bg-primary text-white font-medium rounded-md cursor-pointer hover:bg-primary-hover transition duration-200 whitespace-nowrap"
-                disabled={licenses.length === 0 || loading}
-              >
-                <FiDownload className="mr-2" />
-                Exportar
-              </button> 
-            )}
-          </div>
+              <FiDownload className="mr-2" />
+              Exportar
+            </button> 
+          )}
         </div>
+      </div>
 
+      {/* Mensaje de notificación */}
+      {notification.show && (
+        <Notification
+          type={notification.type}
+          message={notification.message}
+          onClose={() => setNotification({ show: false, type: '', message: '' })}
+        />
+      )}
   
       {/* Mensaje de error */}
       {error && (
@@ -381,24 +430,43 @@ const LicensesPage = () => {
             </div>
           )}
           
-          <div className="flex items-center space-x-2">
-            <FiFilter className="text-gray-400" />
-            <select 
-              className="border border-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-border focus:border-primary-border text-foreground bg-background"
-              value={filter}
-              onChange={(e) => {
-                setFilter(e.target.value);
-                setPagination(prev => ({ ...prev, currentPage: 1 }));
-              }}
-              disabled={loading}
-            >
-              <option value="all">Todas</option>
-              <option value="pending">Pendientes</option>
-              <option value="approved">Aprobadas</option>
-              <option value="rejected">Rechazadas</option>
-              <option value="missing_doc">Falta certificado</option>
-              <option value="expired">Expiradas</option>
-            </select>
+          <div className="flex flex-wrap md:flex-nowrap items-center gap-4">
+            <div className="flex items-center space-x-2">
+              <FiFilter className="text-gray-400" />
+              <select 
+                className="border border-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-border focus:border-primary-border text-foreground bg-background"
+                value={typeFilter}
+                onChange={(e) => {
+                  setTypeFilter(e.target.value);
+                  setPagination(prev => ({ ...prev, currentPage: 1 }));
+                }}
+                disabled={loading || licenseTypes.length === 0}
+              >
+                <option value="all">Todos los tipos</option>
+                {licenseTypes.map(type => (
+                  <option key={type.id} value={type.name}>{type.name}</option>
+                ))}
+              </select>
+            </div>
+            <div className="flex items-center space-x-2">
+              <FiFilter className="text-gray-400" />
+              <select 
+                className="border border-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-border focus:border-primary-border text-foreground bg-background"
+                value={filter}
+                onChange={(e) => {
+                  setFilter(e.target.value);
+                  setPagination(prev => ({ ...prev, currentPage: 1 }));
+                }}
+                disabled={loading}
+              >
+                <option value="all">Todas</option>
+                <option value="pending">Pendientes</option>
+                <option value="approved">Aprobadas</option>
+                <option value="rejected">Rechazadas</option>
+                <option value="missing_doc">Falta certificado</option>
+                <option value="expired">Expiradas</option>
+              </select>
+            </div>
           </div>
         </div>
   
@@ -484,7 +552,7 @@ const LicensesPage = () => {
                   ) : (
                     <tr>
                       <td colSpan={canShowActions ? 7 : 6} className="px-6 py-4 text-center text-foreground">
-                        {searchQuery || filter !== 'all' 
+                        {searchQuery || filter !== 'all' || typeFilter !== 'all' 
                           ? 'No se encontraron licencias que coincidan con los filtros'
                           : 'No hay licencias registradas'}
                       </td>
@@ -556,14 +624,6 @@ const LicensesPage = () => {
         cancelText="Cancelar"
         type="info"
       />
-  
-      {notification.show && (
-        <Notification
-          type={notification.type}
-          message={notification.message}
-          onClose={() => setNotification({ show: false, type: '', message: '' })}
-        />
-      )}
     </div>
   );
 }

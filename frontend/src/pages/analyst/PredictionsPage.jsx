@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { FiActivity, FiAlertTriangle, FiHeart, FiChevronDown, FiChevronUp } from 'react-icons/fi';
 import Anomalies from './Anomalies';
-import HealthPredictions from './HealthPredictions';
+import HealthPredictions from '../../components/analyst/HealthPredictions';
 
 const PredictionsPage = () => {
   const [expandedSection, setExpandedSection] = useState('');
 
   return (
-    <div className="p-6">
+    <div className="bg-background p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-xl sm:text-2xl font-bold flex items-center text-foreground">
           <FiActivity className="mr-2" />
@@ -39,7 +39,7 @@ const PredictionsPage = () => {
         </div>
       </div>
 
-      {/* Sección de Salud Laboral */}
+      {/* Sección de Predicciones de Salud */}
       <div className="overflow-hidden rounded-lg shadow-sm border border-border">
         <button
           onClick={() => setExpandedSection(expandedSection === 'health' ? '' : 'health')}
