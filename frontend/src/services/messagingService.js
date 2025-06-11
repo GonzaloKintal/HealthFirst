@@ -12,7 +12,7 @@ export const getEmailStats = async () => {
     console.error('Error in getEmailStats:', error);
     return {
       success: false,
-      error: error.response?.data?.error || 'Error al obtener las estadísticas de emails. Por favor intenta nuevamente.',
+      error: error.response?.data?.error || 'Error al obtener Las siguientes estadísticas de emails. Por favor intenta nuevamente.',
       stats: {}
     };
   }
