@@ -16,7 +16,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from licenses.utils.file_utils import *
 from messaging.services.brevo_email import *
-from .health_risk.risk_model import predict_risk
+from .health_risk.risk_model import predict_employ_risk, predict_risk
 from django.views.decorators.csrf import csrf_exempt
 from django.core.cache import cache
 from rest_framework.pagination import LimitOffsetPagination
@@ -385,3 +385,15 @@ def predict_health_risk(request):
     paginated_data = paginator.paginate_queryset(risk_list, request)
 
     return paginator.get_paginated_response(paginated_data)
+
+
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def predict_health_risk_by_id(request,id):
+    try:
+        risk = json.loads(predict_employ_risk(id))
+    except Exception as e:
+        return JsonResponse({"Error inesperado al predecir riesgo": str(e)}, status=500)
+
+    return JsonResponse({"risk": risk}, status=200)
