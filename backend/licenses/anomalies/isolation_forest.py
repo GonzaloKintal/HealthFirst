@@ -17,14 +17,9 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'settings.local')
 django.setup()
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-#MODEL_PATH_SUP = os.path.join(BASE_DIR, 'isolation_forest_sup_model.pkl')
-#MODEL_PATH_SUP = os.path.join(BASE_DIR, 'isolation_forest_sup_model_v2.pkl')
 MODEL_PATH_SUP = os.path.join(BASE_DIR, 'isolation_forest_sup_model_v3.pkl')
 
-#MODEL_PATH_EMP = os.path.join(BASE_DIR, 'isolation_forest_emp_model.pkl')
 MODEL_PATH_EMP = os.path.join(BASE_DIR, 'isolation_forest_emp_model_v2.pkl')
-#MODEL_PATH_EMP = os.path.join(BASE_DIR, 'isolation_forest_emp_model_v3.pkl')
-#MODEL_PATH_EMP = os.path.join(BASE_DIR, 'isolation_forest_emp_model_v4.pkl')
 
 
 pd.set_option("display.max_columns", None)  # Mostrar todas las columnas
@@ -206,10 +201,10 @@ def generate_employees_csv(path_csv='employees_data_1000.csv', n=1000, semilla=4
     required_days_rate = required_days / total_requests
     days_per_year = required_days / (np.array(seniority_days) / 365 + 1e-3)
 
-    # Nueva columna: faltas recurrentes lunes y viernes simuladas (0 a 10 días)
+
     mon_fri_requests = np.random.randint(0, 11, size=n)
 
-    # Introducir anomalías en el 5%
+    #anomalías en el 5%
     num_anomalies = int(n * 0.05)
     anomaly_indices = np.random.choice(n, size=num_anomalies, replace=False)
 
@@ -221,7 +216,7 @@ def generate_employees_csv(path_csv='employees_data_1000.csv', n=1000, semilla=4
             days_per_year[idx] *= np.random.uniform(2, 4)
             required_days[idx] = int(days_per_year[idx] * (seniority_days[idx] / 365))
 
-        # Aumentar mon_fri_requests para anomalías (más del 60% de los días)
+        #mon_fri_requests para anomalías (más del 60% de los días)
         mon_fri_requests[idx] = max(mon_fri_requests[idx], int(required_days[idx] * 0.6))
 
     required_days = np.clip(required_days, 1, None)
@@ -349,7 +344,6 @@ def get_employee_anomalies(start_date=None, end_date=None): #FUNCION PRINCIPAL Q
         return pd.DataFrame(columns=cols)
     dataframe =  anomalies_employees(df)
 
-   # Promedios globales
     global_required_days = dataframe['required_days'].mean()
     global_total_requests = dataframe['total_requests'].mean()
     global_days_per_year = dataframe['days_per_year'].mean()
@@ -369,7 +363,6 @@ def get_employee_anomalies(start_date=None, end_date=None): #FUNCION PRINCIPAL Q
     dataframe['required_days_rate_diff'] = dataframe['required_days_rate_diff'].map("{:+.2f}".format)
     dataframe['required_days_percent'] = (dataframe['required_days_percent'] * 100).map("{:.2f}%".format)
 
-    dataframe = dataframe.drop(columns=['mon_fri_requests'])
 
     return dataframe
 
@@ -419,7 +412,7 @@ def generate_small_training_csv(path_csv='small_training_employees.csv', n=30, s
             days_per_year[idx] = required_days[idx] / (seniority_days[idx] / 365 + 1e-3)
 
         elif tipo == "nunca_pide":
-            # Si lleva más de ~300 días y nunca pidió nada → anomalía
+            # Si lleva más de 300 días y nunca pidió nada  anomalía
             if seniority_days[idx] > 300:
                 total_requests[idx] = 0
                 required_days[idx] = 0
