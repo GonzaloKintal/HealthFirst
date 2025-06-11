@@ -166,7 +166,7 @@ def generate_supervisors_csv(path_csv='supervisors_data_1000.csv', n=1000, semil
 def get_supervisor_anomalies(start_date=None, end_date=None): #FUNCION PRINCIPAL QUE SE USARA EN EL FRONT
     df = create_dataframe_supervisor(start_date, end_date)
     if df.empty:
-        cols = ['evaluator_name','department', 'total_requests', 'approved_requests', 'rejected_requests', 'approval_rate', 'rejection_rate','seniority_days']
+        cols = ['evaluator_id','evaluator_name','department', 'total_requests', 'approved_requests', 'rejected_requests', 'approval_rate', 'rejection_rate','seniority_days']
         return pd.DataFrame(columns=cols)
     dataframe =  anomalies_supervisors(df)
     
@@ -188,8 +188,6 @@ def get_supervisor_anomalies(start_date=None, end_date=None): #FUNCION PRINCIPAL
     dataframe['evaluator_name'] = names
     dataframe['department'] = departments
 
-    dataframe = dataframe.drop(columns=['evaluator_id'])
-
     global_approval_rate = dataframe['approval_rate'].mean()
     global_rejection_rate = dataframe['rejection_rate'].mean()
     total_requests_sum = dataframe['total_requests'].sum()
@@ -206,7 +204,7 @@ def get_supervisor_anomalies(start_date=None, end_date=None): #FUNCION PRINCIPAL
 
     dataframe = dataframe.drop(columns=['seniority_days'])
 
-    columnas_ordenadas = ['evaluator_name', 'department'] + [col for col in dataframe.columns if col not in ['evaluator_name', 'department']]
+    columnas_ordenadas = ['evaluator_id','evaluator_name', 'department'] + [col for col in dataframe.columns if col not in ['evaluator_name', 'department']]
     return dataframe[columnas_ordenadas]
 
 #ANOMALIAS SOBRE EMPLEADOS(solicitudes de licencias)------------------------------------------------------------------------------------
@@ -361,7 +359,7 @@ def anomalies_employees(data): #recibe un dataframe
 def get_employee_anomalies(start_date=None, end_date=None): #FUNCION PRINCIPAL QUE SE USARA EN EL FRONT
     df = create_dataFrame_empleados(start_date, end_date)
     if df.empty:
-        cols = ['employee_name', 'department','total_requests', 'required_days', 'required_days_rate','seniority_days','days_per_year','mon_fri_requests']
+        cols = ['employee_id','employee_name', 'department','total_requests', 'required_days', 'required_days_rate','seniority_days','days_per_year','mon_fri_requests']
         return pd.DataFrame(columns=cols)
     dataframe =  anomalies_employees(df)
 
@@ -383,8 +381,6 @@ def get_employee_anomalies(start_date=None, end_date=None): #FUNCION PRINCIPAL Q
     dataframe['employee_name'] = names
     dataframe['department'] = departments
 
-    dataframe = dataframe.drop(columns=['employee_id'])
-
     global_required_days = dataframe['required_days'].mean()
     global_total_requests = dataframe['total_requests'].mean()
     global_days_per_year = dataframe['days_per_year'].mean()
@@ -404,7 +400,7 @@ def get_employee_anomalies(start_date=None, end_date=None): #FUNCION PRINCIPAL Q
     dataframe['required_days_rate_diff'] = dataframe['required_days_rate_diff'].map("{:+.2f}".format)
     dataframe['required_days_percent'] = (dataframe['required_days_percent'] * 100).map("{:.2f}%".format)
 
-    columnas_ordenadas = ['employee_name', 'department'] + [col for col in dataframe.columns if col not in ['employee_name', 'department']]
+    columnas_ordenadas = ['employee_id','employee_name', 'department'] + [col for col in dataframe.columns if col not in ['employee_name', 'department']]
     return dataframe[columnas_ordenadas]
 
 #---------------------------------------------------------------------------------------------------------------
