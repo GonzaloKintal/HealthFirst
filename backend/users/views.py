@@ -392,7 +392,7 @@ def predict_health_risk(request):
 @permission_classes([IsAuthenticated])
 def predict_health_risk_by_id(request,id):
     try:
-        risk = predict_employ_risk(id)
+        risk = json.loads(predict_employ_risk(id))
     except Exception as e:
         return JsonResponse({"Error inesperado al predecir riesgo": str(e)}, status=500)
 
