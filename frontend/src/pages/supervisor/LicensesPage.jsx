@@ -325,7 +325,7 @@ const LicensesPage = () => {
         text: `${lightColors.pending.text} ${darkColors.pending.text}`
       },
       missing_doc: {
-        bg: `${lightColors.missing_doc.bg} ${darkColors.missing_doc}`,
+        bg: `${lightColors.missing_doc.bg} ${darkColors.missing_doc.bg}`,
         text: `${lightColors.missing_doc.text} ${darkColors.missing_doc.text}`
       },
       expired: {
