@@ -12,7 +12,6 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 from datetime import timedelta
-import os
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -60,10 +59,10 @@ INSTALLED_APPS = [
     'users',
     'licenses',
     'metabase',
-    'messaging',
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -71,7 +70,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'backend.urls'
@@ -164,31 +162,4 @@ SIMPLE_JWT = {
 AUTH_USER_MODEL = 'users.HealthFirstUser'
 
 
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False, 
-    'formatters': {
-        'verbose': {
-            'format': '{asctime} [{levelname}] - {message}',
-            'style': '{',
-        },
-    },
-    'handlers': {
-        'console': { 
-            'class': 'logging.StreamHandler',
-        },
-        'file': { 
-            'level': 'INFO',
-            'class': 'logging.FileHandler',
-            'filename': os.path.join(BASE_DIR, 'logs', 'licenses.log'),
-            'formatter': 'verbose',
-        },
-    },
-    'loggers': {
-        'licenses.management.commands.check_licenses_expired': {
-            'handlers': ['console', 'file'],
-            'level': 'INFO',
-            'propagate': False,
-        },
-    },
-}
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB

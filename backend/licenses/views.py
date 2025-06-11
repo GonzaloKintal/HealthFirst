@@ -26,6 +26,8 @@ from licenses.utils.file_utils import *
 from licenses.utils.coherence_model_ml import predict_top_3
 from django.db.models import Q
 import csv
+from rest_framework.pagination import LimitOffsetPagination
+
 
 
 # LICENSES API
@@ -42,6 +44,7 @@ def licenses_list(request):
         employee_name = data.get('employee_name', '').strip()
         page_number = data.get('page', 1)
         page_size = data.get('page_size', 10)
+        license_type= data.get('type', None)
 
         if not user_id:
             return JsonResponse({'error': 'El campo user_id es requerido.'}, status=400)
@@ -60,6 +63,9 @@ def licenses_list(request):
             Q(user__first_name__icontains=employee_name) | 
             Q(user__last_name__icontains=employee_name)
         )
+
+        if license_type:
+            queryset = queryset.filter(type__name=license_type)
 
         # Filtro por estado
         if status_filter:
@@ -638,8 +644,6 @@ def supervisor_anomalies(request):
             df = df[df['evaluator_id'] == int(evaluator_id)]
 
         if is_anomaly is not None:
-            # Suponiendo que la columna 'is_anomaly' es booleana
-            # Convierte el string recibido a booleano
             if is_anomaly.lower() in ['true', '1', 'yes']:
                 anomaly_flag = True
             elif is_anomaly.lower() in ['false', '0', 'no']:
@@ -651,7 +655,12 @@ def supervisor_anomalies(request):
                 df = df[df['is_anomaly'] == anomaly_flag]
 
         data = df.to_dict(orient='records')
-        return JsonResponse({'data': data}, status=200)
+
+        # Aplicar paginación
+        paginator = LimitOffsetPagination()
+        paginated_data = paginator.paginate_queryset(data, request)
+
+        return paginator.get_paginated_response(paginated_data)
 
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
@@ -669,7 +678,7 @@ def employee_anomalies(request):
     try:
         df = get_employee_anomalies(start_date, end_date)
 
-        # FILTRO PARA EXCLUIR REGISTROS SIN SOLICITUDES
+        # Filtro para excluir registros sin solicitudes
         df = df[df['total_requests'] > 0]
 
         if employee_id:
@@ -680,7 +689,12 @@ def employee_anomalies(request):
             df = df[df['is_anomaly'] == int(anomaly_flag)]
 
         data = df.to_dict(orient='records')
-        return JsonResponse({'data': data}, status=200)
+
+        # Aplicar paginación
+        paginator = LimitOffsetPagination()
+        paginated_data = paginator.paginate_queryset(data, request)
+
+        return paginator.get_paginated_response(paginated_data)
 
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)

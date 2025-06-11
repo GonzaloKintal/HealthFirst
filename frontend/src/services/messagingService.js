@@ -12,16 +12,20 @@ export const getEmailStats = async () => {
     console.error('Error in getEmailStats:', error);
     return {
       success: false,
-      error: error.response?.data?.error || 'Error al obtener las estadísticas de emails. Por favor intenta nuevamente.',
+      error: error.response?.data?.error || 'Error al obtener Las siguientes estadísticas de emails. Por favor intenta nuevamente.',
       stats: {}
     };
   }
 };
 
 // Obtener eventos de emails con paginación y filtros
-export const getEmailEvents = async () => {
+export const getEmailEvents = async (limit = 10, offset = 0) => {
   try {
-    const response = await api.get('/messaging/get_email_events');
+    const response = await api.post('/messaging/get_email_events', {
+      limit: limit,
+      offset: offset
+    });
+    
     return {
       success: true,
       events: response.data.events?.events || []
