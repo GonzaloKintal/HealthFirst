@@ -166,10 +166,28 @@ def generate_supervisors_csv(path_csv='supervisors_data_1000.csv', n=1000, semil
 def get_supervisor_anomalies(start_date=None, end_date=None): #FUNCION PRINCIPAL QUE SE USARA EN EL FRONT
     df = create_dataframe_supervisor(start_date, end_date)
     if df.empty:
-        cols = ['evaluator_id', 'total_requests', 'approved_requests', 'rejected_requests', 'approval_rate', 'rejection_rate','seniority_days']
+        cols = ['evaluator_id','evaluator_name','department', 'total_requests', 'approved_requests', 'rejected_requests', 'approval_rate', 'rejection_rate','seniority_days']
         return pd.DataFrame(columns=cols)
     dataframe =  anomalies_supervisors(df)
     
+    names = []
+    departments = []
+
+    for evaluator_id in dataframe['evaluator_id']:
+        try:
+            user = HealthFirstUser.objects.select_related('department').get(id=evaluator_id)
+            full_name = f"{user.first_name} {user.last_name}"
+            dept_name = user.department.name if user.department else "Sin departamento"
+        except HealthFirstUser.DoesNotExist:
+            full_name = "Desconocido"
+            dept_name = "Desconocido"
+
+        names.append(full_name)
+        departments.append(dept_name)
+
+    dataframe['evaluator_name'] = names
+    dataframe['department'] = departments
+
     global_approval_rate = dataframe['approval_rate'].mean()
     global_rejection_rate = dataframe['rejection_rate'].mean()
     total_requests_sum = dataframe['total_requests'].sum()
@@ -184,9 +202,10 @@ def get_supervisor_anomalies(start_date=None, end_date=None): #FUNCION PRINCIPAL
     dataframe['rejection_rate_diff'] = (dataframe['rejection_rate_diff']*100).map("{:+.2f}%".format) #NUEVA INFO
     dataframe['total_requests_percent'] = (dataframe['total_requests_percent']*100).map("{:.2f}%".format)#NUEVA INFO
 
-    print(dataframe)
     dataframe = dataframe.drop(columns=['seniority_days'])
-    return dataframe
+
+    columnas_ordenadas = ['evaluator_id','evaluator_name', 'department'] + [col for col in dataframe.columns if col not in ['evaluator_name', 'department']]
+    return dataframe[columnas_ordenadas]
 
 #ANOMALIAS SOBRE EMPLEADOS(solicitudes de licencias)------------------------------------------------------------------------------------
 def generate_employees_csv(path_csv='employees_data_1000.csv', n=1000, semilla=42):
@@ -340,9 +359,27 @@ def anomalies_employees(data): #recibe un dataframe
 def get_employee_anomalies(start_date=None, end_date=None): #FUNCION PRINCIPAL QUE SE USARA EN EL FRONT
     df = create_dataFrame_empleados(start_date, end_date)
     if df.empty:
-        cols = ['employee_id','total_requests', 'required_days', 'required_days_rate','seniority_days','days_per_year','mon_fri_requests']
+        cols = ['employee_id','employee_name', 'department','total_requests', 'required_days', 'required_days_rate','seniority_days','days_per_year','mon_fri_requests']
         return pd.DataFrame(columns=cols)
     dataframe =  anomalies_employees(df)
+
+    names = []
+    departments = []
+
+    for employee_id in dataframe['employee_id']:
+        try:
+            user = HealthFirstUser.objects.select_related('department').get(id=employee_id)
+            full_name = f"{user.first_name} {user.last_name}"
+            dept_name = user.department.name if user.department else "Sin departamento"
+        except HealthFirstUser.DoesNotExist:
+            full_name = "Desconocido"
+            dept_name = "Desconocido"
+
+        names.append(full_name)
+        departments.append(dept_name)
+
+    dataframe['employee_name'] = names
+    dataframe['department'] = departments
 
     global_required_days = dataframe['required_days'].mean()
     global_total_requests = dataframe['total_requests'].mean()
@@ -363,8 +400,8 @@ def get_employee_anomalies(start_date=None, end_date=None): #FUNCION PRINCIPAL Q
     dataframe['required_days_rate_diff'] = dataframe['required_days_rate_diff'].map("{:+.2f}".format)
     dataframe['required_days_percent'] = (dataframe['required_days_percent'] * 100).map("{:.2f}%".format)
 
-
-    return dataframe
+    columnas_ordenadas = ['employee_id','employee_name', 'department'] + [col for col in dataframe.columns if col not in ['employee_name', 'department']]
+    return dataframe[columnas_ordenadas]
 
 #---------------------------------------------------------------------------------------------------------------
 #falta evaluar fechas de ingreso, es mas anomalo teniendo en cuenta la fecha en la que el supervisor comenzó a trabajr
@@ -487,8 +524,8 @@ def dataframe_pruebas_emp(): # para pruebas
 #generate_supervisors_csv()
 #create_model_supervisor('supervisors_data_1000.csv')
 #print(anomalies_supervisors(dataframe_pruebas_sup()))
-#get_supervisor_anomalies()
-
+#print(get_supervisor_anomalies())
+#print()
 #pruebas emp-------------------------------------------------------------------------------------------------------
 
 #generate_employees_csv()
