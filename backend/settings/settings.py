@@ -164,18 +164,6 @@ SIMPLE_JWT = {
 AUTH_USER_MODEL = 'users.HealthFirstUser'
 
 
-DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp-relay.brevo.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = '8e70eb001@smtp-brevo.com'  # Remitente autorizado en Brevo
-EMAIL_HOST_PASSWORD = '9rZH07cAL3VF4tPj'
-
-EMAIL_HEALTH_FIRST='healthfirst.voxdei@gmail.com'
-
-TELEGRAM_BOT_TOKEN="7667764437:AAEWI4LDMF0JlgZlUvdR5VvIh5CuEL_XxNg"
-
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False, 
