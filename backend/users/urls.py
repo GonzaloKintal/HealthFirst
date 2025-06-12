@@ -21,4 +21,5 @@ urlpatterns = [
 
 
     path('predict_health_risk/', predict_health_risk, name='predict_health_risk'),
+    path('predict_health_risk/<int:id>', predict_health_risk_by_id, name='predict_health_risk_by_id'),
 ]
