@@ -173,9 +173,8 @@ def telegram_webhook(request):
             chat_id = update['message']['chat']['id']
             text = update['message'].get('text', '')
 
-            try:
-                user = HealthFirstUser.objects.filter(telegram_id=chat_id).last()
-
+            user = HealthFirstUser.objects.filter(telegram_id=chat_id).last()
+            if user:
                 if text == '/start':
                     response_text = (
                         "¡Hola! Soy Voxi, el bot de HealthFirst desarrollado por Vox Dei Solutions.\n\n"
@@ -262,8 +261,9 @@ def telegram_webhook(request):
                 else:
                     response_text = "Comando no reconocido."
 
-            except HealthFirstUser.DoesNotExist:
-                response_text="Usuario no registrado en el sistema."
+            else:
+                response_text = "Usuario no autorizado para usar el sistema."
+                    
             
             TelegramService.send_message(chat_id, response_text)
             
