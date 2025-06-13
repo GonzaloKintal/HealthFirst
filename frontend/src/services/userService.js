@@ -125,13 +125,24 @@ export const getHealthRiskPredictions = async (params = {}) => {
       params: {
         limit: params.limit,
         offset: params.offset,
+        risk: params.risk_level
       }
     });
-    console.log('Health risk predictions response:', response.data);
     
     return response.data;
   } catch (error) {
     console.error('Error fetching health risk predictions:', error);
+    throw error;
+  }
+};
+
+export const getIndividualHealthRiskPrediction = async (employeeId) => {
+  try {
+    const response = await api.get(`/users/predict_health_risk/${employeeId}`);
+    
+    return response.data.risk[0];
+  } catch (error) {
+    console.error('Error fetching individual health risk:', error);
     throw error;
   }
 };

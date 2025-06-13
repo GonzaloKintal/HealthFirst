@@ -41,12 +41,17 @@ export const getEmailEvents = async (limit = 10, offset = 0) => {
 };
 
 
-export const getUserEmailEvents = async (id) => {
+export const getUserEmailEvents = async (id, limit = 10, offset = 0) => {
   try {
-    const response = await api.get(`/messaging/get_user_email_events/${id}`);
+    const response = await api.post('/messaging/get_user_email_events', {
+      user_id: id,
+      limit: limit,
+      offset: offset
+    });
+
     return {
       success: true,
-      events: response.data.events || []
+      events: response.data.events?.events || []
     };
   } catch (error) {
     console.error('Error fetching email events:', error);
