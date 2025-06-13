@@ -172,31 +172,98 @@ def telegram_webhook(request):
             
             chat_id = update['message']['chat']['id']
             text = update['message'].get('text', '')
-            
-            if text == '/start':
-                response_text = "¡Hola! Bienvenido a Health First. \n\n"
-                response_text += "Envie /licenses para obtener tus licencias"
-            elif text=='/licenses':
 
-                user = HealthFirstUser.objects.filter(telegram_id=chat_id).last()
-            
-                licenses=License.objects.filter(user=user).order_by("license_id")
-                response_text = "Tus licencias:\n\n"
-                for lic in licenses:
-                    response_text += lic.get_info_for_message() + "\n"
+            user = HealthFirstUser.objects.filter(telegram_id=chat_id).last()
+            if user:
+                if text == '/start':
+                    response_text = (
+                        "¡Hola! Soy Voxi, el bot de HealthFirst desarrollado por Vox Dei Solutions.\n\n"
+                        "Estoy acá para ayudarte con tus consultas de forma rápida y sencilla.\n\n"
+                        "👉 Escribí /licencias y te mostraré el estado de tus últimas 10 licencias."
+                    )
+                elif text=='/licencias':
+                    try:
+                        licenses = License.objects.filter(user=user, is_deleted=False).order_by("-license_id")[:10] 
+
+                            # Definimos los emojis para cada estado
+                        status_icons = {
+                                'missing_doc': '📄❓',     
+                                'pending': '🔄',           
+                                'rejected': '❌',          
+                                'approved': '✅',          
+                                'expired': '⌛'           
+                            }
+
+                        status_descriptions = {
+                            'missing_doc': 'Documentación faltante',
+                            'pending': 'Pendiente de aprobación',
+                            'rejected': 'Rechazada',
+                            'approved': 'Aprobada',
+                            'expired': 'Expirada'
+                        }
+
+                        if licenses:
+                            response_text = "📋 *Acá te muestro tus licencias más recientes:*\n\n"
+                            for lic in licenses:
+                                status_obj = getattr(lic, 'status', None)
+                                if status_obj:
+                                    status_name = status_obj.name
+                                    status_icon = status_icons.get(status_name, '▪️')
+                                    status_desc = status_descriptions.get(status_name, status_name)
+                                else:
+                                    status_icon = '▪️'
+                                    status_desc = 'Estado no definido'
+                                
+                                response_text += (
+                                    f"📄 Licencia #{lic.license_id}\n"
+                                    f"🔄 Estado: {status_icon} {status_desc}\n\n"
+                                )
+                            response_text += (
+                                "\n¿Necesitás más detalles sobre una licencia en particular?\n"
+                                "Escribime el comando así:\n"
+                                "/licencia [ID]\n"
+                                "Por ejemplo: /licencia 1234\n\n"
+                                "¡Estoy acá para ayudarte en lo que necesites! 💙"
+                            )
+                    except License.DoesNotExist:
+                        response_text= "No tenes solicitudes de licencias disponibles."
+
+                elif text.startswith('/licencia '):
+                    license_id = text.split()[1]
+                    try:
+                        license = License.objects.get(license_id=license_id, user=user)
+                        response_text = license.get_detail_for_message()
+                    except License.DoesNotExist:
+                        license=None
+                        response_text = "Licencia no encontrada."
+
+                elif text == '/info':
+                    response_text = (
+                        "📩 ¿Necesitás ayuda?\n"
+                        "Podés escribirnos a: \n" 
+                        "healthfirst.voxdei@gmail.com\n\n"
+                        "💡 Horario de atención:\n"
+                        "Lunes a viernes, de 9 a 18 hs.\n\n"
+                        "🙏 Gracias por usar HealthFirst 💙"
+                    )
+
+                elif text == '/help':
+                    response_text = (
+                        "🆘 Ayuda - Comandos disponibles:\n\n"
+                        "📋 /licencias — Muestra tus últimas 10 licencias y sus estados.\n"
+                        "📄 /licencia [ID] — Muestra el detalle completo de una licencia específica.\n"
+                        "ℹ️ /info — Información de contacto y horarios de atención.\n"
+                        "❓ /help — Muestra este menú de ayuda.\n\n"
+                        "Gracias por usar HealthFirst 💙"
+                    )
 
 
-                response_text += "Envie license seguido del id para obtener mas informacion sobre una licencia.\nn ejemplo: license 1234"
-
-            elif text.startswith('license '):
-                license_id = text.split()[1]
-                license = License.objects.filter(license_id=license_id).first()
-                if license:
-                    response_text = license.get_detail_for_message()
                 else:
-                    response_text = "Licencia no encontrada."
+                    response_text = "Comando no reconocido."
+
             else:
-                response_text = "Comando no reconocido."
+                response_text = "Usuario no autorizado para usar el sistema."
+                    
             
             TelegramService.send_message(chat_id, response_text)
             
