@@ -9,7 +9,8 @@ const Confirmation = ({
   message = "Esta acción no se puede deshacer.",
   confirmText = "Confirmar",
   cancelText = "Cancelar",
-  type = "warning" // 'warning', 'danger', 'info'
+  type = "warning", // 'warning', 'danger', 'info'
+  confirmDisabled = false
 }) => {
   const [isBrowser, setIsBrowser] = useState(false);
 
@@ -57,6 +58,7 @@ const Confirmation = ({
           <div className="px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse gap-1">
             <button
               type="button"
+              disabled={confirmDisabled}
               className={`w-full inline-flex justify-center rounded-md px-4 py-2 text-base font-medium shadow-sm focus:outline-none sm:ml-3 sm:w-auto sm:text-sm ${currentStyle.button}`}
               onClick={onConfirm}
             >
@@ -64,6 +66,7 @@ const Confirmation = ({
             </button>
             <button
               type="button"
+              disabled={confirmDisabled}
               className="mt-3 w-full inline-flex justify-center rounded-md border border-border px-4 py-2 bg-background text-base font-medium text-foreground shadow-sm hover:bg-card focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
               onClick={onClose}
             >
