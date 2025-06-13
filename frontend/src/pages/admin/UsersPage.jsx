@@ -34,12 +34,12 @@ const UsersPage = () => {
       try {
         setLoading(true);
         setError(null);
-        const filterToSend = filter !== 'all' ? `${filter}` : '';
         
         const response = await getUsersByFilter(
           pagination.currentPage, 
-          filterToSend,
-          10
+          '',
+          10,
+          filter
         );
         
         const transformedUsers = response.users.map(user => ({
@@ -84,7 +84,8 @@ const UsersPage = () => {
       const response = await getUsersByFilter(
         1,
         searchTerm,
-        5
+        5,
+        filter
       );
       
       const transformedUsers = response.users.map(user => ({
@@ -113,6 +114,7 @@ const UsersPage = () => {
   // Manejar la tecla Enter
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
+      e.preventDefault();
       handleSearch();
     }
   };
