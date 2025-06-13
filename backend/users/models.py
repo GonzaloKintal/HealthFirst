@@ -1,5 +1,4 @@
 from datetime import datetime
-from this import d
 from django.utils import timezone
 from django.conf import settings
 from django.db import models
@@ -28,6 +27,7 @@ class Department(models.Model):
     department_id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True, null=True)
+    is_high_risk_department=models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
@@ -63,7 +63,8 @@ class HealthFirstUser(AbstractUser):
     is_deleted=models.BooleanField(default=False)
     delete_at=models.DateTimeField(null=True, blank=True,default=None)
     employment_start_date=models.DateField(null=True, blank=True)
-
+    is_telegram_suscriptor = models.BooleanField(default=False)
+    telegram_id=models.BigIntegerField(null=True, blank=True)
 
     def save(self, *args, **kwargs):
         # Asegurar campos de tipo `date`
@@ -116,6 +117,17 @@ class HealthFirstUser(AbstractUser):
         self.is_deleted = True
         self.delete_at=now()
         super().save(*args, **kwargs)
+
+
+    def add_telegram_suscription(self, telegram_id):
+        self.is_telegram_suscriptor = True
+        self.telegram_id = telegram_id
+        super().save()
+
+    def remove_telegram_suscription(self):
+        self.is_telegram_suscriptor = False
+        self.telegram_id = None
+        super().save()
 
     @classmethod
     def user_roles(cls):

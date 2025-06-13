@@ -3,7 +3,8 @@ from django.contrib.auth.decorators import login_required
 import jwt
 import time
 
-METABASE_SITE_URL = "http://ec2-54-205-20-165.compute-1.amazonaws.com:3000";
+#METABASE_SITE_URL = "http://ec2-54-205-20-165.compute-1.amazonaws.com:3000";
+METABASE_SITE_URL = "https://metabase-vd.duckdns.org";
 METABASE_SECRET_KEY = "b6c90930d0256debc70b6b653f2198ef342f952da1349fb7d7f6120f63c27554";
 
 def metabase_iframe_url(request):
@@ -12,7 +13,6 @@ def metabase_iframe_url(request):
     request_date = request.GET.get("request_date")
     license_type = request.GET.get("license_type")
     user = request.GET.get("user")
-    justified = request.GET.get("justified")
     evaluator = request.GET.get("evaluator")
 
     params = {}
@@ -22,8 +22,6 @@ def metabase_iframe_url(request):
         params["License Type"] = license_type
     if user:
         params["User"] = user
-    if justified:
-        params["Justified"] = justified
     if evaluator:
         params["Evaluator"] = evaluator
 

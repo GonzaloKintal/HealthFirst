@@ -12,6 +12,7 @@ dist
 dist-ssr
 *.local
 
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -29,3 +30,5 @@ local.py
 backend/env/
 backend/venv/
 modelo_clasificador.joblib
+nohup.out
+backend/settings/settings_prod.py

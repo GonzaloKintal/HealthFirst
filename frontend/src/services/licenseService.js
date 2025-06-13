@@ -8,8 +8,9 @@ export const getLicenses = async (filters = {}) => {
       user_id: filters.user_id || null,
       status: filters.status || null,
       employee_name: filters.employee_name || '',
+      type: filters.type || null,
       page: filters.page || 1,
-      page_size: filters.pageSize || 5,
+      page_size: filters.pageSize || 10,
       show_all_users: filters.show_all_users || false
     });
     
@@ -235,6 +236,74 @@ export const exportLicensesToCSV = async (filters = {}) => {
     return {
       success: false,
       error: error.response?.data?.error || 'Error al exportar las licencias a CSV'
+    };
+  }
+};
+
+// Obtener anomalías de supervisores
+export const getSupervisorAnomalies = async (filters = {}) => {
+  try {
+    const response = await api.get('/licenses/anomalies/supervisor', {
+      params: {
+        start_date: filters.start_date || null,
+        end_date: filters.end_date || null,
+        user_id: filters.user_id || null,
+        is_anomaly: filters.is_anomaly || null,
+        limit: filters.limit || null,
+        offset: filters.offset || null
+      }
+    });
+    
+    return {
+      success: true,
+      data: response.data.results || [],
+      count: response.data.count || 0,
+      next: response.data.next || null,
+      previous: response.data.previous || null
+    };
+  } catch (error) {
+    console.error('Error fetching supervisor anomalies:', error);
+    return {
+      success: false,
+      error: error.response?.data?.error || 'Error al obtener las anomalías de supervisores',
+      data: [],
+      count: 0,
+      next: null,
+      previous: null
+    };
+  }
+};
+
+ // Obtener anomalías de empleados
+export const getEmployeeAnomalies = async (filters = {}) => {
+  try {
+    const response = await api.get('/licenses/anomalies/employee', {
+      params: {
+        start_date: filters.start_date || null,
+        end_date: filters.end_date || null,
+        employee_id: filters.employee_id || null,
+        is_anomaly: filters.is_anomaly || null,
+        limit: filters.limit || null,
+        offset: filters.offset || null
+      }
+    });
+
+    return {
+      success: true,
+      data: response.data.results || [],
+      count: response.data.count || 0,
+      next: response.data.next || null,
+      previous: response.data.previous || null
+    };
+  } catch (error) {
+    console.error('Error fetching employee anomalies:', error);
+    return {
+      success: false,
+      error: error.response?.data?.error || 'Error al obtener las anomalías de empleados',
+      data: [],
+      count: 0,
+      next: null,
+      previous: null
     };
   }
 };
