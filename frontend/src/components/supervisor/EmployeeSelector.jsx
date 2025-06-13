@@ -6,7 +6,8 @@ import { getUsersByFilter } from '../../services/userService';
 const EmployeeSelector = ({ 
   selectedEmployee, 
   onEmployeeSelected,
-  initialEmployees = []
+  initialEmployees = [],
+  roles = ['employee']
 }) => {
   const [employeeSearchTerm, setEmployeeSearchTerm] = useState('');
   const [filteredEmployees, setFilteredEmployees] = useState(initialEmployees);
@@ -23,7 +24,7 @@ const EmployeeSelector = ({
     try {
       const response = await getUsersByFilter(1, query, 10);
       const filtered = response.users.filter(user => 
-        user.role === 'employee' || user.role === 'analyst'
+        roles.includes(user.role)
       );
       setFilteredEmployees(filtered);
     } catch (error) {
@@ -48,10 +49,19 @@ const EmployeeSelector = ({
     setEmployeeSearchTerm('');
   };
 
+  const getRoleLabel = () => {
+    if (roles.includes('employee')) {
+      return 'Seleccionar Empleado *';
+    }
+    if (roles.includes('supervisor')) {
+      return 'Seleccionar Supervisor *';
+    }
+  };
+
   return (
     <div className="mb-4">
       <label className="block text-sm font-medium text-foreground mb-1">
-        Seleccionar Empleado *
+        {getRoleLabel()}
       </label>
       <Combobox 
         value={selectedEmployee}

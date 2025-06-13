@@ -49,9 +49,6 @@ class License(models.Model):
     information = models.TextField(blank=True, null=True)
     request_date = models.DateField()
     closing_date = models.DateField(blank=True, null=True)
-    justified = models.BooleanField(default=False)
-    certificate_need = models.BooleanField(default=False)
-    certificate_immediate = models.BooleanField(default=False)
     deleted_at = models.DateTimeField(blank=True, null=True)
     is_deleted = models.BooleanField(default=False)
     evaluator=models.ForeignKey(HealthFirstUser, on_delete=models.SET_NULL, null=True, blank=True, related_name='evaluator')
@@ -96,6 +93,17 @@ class License(models.Model):
             name=default_status,
             evaluation_comment='Nueva solicitud.'
         )
+
+    def get_detail_for_message(self):
+        return (
+                f"🪪 Licencia #{self.license_id}\n"
+                f"📅 Solicitada: {self.request_date.strftime('%d/%m/%Y')}\n"
+                f"✅ Estado: {self.status.get_name_display()}\n"
+                f"🗓️ Desde: {self.start_date.strftime('%d/%m/%Y')} "
+                f"hasta {self.end_date.strftime('%d/%m/%Y')}\n"
+                f"📝 Tipo de licencia: {self.type.name}"
+            )
+
 
 
 

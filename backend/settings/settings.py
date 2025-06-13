@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 from datetime import timedelta
+import os
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -27,7 +28,7 @@ SECRET_KEY = 'django-insecure-$ahyu_#9ahc$wftk66w=w$f$scqo@0@)gwot(*n#(c+kk2&ly)
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost',]
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost','ec2-54-163-100-219.compute-1.amazonaws.com', 'https://healthfirst-one.vercel.app/', '.vercel.app', 'https://healthfirst-one.vercel.app/login', 'healthfirst-vd.duckdns.org']
 
 DATABASES = {
 
@@ -137,8 +138,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CORS_ALLOWED_ORIGINS = [
      "http://localhost:3000",
     "http://localhost:5173",
+    "https://healthfirst-one.vercel.app"
 ]
 CORS_ALLOW_CREDENTIALS = True
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -161,16 +164,31 @@ SIMPLE_JWT = {
 AUTH_USER_MODEL = 'users.HealthFirstUser'
 
 
-DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp-relay.brevo.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = '8e70eb001@smtp-brevo.com'  # Remitente autorizado en Brevo
-EMAIL_HOST_PASSWORD = '9rZH07cAL3VF4tPj'
-
-EMAIL_HEALTH_FIRST='healthfirst.voxdei@gmail.com'
-
-
-
-TELEGRAM_BOT_TOKEN="7667764437:AAEWI4LDMF0JlgZlUvdR5VvIh5CuEL_XxNg"
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False, 
+    'formatters': {
+        'verbose': {
+            'format': '{asctime} [{levelname}] - {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': { 
+            'class': 'logging.StreamHandler',
+        },
+        'file': { 
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs', 'licenses.log'),
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        'licenses.management.commands.check_licenses_expired': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    },
+}

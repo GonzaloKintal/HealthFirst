@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { FiCalendar, FiUpload, FiUser, FiFileText} from 'react-icons/fi';
+import { FiCalendar, FiUpload, FiUser, FiFileText, FiSend} from 'react-icons/fi';
 import useAuth from '../../hooks/useAuth';
 import Notification from '../utils/Notification';
 import { getUser, getUsers } from '../../services/userService';
@@ -13,12 +13,14 @@ import StyledDatePicker from '../utils/StyledDatePicker';
 import { format } from 'date-fns';
 import es from 'date-fns/locale/es';
 import { formatArgentinaDate } from '../utils/FormattedDate';
+import AlertWithDownload from './AlertWithDownload';
 
 const RequestLicense = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     licenseTypeId: '',
+    licenseTypeName: '',
     startDate: null,
     endDate: null,
     reason: '',
@@ -187,13 +189,30 @@ useEffect(() => {
 
   const employeeData = getEmployeeData();
 
+  // const handleChange = (e) => {
+  //   const { name, value, files, type, checked } = e.target;
+    
+  //   setFormData(prev => ({
+  //     ...prev,
+  //     [name]: type === 'checkbox' ? checked : (files ? files[0] : value)
+  //   }));
+  // };
   const handleChange = (e) => {
     const { name, value, files, type, checked } = e.target;
-    
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : (files ? files[0] : value)
-    }));
+
+    if (name === 'licenseTypeId') {
+      const selectedType = licenseTypes.find(type => type.id === Number(value));
+      setFormData(prev => ({
+        ...prev,
+        licenseTypeId: value,
+        licenseTypeName: selectedType?.name || ''
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: type === 'checkbox' ? checked : (files ? files[0] : value)
+      }));
+    }
   };
 
   const handleDateChange = (date, field) => {
@@ -358,6 +377,7 @@ useEffect(() => {
     }
   };
   
+  
 
   return (
     <div className="p-6 max-w-3xl mx-auto relative">
@@ -370,12 +390,15 @@ useEffect(() => {
         />
       )}
       
-      <h1 className="text-2xl font-bold mb-6 text-foreground">Solicitar Licencia</h1>
+      <h1 className="text-xl sm:text-2xl mb-6 font-bold flex items-center text-foreground">
+        <FiSend className="mr-2" />
+        Solicitar Licencia
+      </h1>
       
       <form onSubmit={handleSubmit} className="space-y-6" autoComplete='off'>
         {/* Sección de Datos Personales */}
         <div className="bg-background p-6 rounded-lg shadow">
-          <h2 className="text-xl font-semibold mb-4 flex items-center text-foreground">
+          <h2 className="text-xl sm:text-2xl font-semibold mb-4 flex items-center text-foreground">
             <FiUser className="mr-2" /> Datos Personales
           </h2>
           
@@ -385,6 +408,7 @@ useEffect(() => {
               selectedEmployee={formData.selectedEmployee}
               onEmployeeSelected={(value) => setFormData(prev => ({ ...prev, selectedEmployee: value }))}
               initialEmployees={employees}
+              roles={['employee']}
             />
           )}
           
@@ -455,7 +479,7 @@ useEffect(() => {
 
         {/* Sección de Detalles de la Licencia */}
         <div className="bg-background p-6 rounded-lg shadow">
-          <h2 className="text-xl font-semibold mb-4 flex items-center text-foreground">
+          <h2 className="text-xl sm:text-2xl font-semibold mb-4 flex items-center text-foreground">
             <FiCalendar className="mr-2 text-foreground" /> Detalles de la Licencia
           </h2>
           
@@ -537,9 +561,14 @@ useEffect(() => {
 
         {/* Sección de Documentación */}
         <div className="bg-background p-6 rounded-lg shadow">
-          <h2 className="text-xl font-semibold mb-4 flex items-center text-foreground">
+          <h2 className="text-xl sm:text-2xl font-semibold mb-4 flex items-center text-foreground">
             <FiUpload className="mr-2 text-foreground" /> Documentación Adjunta
           </h2>
+
+          {licenseTypes.find(type => type.id === Number(formData.licenseTypeId))?.name.toLowerCase() === 'enfermedad' && (
+            <AlertWithDownload />
+          )}
+
           
           <FileValidator onValidation={(result) => {
             if (!result.isValid && result.error) {
@@ -549,10 +578,10 @@ useEffect(() => {
             {({ validateFile, error }) => (
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1">
-                  Adjuntar Documento (opcional)
+                  Adjuntar Documento
                 </label>
                 
-                <div className="mt-1 flex items-center">
+                <div className="mt-1 flex flex-col sm:flex-row items-start sm:items-center">
                   <label className="cursor-pointer bg-background py-2 px-3 border border-border rounded-md shadow-sm text-sm leading-4 font-medium text-foreground hover:bg-card focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-border">
                     <FiFileText className="inline mr-2 text-lg text-foreground" />
                     Seleccionar archivo

@@ -21,6 +21,21 @@ class LicenseValidationError(Exception): # para las excepiones
 
 def license_analysis(license): #se le pasa la licencia
 
+
+
+    overlapping_licenses = License.objects.filter(
+        user=license.user,
+        status__name__in=["approved", "missing_doc", "pending"],
+        is_deleted=False,
+        start_date__lte=license.end_date,
+        end_date__gte=license.start_date
+    )
+
+    if overlapping_licenses.exists():
+        raise LicenseValidationError ("El empleado ya posee una solicitud o una licencia en el rango de fechas seleccionado")
+
+
+
     if license.type.name== "Vacaciones" and license.required_days > calculate_total_vacation_days(license.user):
         raise LicenseValidationError ("No posee los dias suficientes para solicitar vacaciones") #actualizo la cantidad de dias que tiene por vacaciones
     
@@ -61,14 +76,9 @@ def license_analysis(license): #se le pasa la licencia
         "Mudanza"
     ]
 
-    #validar si el certificado subido corresponde con la licencia(evalua:fechas,dni,nombre y apellido)
-    if license.certificate_need and license.type.name not in licenses_types and not validar_datos_certificado(license.certificate.file, license, license.user):
-         raise LicenseValidationError ("El certificado asociado no es coherente con la licencia pedida")
-
 def calculate_total_vacation_days(user): # se obtienen el total de dias para las vacaciones
 
-    current_year = datetime.now().year # obtengo el año actual
-    last_date = date(current_year, 12, 31) #se usa para calcular la antiguedad
+    last_date = datetime.now().date() #se usa para calcular la antiguedad
     
 
     if user.employment_start_date is None:

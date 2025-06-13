@@ -34,7 +34,6 @@ const RequestLicense = () => {
 
   return (
     <>
-      <h3 className="text-lg font-medium text-foreground">Cómo solicitar licencia</h3>
       <p className="mt-1 text-sm text-foreground">
         Procedimiento para empleados que necesitan solicitar licencias.
       </p>

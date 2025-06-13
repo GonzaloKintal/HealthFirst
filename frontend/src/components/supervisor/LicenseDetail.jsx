@@ -76,80 +76,137 @@ const LicenseDetail = () => {
     fetchLicense();
   }, [id]);
 
-
   const handleApprove = async () => {
-    try {
-      const response = await evaluateLicense(id, 'approved');
+  try {
+    const response = await evaluateLicense(id, 'approved');
+    
+    if (response.success) {
+      setNotification({
+        show: true,
+        type: 'success',
+        message: 'Licencia aprobada correctamente'
+      });
       
-      if (response.success) {
-        setNotification({
-          show: true,
-          type: 'success',
-          message: 'Licencia aprobada correctamente'
-        });
-        setLicense(prev => ({ 
-          ...prev, 
-          status: 'approved',
-          evaluator: `${user.first_name} ${user.last_name}`,
-          evaluatorRole: user.role,
-          evaluationDate: new Date().toISOString().split('T')[0]
-        }));
+      // Volver a obtener los datos de la licencia desde el servidor
+      const licenseResponse = await getLicenseDetail(id);
+      
+      if (licenseResponse.success && licenseResponse.data) {
+        const status = licenseResponse.data.status?.name?.toLowerCase() || 'pending';
+        const licenseData = {
+          id: id,
+          employee: licenseResponse.data.user?.full_name || 
+                   `${licenseResponse.data.user?.first_name} ${licenseResponse.data.user?.last_name}`,
+          DNI: licenseResponse.data.user?.dni || 'No disponible',
+          department: licenseResponse.data.user?.department || 'No disponible',
+          type: licenseResponse.data.license?.type || 'No disponible',
+          startDate: licenseResponse.data.license?.start_date || '',
+          endDate: licenseResponse.data.license?.end_date || '',
+          days: licenseResponse.data.license?.required_days || 0,
+          status: status,
+          requestedOn: licenseResponse.data.license?.request_date || '',
+          information: licenseResponse.data.license?.information || '',
+          certificate: licenseResponse.data.certificate || null,
+          email: licenseResponse.data.user?.email || '',
+          phone: licenseResponse.data.user?.phone || '',
+          dateOfBirth: licenseResponse.data.user?.date_of_birth || '',
+          rejectionReason: status === 'rejected' ? licenseResponse.data.status?.evaluation_comment || '' : '',
+          evaluator: licenseResponse.data.license?.evaluator || '',
+          evaluatorRole: licenseResponse.data.license?.evaluator_role || '',
+          evaluationDate: licenseResponse.data.status?.evaluation_date || ''
+        };
+        setLicense(licenseData);
       } else {
         setNotification({
           show: true,
           type: 'error',
-          message: response.error || 'Error al aprobar la licencia'
+          message: 'Licencia aprobada, pero no se pudieron actualizar los datos'
         });
       }
-    } catch (error) {
-      console.error('Error approving license:', error);
+    } else {
       setNotification({
         show: true,
         type: 'error',
-        message: 'Error al aprobar la licencia'
+        message: response.error || 'Error al aprobar la licencia'
       });
-    } finally {
-      setShowApproveConfirmation(false);
     }
-  };
-  
-  const handleReject = async () => {
-    try {
-      const response = await evaluateLicense(id, 'rejected', rejectionReason);
+  } catch (error) {
+    console.error('Error approving license:', error);
+    setNotification({
+      show: true,
+      type: 'error',
+      message: 'Error al aprobar la licencia'
+    });
+  } finally {
+    setShowApproveConfirmation(false);
+  }
+};
+
+const handleReject = async () => {
+  try {
+    const response = await evaluateLicense(id, 'rejected', rejectionReason);
+    
+    if (response.success) {
+      setNotification({
+        show: true,
+        type: 'success',
+        message: 'Licencia rechazada correctamente'
+      });
       
-      if (response.success) {
-        setNotification({
-          show: true,
-          type: 'success',
-          message: 'Licencia rechazada correctamente'
-        });
-        setLicense(prev => ({
-          ...prev,
-          status: 'rejected',
-          rejectionReason: rejectionReason,
-          evaluator: `${user.first_name} ${user.last_name}`,
-          evaluatorRole: user.role,
-          evaluationDate: new Date().toISOString().split('T')[0]
-        }));
-        resetRejectionForm();
+      // Volver a obtener los datos de la licencia desde el servidor
+      const licenseResponse = await getLicenseDetail(id);
+      
+      if (licenseResponse.success && licenseResponse.data) {
+        const status = licenseResponse.data.status?.name?.toLowerCase() || 'pending';
+        const licenseData = {
+          id: id,
+          employee: licenseResponse.data.user?.full_name || 
+                   `${licenseResponse.data.user?.first_name} ${licenseResponse.data.user?.last_name}`,
+          DNI: licenseResponse.data.user?.dni || 'No disponible',
+          department: licenseResponse.data.user?.department || 'No disponible',
+          type: licenseResponse.data.license?.type || 'No disponible',
+          startDate: licenseResponse.data.license?.start_date || '',
+          endDate: licenseResponse.data.license?.end_date || '',
+          days: licenseResponse.data.license?.required_days || 0,
+          status: status,
+          requestedOn: licenseResponse.data.license?.request_date || '',
+          information: licenseResponse.data.license?.information || '',
+          certificate: licenseResponse.data.certificate || null,
+          email: licenseResponse.data.user?.email || '',
+          phone: licenseResponse.data.user?.phone || '',
+          dateOfBirth: licenseResponse.data.user?.date_of_birth || '',
+          rejectionReason: status === 'rejected' ? licenseResponse.data.status?.evaluation_comment || '' : '',
+          evaluator: licenseResponse.data.license?.evaluator || '',
+          evaluatorRole: licenseResponse.data.license?.evaluator_role || '',
+          evaluationDate: licenseResponse.data.status?.evaluation_date || ''
+        };
+        setLicense(licenseData);
       } else {
         setNotification({
           show: true,
           type: 'error',
-          message: response.error || 'Error al rechazar la licencia'
+          message: 'Licencia rechazada, pero no se pudieron actualizar los datos'
         });
       }
-    } catch (error) {
-      console.error('Error rejecting license:', error);
+      
+      resetRejectionForm();
+    } else {
       setNotification({
         show: true,
         type: 'error',
-        message: 'Error al rechazar la licencia'
+        message: response.error || 'Error al rechazar la licencia'
       });
-    } finally {
-      setShowRejectConfirmation(false);
     }
-  };
+  } catch (error) {
+    console.error('Error rejecting license:', error);
+    setNotification({
+      show: true,
+      type: 'error',
+      message: 'Error al rechazar la licencia'
+    });
+  } finally {
+    setShowRejectConfirmation(false);
+  }
+};
 
   const handleViewCertificate = () => {
     try {
@@ -295,7 +352,7 @@ const LicenseDetail = () => {
   if (error) {
     return (
       <div className="p-6">
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+        <div className="mt-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded dark:bg-red-900 dark:border-red-700 dark:text-red-100">
           <strong className="font-bold">Error!</strong>
           <span className="block sm:inline"> {error}</span>
         </div>
@@ -351,14 +408,24 @@ const LicenseDetail = () => {
 
               {showRejectionInput && (
               <div className="space-y-2">
-                <textarea
+                <select
                   value={rejectionReason}
                   onChange={(e) => setRejectionReason(e.target.value)}
-                  placeholder="Ingrese el motivo del rechazo..."
-                  className="w-full p-2 border bg-background border-border rounded-md focus:ring-primary-border focus:border-primary-border resize-none text-foreground"
-                  rows={3}
+                  className="w-full mt-2 mb-2 p-2 border bg-background border-border rounded-md focus:ring-primary-border focus:border-primary-border text-foreground"
                   required
-                />
+                >
+                  <option value="">Seleccione un motivo de rechazo...</option>
+                  <option value="Certificado falso">Certificado falso</option>
+                  <option value="Certificado con inconsistencias evidentes">Certificado con inconsistencias evidentes</option>
+                  <option value="Certificado ilegible">Certificado ilegible</option>
+                  <option value="Certificado incompleto">Certificado incompleto</option>
+                  <option value="Fecha del certificado fuera del período solicitado">Fecha del certificado fuera del período solicitado</option>
+                  <option value="Duración de la licencia no respaldada por el certificado médico">Duración de la licencia no respaldada por el certificado médico</option>
+                  <option value="Motivo no justificado en el documento adjuntado">Motivo no justificado en el documento adjuntado</option>
+                  <option value="Tipo de licencia no respaldado por la documentación">Tipo de licencia no respaldado por la documentación</option>
+                  <option value="Inconsistencias entre datos del empleado y lo declarado en el certificado">Inconsistencias entre datos del empleado y lo declarado en el certificado</option>
+                </select>
+
                 <div className="flex space-x-2">
                   <button
                     onClick={() => {
@@ -366,7 +433,7 @@ const LicenseDetail = () => {
                         setNotification({
                           show: true,
                           type: 'error',
-                          message: 'Por favor ingrese un motivo de rechazo'
+                          message: 'Por favor seleccione un motivo de rechazo'
                         });
                         return;
                       }

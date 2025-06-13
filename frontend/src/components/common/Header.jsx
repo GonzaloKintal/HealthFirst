@@ -34,7 +34,6 @@ const Header = ({ toggleDrawer }) => {
 
   const handleLogout = async () => {
     setIsLoggingOut(true);
-    await new Promise(resolve => setTimeout(resolve, 3000));
     logout();
     setIsDropdownOpen(false);
     setIsLoggingOut(false);
