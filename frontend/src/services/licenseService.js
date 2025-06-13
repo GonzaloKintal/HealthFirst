@@ -253,7 +253,6 @@ export const getSupervisorAnomalies = async (filters = {}) => {
         offset: filters.offset || null
       }
     });
-    console.log('Response from getSupervisorAnomalies:', response.data);
     
     return {
       success: true,
@@ -288,7 +287,6 @@ export const getEmployeeAnomalies = async (filters = {}) => {
         offset: filters.offset || null
       }
     });
-    console.log('Response from getEmployeeAnomalies:', response.data);
 
     return {
       success: true,
