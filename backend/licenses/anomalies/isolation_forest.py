@@ -203,7 +203,7 @@ def get_supervisor_anomalies(start_date=None, end_date=None): #FUNCION PRINCIPAL
     dataframe['approval_rate_diff'] = (dataframe['approval_rate_diff']*100).map("{:+.2f}%".format) #NUEVA INFO
     dataframe['rejection_rate_diff'] = (dataframe['rejection_rate_diff']*100).map("{:+.2f}%".format) #NUEVA INFO
     dataframe['total_requests_percent'] = (dataframe['total_requests_percent']*100).map("{:.2f}%".format)#NUEVA INFO
-    print(dataframe)
+    #print(dataframe)
     dataframe = dataframe.drop(columns=['seniority_days'])
 
     columnas_ordenadas = ['evaluator_id','evaluator_name', 'department'] + [col for col in dataframe.columns if col not in ['evaluator_name', 'department']]
@@ -545,9 +545,9 @@ def dataframe_pruebas_emp(): # para pruebas
 #print(get_supervisor_anomalies())
 
 #generate_supervisors_csv()
-create_model_supervisor('supervisors.csv')
-print(anomalies_supervisors(dataframe_pruebas_sup()))
-print(anomalies_supervisors(dataframe_pruebas_sup_not()))
+#create_model_supervisor('supervisors.csv')
+#print(anomalies_supervisors(dataframe_pruebas_sup()))
+#print(anomalies_supervisors(dataframe_pruebas_sup_not()))
 #get_supervisor_anomalies()
 #print()
 #pruebas emp-------------------------------------------------------------------------------------------------------
