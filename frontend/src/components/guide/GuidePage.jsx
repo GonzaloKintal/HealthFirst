@@ -56,9 +56,9 @@ const GuidePage = () => {
         </h1>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-6">
+      <div className="flex flex-col gap-6">
         {/* Índice lateral */}
-        <div className="lg:w-72 flex-shrink-0">
+        <div className="flex-shrink-0">
           <div className="lg:sticky lg:top-6">
             <div className="bg-card p-4 rounded-lg shadow">
               <h2 className="text-lg font-semibold mb-4 text-foreground border-b border-border pb-2">Índice</h2>
