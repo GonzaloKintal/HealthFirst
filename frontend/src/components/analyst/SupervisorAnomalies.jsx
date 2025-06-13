@@ -5,16 +5,13 @@ import { FiRefreshCw, FiPieChart, FiUser, FiFilter, FiX, FiAlertTriangle, FiTren
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, PointElement, ScatterController } from 'chart.js';
 import { Pie, Scatter } from 'react-chartjs-2';
 import { getSupervisorAnomalies } from '../../services/licenseService';
-import { getUser } from '../../services/userService';
 import StyledDatePicker from '../utils/StyledDatePicker';
-import EmployeeSelector from '../supervisor/EmployeeSelector';
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, PointElement, ScatterController);
 
 const SupervisorAnomalies = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [supervisors, setSupervisors] = useState({});
   const [anomaliesData, setAnomaliesData] = useState(null);
   const [globalAnomaliesData, setGlobalAnomaliesData] = useState(null);
   const [error, setError] = useState(null);
@@ -86,27 +83,6 @@ const SupervisorAnomalies = () => {
 
         const transformedGlobalData = transformApiData(globalResult.data);
         setGlobalAnomaliesData(transformedGlobalData);
-
-        // Fetch supervisor data for unique supervisor IDs in global data
-        const globalSupervisorIds = [...new Set(transformedGlobalData.map(item => item.evaluator_id))];
-        const supervisorPromises = globalSupervisorIds.map(async (id) => {
-          if (!supervisors[id]) {
-            try {
-              const supervisorData = await getUser(id);
-              return { id, ...supervisorData };
-            } catch (err) {
-              console.error(`Error fetching supervisor ${id}:`, err);
-              return { id, name: `Supervisor (ID: ${id})`, department: 'Sin departamento' };
-            }
-          }
-          return null;
-        });
-
-        const fetchedSupervisors = (await Promise.all(supervisorPromises)).filter(sup => sup !== null);
-        setSupervisors(prev => ({
-          ...prev,
-          ...fetchedSupervisors.reduce((acc, sup) => ({ ...acc, [sup.id]: sup }), {})
-        }));
       }
 
       // Fetch filtered anomalies data
@@ -125,27 +101,6 @@ const SupervisorAnomalies = () => {
 
       const transformedFilteredData = transformApiData(filteredResult.data);
       setAnomaliesData(transformedFilteredData);
-
-      // Fetch supervisor data for unique supervisor IDs in filtered data
-      const filteredSupervisorIds = [...new Set(transformedFilteredData.map(item => item.evaluator_id))];
-      const supervisorPromises = filteredSupervisorIds.map(async (id) => {
-        if (!supervisors[id]) {
-          try {
-            const supervisorData = await getUser(id);
-            return { id, ...supervisorData };
-          } catch (err) {
-            console.error(`Error fetching supervisor ${id}:`, err);
-            return { id, name: `Supervisor (ID: ${id})`, department: 'Sin departamento' };
-          }
-        }
-        return null;
-      });
-
-      const fetchedSupervisors = (await Promise.all(supervisorPromises)).filter(sup => sup !== null);
-      setSupervisors(prev => ({
-        ...prev,
-        ...fetchedSupervisors.reduce((acc, sup) => ({ ...acc, [sup.id]: sup }), {})
-      }));
 
       setPagination({
         count: filteredResult.count || 0,
@@ -180,12 +135,22 @@ const SupervisorAnomalies = () => {
   };
 
   const handleRowMouseEnter = (event, index) => {
+    const tooltipWidth = 256;
+    const windowWidth = window.innerWidth;
+    const offsetX = 15;
+
+    let xPos = event.clientX + offsetX;
+    if (xPos + tooltipWidth > windowWidth - 10) {
+      xPos = event.clientX - tooltipWidth - offsetX;
+    }
+
     setTooltipPosition({
-      x: event.clientX,
-      y: event.clientY
+      x: xPos,
+      y: event.clientY - 30,
     });
     setHoveredRow(index);
   };
+
 
   const handleRowMouseLeave = () => {
     setHoveredRow(null);
@@ -194,6 +159,8 @@ const SupervisorAnomalies = () => {
   const transformApiData = (apiData) => {
     return apiData.map(item => ({
       evaluator_id: item.evaluator_id,
+      evaluator_name: item.evaluator_name,
+      department: item.department,
       total_requests: item.total_requests,
       approved_requests: item.approved_requests,
       rejected_requests: item.rejected_requests,
@@ -204,25 +171,6 @@ const SupervisorAnomalies = () => {
       rejection_rate_diff: item.rejection_rate_diff || '0%',
       total_requests_percent: item.total_requests_percent || '0%'
     }));
-  };
-
-  const getNameById = (id, ignoreLoading = false) => {
-    if (!ignoreLoading && isLoading) return 'Cargando...';
-    if (error) return `Supervisor (ID: ${id})`;
-
-    const supervisor = supervisors[id];
-    if (!supervisor) {
-      return `Supervisor (ID: ${id})`;
-    }
-    return supervisor.name || supervisor.full_name || `Supervisor (ID: ${id})`;
-  };
-
-  const getDepartmentById = (id) => {
-    if (isLoading) return 'Cargando...';
-    if (error) return 'Sin departamento';
-
-    const supervisor = supervisors[id];
-    return supervisor?.department || 'Sin departamento';
   };
 
   const getChartData = () => {
@@ -247,7 +195,7 @@ const SupervisorAnomalies = () => {
       },
       scatterData: {
         datasets: globalAnomaliesData.length > 0 ? globalAnomaliesData.map(item => ({
-          label: getNameById(item.evaluator_id, true),
+          label: item.evaluator_name,
           data: [{
             x: item.total_requests,
             y: item.approval_rate,
@@ -271,6 +219,11 @@ const SupervisorAnomalies = () => {
         position: 'bottom',
         labels: {
           color: isDarkMode ? '#ffffff' : '#1f2937',
+          padding: 20,
+          boxWidth: 15,
+          font: {
+            size: 12
+          }
         },
       },
       tooltip: {
@@ -328,7 +281,7 @@ const SupervisorAnomalies = () => {
           label: (ctx) => {
             const item = globalAnomaliesData[ctx.datasetIndex];
             return [
-              `Supervisor: ${getNameById(item.evaluator_id)}`,
+              `Supervisor: ${item.evaluator_name}`,
               `Solicitudes: ${ctx.parsed.x}`,
               `Aprobación: ${ctx.parsed.y}%`,
               `Desviación: ${item.approval_rate_diff}`
@@ -405,7 +358,7 @@ const SupervisorAnomalies = () => {
               </>
             ) : (
               <>
-                <FiRefreshCw className="mr-2" />
+                <FiRefreshCw className="mr-2 hidden sm:inline" />
                 Analizar supervisores
               </>
             )}
@@ -446,13 +399,6 @@ const SupervisorAnomalies = () => {
               </div>
 
               <div className="space-y-3">
-                <EmployeeSelector
-                  selectedEmployee={filters.user_id}
-                  onEmployeeSelected={(value) => setFilters(prev => ({ ...prev, user_id: value }))}
-                  initialEmployees={Object.values(supervisors)}
-                  roles={['supervisor']}
-                />
-
                 <div>
                   <label className="block text-sm font-medium mb-1 text-foreground">Estado</label>
                   <select
@@ -575,12 +521,9 @@ const SupervisorAnomalies = () => {
               {globalAnomaliesData && globalAnomaliesData.length > 0 ? (
                 <>
                   <div className="mt-2 text-xl font-bold text-foreground">
-                    {getNameById(
-                      globalAnomaliesData.reduce((prev, current) => 
-                        (prev.approval_rate > current.approval_rate) ? prev : current
-                      ).evaluator_id,
-                      true
-                    )}
+                    {globalAnomaliesData.reduce((prev, current) =>
+                      (prev.approval_rate > current.approval_rate) ? prev : current
+                    ).evaluator_name}
                   </div>
                   <div className="text-sm text-green-600 dark:text-green-400 flex items-center">
                     {globalAnomaliesData.reduce((prev, current) => 
@@ -604,12 +547,9 @@ const SupervisorAnomalies = () => {
               {globalAnomaliesData && globalAnomaliesData.length > 0 ? (
                 <>
                   <div className="mt-2 text-xl font-bold text-foreground">
-                    {getNameById(
-                      globalAnomaliesData.reduce((prev, current) => 
-                        (prev.approval_rate < current.approval_rate) ? prev : current
-                      ).evaluator_id,
-                      true
-                    )}
+                    {globalAnomaliesData.reduce((prev, current) =>
+                      (prev.approval_rate < current.approval_rate) ? prev : current
+                    ).evaluator_name}
                   </div>
                   <div className="text-sm text-red-600 dark:text-red-400 flex items-center">
                     {globalAnomaliesData.reduce((prev, current) => 
@@ -636,7 +576,7 @@ const SupervisorAnomalies = () => {
             >
               <div className="text-sm text-gray-700 dark:text-gray-300 space-y-2">
                 <div className="font-semibold text-base pb-2 border-b border-gray-200 dark:border-gray-700">
-                  {getNameById(anomaliesData[hoveredRow].evaluator_id)}
+                  {anomaliesData[hoveredRow].evaluator_name}
                 </div>
 
                 <div>
@@ -731,12 +671,8 @@ const SupervisorAnomalies = () => {
                         onMouseLeave={handleRowMouseLeave}
                       >
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground text-center">
-                          <div className="font-medium">{getNameById(item.evaluator_id)}</div>
-                          {!isLoading && !error && Object.keys(supervisors).length > 0 && (
-                            <div className="text-xs text-foreground">
-                              {getDepartmentById(item.evaluator_id)}
-                            </div>
-                          )}
+                          <div className="font-medium">{item.evaluator_name}</div>
+                          <div className="text-xs text-gray-600 dark:text-gray-400">{item.department}</div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground text-center">
                           {item.total_requests}
@@ -858,3 +794,4 @@ const SupervisorAnomalies = () => {
 };
 
 export default SupervisorAnomalies;
+
