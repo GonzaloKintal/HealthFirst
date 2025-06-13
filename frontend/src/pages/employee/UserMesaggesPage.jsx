@@ -1,5 +1,6 @@
+
 import { useState, useEffect } from 'react';
-import { FiMail, FiRefreshCw } from 'react-icons/fi';
+import { FiMail, FiRefreshCw, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import Notification from '../../components/utils/Notification';
 import { getUserEmailEvents } from '../../services/messagingService';
 import useAuth from '../../hooks/useAuth';
@@ -14,18 +15,28 @@ const UserMessagesPage = () => {
     message: ''
   });
   const [error, setError] = useState(null);
+  const [pagination, setPagination] = useState({
+    limit: 10,
+    offset: 0,
+    hasMore: true
+  });
 
   useEffect(() => {
     fetchData();
   }, []);
 
-  const fetchData = async () => {
+  const fetchData = async (newOffset = 0) => {
     try {
       setError(null);
       setLoading(true);
-      const response = await getUserEmailEvents(user.id);
+      const response = await getUserEmailEvents(user.id, pagination.limit, newOffset);
       if (response.success) {
         setEvents(response.events);
+        setPagination(prev => ({
+          ...prev,
+          offset: newOffset,
+          hasMore: response.events.length >= pagination.limit
+        }));
       } else {
         setError(response.error || 'Error al cargar los eventos de correo');
       }
@@ -45,8 +56,18 @@ const UserMessagesPage = () => {
   };
 
   const handleRefresh = async () => {
-    await fetchData();
+    await fetchData(0);
     showNotification('success', 'Eventos actualizados correctamente');
+  };
+
+  const handleNextPage = () => {
+    const newOffset = pagination.offset + pagination.limit;
+    fetchData(newOffset);
+  };
+
+  const handlePrevPage = () => {
+    const newOffset = Math.max(0, pagination.offset - pagination.limit);
+    fetchData(newOffset);
   };
 
   const formatDate = (dateString) => {
@@ -111,74 +132,95 @@ const UserMessagesPage = () => {
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
           </div>
         ) : events.length > 0 ? (
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-border">
-              <thead className="bg-card">
-                <tr>
-                  <th className="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider">
-                    Remitente
-                  </th>
-                  <th className="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider">
-                    Fecha
-                  </th>
-                  <th className="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider">
-                    Asunto
-                  </th>
-                  <th className="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider">
-                    Evento
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-background divide-y divide-border">
-                {events.slice(0, 10).map((event, index) => (
-                  <tr key={index} className="hover:bg-card">
-                    <td className="px-6 py-4 whitespace-nowrap text-center">
-                      <div className="text-sm font-medium">
-                        {formatSender(event.from)}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-center">
-                      <div className="text-sm">
-                        {formatDate(event.date)}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-center">
-                      <div className="text-sm">
-                        {event.subject || 'Sin asunto'}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-center">
-                      <div className="text-sm">
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          event.event === 'delivered' 
-                            ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100' :
-                          event.event === 'opened' 
-                            ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100' :
-                          event.event === 'hardBounces' 
-                            ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100' :
-                          event.event === 'blocked' 
-                            ? 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-100' :
-                          event.event === 'softBounces' 
-                            ? 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-100' :
-                          event.event === 'requests'
-                            ? 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200' :
-                          'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
-                        }`}>
-                          {event.event === 'delivered' ? 'Entregado' :
-                          event.event === 'opened' ? 'Abierto' :
-                          event.event === 'hardBounces' ? 'Rebote duro' :
-                          event.event === 'blocked' ? 'Bloqueado' :
-                          event.event === 'softBounces' ? 'Rebote suave' :
-                          event.event === 'requests' ? 'Solicitado' :
-                          event.event}
-                        </span>
-                      </div>
-                    </td>
+          <>
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-border">
+                <thead className="bg-card">
+                  <tr>
+                    <th className="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider">
+                      Remitente
+                    </th>
+                    <th className="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider">
+                      Fecha
+                    </th>
+                    <th className="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider">
+                      Asunto
+                    </th>
+                    <th className="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider">
+                      Evento
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="bg-background divide-y divide-border">
+                  {events.map((event, index) => (
+                    <tr key={index} className="hover:bg-card">
+                      <td className="px-6 py-4 whitespace-nowrap text-center">
+                        <div className="text-sm font-medium">
+                          {formatSender(event.from)}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-center">
+                        <div className="text-sm">
+                          {formatDate(event.date)}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-center">
+                        <div className="text-sm">
+                          {event.subject || 'Sin asunto'}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-center">
+                        <div className="text-sm">
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            event.event === 'delivered' 
+                              ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100' :
+                            event.event === 'opened' 
+                              ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100' :
+                            event.event === 'hardBounces' 
+                              ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100' :
+                            event.event === 'blocked' 
+                              ? 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-100' :
+                            event.event === 'softBounces' 
+                              ? 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-100' :
+                            event.event === 'requests'
+                              ? 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200' :
+                            'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
+                          }`}>
+                            {event.event === 'delivered' ? 'Entregado' :
+                            event.event === 'opened' ? 'Abierto' :
+                            event.event === 'hardBounces' ? 'Rebote duro' :
+                            event.event === 'blocked' ? 'Bloqueado' :
+                            event.event === 'softBounces' ? 'Rebote suave' :
+                            event.event === 'requests' ? 'Solicitado' :
+                            event.event}
+                          </span>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            {/* Paginación */}
+            <div className="flex justify-center mt-6">
+              <nav className="inline-flex rounded-md shadow">
+                <button
+                  onClick={handlePrevPage}
+                  disabled={pagination.offset === 0 || loading}
+                  className="px-3 py-2 rounded-l-md border border-border bg-background text-sm font-medium text-foreground hover:bg-card disabled:opacity-50 flex items-center"
+                >
+                  <FiChevronLeft className="mr-1" /> Anterior
+                </button>
+                <button
+                  onClick={handleNextPage}
+                  disabled={!pagination.hasMore || loading}
+                  className="px-3 py-2 rounded-r-md border border-border bg-background text-sm font-medium text-foreground hover:bg-card disabled:opacity-50 flex items-center"
+                >
+                  Siguiente <FiChevronRight className="ml-1" />
+                </button>
+              </nav>
+            </div>
+          </>
         ) : (
           <p className="text-center">No hay eventos registrados</p>
         )}
