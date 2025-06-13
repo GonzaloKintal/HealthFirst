@@ -16,7 +16,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from licenses.utils.file_utils import *
 from messaging.services.brevo_email import *
-from .health_risk.risk_model import predict_risk
+from .health_risk.risk_model import predict_employ_risk, predict_risk
 from django.views.decorators.csrf import csrf_exempt
 from django.core.cache import cache
 from rest_framework.pagination import LimitOffsetPagination
@@ -217,21 +217,26 @@ def get_users_by_filter(request):
     page_number = data.get('page', 1)
     page_size = data.get('page_size', 10) 
     filter = data.get('filter', None)
-    decoded_filter = unquote(filter)
-    keywords = decoded_filter.strip().split()  
+    role=data.get('role', None)
 
     try:
         query = Q(is_deleted=False)
-        for word in keywords:
-            subquery = (
-                Q(first_name__icontains=word) |
-                Q(last_name__icontains=word) |
-                Q(email__icontains=word) |
-                Q(dni__icontains=word) |
-                Q(department__name__icontains=word) |
-                Q(role__name__icontains=word)
-            )
-            query &= subquery 
+        if role:
+            query &= Q(role__name=role)
+
+        if filter:
+            decoded_filter = unquote(filter)
+            keywords = decoded_filter.strip().split()
+            for word in keywords:
+                subquery = (
+                    Q(first_name__icontains=word) |
+                    Q(last_name__icontains=word) |
+                    Q(email__icontains=word) |
+                    Q(dni__icontains=word) |
+                    Q(department__name__icontains=word) |
+                    Q(role__name__icontains=word)
+                )
+                query &= subquery 
 
         users = HealthFirstUser.objects.filter(query).distinct()
         paginator= Paginator(users, page_size)
@@ -376,7 +381,12 @@ def predict_health_risk(request):
 
         if not risk_list:
             risk_list = json.loads(predict_risk())
-            cache.set("cached_risk_list", risk_list, timeout=300) 
+            cache.set("cached_risk_list", risk_list, timeout=300)
+
+        risk_filter = request.query_params.get('risk')
+        if risk_filter in ['high', 'low']:
+            risk_label = 'high risk' if risk_filter == 'high' else 'low risk'
+            risk_list = [item for item in risk_list if item.get('risk') == risk_label]
 
     except Exception as e:
         return JsonResponse({"Error inesperado al predecir riesgo": str(e)}, status=500)
@@ -385,3 +395,15 @@ def predict_health_risk(request):
     paginated_data = paginator.paginate_queryset(risk_list, request)
 
     return paginator.get_paginated_response(paginated_data)
+
+
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def predict_health_risk_by_id(request,id):
+    try:
+        risk = json.loads(predict_employ_risk(id))
+    except Exception as e:
+        return JsonResponse({"Error inesperado al predecir riesgo": str(e)}, status=500)
+
+    return JsonResponse({"risk": risk}, status=200)

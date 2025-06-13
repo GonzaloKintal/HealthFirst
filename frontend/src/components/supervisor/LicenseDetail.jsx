@@ -76,80 +76,137 @@ const LicenseDetail = () => {
     fetchLicense();
   }, [id]);
 
-
   const handleApprove = async () => {
-    try {
-      const response = await evaluateLicense(id, 'approved');
+  try {
+    const response = await evaluateLicense(id, 'approved');
+    
+    if (response.success) {
+      setNotification({
+        show: true,
+        type: 'success',
+        message: 'Licencia aprobada correctamente'
+      });
       
-      if (response.success) {
-        setNotification({
-          show: true,
-          type: 'success',
-          message: 'Licencia aprobada correctamente'
-        });
-        setLicense(prev => ({ 
-          ...prev, 
-          status: 'approved',
-          evaluator: `${user.first_name} ${user.last_name}`,
-          evaluatorRole: user.role,
-          evaluationDate: new Date().toISOString().split('T')[0]
-        }));
+      // Volver a obtener los datos de la licencia desde el servidor
+      const licenseResponse = await getLicenseDetail(id);
+      
+      if (licenseResponse.success && licenseResponse.data) {
+        const status = licenseResponse.data.status?.name?.toLowerCase() || 'pending';
+        const licenseData = {
+          id: id,
+          employee: licenseResponse.data.user?.full_name || 
+                   `${licenseResponse.data.user?.first_name} ${licenseResponse.data.user?.last_name}`,
+          DNI: licenseResponse.data.user?.dni || 'No disponible',
+          department: licenseResponse.data.user?.department || 'No disponible',
+          type: licenseResponse.data.license?.type || 'No disponible',
+          startDate: licenseResponse.data.license?.start_date || '',
+          endDate: licenseResponse.data.license?.end_date || '',
+          days: licenseResponse.data.license?.required_days || 0,
+          status: status,
+          requestedOn: licenseResponse.data.license?.request_date || '',
+          information: licenseResponse.data.license?.information || '',
+          certificate: licenseResponse.data.certificate || null,
+          email: licenseResponse.data.user?.email || '',
+          phone: licenseResponse.data.user?.phone || '',
+          dateOfBirth: licenseResponse.data.user?.date_of_birth || '',
+          rejectionReason: status === 'rejected' ? licenseResponse.data.status?.evaluation_comment || '' : '',
+          evaluator: licenseResponse.data.license?.evaluator || '',
+          evaluatorRole: licenseResponse.data.license?.evaluator_role || '',
+          evaluationDate: licenseResponse.data.status?.evaluation_date || ''
+        };
+        setLicense(licenseData);
       } else {
         setNotification({
           show: true,
           type: 'error',
-          message: response.error || 'Error al aprobar la licencia'
+          message: 'Licencia aprobada, pero no se pudieron actualizar los datos'
         });
       }
-    } catch (error) {
-      console.error('Error approving license:', error);
+    } else {
       setNotification({
         show: true,
         type: 'error',
-        message: 'Error al aprobar la licencia'
+        message: response.error || 'Error al aprobar la licencia'
       });
-    } finally {
-      setShowApproveConfirmation(false);
     }
-  };
-  
-  const handleReject = async () => {
-    try {
-      const response = await evaluateLicense(id, 'rejected', rejectionReason);
+  } catch (error) {
+    console.error('Error approving license:', error);
+    setNotification({
+      show: true,
+      type: 'error',
+      message: 'Error al aprobar la licencia'
+    });
+  } finally {
+    setShowApproveConfirmation(false);
+  }
+};
+
+const handleReject = async () => {
+  try {
+    const response = await evaluateLicense(id, 'rejected', rejectionReason);
+    
+    if (response.success) {
+      setNotification({
+        show: true,
+        type: 'success',
+        message: 'Licencia rechazada correctamente'
+      });
       
-      if (response.success) {
-        setNotification({
-          show: true,
-          type: 'success',
-          message: 'Licencia rechazada correctamente'
-        });
-        setLicense(prev => ({
-          ...prev,
-          status: 'rejected',
-          rejectionReason: rejectionReason,
-          evaluator: `${user.first_name} ${user.last_name}`,
-          evaluatorRole: user.role,
-          evaluationDate: new Date().toISOString().split('T')[0]
-        }));
-        resetRejectionForm();
+      // Volver a obtener los datos de la licencia desde el servidor
+      const licenseResponse = await getLicenseDetail(id);
+      
+      if (licenseResponse.success && licenseResponse.data) {
+        const status = licenseResponse.data.status?.name?.toLowerCase() || 'pending';
+        const licenseData = {
+          id: id,
+          employee: licenseResponse.data.user?.full_name || 
+                   `${licenseResponse.data.user?.first_name} ${licenseResponse.data.user?.last_name}`,
+          DNI: licenseResponse.data.user?.dni || 'No disponible',
+          department: licenseResponse.data.user?.department || 'No disponible',
+          type: licenseResponse.data.license?.type || 'No disponible',
+          startDate: licenseResponse.data.license?.start_date || '',
+          endDate: licenseResponse.data.license?.end_date || '',
+          days: licenseResponse.data.license?.required_days || 0,
+          status: status,
+          requestedOn: licenseResponse.data.license?.request_date || '',
+          information: licenseResponse.data.license?.information || '',
+          certificate: licenseResponse.data.certificate || null,
+          email: licenseResponse.data.user?.email || '',
+          phone: licenseResponse.data.user?.phone || '',
+          dateOfBirth: licenseResponse.data.user?.date_of_birth || '',
+          rejectionReason: status === 'rejected' ? licenseResponse.data.status?.evaluation_comment || '' : '',
+          evaluator: licenseResponse.data.license?.evaluator || '',
+          evaluatorRole: licenseResponse.data.license?.evaluator_role || '',
+          evaluationDate: licenseResponse.data.status?.evaluation_date || ''
+        };
+        setLicense(licenseData);
       } else {
         setNotification({
           show: true,
           type: 'error',
-          message: response.error || 'Error al rechazar la licencia'
+          message: 'Licencia rechazada, pero no se pudieron actualizar los datos'
         });
       }
-    } catch (error) {
-      console.error('Error rejecting license:', error);
+      
+      resetRejectionForm();
+    } else {
       setNotification({
         show: true,
         type: 'error',
-        message: 'Error al rechazar la licencia'
+        message: response.error || 'Error al rechazar la licencia'
       });
-    } finally {
-      setShowRejectConfirmation(false);
     }
-  };
+  } catch (error) {
+    console.error('Error rejecting license:', error);
+    setNotification({
+      show: true,
+      type: 'error',
+      message: 'Error al rechazar la licencia'
+    });
+  } finally {
+    setShowRejectConfirmation(false);
+  }
+};
 
   const handleViewCertificate = () => {
     try {
