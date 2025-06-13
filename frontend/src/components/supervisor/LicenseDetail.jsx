@@ -8,6 +8,7 @@ import useAuth from '../../hooks/useAuth';
 import Notification from '../../components/utils/Notification';
 import UploadCertificateModal from '../employee/UploadCertificateModal';
 import LicenseDetailSkeleton from './LicenseDetailSkeleton';
+import { set } from 'date-fns';
 
 const LicenseDetail = () => {
   const { id } = useParams();
@@ -29,6 +30,7 @@ const LicenseDetail = () => {
   const [analysis, setAnalysis] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
     const fetchLicense = async () => {
@@ -78,6 +80,7 @@ const LicenseDetail = () => {
 
   const handleApprove = async () => {
   try {
+    setIsProcessing(true);
     const response = await evaluateLicense(id, 'approved');
     
     if (response.success) {
@@ -137,12 +140,14 @@ const LicenseDetail = () => {
       message: 'Error al aprobar la licencia'
     });
   } finally {
+    setIsProcessing(false);
     setShowApproveConfirmation(false);
   }
 };
 
 const handleReject = async () => {
   try {
+    setIsProcessing(true);
     const response = await evaluateLicense(id, 'rejected', rejectionReason);
     
     if (response.success) {
@@ -204,6 +209,7 @@ const handleReject = async () => {
       message: 'Error al rechazar la licencia'
     });
   } finally {
+    setIsProcessing(false);
     setShowRejectConfirmation(false);
   }
 };
@@ -395,6 +401,7 @@ const handleReject = async () => {
                 <button
                   onClick={() => setShowApproveConfirmation(true)}
                   className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 flex items-center cursor-pointer"
+                  disabled={isProcessing}
                 >
                   <FiCheck className="mr-2" /> Aprobar
                 </button>
@@ -440,6 +447,7 @@ const handleReject = async () => {
                       setShowRejectConfirmation(true);
                     }}
                     className="px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 text-sm cursor-pointer"
+                    disabled={isProcessing}
                   >
                     Confirmar Rechazo
                   </button>
@@ -696,6 +704,7 @@ const handleReject = async () => {
         confirmText="Aprobar"
         cancelText="Cancelar"
         type="info"
+        confirmDisabled={isProcessing}
       />
 
       <Confirmation
@@ -707,6 +716,7 @@ const handleReject = async () => {
         confirmText="Confirmar Rechazo"
         cancelText="Cancelar"
         type="danger"
+        confirmDisabled={isProcessing}
       />
 
       {notification.show && (
