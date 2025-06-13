@@ -23,7 +23,7 @@ const PredictionsPage = () => {
         >
           <div className="flex items-center">
             <FiAlertTriangle className="mr-2 text-blue-500" />
-            <h2 className="text-lg font-semibold text-foreground">Análisis de Anomalías</h2>
+            <h2 className="text-lg sm:text-xl font-semibold text-foreground">Análisis de Anomalías</h2>
           </div>
           <span className="text-foreground">
             {expandedSection === 'anomalies' ? <FiChevronUp /> : <FiChevronDown />}
@@ -31,7 +31,7 @@ const PredictionsPage = () => {
         </button>
         
         <div className={`transition-all duration-300 ease-in-out overflow-hidden ${
-          expandedSection === 'anomalies' ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'
+          expandedSection === 'anomalies' ? 'opacity-100' : 'max-h-0 opacity-0'
         }`}>
           <div className="p-4 bg-background border-t border-border">
             <Anomalies />
@@ -47,7 +47,7 @@ const PredictionsPage = () => {
         >
           <div className="flex items-center">
             <FiHeart className="mr-2 text-green-500" />
-            <h2 className="text-lg font-semibold text-foreground">Predicciones de Salud Laboral</h2>
+            <h2 className="text-lg sm:text-xl font-semibold text-foreground">Predicciones de Salud Laboral</h2>
           </div>
           <span className="text-foreground">
             {expandedSection === 'health' ? <FiChevronUp /> : <FiChevronDown />}
@@ -55,7 +55,7 @@ const PredictionsPage = () => {
         </button>
         
         <div className={`transition-all duration-300 ease-in-out overflow-hidden ${
-          expandedSection === 'health' ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'
+          expandedSection === 'health' ? 'opacity-100' : 'max-h-0 opacity-0'
         }`}>
           <div className="p-4 bg-background border-t border-border">
             <HealthPredictions />

@@ -217,21 +217,26 @@ def get_users_by_filter(request):
     page_number = data.get('page', 1)
     page_size = data.get('page_size', 10) 
     filter = data.get('filter', None)
-    decoded_filter = unquote(filter)
-    keywords = decoded_filter.strip().split()  
+    role=data.get('role', None)
 
     try:
         query = Q(is_deleted=False)
-        for word in keywords:
-            subquery = (
-                Q(first_name__icontains=word) |
-                Q(last_name__icontains=word) |
-                Q(email__icontains=word) |
-                Q(dni__icontains=word) |
-                Q(department__name__icontains=word) |
-                Q(role__name__icontains=word)
-            )
-            query &= subquery 
+        if role:
+            query &= Q(role__name=role)
+
+        if filter:
+            decoded_filter = unquote(filter)
+            keywords = decoded_filter.strip().split()
+            for word in keywords:
+                subquery = (
+                    Q(first_name__icontains=word) |
+                    Q(last_name__icontains=word) |
+                    Q(email__icontains=word) |
+                    Q(dni__icontains=word) |
+                    Q(department__name__icontains=word) |
+                    Q(role__name__icontains=word)
+                )
+                query &= subquery 
 
         users = HealthFirstUser.objects.filter(query).distinct()
         paginator= Paginator(users, page_size)

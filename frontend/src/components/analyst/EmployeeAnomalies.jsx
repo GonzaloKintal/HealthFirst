@@ -1,19 +1,17 @@
 
+
 import { useState, useEffect } from 'react';
 import { FiRefreshCw, FiPieChart, FiUsers, FiFilter, FiX, FiAlertTriangle, FiTrendingUp, FiTrendingDown, FiInfo, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, PointElement, ScatterController } from 'chart.js';
 import { Pie, Scatter } from 'react-chartjs-2';
 import { getEmployeeAnomalies } from '../../services/licenseService';
-import { getUser } from '../../services/userService';
 import StyledDatePicker from '../utils/StyledDatePicker';
-import EmployeeSelector from '../supervisor/EmployeeSelector';
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, PointElement, ScatterController);
 
 const EmployeeAnomalies = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [employees, setEmployees] = useState({});
   const [anomaliesData, setAnomaliesData] = useState(null);
   const [globalAnomaliesData, setGlobalAnomaliesData] = useState(null);
   const [error, setError] = useState(null);
@@ -85,27 +83,6 @@ const EmployeeAnomalies = () => {
 
         const transformedGlobalData = transformApiData(globalResult.data);
         setGlobalAnomaliesData(transformedGlobalData);
-
-        // Fetch employee data for unique employee IDs in global data
-        const globalEmployeeIds = [...new Set(transformedGlobalData.map(item => item.employee_id))];
-        const employeePromises = globalEmployeeIds.map(async (id) => {
-          if (!employees[id]) {
-            try {
-              const employeeData = await getUser(id);
-              return { id, employee_id: employeeData.id, ...employeeData };
-            } catch (err) {
-              console.error(`Error fetching employee ${id}:`, err);
-              return { id, employee_id: id, name: `Empleado (ID: ${id})`, department: 'Sin departamento' };
-            }
-          }
-          return null;
-        });
-
-        const fetchedEmployees = (await Promise.all(employeePromises)).filter(emp => emp !== null);
-        setEmployees(prev => ({
-          ...prev,
-          ...fetchedEmployees.reduce((acc, emp) => ({ ...acc, [emp.id]: emp }), {})
-        }));
       }
 
       // Fetch filtered anomalies data
@@ -124,27 +101,6 @@ const EmployeeAnomalies = () => {
 
       const transformedFilteredData = transformApiData(filteredResult.data);
       setAnomaliesData(transformedFilteredData);
-
-      // Fetch employee data for unique employee IDs in filtered data (if not already fetched)
-      const filteredEmployeeIds = [...new Set(transformedFilteredData.map(item => item.employee_id))];
-      const employeePromises = filteredEmployeeIds.map(async (id) => {
-        if (!employees[id]) {
-          try {
-            const employeeData = await getUser(id);
-            return { id, employee_id: employeeData.id, ...employeeData };
-          } catch (err) {
-            console.error(`Error fetching employee ${id}:`, err);
-            return { id, employee_id: id, name: `Empleado (ID: ${id})`, department: 'Sin departamento' };
-          }
-        }
-        return null;
-      });
-
-      const fetchedEmployees = (await Promise.all(employeePromises)).filter(emp => emp !== null);
-      setEmployees(prev => ({
-        ...prev,
-        ...fetchedEmployees.reduce((acc, emp) => ({ ...acc, [emp.id]: emp }), {})
-      }));
 
       setPagination({
         count: filteredResult.count || 0,
@@ -179,12 +135,22 @@ const EmployeeAnomalies = () => {
   };
 
   const handleRowMouseEnter = (event, index) => {
+    const tooltipWidth = 256;
+    const windowWidth = window.innerWidth;
+    const offsetX = 15;
+
+    let xPos = event.clientX + offsetX;
+    if (xPos + tooltipWidth > windowWidth - 10) {
+      xPos = event.clientX - tooltipWidth - offsetX;
+    }
+
     setTooltipPosition({
-      x: event.clientX,
-      y: event.clientY
+      x: xPos,
+      y: event.clientY - 30,
     });
     setHoveredRow(index);
   };
+
 
   const handleRowMouseLeave = () => {
     setHoveredRow(null);
@@ -193,6 +159,8 @@ const EmployeeAnomalies = () => {
   const transformApiData = (apiData) => {
     return apiData.map(item => ({
       employee_id: item.employee_id,
+      employee_name: item.employee_name || `Empleado (ID: ${item.employee_id})`,
+      department: item.department || 'Sin departamento',
       total_requests: item.total_requests,
       required_days: item.required_days,
       required_days_rate: parseFloat(item.required_days_rate) || 0,
@@ -202,25 +170,6 @@ const EmployeeAnomalies = () => {
       total_requests_diff: item.total_requests_diff || '0',
       required_days_percent: item.required_days_percent || '0%'
     }));
-  };
-
-  const getNameById = (id, ignoreLoading = false) => {
-    // if (!ignoreLoading && isLoading) return 'Cargando...';
-    if (error) return `Empleado (ID: ${id})`;
-
-    const employee = employees[id];
-    if (!employee) {
-      return `(${id})`;
-    }
-    return employee.name || employee.full_name || `(${id})`;
-  };
-
-  const getDepartmentById = (id) => {
-    // if (isLoading) return 'Cargando...';
-    if (error) return 'Sin departamento';
-
-    const employee = employees[id];
-    return employee?.department || 'Sin departamento';
   };
 
   const getChartData = () => {
@@ -245,7 +194,7 @@ const EmployeeAnomalies = () => {
       },
       scatterData: {
         datasets: globalAnomaliesData.length > 0 ? globalAnomaliesData.map(item => ({
-          label: getNameById(item.employee_id, true),
+          label: item.employee_name,
           data: [{
             x: item.total_requests,
             y: item.required_days_rate,
@@ -269,6 +218,11 @@ const EmployeeAnomalies = () => {
         position: 'bottom',
         labels: {
           color: isDarkMode ? '#ffffff' : '#1f2937',
+          padding: 20,
+          boxWidth: 15,
+          font: {
+            size: 12
+          }
         },
       },
       tooltip: {
@@ -326,7 +280,7 @@ const EmployeeAnomalies = () => {
           label: (ctx) => {
             const item = globalAnomaliesData[ctx.datasetIndex];
             return [
-              `Empleado: ${getNameById(item.employee_id)}`,
+              `Empleado: ${item.employee_name}`,
               `Solicitudes: ${ctx.parsed.x}`,
               `Días Promedio: ${ctx.parsed.y}`,
               `Desviación Días: ${item.required_days_diff}`
@@ -403,7 +357,7 @@ const EmployeeAnomalies = () => {
               </>
             ) : (
               <>
-                <FiRefreshCw className="mr-2" />
+                <FiRefreshCw className="mr-2 hidden sm:inline" />
                 Analizar empleados
               </>
             )}
@@ -444,13 +398,6 @@ const EmployeeAnomalies = () => {
               </div>
 
               <div className="space-y-3">
-                <EmployeeSelector
-                  selectedEmployee={filters.employee_id}
-                  onEmployeeSelected={(value) => setFilters(prev => ({ ...prev, employee_id: value }))}
-                  initialEmployees={Object.values(employees)}
-                  roles={['employee']}
-                />
-
                 <div>
                   <label className="block text-sm font-medium mb-1 text-foreground">Estado</label>
                   <select
@@ -576,12 +523,9 @@ const EmployeeAnomalies = () => {
               {globalAnomaliesData && globalAnomaliesData.length > 0 ? (
                 <>
                   <div className="mt-2 text-xl font-bold text-foreground">
-                    {getNameById(
-                      globalAnomaliesData.reduce((prev, current) => 
-                        (prev.total_requests > current.total_requests) ? prev : current
-                      ).employee_id,
-                      true
-                    )}
+                    {globalAnomaliesData.reduce((prev, current) => 
+                      (prev.total_requests > current.total_requests) ? prev : current
+                    ).employee_name}
                   </div>
                   <div className="text-sm text-green-600 dark:text-green-400 flex items-center">
                     {globalAnomaliesData.reduce((prev, current) =>
@@ -605,11 +549,9 @@ const EmployeeAnomalies = () => {
               {globalAnomaliesData && globalAnomaliesData.length > 0 ? (
                 <>
                   <div className="mt-2 text-xl font-bold text-foreground">
-                    {getNameById(globalAnomaliesData.reduce((prev, current) =>
+                    {globalAnomaliesData.reduce((prev, current) =>
                       (prev.total_requests < current.total_requests) ? prev : current
-                    ).employee_id,
-                      true
-                    )}
+                    ).employee_name}
                   </div>
                   <div className="text-sm text-red-600 dark:text-red-400 flex items-center">
                     {globalAnomaliesData.reduce((prev, current) =>
@@ -636,7 +578,7 @@ const EmployeeAnomalies = () => {
             >
               <div className="text-sm text-gray-700 dark:text-gray-300 space-y-2">
                 <div className="font-semibold text-base pb-2 border-b border-gray-200 dark:border-gray-700">
-                  {getNameById(anomaliesData[hoveredRow].employee_id)}
+                  {anomaliesData[hoveredRow].employee_name}
                 </div>
                 <div>
                   <div className="flex items-center">
@@ -719,7 +661,7 @@ const EmployeeAnomalies = () => {
                   </tr>
                 </thead>
                 <tbody className="bg-background dark:bg-background-dark divide-y divide-border dark:divide-border-dark">
-                  {anomaliesData.length > 0 ? (
+                  {anomaliesData && anomaliesData.length > 0 ? (
                     anomaliesData.map((item, index) => (
                       <tr
                         key={item.employee_id}
@@ -728,15 +670,11 @@ const EmployeeAnomalies = () => {
                         onMouseLeave={handleRowMouseLeave}
                       >
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground text-center">
-                          <div className="font-medium">{getNameById(item.employee_id)}</div>
-                          {!isLoading && !error && Object.keys(employees).length > 0 && (
-                            <div className="text-xs text-foreground">
-                              {getDepartmentById(item.employee_id)}
-                            </div>
-                          )}
+                          <div className="font-medium">{item.employee_name}</div>
+                          <div className="text-xs text-foreground">{item.department}</div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground text-center">
-                          {getDepartmentById(item.employee_id)}
+                          {item.department}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground text-center">
                           {item.total_requests}
@@ -799,7 +737,7 @@ const EmployeeAnomalies = () => {
                 <h3 className="font-medium">Distribución de Anomalías</h3>
               </div>
               <div className="h-64">
-                {chartData && globalAnomaliesData.length > 0 ? (
+                {chartData && globalAnomaliesData && globalAnomaliesData.length > 0 ? (
                   <Pie
                     data={chartData.anomalyDistribution}
                     options={getPieChartOptions()}
@@ -818,7 +756,7 @@ const EmployeeAnomalies = () => {
                 <h3 className="font-medium">Análisis de Patrones</h3>
               </div>
               <div className="h-64">
-                {chartData && globalAnomaliesData.length > 0 ? (
+                {chartData && globalAnomaliesData && globalAnomaliesData.length > 0 ? (
                   <Scatter
                     data={chartData.scatterData}
                     options={getScatterOptions()}
@@ -855,3 +793,4 @@ const EmployeeAnomalies = () => {
 };
 
 export default EmployeeAnomalies;
+

@@ -57,12 +57,13 @@ export const getUser = async (id) => {
     }
 };
 
-export const getUsersByFilter = async (page = 1, filter = '', pageSize = 5) => {
+export const getUsersByFilter = async (page = 1, filter = '', pageSize = 5, role = '') => {
     try {
         const body = {
             page,
             page_size: pageSize,
-            filter: filter
+            filter: filter,
+            role: role !== 'all' ? role : null
         };
 
         const response = await api.post('/users/get_users_by_filter', body);
@@ -78,7 +79,6 @@ export const getUsersByFilter = async (page = 1, filter = '', pageSize = 5) => {
         throw error;
     }
 };
-
 
 export const addTelegramSubscription = async (userId, telegramId) => {
     try {
@@ -125,13 +125,24 @@ export const getHealthRiskPredictions = async (params = {}) => {
       params: {
         limit: params.limit,
         offset: params.offset,
+        risk: params.risk_level
       }
     });
-    console.log('Health risk predictions response:', response.data);
     
     return response.data;
   } catch (error) {
     console.error('Error fetching health risk predictions:', error);
+    throw error;
+  }
+};
+
+export const getIndividualHealthRiskPrediction = async (employeeId) => {
+  try {
+    const response = await api.get(`/users/predict_health_risk/${employeeId}`);
+    
+    return response.data.risk[0];
+  } catch (error) {
+    console.error('Error fetching individual health risk:', error);
     throw error;
   }
 };

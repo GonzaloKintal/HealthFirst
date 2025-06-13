@@ -35,6 +35,7 @@ const RequestLicense = () => {
   const [selectedEmployeeData, setSelectedEmployeeData] = useState(null);
   const [currentUserData, setCurrentUserData] = useState(null);
   const [licenseTypes, setLicenseTypes] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
 
   useEffect(() => {
@@ -189,14 +190,6 @@ useEffect(() => {
 
   const employeeData = getEmployeeData();
 
-  // const handleChange = (e) => {
-  //   const { name, value, files, type, checked } = e.target;
-    
-  //   setFormData(prev => ({
-  //     ...prev,
-  //     [name]: type === 'checkbox' ? checked : (files ? files[0] : value)
-  //   }));
-  // };
   const handleChange = (e) => {
     const { name, value, files, type, checked } = e.target;
 
@@ -252,6 +245,9 @@ useEffect(() => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (isSubmitting) return;
+    setIsSubmitting(true);
     
     if (!formData.declaration) {
       setNotification({
@@ -259,6 +255,7 @@ useEffect(() => {
         message: 'Debe aceptar la declaración para enviar la solicitud.'
       });
       return;
+      setIsSubmitting(false);
     }
   
     if (formData.startDate && formData.endDate) {
@@ -374,7 +371,9 @@ useEffect(() => {
                  error.response?.data?.error || 
                  'Ocurrió un error al enviar tu solicitud.'
       });
-    }
+    } finally {
+        setIsSubmitting(false);
+      }
   };
   
   
@@ -643,7 +642,7 @@ useEffect(() => {
           <button
             type="submit"
             className="cursor-pointer px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-hover disabled:bg-gray-400 disabled:cursor-not-allowed"
-            disabled={(user?.role === 'admin' || user?.role === 'supervisor') && !formData.selectedEmployee}
+            disabled={isSubmitting || (user?.role === 'admin' || user?.role === 'supervisor') && !formData.selectedEmployee}
           >
             Enviar Solicitud
           </button>
