@@ -385,7 +385,7 @@ const handleNextPage = () => {
   const chartData = getChartData();
 
   return (
-    <div className="min-h-screen overflow-y-auto pt-2">
+    <div className="overflow-y-auto pt-2">
       <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
         <div className="flex items-center gap-2">
           <button
@@ -538,6 +538,7 @@ const handleNextPage = () => {
           {error}
         </div>
       )}
+
       {healthData ? (
         <>
           <div className="mt-4 text-xs italic text-gray-600 dark:text-gray-400">
@@ -803,9 +804,6 @@ const handleNextPage = () => {
               </div>
             </div>
           </div>
-          <div className="mt-4">
-            <IndividualEmployeeAnalysis employees={globalHealthData || []} isDarkMode={isDarkMode} />
-          </div>
         </>
       ) : (
         <div className="mt-4 bg-white dark:bg-gray-800 rounded-lg shadow p-6 border border-gray-200 dark:border-gray-600">
@@ -822,6 +820,10 @@ const handleNextPage = () => {
           </div>
         </div>
       )}
+
+       <div className="mt-4">
+        <IndividualEmployeeAnalysis employees={globalHealthData || []} isDarkMode={isDarkMode} />
+      </div> 
     </div>
   );
 };
