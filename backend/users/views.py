@@ -376,7 +376,12 @@ def predict_health_risk(request):
 
         if not risk_list:
             risk_list = json.loads(predict_risk())
-            cache.set("cached_risk_list", risk_list, timeout=300) 
+            cache.set("cached_risk_list", risk_list, timeout=300)
+
+        risk_filter = request.query_params.get('risk')
+        if risk_filter in ['high', 'low']:
+            risk_label = 'high risk' if risk_filter == 'high' else 'low risk'
+            risk_list = [item for item in risk_list if item.get('risk') == risk_label]
 
     except Exception as e:
         return JsonResponse({"Error inesperado al predecir riesgo": str(e)}, status=500)
