@@ -18,7 +18,7 @@ from django.core.paginator import Paginator
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
-import magic  
+#import magic  
 import img2pdf
 from django.db import transaction
 from .analisis import license_analysis
@@ -185,10 +185,10 @@ def create_license(request):
                 )
 
             license.assign_status()
-            if license.type and license.type.certificate_require and certificate_data is None:
-                MessengerService.send_upload_license_without_certificate_message(license)
-            else:
-                MessengerService.send_upload_license_message(license)
+            #if license.type and license.type.certificate_require and certificate_data is None:
+            #    MessengerService.send_upload_license_without_certificate_message(license)
+            #else:
+            #    MessengerService.send_upload_license_message(license)
 
         return JsonResponse({'message': 'Licencia solicitada exitosamente.'}, status=200)
 
@@ -535,15 +535,15 @@ def process_certificate(certificate_data):
         file_decoded = base64.b64decode(file_data)
         
         # Detectar tipo de archivo
-        mime = magic.Magic(mime=True)
-        file_type = mime.from_buffer(file_decoded)
+        #mime = magic.Magic(mime=True)
+        #file_type = mime.from_buffer(file_decoded)
         
-        allowed_types = ['image/jpeg', 'image/png', 'application/pdf']
-        if file_type not in allowed_types:
-            raise ValueError('Tipo de archivo no permitido. Solo se aceptan JPG, PNG o PDF.')
+        #allowed_types = ['image/jpeg', 'image/png', 'application/pdf']
+        #if file_type not in allowed_types:
+        #    raise ValueError('Tipo de archivo no permitido. Solo se aceptan JPG, PNG o PDF.')
         
-        if file_type in ['image/jpeg', 'image/png']:
-            file_decoded = img2pdf.convert(file_decoded)
+        #if file_type in ['image/jpeg', 'image/png']:
+        #    file_decoded = img2pdf.convert(file_decoded)
         
         file_encoded = base64.b64encode(file_decoded).decode('utf-8')
 
@@ -711,9 +711,9 @@ def get_next_certificate_id():
         row = cursor.fetchone()
     return row[0] if row else None
 
-@api_view(['GET'])
-@authentication_classes([JWTAuthentication])
-@permission_classes([IsAuthenticated])
+#@api_view(['GET'])
+#@authentication_classes([JWTAuthentication])
+#@permission_classes([IsAuthenticated])
 def generate_certificate_code(request):
     try:
         # Obtener próximo ID
