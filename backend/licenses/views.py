@@ -521,7 +521,7 @@ def upload_base64_file(request):
             "probability_of_approval": evaluation_prediction["probability_of_approval"],
             "probability_of_rejection": evaluation_prediction["probability_of_rejection"],
             "reason_of_rejection": evaluation_prediction["reason_of_rejection"] if evaluation_prediction["reason_of_rejection"] else "",
-            "top_reasons": evaluation_prediction["top_reasons"] if evaluation_prediction["top_reasons"] else "",
+            "top_reasons": evaluation_prediction["top_reasons"] if "top_reasons" in evaluation_prediction else "",
             "license_types": license_type_prediction
         }
 
