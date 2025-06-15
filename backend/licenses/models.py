@@ -2,6 +2,7 @@ from django.db import models
 from users.models import HealthFirstUser
 from django.utils import timezone
 from licenses.utils import file_utils
+from django.core.exceptions import ValidationError
 
 # Create your models here.
 class Status(models.Model):
@@ -33,6 +34,33 @@ class LicenseType(models.Model):
     yearly_approved_requests=models.IntegerField(null=True, blank=True)
     is_deleted = models.BooleanField(default=False)
     deleted_at = models.DateTimeField(blank=True, null=True)
+
+
+    @property
+    def group(self):
+        license_group_map = {
+            'Accidente de trabajo': 'accidente_trabajo',
+            'Donación de sangre': 'donacion_sangre',
+            'Duelo(A)': 'duelo',
+            'Duelo(B)': 'duelo',
+            'Enfermedad': 'enfermedad',
+            'Asistencia a familiares': 'asistencia_familiares',
+            'Estudios': 'estudios',
+            'Casamiento': 'matrimonial',
+            'Casamiento de hijos': 'matrimonial',
+            'Trámites patriomaniales': 'matrimonial',
+            'Mudanza': 'mudanza',
+            'Obligaciones públicas': 'gremial',
+            'Reunión gremial': 'gremial',
+            'Representante gremial': 'gremial',
+            'Reunión extraordinaria': 'gremial',
+            'Nacimiento de hijo': 'nacimiento',
+            'Maternidad': 'salud_materna',
+            'Control prenatal': 'salud_materna',
+            'Vacaciones': 'vacaciones',
+        }
+        return license_group_map.get(self.name, 'otro')
+
 
 
     def requieres_inmediate_certificate(self):
@@ -125,3 +153,38 @@ class Certificate(models.Model):
             keys=[self.license.user.first_name,self.license.user.last_name,str(self.license.user.dni)] #ojo con dni con punto, se queda con las palabras claves para ownership
             return file_utils.search_in_pdf_text(keys,certificate_text) and file_utils.date_in_range(certificate_text,self.license) #si encontró las palabras claves y una fecha que en el certificado que entra en rango
         return False
+
+
+class LicenseDatasetEntry(models.Model):
+    GROUP_CHOICES = [
+        ('accidente_trabajo', 'Accidente de trabajo'),
+        ('donacion_sangre', 'Donación de sangre'),
+        ('duelo', 'Duelo tipo A y B'),
+        ('enfermedad', 'Enfermedad'),
+        ('asistencia_familiares', 'Asistencia de familiares'),
+        ('estudios', 'Estudios'),
+        ('matrimonial', 'Matrimonial'),
+        ('mudanza', 'Mudanza'),
+        ('gremial', 'Gremial'),
+        ('nacimiento', 'Nacimiento'),
+        ('salud_materna', 'Salud Materna'),
+        ('vacaciones', 'Vacaciones'),
+        ('otro', 'Otro'),
+    ]
+
+    STATUS_CHOICES = [
+        ('approved', 'Aprobado'),
+        ('rejected', 'Rechazado'),
+    ]
+
+    text = models.TextField()
+    type = models.CharField(max_length=30, choices=GROUP_CHOICES)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES)
+    reason = models.TextField(blank=True, null=True)
+
+    def clean(self):
+        if self.status == 'rejected' and not self.reason:
+            raise ValidationError('Debe especificar un motivo si el estado es "rejected".')
+
+    def __str__(self):
+        return f"{self.type} ({self.status})"
