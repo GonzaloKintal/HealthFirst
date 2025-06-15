@@ -317,6 +317,7 @@ def add_certificate(request, id):
         data = json.loads(request.body)
         certificate_data = data.get('certificate', None)
 
+        # Validar que la LICENCIA a editar EXISTE
         try:
             license = License.objects.get(license_id=id, is_deleted=False)
         except License.DoesNotExist:
@@ -326,22 +327,24 @@ def add_certificate(request, id):
             raise Exception('El tipo de licencia no requiere certificado.')
         
         try:
-            file_data = process_certificate(certificate_data)
+            file_data, certificate_obj = process_certificate(certificate_data)
         except Exception as e:
             raise Exception(f'Error en certificado: {str(e)}')
 
-        if file_data:
-            Certificate.objects.create(
-                license=license,
-                file=file_data,
-                validation=False,
-                upload_date=datetime.now(),
-                is_deleted=False,
-                deleted_at=None
-            )
+        if file_data and certificate_obj:
+            # Actualiza el certificado ya existente
+            certificate_obj.license = license
+            certificate_obj.file = file_data
+            certificate_obj.validation = False
+            certificate_obj.upload_date = datetime.now()
+            certificate_obj.is_deleted = False
+            certificate_obj.deleted_at = None
+            certificate_obj.save()
 
+            # Cambia el estado de la licencia
             license.status.name = Status.StatusChoices.PENDING
             license.status.save()
+
             response_data = {'message': 'Certificado agregado exitosamente.'}
         else:
             status_code = 400
@@ -537,7 +540,6 @@ def process_certificate(certificate_data):
         """ Validacíon de código unico """
         certificate_id = extract_certificate_id_from_pdf_base64(file_data)
         print("El codigo de certficiado es: ", certificate_id)
-
         """ FIN Validación de codigo unico """
         
         # Detectar tipo de archivo
@@ -550,10 +552,21 @@ def process_certificate(certificate_data):
         
         #if file_type in ['image/jpeg', 'image/png']:
         #    file_decoded = img2pdf.convert(file_decoded)
+
+
+         # Buscar el certificado en la base de datos
+        try:
+            certificate_obj = Certificate.objects.get(certificate_id=certificate_id)
+        except Certificate.DoesNotExist:
+            raise ValueError("El código de certificado no existe.")
+
+        # Validar que el CERTIFICADO NO ESTE relacionado a la LICENCIA.
+        if certificate_obj.license is not None:
+            raise ValueError("El certificado ya fue utilizado.")
         
         file_encoded = base64.b64encode(file_decoded).decode('utf-8')
 
-        return file_encoded
+        return file_encoded, certificate_obj
 
 @api_view(['POST'])
 @authentication_classes([JWTAuthentication])
