@@ -533,6 +533,12 @@ def process_certificate(certificate_data):
             raise ValueError('Archivo del certificado no encontrado.')
         
         file_decoded = base64.b64decode(file_data)
+
+        """ Validacíon de código unico """
+        certificate_id = extract_certificate_id_from_pdf_base64(file_data)
+        print("El codigo de certficiado es: ", certificate_id)
+
+        """ FIN Validación de codigo unico """
         
         # Detectar tipo de archivo
         #mime = magic.Magic(mime=True)
