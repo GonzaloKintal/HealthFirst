@@ -109,7 +109,7 @@ class License(models.Model):
 
 class Certificate(models.Model):
     certificate_id = models.AutoField(primary_key=True)
-    license = models.OneToOneField(License, on_delete=models.CASCADE, related_name='certificate')
+    license = models.OneToOneField(License, on_delete=models.CASCADE, related_name='certificate', null=True, blank=True)
     file = models.TextField(blank=True, null=True)
     validation = models.BooleanField(default=False)
     upload_date = models.DateTimeField(auto_now_add=True)

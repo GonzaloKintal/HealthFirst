@@ -25,6 +25,7 @@ from .analisis import license_analysis
 from licenses.utils.file_utils import *
 from licenses.utils.coherence_model_ml import predict_top_3
 from django.db.models import Q
+from django.db import connection
 import csv
 from rest_framework.pagination import LimitOffsetPagination
 
@@ -625,6 +626,7 @@ def export_licenses_to_csv(request):
 
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
+        
 
 
 ##################### API Anomalias #########################
@@ -695,6 +697,45 @@ def employee_anomalies(request):
         paginated_data = paginator.paginate_queryset(data, request)
 
         return paginator.get_paginated_response(paginated_data)
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+
+
+
+def get_next_certificate_id():
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT nextval(pg_get_serial_sequence('licenses_certificate', 'certificate_id'))")
+        row = cursor.fetchone()
+    return row[0] if row else None
+
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def generate_certificate_code(request):
+    try:
+        # Obtener próximo ID
+        next_id = get_next_certificate_id()
+        if not next_id:
+            return JsonResponse({'error': 'No se pudo obtener el próximo ID de certificado.'}, status=500)
+
+        # Crear el código
+        code = f"HFCOD{next_id}"
+
+        # Crear el Certificate sin licencia
+        Certificate.objects.create(
+            certificate_id=next_id,
+            license=None,
+            file=None,
+            validation=False,
+            upload_date=datetime.now(),
+            is_deleted=False,
+            deleted_at=None
+        )
+
+        return JsonResponse({'message': 'Código generado', 'code': code, 'certificate_id': next_id}, status=200)
 
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
