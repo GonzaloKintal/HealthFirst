@@ -716,15 +716,15 @@ def get_next_certificate_id():
 #@permission_classes([IsAuthenticated])
 def generate_certificate_code(request):
     try:
-        # Obtener próximo ID
+        # Obtener proximo id de tabla certificate
         next_id = get_next_certificate_id()
         if not next_id:
             return JsonResponse({'error': 'No se pudo obtener el próximo ID de certificado.'}, status=500)
 
-        # Crear el código
+        # Crear el codigo
         code = f"HFCOD{next_id}"
 
-        # Crear el Certificate sin licencia
+        # Crear el Certificate sin licencia relacionada
         Certificate.objects.create(
             certificate_id=next_id,
             license=None,
@@ -735,7 +735,13 @@ def generate_certificate_code(request):
             deleted_at=None
         )
 
-        return JsonResponse({'message': 'Código generado', 'code': code, 'certificate_id': next_id}, status=200)
+        template_path = os.path.join(settings.BASE_DIR, 'public', 'templates', 'standard_format.pdf')
+
+        modified_pdf = insert_code_to_pdf_return_bytes(template_path, code)
+
+        response = HttpResponse(modified_pdf, content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="certificado_{code}.pdf"'
+        return response
 
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
