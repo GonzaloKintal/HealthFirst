@@ -23,10 +23,11 @@ import img2pdf
 from django.db import transaction
 from .analisis import license_analysis
 from licenses.utils.file_utils import *
-from licenses.utils.coherence_model_ml import predict_top_3
+from licenses.utils.coherence_model_ml import predict_license_types
 from django.db.models import Q
 import csv
 from rest_framework.pagination import LimitOffsetPagination
+from licenses.utils.evaluation_model import predict_evaluation
 
 
 
@@ -512,8 +513,19 @@ def upload_base64_file(request):
             is_image=True
 
         text= base64_to_text(base64_string,is_image)
-        result = predict_top_3(text)
-        parsed_result = {item[0]: item[1] for item in result}
+        license_type_prediction = predict_license_types(text)
+        evaluation_prediction = predict_evaluation(text)
+
+        result = {
+            "is_approved": bool(evaluation_prediction["approved"]),
+            "probability_of_approval": evaluation_prediction["probability_of_approval"],
+            "probability_of_rejection": evaluation_prediction["probability_of_rejection"],
+            "reason_of_rejection": evaluation_prediction["reason_of_rejection"] if evaluation_prediction["reason_of_rejection"] else "",
+            "top_reasons": evaluation_prediction["top_reasons"] if evaluation_prediction["top_reasons"] else "",
+            "license_types": license_type_prediction
+        }
+
+        parsed_result = json.loads(json.dumps(result))
  
 
         if "error" in result:
