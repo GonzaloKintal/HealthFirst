@@ -159,3 +159,25 @@ def insert_code_to_pdf_return_bytes(template_path: str, code: str) -> bytes:
     PdfWriter(output_stream, trailer=template_pdf).write()
     output_stream.seek(0)
     return output_stream.read()
+
+
+
+# Imporante: es requisito que el codigo debe venir en BASE64
+def extract_certificate_id_from_pdf_base64(base64_pdf: str) -> str:
+    try:
+        # Decodificar base64 a bytes
+        pdf_bytes = base64.b64decode(base64_pdf)
+        buffer = BytesIO(pdf_bytes)
+
+        # Extraer texto
+        text = extract_text(buffer)
+
+        # Buscar código tipo HFCOD123
+        match = re.search(r'HFCOD(\d+)', text)
+        if match:
+            return match.group(1)  # Solo devuelve el número, sin "HFCOD"
+
+        return None
+    except Exception as e:
+        print(f"Error leyendo PDF en base64: {e}")
+        return None
