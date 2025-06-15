@@ -2,28 +2,35 @@ import React from 'react';
 import { FiDownload } from 'react-icons/fi';
 
 const AlertWithDownload = ({ onDownload }) => {
-  const handleDownload = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const handleDownload = async (e) => {
+  e.preventDefault();
+  e.stopPropagation();
 
-    try {
-      const fileUrl = '/documents/standard_format.pdf';
-      
-      const link = document.createElement('a');
-      link.href = fileUrl;
-      link.download = 'Formato_Certificado_HealthFirst.pdf';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      
-      if (onDownload) {
-        onDownload();
-      }
-      
-    } catch (error) {
-      console.error("Error al descargar el formato:", error);
+  try {
+    const response = await fetch('http://localhost:8000/licenses/certificate/code');
+
+    if (!response.ok) {
+      throw new Error('Error al obtener el archivo');
     }
-  };
+
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'Formato_Certificado_HealthFirst.pdf';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+
+    if (onDownload) {
+      onDownload();
+    }
+  } catch (error) {
+    console.error("Error al descargar el formato:", error);
+  }
+};
 
   return (
     <div className="bg-yellow-50 dark:bg-yellow-700 dark:bg-opacity-20 border-l-4 border-yellow-400 dark:border-yellow-500 p-4 mb-4 rounded-md">

@@ -759,7 +759,7 @@ def generate_certificate_code(request):
         modified_pdf = insert_code_to_pdf_return_bytes(template_path, code)
 
         response = HttpResponse(modified_pdf, content_type='application/pdf')
-        response['Content-Disposition'] = f'attachment; filename="certificado_{code}.pdf"'
+        response['Content-Disposition'] = f'attachment; filename="Formato_Certificado_HealthFirst.pdf"'
         return response
 
     except Exception as e:
