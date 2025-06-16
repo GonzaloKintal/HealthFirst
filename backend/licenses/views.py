@@ -466,30 +466,6 @@ def process_certificate(certificate_data):
 
         return file_encoded
 
-@api_view(['PUT'])
-@authentication_classes([JWTAuthentication])
-@permission_classes([IsAuthenticated])
-def update_expired(request):
-    licenses = License.objects.filter(is_deleted=False, status__name=Status.StatusChoices.MISSING_DOC)
-    try:
-        if not licenses:
-            raise Exception('No se encontraron licencias vencidas.')
-
-        for license in licenses:
-            expired_time= license.request_date + timedelta(days=license.required_days)
-            expired_licenses=0
-            if expired_time < timezone.now().date():
-                license.status.name = Status.StatusChoices.EXPIRED
-                license.status.evaluation_comment = 'Licencia vencida.'
-                license.status.save()
-                expired_licenses+=1
-        print(expired_licenses)
-        return JsonResponse({"expired_licenses": expired_licenses}, status=200)
-    
-    except Exception as e:
-        return JsonResponse({"error": str(e)}, status=500)  
-
-
 @api_view(['POST'])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
