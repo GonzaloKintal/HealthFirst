@@ -289,8 +289,8 @@ def update_license(request, id):
                             cert.is_deleted = False
                             cert.deleted_at = None
                             cert.save()
-                        elif hasattr(license, 'certificate'):
-                            # Si ya tiene uno, se actualiza
+                        elif license.certificate:
+                            # Si ya tiene uno que no es HFCOD, se actualiza
                             cert = license.certificate
                             cert.file = file_data
                             cert.validation = validation
@@ -352,7 +352,7 @@ def add_certificate(request, id):
             raise Exception('El tipo de licencia no requiere certificado.')
 
         try:
-            file_data, certificate_obj, certificate_id = process_certificate_add_certificate(certificate_data)
+            file_data, certificate_obj = process_certificate_add_certificate(certificate_data)
         except Exception as e:
             raise Exception(f'Error en certificado: {str(e)}')
 
@@ -588,7 +588,7 @@ def process_certificate(certificate_data):
         #    file_decoded = img2pdf.convert(file_decoded)
 
 
-         # Buscar el certificado en la base de datos
+         # Si encontro certificate_id significa que es HFCOD, debe existir el certificado en la BD:
         if certificate_id: 
             try:
                 certificate_obj = Certificate.objects.get(certificate_id=certificate_id)
@@ -647,7 +647,7 @@ def process_certificate_add_certificate(certificate_data):
 
         # Codificamos nuevamente el archivo para guardar
         file_encoded = base64.b64encode(file_decoded).decode('utf-8')
-        return file_encoded, certificate_obj, certificate_id
+        return file_encoded, certificate_obj
 
 
 def process_certificate_update_certificate(certificate_data, current_license):
