@@ -61,6 +61,7 @@ INSTALLED_APPS = [
     'licenses',
     'metabase',
     'messaging',
+    'ml_models',
 ]
 
 MIDDLEWARE = [

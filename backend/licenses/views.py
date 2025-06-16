@@ -7,7 +7,7 @@ from xmlrpc.client import NOT_WELLFORMED_ERROR
 
 from messaging.services.messenger import MessengerService
 
-from .anomalies.isolation_forest import get_employee_anomalies, get_supervisor_anomalies
+from ml_models.anomalies.isolation_forest import get_employee_anomalies, get_supervisor_anomalies
 from messaging.services.brevo_email import *
 from .models import *
 from django.http import JsonResponse, HttpResponse
@@ -22,12 +22,12 @@ import magic
 import img2pdf
 from django.db import transaction
 from .analisis import license_analysis
-from licenses.utils.file_utils import *
-from licenses.utils.coherence_model_ml import predict_license_types
+from ml_models.utils.file_utils import *
+from ml_models.utils.coherence_model_ml import predict_license_types
 from django.db.models import Q
 import csv
 from rest_framework.pagination import LimitOffsetPagination
-from licenses.utils.evaluation_model import predict_evaluation
+from ml_models.utils.evaluation_model import predict_evaluation
 
 
 
@@ -405,6 +405,17 @@ def evaluate_license(request, id):
             MessengerService.send_approved_license_message(license)
 
         evaluator= f"{request.user.first_name} {request.user.last_name}"
+
+        if license.type.certificate_require:
+            base64_certificate = license.certificate.file
+            is_image=False
+
+            if is_pdf_image(base64_certificate):
+                is_image=True
+
+            text= base64_to_text(base64_certificate,is_image)
+            text_normalize=normalize_text(text)
+
 
         return JsonResponse({'message': 'Licencia evaluada correctamente.','evaluator': evaluator}, status=200)
 
