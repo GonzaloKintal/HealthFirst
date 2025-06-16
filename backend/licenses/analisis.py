@@ -28,8 +28,7 @@ def license_analysis(license): #se le pasa la licencia
         status__name__in=["approved", "missing_doc", "pending"],
         is_deleted=False,
         start_date__lte=license.end_date,
-        end_date__gte=license.start_date
-    )
+        end_date__gte=license.start_date).exclude(license_id=license.license_id)
 
     if overlapping_licenses.exists():
         raise LicenseValidationError ("El empleado ya posee una solicitud o una licencia en el rango de fechas seleccionado")
