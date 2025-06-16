@@ -25,22 +25,6 @@ def is_pdf_image(base64_pdf):
    text = extract_text(BytesIO(pdf_bytes))
    return not bool(text.strip())  # True si NO hay texto
 
-def normalize_text(text):
-    """Normaliza texto: minúsculas, sin tildes, sin puntuación, conserva ñ/Ñ"""
-    if not isinstance(text, str):
-        return ""  # Maneja valores no-string
-    
-    clean_text = []
-    for char in text:
-        if char in ['ñ', 'Ñ']:
-            clean_text.append(char)
-        else:
-            normalized_char = unicodedata.normalize('NFD', char)
-            clean_text.append(''.join(c for c in normalized_char if unicodedata.category(c) != 'Mn'))
-    text = ''.join(clean_text).lower()
-    text = re.sub(r'[^\wñÑ\s]', '', text)  # Remueve puntuación pero conserva espacios
-    text = re.sub(r'\s+', ' ', text).strip()
-    return text
 
 
 def base64_to_text(base64_pdf, is_image=False):
@@ -121,13 +105,6 @@ def search_in_pdf_text(normalized_text, search_terms):
                 return False
     return True
 
-def normalize_text(text):
-    # Convierte a minúsculas, elimina acentos y signos de puntuación
-    text = text.lower()
-    text = unicodedata.normalize('NFD', text)
-    text = text.encode('ascii', 'ignore').decode('utf-8')  #quita acentos
-    text = re.sub(r'[^\w\s]', '', text)  # quita puntuación
-    return text
 
 
 def insert_code_to_pdf_return_bytes(template_path: str, code: str) -> bytes:
@@ -181,3 +158,21 @@ def extract_certificate_id_from_pdf_base64(base64_pdf: str) -> str:
     except Exception as e:
         print(f"Error leyendo PDF en base64: {e}")
         return None
+    
+def normalize_text(text):
+    """Normaliza texto: minúsculas, sin tildes, sin puntuación, conserva ñ/Ñ"""
+    if not isinstance(text, str):
+        return ""  # Maneja valores no-string
+    
+    clean_text = []
+    for char in text:
+        if char in ['ñ', 'Ñ']:
+            clean_text.append(char)
+        else:
+            normalized_char = unicodedata.normalize('NFD', char)
+            clean_text.append(''.join(c for c in normalized_char if unicodedata.category(c) != 'Mn'))
+    text = ''.join(clean_text).lower()
+    text = re.sub(r'[^\wñÑ\s]', '', text)  # Remueve puntuación pero conserva espacios
+    text = re.sub(r'\s+', ' ', text).strip()
+    return text
+ 
