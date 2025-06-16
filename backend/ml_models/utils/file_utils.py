@@ -3,6 +3,7 @@ import re
 import os
 import pytesseract
 import unicodedata
+import io
 
 #from PIL import Image #podria no necesitarse
 from pdfminer.high_level import extract_text
@@ -10,6 +11,13 @@ from datetime import datetime #podria no necesitarse
 from io import BytesIO
 from PyPDF2 import PdfReader
 from pdf2image import convert_from_path
+    
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter
+from reportlab.lib.units import mm
+from pdfrw import PdfReader, PdfWriter, PageMerge
+
+
 
 def is_pdf_image(base64_pdf):
    """ Determina si el PDF es una imagen"""
@@ -97,6 +105,60 @@ def search_in_pdf_text(normalized_text, search_terms):
                 return False
     return True
 
+
+
+def insert_code_to_pdf_return_bytes(template_path: str, code: str) -> bytes:
+    # Leer PDF original
+    template_pdf = PdfReader(template_path)
+    last_page = template_pdf.pages[-1]
+
+    # Obtener tamaño de la última página
+    media_box = last_page.MediaBox
+    width = float(media_box[2])
+    height = float(media_box[3])
+
+    # Crear overlay con reportlab
+    packet = io.BytesIO()
+    c = canvas.Canvas(packet, pagesize=(width, height))
+    x = 160 * mm
+    y = 10 * mm
+    c.setFont("Helvetica-Bold", 14)
+    c.drawString(x, y, f"{code}")
+    c.save()
+
+    packet.seek(0)
+    overlay_pdf = PdfReader(packet)
+    overlay_page = overlay_pdf.pages[0]
+
+    PageMerge(last_page).add(overlay_page).render()
+
+    output_stream = io.BytesIO()
+    PdfWriter(output_stream, trailer=template_pdf).write()
+    output_stream.seek(0)
+    return output_stream.read()
+
+
+
+# Imporante: es requisito que el codigo debe venir en BASE64
+def extract_certificate_id_from_pdf_base64(base64_pdf: str) -> str:
+    try:
+        # Decodificar base64 a bytes
+        pdf_bytes = base64.b64decode(base64_pdf)
+        buffer = BytesIO(pdf_bytes)
+
+        # Extraer texto
+        text = extract_text(buffer)
+
+        # Buscar código tipo HFCOD123
+        match = re.search(r'HFCOD(\d+)', text)
+        if match:
+            return match.group(1)  # Solo devuelve el número, sin "HFCOD"
+
+        return None
+    except Exception as e:
+        print(f"Error leyendo PDF en base64: {e}")
+        return None
+    
 def normalize_text(text):
     """Normaliza texto: minúsculas, sin tildes, sin puntuación, conserva ñ/Ñ"""
     if not isinstance(text, str):
@@ -113,3 +175,4 @@ def normalize_text(text):
     text = re.sub(r'[^\wñÑ\s]', '', text)  # Remueve puntuación pero conserva espacios
     text = re.sub(r'\s+', ' ', text).strip()
     return text
+ 
