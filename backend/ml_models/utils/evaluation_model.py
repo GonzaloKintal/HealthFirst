@@ -5,9 +5,12 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, accuracy_score, confusion_matrix
 import lightgbm as lgb
+from ml_models.models import MLModel
 from ml_models.utils.file_utils import normalize_text
 from .spanish_stopwords import SPANISH_STOPWORDS
 from sklearn.model_selection import cross_val_score, StratifiedKFold
+from datetime import datetime
+
 
 # Paths
 APPROVAL_MODEL_PATH = Path(__file__).resolve().parent / 'modelo_aprobacion.joblib'
@@ -130,7 +133,7 @@ class RejectionReasonClassifier:
         return self.classifier.predict_proba(X_vec)
 
 
-def train_approval_model():
+def train_approval_model(first_id=None, last_id=None):
     texts, labels = load_approval_data(DATASET_PATH)
     
     X_train, X_test, y_train, y_test = train_test_split(
@@ -191,10 +194,20 @@ def train_approval_model():
     }
     
     joblib.dump(model, APPROVAL_MODEL_PATH)
+    MLModel.objects.create(
+        model_type= 'LICENSE_APPROVAL',
+        name= 'Modelo de aprobación de licencias',
+        algorithm= 'LGBM',
+        is_active= True,
+        training_date = datetime.now(),
+        first_training_id= first_id,
+        last_training_id= last_id
+
+    )
     return model, training_info
 
 
-def train_rejection_reason_model():
+def train_rejection_reason_model(first_id=None, last_id=None):
     texts, reasons = load_rejection_reasons_data(DATASET_PATH)
     
     if len(texts) == 0:
@@ -250,6 +263,16 @@ def train_rejection_reason_model():
     }
     
     joblib.dump(model, REJECTION_MODEL_PATH)
+
+    MLModel.objects.create(
+    model_type= 'REJECTION_REASON',
+    name= 'Modelo de clasificacion de motivos de rechazo',
+    algorithm= 'LGBM',
+    is_active= True,
+    training_date = datetime.now(),
+    first_training_id= first_id,
+    last_training_id= last_id)
+
     return model, training_info
 
 

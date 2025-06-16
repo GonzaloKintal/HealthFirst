@@ -8,6 +8,8 @@ from .file_utils import normalize_text
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, accuracy_score
 from .spanish_stopwords import SPANISH_STOPWORDS
+from ml_models.models import MLModel
+from datetime import datetime
 # Paths
 MODEL_PATH = Path(__file__).resolve().parent / 'modelo_clasificador.joblib'
 DATASET_PATH = Path(__file__).resolve().parent / 'coherence_license_type_dataset.csv'
@@ -32,7 +34,7 @@ def load_data(csv_file: Path):
 
 
 
-def train_and_save_model():
+def train_and_save_model(first_id=None, last_id=None):
     texts, labels = load_data(DATASET_PATH)
 
     # Dividir en entrenamiento y test
@@ -62,6 +64,15 @@ def train_and_save_model():
 
     # Guardar modelo
     joblib.dump(model, MODEL_PATH)
+    MLModel.objects.create(
+        model_type= 'CLASSIFICATION',
+        name= 'Modelo de coherencia de certificados',
+        algorithm= 'RANDOM_FOREST',
+        is_active= True,
+        training_date = datetime.now(),
+        first_training_id= first_id,
+        last_training_id= last_id
+        )
 
     return model
 
