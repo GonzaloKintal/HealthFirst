@@ -5,7 +5,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, accuracy_score, confusion_matrix
 import lightgbm as lgb
-from .file_utils import normalize_text
+from ml_models.utils.file_utils import normalize_text
 from .spanish_stopwords import SPANISH_STOPWORDS
 from sklearn.model_selection import cross_val_score, StratifiedKFold
 
