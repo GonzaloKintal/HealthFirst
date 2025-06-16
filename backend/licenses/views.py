@@ -169,20 +169,32 @@ def create_license(request):
 
             if certificate_data:
                 try:
-                    file_data = process_certificate(certificate_data)
+                    file_data, certificate_obj = process_certificate(certificate_data)
                 except Exception as e:
                     raise Exception(f'Error en certificado: {str(e)}')
-            
-            
 
-                Certificate.objects.create(
-                    license=license,
-                    file=file_data,
-                    validation=certificate_data.get('validation', False),
-                    upload_date=datetime.now(),
-                    is_deleted=False,
-                    deleted_at=None
-                )
+                validation = certificate_data.get('validation', False)
+
+                if certificate_obj:
+                    # Certificado HFCOD ya existente y válido
+                    certificate_obj.license = license
+                    certificate_obj.file = file_data
+                    certificate_obj.validation = validation
+                    certificate_obj.upload_date = datetime.now()
+                    certificate_obj.is_deleted = False
+                    certificate_obj.deleted_at = None
+                    certificate_obj.save()
+                else:
+                    # Certificado nuevo sin HFCOD
+                    Certificate.objects.create(
+                        license=license,
+                        certificate_id=None,
+                        file=file_data,
+                        validation=validation,
+                        upload_date=datetime.now(),
+                        is_deleted=False,
+                        deleted_at=None
+                    )
 
             license.assign_status()
             #if license.type and license.type.certificate_require and certificate_data is None:
