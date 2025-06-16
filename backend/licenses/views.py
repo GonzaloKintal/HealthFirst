@@ -684,11 +684,12 @@ def process_certificate_update_certificate(certificate_data, current_license):
                 raise ValueError("El código de certificado no existe en el sistema.")
 
             # Validar si está asignado a otra licencia
-            if certificate_obj.license and certificate_obj.license.id != current_license.id:
+            if certificate_obj.license and certificate_obj.license.pk != current_license.pk:
                 raise ValueError("Este certificado ya está asignado a otra licencia.")
 
             # Si la licencia ya tiene un certificado, se valida que sea el mismo código
-            if hasattr(current_license, 'certificate') and current_license.certificate:
+            certificate = getattr(current_license, 'certificate', None)
+            if certificate:
                 current_certificate_id = str(current_license.certificate.certificate_id)
                 if str(certificate_id) != current_certificate_id:
                     raise ValueError("No se puede reemplazar el certificado: el código no coincide con el actual.")
