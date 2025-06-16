@@ -8,7 +8,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'settings.local')
 django.setup()
 
 from licenses.models import License
-from licenses.utils.file_utils import (
+from ml_models.utils.file_utils import (
     base64_to_text,
     is_pdf_image,
     normalize_text,
