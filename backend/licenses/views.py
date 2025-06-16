@@ -272,14 +272,25 @@ def update_license(request, id):
                 # Actualizar certificado
                 if certificate_data:
                     try:
-                        file_data = process_certificate(certificate_data)
+                        file_data, certificate_obj = process_certificate_update_certificate(certificate_data, license)
                     except Exception as e:
                         raise Exception(f'Error en certificado: {str(e)}')
                         
                     validation = certificate_data.get('validation', False)
 
                     if file_data:
-                        if hasattr(license, 'certificate'):
+                        if certificate_obj:
+                            # Reutilizar el certificado ya existente
+                            cert = certificate_obj
+                            cert.license = license  # Asegurar que esté vinculado correctamente
+                            cert.file = file_data
+                            cert.validation = validation
+                            cert.upload_date = datetime.now()
+                            cert.is_deleted = False
+                            cert.deleted_at = None
+                            cert.save()
+                        elif hasattr(license, 'certificate'):
+                            # Si ya tiene uno, se actualiza
                             cert = license.certificate
                             cert.file = file_data
                             cert.validation = validation
@@ -288,6 +299,7 @@ def update_license(request, id):
                             cert.deleted_at = None
                             cert.save()
                         else:
+                            # Si no hay ninguno, se crea
                             Certificate.objects.create(
                                 license=license,
                                 file=file_data,
@@ -295,7 +307,7 @@ def update_license(request, id):
                                 upload_date=datetime.now(),
                                 is_deleted=False,
                                 deleted_at=None
-                        )
+                            )
                 if license.status.name not in [Status.StatusChoices.APPROVED, Status.StatusChoices.REJECTED]:
                     try:
                         certificate=license.certificate
@@ -325,7 +337,7 @@ def update_license(request, id):
 def add_certificate(request, id):
     status_code = 200
     response_data = {}
-    
+
     try:
         data = json.loads(request.body)
         certificate_data = data.get('certificate', None)
@@ -338,30 +350,26 @@ def add_certificate(request, id):
 
         if not license.type.certificate_require:
             raise Exception('El tipo de licencia no requiere certificado.')
-        
+
         try:
-            file_data, certificate_obj = process_certificate(certificate_data)
+            file_data, certificate_obj, certificate_id = process_certificate_add_certificate(certificate_data)
         except Exception as e:
             raise Exception(f'Error en certificado: {str(e)}')
 
-        if file_data and certificate_obj:
-            # Actualiza el certificado ya existente
-            certificate_obj.license = license
-            certificate_obj.file = file_data
-            certificate_obj.validation = False
-            certificate_obj.upload_date = datetime.now()
-            certificate_obj.is_deleted = False
-            certificate_obj.deleted_at = None
-            certificate_obj.save()
+        # Asociar y guardar el certificado existente
+        certificate_obj.license = license
+        certificate_obj.file = file_data
+        certificate_obj.validation = False
+        certificate_obj.upload_date = datetime.now()
+        certificate_obj.is_deleted = False
+        certificate_obj.deleted_at = None
+        certificate_obj.save()
 
-            # Cambia el estado de la licencia
-            license.status.name = Status.StatusChoices.PENDING
-            license.status.save()
+        # Cambiar estado de la licencia
+        license.status.name = Status.StatusChoices.PENDING
+        license.status.save()
 
-            response_data = {'message': 'Certificado agregado exitosamente.'}
-        else:
-            status_code = 400
-            response_data = {'error': 'No se pudo procesar el certificado.'}
+        response_data = {'message': 'Certificado agregado exitosamente.'}
 
     except Exception as e:
         status_code = 500
@@ -579,18 +587,123 @@ def process_certificate(certificate_data):
 
 
          # Buscar el certificado en la base de datos
-        try:
-            certificate_obj = Certificate.objects.get(certificate_id=certificate_id)
-        except Certificate.DoesNotExist:
-            raise ValueError("El código de certificado no existe.")
+        if certificate_id and certificate_id.startswith("HFCOD"): 
+            try:
+                certificate_obj = Certificate.objects.get(certificate_id=certificate_id)
+            except Certificate.DoesNotExist:
+                raise ValueError("El código de certificado no existe.")
 
-        # Validar que el CERTIFICADO NO ESTE relacionado a la LICENCIA.
-        if certificate_obj.license is not None:
-            raise ValueError("El certificado ya fue utilizado.")
+            # Validar que el CERTIFICADO NO ESTE relacionado a la LICENCIA.
+            if certificate_obj.license is not None:
+                raise ValueError("El certificado ya fue utilizado.")
+        else:
+            # Certificado genérico sin HFCOD
+            certificate_obj = None
+            certificate_id = None    
         
         file_encoded = base64.b64encode(file_decoded).decode('utf-8')
 
         return file_encoded, certificate_obj
+
+
+
+
+def process_certificate_add_certificate(certificate_data):
+        file_data = certificate_data.get('file', None)
+        if not file_data:
+            raise ValueError('Archivo del certificado no encontrado.')
+        
+        file_decoded = base64.b64decode(file_data)
+
+        """ Validacíon de código unico """
+        certificate_id = extract_certificate_id_from_pdf_base64(file_data)
+        print("El codigo de certficiado es: ", certificate_id)
+        """ FIN Validación de codigo unico """
+        
+        # Detectar tipo de archivo
+        #mime = magic.Magic(mime=True)
+        #file_type = mime.from_buffer(file_decoded)
+        
+        #allowed_types = ['image/jpeg', 'image/png', 'application/pdf']
+        #if file_type not in allowed_types:
+        #    raise ValueError('Tipo de archivo no permitido. Solo se aceptan JPG, PNG o PDF.')
+        
+        #if file_type in ['image/jpeg', 'image/png']:
+        #    file_decoded = img2pdf.convert(file_decoded)
+
+
+        # Si el código existe
+        if certificate_id:
+            try:
+                certificate_obj = Certificate.objects.get(certificate_id=certificate_id)
+                print(f"Usando certificado existente con ID {certificate_obj.certificate_id}")    
+            except Certificate.DoesNotExist:
+                raise ValueError(f"El certificado con ID {certificate_id} no existe.")
+
+            # Validar que el código del certificado no esté relacionado con otra licencia
+            if certificate_obj.license is not None:
+                raise ValueError("El certificado ya fue utilizado.")
+        else:
+            # Si no tiene el prefijo HFCOD, simplemente generamos un nuevo certificado "genérico"
+            certificate_obj = Certificate()
+
+        # Codificamos nuevamente el archivo para guardar
+        file_encoded = base64.b64encode(file_decoded).decode('utf-8')
+        return file_encoded, certificate_obj, certificate_id
+
+
+def process_certificate_update_certificate(certificate_data, current_license):
+        file_data = certificate_data.get('file', None)
+        if not file_data:
+            raise ValueError('Archivo del certificado no encontrado.')
+        
+        file_decoded = base64.b64decode(file_data)
+
+        """ Validacíon de código unico """
+        certificate_id = extract_certificate_id_from_pdf_base64(file_data)
+        print("El codigo de certficiado es: ", certificate_id)
+        certificate_obj = None
+        """ FIN Validación de codigo unico """
+        
+        
+        # Detectar tipo de archivo
+        #mime = magic.Magic(mime=True)
+        #file_type = mime.from_buffer(file_decoded)
+        
+        #allowed_types = ['image/jpeg', 'image/png', 'application/pdf']
+        #if file_type not in allowed_types:
+        #    raise ValueError('Tipo de archivo no permitido. Solo se aceptan JPG, PNG o PDF.')
+        
+        #if file_type in ['image/jpeg', 'image/png']:
+        #    file_decoded = img2pdf.convert(file_decoded)
+
+
+         # Buscar el certificado en la base de datos
+        if certificate_id:
+            try:
+                certificate_obj = Certificate.objects.get(certificate_id=certificate_id)
+            except Certificate.DoesNotExist:
+                raise ValueError("El código de certificado no existe en el sistema.")
+
+            # Validar si está asignado a otra licencia
+            if certificate_obj.license and certificate_obj.license.id != current_license.id:
+                raise ValueError("Este certificado ya está asignado a otra licencia.")
+
+            # Si la licencia ya tiene un certificado, se valida que sea el mismo código
+            if hasattr(current_license, 'certificate') and current_license.certificate:
+                current_certificate_id = str(current_license.certificate.certificate_id)
+                if str(certificate_id) != current_certificate_id:
+                    raise ValueError("No se puede reemplazar el certificado: el código no coincide con el actual.")
+            else:
+                raise ValueError("La licencia no posee un certificado actual para validar el código.")
+        else:
+            # No tiene HFCOD entonces no se valida el código, se permite continuar
+            certificate_obj = None    
+        
+        file_encoded = base64.b64encode(file_decoded).decode('utf-8')
+
+        return file_encoded, certificate_obj
+
 
 @api_view(['POST'])
 @authentication_classes([JWTAuthentication])
