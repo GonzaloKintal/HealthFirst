@@ -18,7 +18,7 @@ from django.core.paginator import Paginator
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
-#import magic  
+import magic  
 import img2pdf
 from django.db import transaction
 from .analisis import license_analysis
@@ -577,18 +577,18 @@ def process_certificate(certificate_data):
         certificate_obj = None
 
         # Detectar tipo de archivo
-        #mime = magic.Magic(mime=True)
-        #file_type = mime.from_buffer(file_decoded)
+        mime = magic.Magic(mime=True)
+        file_type = mime.from_buffer(file_decoded)
         
-        #allowed_types = ['image/jpeg', 'image/png', 'application/pdf']
-        #if file_type not in allowed_types:
-        #    raise ValueError('Tipo de archivo no permitido. Solo se aceptan JPG, PNG o PDF.')
+        allowed_types = ['image/jpeg', 'image/png', 'application/pdf']
+        if file_type not in allowed_types:
+            raise ValueError('Tipo de archivo no permitido. Solo se aceptan JPG, PNG o PDF.')
         
-        #if file_type in ['image/jpeg', 'image/png']:
-        #    file_decoded = img2pdf.convert(file_decoded)
+        if file_type in ['image/jpeg', 'image/png']:
+            file_decoded = img2pdf.convert(file_decoded)
 
 
-         # Si encontro certificate_id significa que es HFCOD, debe existir el certificado en la BD:
+        # Si encontro certificate_id significa que es HFCOD, debe existir el certificado en la BD:
         if certificate_id: 
             try:
                 certificate_obj = Certificate.objects.get(certificate_id=certificate_id)
@@ -619,12 +619,12 @@ def process_certificate_add_certificate(certificate_data):
         """ FIN Validación de codigo unico """
         
         # Detectar tipo de archivo
-        #mime = magic.Magic(mime=True)
-        #file_type = mime.from_buffer(file_decoded)
+        mime = magic.Magic(mime=True)
+        file_type = mime.from_buffer(file_decoded)
         
-        #allowed_types = ['image/jpeg', 'image/png', 'application/pdf']
-        #if file_type not in allowed_types:
-        #    raise ValueError('Tipo de archivo no permitido. Solo se aceptan JPG, PNG o PDF.')
+        allowed_types = ['image/jpeg', 'image/png', 'application/pdf']
+        if file_type not in allowed_types:
+            raise ValueError('Tipo de archivo no permitido. Solo se aceptan JPG, PNG o PDF.')
         
         #if file_type in ['image/jpeg', 'image/png']:
         #    file_decoded = img2pdf.convert(file_decoded)
@@ -665,15 +665,15 @@ def process_certificate_update_certificate(certificate_data, current_license):
         
         
         # Detectar tipo de archivo
-        #mime = magic.Magic(mime=True)
-        #file_type = mime.from_buffer(file_decoded)
+        mime = magic.Magic(mime=True)
+        file_type = mime.from_buffer(file_decoded)
         
-        #allowed_types = ['image/jpeg', 'image/png', 'application/pdf']
-        #if file_type not in allowed_types:
-        #    raise ValueError('Tipo de archivo no permitido. Solo se aceptan JPG, PNG o PDF.')
+        allowed_types = ['image/jpeg', 'image/png', 'application/pdf']
+        if file_type not in allowed_types:
+            raise ValueError('Tipo de archivo no permitido. Solo se aceptan JPG, PNG o PDF.')
         
-        #if file_type in ['image/jpeg', 'image/png']:
-        #    file_decoded = img2pdf.convert(file_decoded)
+        if file_type in ['image/jpeg', 'image/png']:
+            file_decoded = img2pdf.convert(file_decoded)
 
 
          # Buscar el certificado en la base de datos
@@ -866,9 +866,9 @@ def get_next_certificate_id():
         row = cursor.fetchone()
     return row[0] if row else None
 
-#@api_view(['GET'])
-#@authentication_classes([JWTAuthentication])
-#@permission_classes([IsAuthenticated])
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
 def generate_certificate_code(request):
     try:
         # Obtener proximo id de tabla certificate
