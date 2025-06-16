@@ -574,6 +574,8 @@ def process_certificate(certificate_data):
         print("El codigo de certficiado es: ", certificate_id)
         """ FIN Validación de codigo unico """
         
+        certificate_obj = None
+
         # Detectar tipo de archivo
         #mime = magic.Magic(mime=True)
         #file_type = mime.from_buffer(file_decoded)
@@ -587,19 +589,15 @@ def process_certificate(certificate_data):
 
 
          # Buscar el certificado en la base de datos
-        if certificate_id and certificate_id.startswith("HFCOD"): 
+        if certificate_id: 
             try:
                 certificate_obj = Certificate.objects.get(certificate_id=certificate_id)
             except Certificate.DoesNotExist:
-                raise ValueError("El código de certificado no existe.")
+                raise ValueError("El código de certificado no existe en la dB.")
 
             # Validar que el CERTIFICADO NO ESTE relacionado a la LICENCIA.
             if certificate_obj.license is not None:
                 raise ValueError("El certificado ya fue utilizado.")
-        else:
-            # Certificado genérico sin HFCOD
-            certificate_obj = None
-            certificate_id = None    
         
         file_encoded = base64.b64encode(file_decoded).decode('utf-8')
 
