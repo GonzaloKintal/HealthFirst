@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 from sklearn.ensemble import IsolationForest
 import joblib
-
+import re
 import django
 from django.db.models import Sum,Count,OuterRef,Subquery ,IntegerField,Value
 from django.db.models.functions import Coalesce
@@ -17,13 +17,6 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'settings.local')
 django.setup()
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-#MODEL_PATH_SUP = os.path.join(BASE_DIR, 'isolation_forest_sup_model_v3.pkl')
-MODEL_PATH_SUP = os.path.join(BASE_DIR, 'isolation_forest_sup_model_v4.pkl')
-
-#MODEL_PATH_EMP = os.path.join(BASE_DIR, 'isolation_forest_emp_model_v2.pkl')
-#MODEL_PATH_EMP = os.path.join(BASE_DIR, 'isolation_forest_emp_model_v3.pkl')
-MODEL_PATH_EMP = os.path.join(BASE_DIR, 'isolation_forest_emp_model_v4.pkl')
-
 pd.set_option("display.max_columns", None)  # Mostrar todas las columnas
 pd.set_option("display.max_rows", None)     # Mostrar todas las filas
 pd.set_option("display.width", 0)           # Autoajuste al ancho de consola
@@ -34,7 +27,7 @@ import pandas as pd
 
 
 #ANOMALIAS SOBRE SUPERVISORES------------------------------------------------------------------------------------
-def create_model_supervisor(path_csv): # le paso el csv para el entreamiento
+def create_model_supervisor(path_csv,base_name): # le paso el csv para el entreamiento
     data= pd.read_csv(path_csv)
     features = data[['total_requests', 'approved_requests', 'rejected_requests','seniority_days']].copy()
 
@@ -50,14 +43,16 @@ def create_model_supervisor(path_csv): # le paso el csv para el entreamiento
 
     # Guardar el modelo en un archivo, ESTO ES LO CORRECTO
     #joblib.dump(model, MODEL_PATH_SUP)
-    joblib.dump(model,MODEL_PATH_SUP)
+    name=get_next_model_path(base_name)
+    joblib.dump(model,name)
 
     return model # NO deberia retornarlo, pero por ahora para pruebas lo dejo así
 
 
-def anomalies_supervisors(data): #recibe un dataframe
+def anomalies_supervisors(data,base_name): #recibe un dataframe
     #Cargo el modelo previamente guardado
-    model = joblib.load(MODEL_PATH_SUP)
+    model_path = get_latest_model_path(base_name)
+    model = joblib.load(model_path)
     #data= pd.read_csv(path_csv)
     features = data[['total_requests', 'approved_requests', 'rejected_requests', 'seniority_days']]
 
@@ -170,7 +165,16 @@ def get_supervisor_anomalies(start_date=None, end_date=None): #FUNCION PRINCIPAL
     if df.empty:
         cols = ['evaluator_id','evaluator_name','department', 'total_requests', 'approved_requests', 'rejected_requests', 'approval_rate', 'rejection_rate','seniority_days']
         return pd.DataFrame(columns=cols)
-    dataframe =  anomalies_supervisors(df)
+
+    base_name = "isolation_forest_sup_model"
+    model_path = get_latest_model_path(base_name)
+
+    if model_path and os.path.exists(model_path):
+        dataframe = anomalies_supervisors(df, base_name)
+    else:
+        create_model_supervisor('supervisors.csv', base_name=base_name)
+        dataframe = anomalies_supervisors(df, base_name)
+
     
     names = []
     departments = []
@@ -257,7 +261,7 @@ def generate_employees_csv(path_csv='employees_data_1000.csv', n=1000, semilla=4
     df.to_csv(path_csv, index=False)
     return df
 
-def create_model_empleados(path_csv): # le paso el csv para el entreamiento
+def create_model_empleados(path_csv,base_name): # le paso el csv para el entreamiento
     data= pd.read_csv(path_csv)
     features = data[['total_requests', 'required_days', 'required_days_rate','seniority_days','days_per_year','mon_fri_requests']]
 
@@ -270,9 +274,9 @@ def create_model_empleados(path_csv): # le paso el csv para el entreamiento
         random_state=42,
     )
     model.fit(features)
-
+    name = get_next_model_path(base_name)
     #se guardan el modelo en un archivo
-    joblib.dump(model, MODEL_PATH_EMP)
+    joblib.dump(model, name)
 
 def create_dataFrame_empleados(start_date=None, end_date=None):
     employees = HealthFirstUser.objects.filter(role__name='employee', is_deleted=False)
@@ -346,9 +350,10 @@ def calculate_mon_fri(start_date=None, end_date=None):
 
     return weekday_counts
     
-def anomalies_employees(data): #recibe un dataframe
+def anomalies_employees(data,base_name): #recibe un dataframe
     #Cargo el modelo previamente guardado
-    model = joblib.load(MODEL_PATH_EMP)
+    name = get_latest_model_path(base_name)
+    model = joblib.load(name)
     features = data[['total_requests', 'required_days', 'required_days_rate','seniority_days','days_per_year','mon_fri_requests']]
 
 
@@ -363,7 +368,14 @@ def get_employee_anomalies(start_date=None, end_date=None): #FUNCION PRINCIPAL Q
     if df.empty:
         cols = ['employee_id','employee_name', 'department','total_requests', 'required_days', 'required_days_rate','seniority_days','days_per_year','mon_fri_requests']
         return pd.DataFrame(columns=cols)
-    dataframe =  anomalies_employees(df)
+    base_name = "isolation_forest_emp_model"
+    model_path = get_latest_model_path(base_name)
+
+    if model_path and os.path.exists(model_path):
+        dataframe = anomalies_employees(df, base_name)
+    else:
+        create_model_empleados('employees.csv', base_name=base_name)
+        dataframe = anomalies_employees(df,base_name)
 
     names = []
     departments = []
@@ -539,24 +551,39 @@ def dataframe_pruebas_emp(): # para pruebas
 
     return data
 
+#busco nombres para modelos------------------------------------------------------------------------------------------------------
+def get_next_model_path(base_name):
+    versiones = []
+    patron = re.compile(rf"{re.escape(base_name)}_v(\d+)\.pkl")
+    
+    for archivo in os.listdir(BASE_DIR):
+        match = patron.match(archivo)
+        if match:
+            versiones.append(int(match.group(1)))
+    
+    siguiente = max(versiones, default=0) + 1
+    return os.path.join(BASE_DIR, f"{base_name}_v{siguiente}.pkl")
+
+def get_latest_model_path(base_name):
+    versiones = []
+    patron = re.compile(rf"{re.escape(base_name)}_v(\d+)\.pkl")
+    
+    for archivo in os.listdir(BASE_DIR):
+        match = patron.match(archivo)
+        if match:
+            versiones.append((int(match.group(1)), archivo))
+    
+    if not versiones:
+        return None
+    
+    versiones.sort(key=lambda x: x[0], reverse=True)
+    return os.path.join(BASE_DIR, versiones[0][1])
     
 #-pruebas sup------------------------------------------------------------------------------------------------------
-
-#print(get_supervisor_anomalies())
-
-#generate_supervisors_csv()
 #create_model_supervisor('supervisors.csv')
-#print(anomalies_supervisors(dataframe_pruebas_sup()))
-#print(anomalies_supervisors(dataframe_pruebas_sup_not()))
-#get_supervisor_anomalies()
-#print()
+#print(anomalies_supervisors(dataframe_pruebas_sup(),"isolation_forest_sup_model"))
+#print(anomalies_supervisors(dataframe_pruebas_sup_not(),"isolation_forest_sup_model"))
+#print(get_supervisor_anomalies())
+print(get_supervisor_anomalies())
 #pruebas emp-------------------------------------------------------------------------------------------------------
-
-#generate_employees_csv()
-#generate_small_training_csv()
-#create_model_empleados('employees.csv')
-#print(anomalies_employees(dataframe_pruebas_emp()))
-
-#print(create_dataFrame_empleados())
-
-#print(get_employee_anomalies())
+print(get_employee_anomalies())
