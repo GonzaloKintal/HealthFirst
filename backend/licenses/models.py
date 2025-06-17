@@ -1,7 +1,8 @@
 from django.db import models
 from users.models import HealthFirstUser
 from django.utils import timezone
-from licenses.utils import file_utils
+from ml_models.utils import file_utils
+from django.core.exceptions import ValidationError
 
 # Create your models here.
 class Status(models.Model):
@@ -33,6 +34,33 @@ class LicenseType(models.Model):
     yearly_approved_requests=models.IntegerField(null=True, blank=True)
     is_deleted = models.BooleanField(default=False)
     deleted_at = models.DateTimeField(blank=True, null=True)
+
+
+    @property
+    def group(self):
+        license_group_map = {
+            'Accidente de trabajo': 'accidente_trabajo',
+            'Donación de sangre': 'donacion_sangre',
+            'Duelo(A)': 'duelo',
+            'Duelo(B)': 'duelo',
+            'Enfermedad': 'enfermedad',
+            'Asistencia a familiares': 'asistencia_familiares',
+            'Estudios': 'estudios',
+            'Casamiento': 'matrimonial',
+            'Casamiento de hijos': 'matrimonial',
+            'Trámites patriomaniales': 'matrimonial',
+            'Mudanza': 'mudanza',
+            'Obligaciones públicas': 'gremial',
+            'Reunión gremial': 'gremial',
+            'Representante gremial': 'gremial',
+            'Reunión extraordinaria': 'gremial',
+            'Nacimiento de hijo': 'nacimiento',
+            'Maternidad': 'salud_materna',
+            'Control prenatal': 'salud_materna',
+            'Vacaciones': 'vacaciones',
+        }
+        return license_group_map.get(self.name, 'otro')
+
 
 
     def requieres_inmediate_certificate(self):
@@ -109,7 +137,7 @@ class License(models.Model):
 
 class Certificate(models.Model):
     certificate_id = models.AutoField(primary_key=True)
-    license = models.OneToOneField(License, on_delete=models.CASCADE, related_name='certificate')
+    license = models.OneToOneField(License, on_delete=models.CASCADE, related_name='certificate', null=True, blank=True)
     file = models.TextField(blank=True, null=True)
     validation = models.BooleanField(default=False)
     upload_date = models.DateTimeField(auto_now_add=True)
