@@ -10,6 +10,7 @@ from ml_models.utils.file_utils import normalize_text
 from .spanish_stopwords import SPANISH_STOPWORDS
 from sklearn.model_selection import cross_val_score, StratifiedKFold
 from datetime import datetime
+from ml_models.models import LicenseDatasetEntry
 
 
 # Paths
@@ -18,33 +19,44 @@ REJECTION_MODEL_PATH = Path(__file__).resolve().parent / 'modelo_motivo_rechazo.
 DATASET_PATH = Path(__file__).resolve().parent / 'coherence_license_type_dataset.csv'
 
 
-def load_approval_data(csv_file: Path):
-    """Carga datos para el modelo de aprobación/rechazo."""
-    df = pd.read_csv(
-        csv_file,
-        delimiter=',',
-        quotechar='"',
-        engine='python',
-        on_bad_lines='skip'
-    )
-    df['text'] = df['text'].apply(normalize_text)
-    df['approved'] = (df['estado'] == 'approved').astype(int)
-    return df['text'].tolist(), df['approved'].tolist()
+def load_approval_data():
+    """Carga datos desde la base de datos para el modelo de aprobación/rechazo."""
+    queryset = LicenseDatasetEntry.objects.all().values('id', 'text', 'status')
+    df = pd.DataFrame.from_records(queryset)
+
+    df['approved'] = (df['status'] == 'approved').astype(int)
+
+    first_id = df['id'].min() if not df.empty else None
+    last_id = df['id'].max() if not df.empty else None
+
+    return {
+        'texts': df['text'].tolist(),
+        'approved': df['approved'].tolist(),
+        'first_id': first_id,
+        'last_id': last_id
+    }
 
 
-def load_rejection_reasons_data(csv_file: Path):
-    """Carga datos para el modelo de motivos de rechazo."""
-    df = pd.read_csv(
-        csv_file,
-        delimiter=',',
-        quotechar='"',
-        engine='python',
-        on_bad_lines='skip'
-    )
-    
-    rejected_df = df[(df['estado'] == 'rejected') & (df['motivo'].notna())]
-    rejected_df['text'] = rejected_df['text'].apply(normalize_text)
-    return rejected_df['text'].tolist(), rejected_df['motivo'].tolist()
+def load_rejection_reasons_data():
+    """Carga datos desde la base de datos para el modelo de motivos de rechazo."""
+    queryset = LicenseDatasetEntry.objects.filter(
+        status='rejected',
+        reason__isnull=False
+    ).values('id', 'text', 'reason')
+    df = pd.DataFrame.from_records(queryset)
+
+    first_id = df['id'].min() if not df.empty else None
+    last_id = df['id'].max() if not df.empty else None
+
+    return {
+        'texts': df['text'].tolist(),
+        'reasons': df['reason'].tolist(),
+        'first_id': first_id,
+        'last_id': last_id
+    }
+
+
+
 
 
 class ApprovalClassifier:
@@ -133,8 +145,12 @@ class RejectionReasonClassifier:
         return self.classifier.predict_proba(X_vec)
 
 
-def train_approval_model(first_id=None, last_id=None):
-    texts, labels = load_approval_data(DATASET_PATH)
+def train_approval_model():
+    data = load_approval_data()
+    texts = data['texts']
+    labels = data['approved']   # aquí labels es approved
+    first_id = data['first_id']
+    last_id = data['last_id']
     
     X_train, X_test, y_train, y_test = train_test_split(
         texts, labels, 
@@ -207,8 +223,12 @@ def train_approval_model(first_id=None, last_id=None):
     return model, training_info
 
 
-def train_rejection_reason_model(first_id=None, last_id=None):
-    texts, reasons = load_rejection_reasons_data(DATASET_PATH)
+def train_rejection_reason_model():
+    data = load_rejection_reasons_data()
+    texts = data['texts']
+    reasons = data['reasons']
+    first_id = data['first_id']
+    last_id = data['last_id']
     
     if len(texts) == 0:
         return None, None

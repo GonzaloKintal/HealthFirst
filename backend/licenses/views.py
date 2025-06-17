@@ -4,9 +4,8 @@ from datetime import datetime, timedelta
 from django.utils.timezone import now
 from django.contrib.auth import get_user_model
 from xmlrpc.client import NOT_WELLFORMED_ERROR
-
+from ml_models.models import LicenseDatasetEntry
 from messaging.services.messenger import MessengerService
-
 from ml_models.anomalies.isolation_forest import get_employee_anomalies, get_supervisor_anomalies
 from messaging.services.brevo_email import *
 from .models import *
@@ -439,6 +438,13 @@ def evaluate_license(request, id):
 
             text= base64_to_text(base64_certificate,is_image)
             text_normalize=normalize_text(text)
+
+            LicenseDatasetEntry.objects.create(
+                text=text_normalize,
+                type=license.type.group,
+                status=license.status.name,
+                reason=license.status.evaluation_comment
+            )
 
 
         return JsonResponse({'message': 'Licencia evaluada correctamente.','evaluator': evaluator}, status=200)

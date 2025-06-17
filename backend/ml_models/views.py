@@ -7,6 +7,8 @@ from django.http import JsonResponse
 from ml_models.serializers import MLModelSerializer
 import json
 from django.core.paginator import Paginator
+from .utils.coherence_model_ml import train_and_save_coherence_model
+from .utils.evaluation_model import train_approval_model, train_rejection_reason_model
 
 
 @api_view(['GET'])
@@ -41,3 +43,27 @@ def all_models(request):
         "num_pages": paginator.num_pages,
         "current_page": page_number
     }, status=200)
+
+
+def train_models(request):
+    data = json.loads(request.body)
+    models = data.get('models', [])  # Esperamos una lista de modelos
+
+    valid_models = {'coherence', 'approval', 'rejection_reason'}
+    invalid_models = [m for m in models if m not in valid_models]
+
+    if invalid_models:
+        return JsonResponse({"error": f"Modelos inválidos: {invalid_models}"}, status=400)
+
+    try:
+        if 'coherence' in models:
+            train_and_save_coherence_model()
+        if 'approval' in models:
+            train_approval_model()
+        if 'rejection_reason' in models:
+            train_rejection_reason_model()
+            
+    except Exception as e:
+        return JsonResponse({"error": f"Error al entrenar los modelos: {str(e)}"}, status=500)
+
+    return JsonResponse({"message": f"Modelos entrenados correctamente: {models}"}, status=200)
