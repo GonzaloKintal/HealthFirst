@@ -28,8 +28,8 @@ def load_approval_data(csv_file: Path):
         on_bad_lines='skip'
     )
     df['text'] = df['text'].apply(normalize_text)
-    df['aprobado'] = (df['estado'] == 'aprobado').astype(int)
-    return df['text'].tolist(), df['aprobado'].tolist()
+    df['approved'] = (df['estado'] == 'approved').astype(int)
+    return df['text'].tolist(), df['approved'].tolist()
 
 
 def load_rejection_reasons_data(csv_file: Path):
@@ -42,7 +42,7 @@ def load_rejection_reasons_data(csv_file: Path):
         on_bad_lines='skip'
     )
     
-    rejected_df = df[(df['estado'] == 'rechazado') & (df['motivo'].notna())]
+    rejected_df = df[(df['estado'] == 'rejected') & (df['motivo'].notna())]
     rejected_df['text'] = rejected_df['text'].apply(normalize_text)
     return rejected_df['text'].tolist(), rejected_df['motivo'].tolist()
 
@@ -328,8 +328,8 @@ def get_rejection_model():
 
 def predict_evaluation(text):
     """
-    Predice si un certificado será aprobado o rechazado.
-    Si es rechazado, predice el motivo más probable.
+    Predice si un certificado será approved o rejected.
+    Si es rejected, predice el motivo más probable.
     """
     normalized_text = normalize_text(text)
     
