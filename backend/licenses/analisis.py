@@ -8,7 +8,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'settings.local')
 django.setup()
 
 from licenses.models import License
-from licenses.utils.file_utils import (
+from ml_models.utils.file_utils import (
     base64_to_text,
     is_pdf_image,
     normalize_text,
@@ -28,8 +28,7 @@ def license_analysis(license): #se le pasa la licencia
         status__name__in=["approved", "missing_doc", "pending"],
         is_deleted=False,
         start_date__lte=license.end_date,
-        end_date__gte=license.start_date
-    )
+        end_date__gte=license.start_date).exclude(license_id=license.license_id)
 
     if overlapping_licenses.exists():
         raise LicenseValidationError ("El empleado ya posee una solicitud o una licencia en el rango de fechas seleccionado")
