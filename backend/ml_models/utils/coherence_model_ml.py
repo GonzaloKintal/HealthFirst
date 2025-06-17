@@ -16,7 +16,7 @@ DATASET_PATH = Path(__file__).resolve().parent / 'coherence_license_type_dataset
 
 
 def load_data(csv_file: Path):
-    """Loads and normalizes the dataset from a CSV file, keeping only rows with estado='aprobado'."""
+    """Loads and normalizes the dataset from a CSV file, keeping only rows with estado='approved'."""
     df = pd.read_csv(
         csv_file,
         delimiter=',',
@@ -25,8 +25,8 @@ def load_data(csv_file: Path):
         on_bad_lines='skip'
     )
     
-    # Filtramos solo las filas con estado 'aprobado'
-    df = df[df['estado'] == 'aprobado']
+    # Filtramos solo las filas con estado 'approved'
+    df = df[df['estado'] == 'approved']
 
     df['text'] = df['text'].apply(normalize_text)
 

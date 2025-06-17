@@ -9,7 +9,7 @@ import io
 from pdfminer.high_level import extract_text
 from datetime import datetime #podria no necesitarse
 from io import BytesIO
-from PyPDF2 import PdfReader
+from PyPDF2 import PdfReader as PyPDF2_PdfReader
 from pdf2image import convert_from_path
     
 from reportlab.pdfgen import canvas
@@ -38,7 +38,7 @@ def base64_to_text(base64_pdf, is_image=False):
 
         if not is_image:
             with open("temp.pdf", "rb") as file:
-                reader = PdfReader(file)
+                reader = PyPDF2_PdfReader(file)
                 for page in reader.pages:
                     page_text = page.extract_text()
                     if page_text:
