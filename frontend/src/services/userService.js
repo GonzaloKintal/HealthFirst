@@ -57,12 +57,13 @@ export const getUser = async (id) => {
     }
 };
 
-export const getUsersByFilter = async (page = 1, filter = '', pageSize = 5) => {
+export const getUsersByFilter = async (page = 1, filter = '', pageSize = 5, role = '') => {
     try {
         const body = {
             page,
             page_size: pageSize,
-            filter: filter
+            filter: filter,
+            role: role !== 'all' ? role : null
         };
 
         const response = await api.post('/users/get_users_by_filter', body);
@@ -78,7 +79,6 @@ export const getUsersByFilter = async (page = 1, filter = '', pageSize = 5) => {
         throw error;
     }
 };
-
 
 export const addTelegramSubscription = async (userId, telegramId) => {
     try {
