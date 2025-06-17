@@ -1,3 +1,4 @@
+from cProfile import label
 import pandas as pd
 import joblib
 from pathlib import Path
@@ -10,36 +11,42 @@ from sklearn.metrics import classification_report, accuracy_score
 from .spanish_stopwords import SPANISH_STOPWORDS
 from ml_models.models import MLModel
 from datetime import datetime
+from ml_models.models import LicenseDatasetEntry
 # Paths
 MODEL_PATH = Path(__file__).resolve().parent / 'modelo_clasificador.joblib'
 DATASET_PATH = Path(__file__).resolve().parent / 'coherence_license_type_dataset.csv'
 
 
-def load_data(csv_file: Path):
-    """Loads and normalizes the dataset from a CSV file, keeping only rows with estado='approved'."""
-    df = pd.read_csv(
-        csv_file,
-        delimiter=',',
-        quotechar='"',
-        engine='python',
-        on_bad_lines='skip'
-    )
+def load_data_from_db():
+    """Carga el dataset desde la base de datos, manteniendo solo las filas con estado='approved'."""
+    queryset = LicenseDatasetEntry.objects.filter(
+        status='approved'
+    ).values('id', 'text', 'type')
     
-    # Filtramos solo las filas con estado 'approved'
-    df = df[df['estado'] == 'approved']
+    df = pd.DataFrame.from_records(queryset)
 
-    df['text'] = df['text'].apply(normalize_text)
+    first_id = df['id'].min() if not df.empty else None
+    last_id = df['id'].max() if not df.empty else None
 
-    return df['text'].tolist(), df['clase'].tolist()
+    return {
+        'texts': df['text'].tolist(),
+        'types': df['type'].tolist(),
+        'first_id': first_id,
+        'last_id': last_id
+    }
 
 
 
-def train_and_save_model(first_id=None, last_id=None):
-    texts, labels = load_data(DATASET_PATH)
+def train_and_save_coherence_model():
+    data = load_data_from_db()
+    texts = data['texts']
+    types = data['types']
+    first_id = data['first_id']
+    last_id = data['last_id']
 
     # Dividir en entrenamiento y test
     X_train, X_test, y_train, y_test = train_test_split(
-        texts, labels, test_size=20, random_state=42, stratify=labels
+        texts, types, test_size=20, random_state=42, stratify=types
     )
 
     model = make_pipeline(
@@ -80,7 +87,7 @@ def get_model():
     if MODEL_PATH.exists():
         return joblib.load(MODEL_PATH)
     else:
-        return train_and_save_model()
+        return train_and_save_coherence_model()
 
 
 def predict_license_types(text):
