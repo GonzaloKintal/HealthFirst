@@ -145,7 +145,7 @@ class RejectionReasonClassifier:
         return self.classifier.predict_proba(X_vec)
 
 
-def train_approval_model():
+def train_and_save_approval_model():
     data = load_approval_data()
     texts = data['texts']
     labels = data['approved']   # aquí labels es approved
@@ -223,7 +223,7 @@ def train_approval_model():
     return model, training_info
 
 
-def train_rejection_reason_model():
+def train_and_save_rejection_reason_model():
     data = load_rejection_reasons_data()
     texts = data['texts']
     reasons = data['reasons']
@@ -335,7 +335,7 @@ def get_approval_model():
     if APPROVAL_MODEL_PATH.exists():
         return joblib.load(APPROVAL_MODEL_PATH), None
     else:
-        return train_approval_model()
+        return train_and_save_approval_model()
 
 
 def get_rejection_model():
@@ -343,7 +343,7 @@ def get_rejection_model():
     if REJECTION_MODEL_PATH.exists():
         return joblib.load(REJECTION_MODEL_PATH), None
     else:
-        return train_rejection_reason_model()
+        return train_and_save_rejection_reason_model()
 
 
 def predict_evaluation(text):
