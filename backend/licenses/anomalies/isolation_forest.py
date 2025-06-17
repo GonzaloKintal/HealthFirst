@@ -17,10 +17,12 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'settings.local')
 django.setup()
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-MODEL_PATH_SUP = os.path.join(BASE_DIR, 'isolation_forest_sup_model_v3.pkl')
+#MODEL_PATH_SUP = os.path.join(BASE_DIR, 'isolation_forest_sup_model_v3.pkl')
+MODEL_PATH_SUP = os.path.join(BASE_DIR, 'isolation_forest_sup_model_v4.pkl')
 
-MODEL_PATH_EMP = os.path.join(BASE_DIR, 'isolation_forest_emp_model_v2.pkl')
-
+#MODEL_PATH_EMP = os.path.join(BASE_DIR, 'isolation_forest_emp_model_v2.pkl')
+#MODEL_PATH_EMP = os.path.join(BASE_DIR, 'isolation_forest_emp_model_v3.pkl')
+MODEL_PATH_EMP = os.path.join(BASE_DIR, 'isolation_forest_emp_model_v4.pkl')
 
 pd.set_option("display.max_columns", None)  # Mostrar todas las columnas
 pd.set_option("display.max_rows", None)     # Mostrar todas las filas
@@ -39,8 +41,8 @@ def create_model_supervisor(path_csv): # le paso el csv para el entreamiento
      # Entrenamiento del modelo Isolation Forest
     model = IsolationForest(
         n_estimators=200,
-        contamination=0.04,
-        max_samples=100,
+        contamination=0.1,
+        max_samples='auto',
         max_features=0.8,
         random_state=42,
     )
@@ -48,7 +50,7 @@ def create_model_supervisor(path_csv): # le paso el csv para el entreamiento
 
     # Guardar el modelo en un archivo, ESTO ES LO CORRECTO
     #joblib.dump(model, MODEL_PATH_SUP)
-    joblib.dump(model,'isolation_forest_sup_model_v3.pkl')
+    joblib.dump(model,MODEL_PATH_SUP)
 
     return model # NO deberia retornarlo, pero por ahora para pruebas lo dejo así
 
@@ -201,7 +203,7 @@ def get_supervisor_anomalies(start_date=None, end_date=None): #FUNCION PRINCIPAL
     dataframe['approval_rate_diff'] = (dataframe['approval_rate_diff']*100).map("{:+.2f}%".format) #NUEVA INFO
     dataframe['rejection_rate_diff'] = (dataframe['rejection_rate_diff']*100).map("{:+.2f}%".format) #NUEVA INFO
     dataframe['total_requests_percent'] = (dataframe['total_requests_percent']*100).map("{:.2f}%".format)#NUEVA INFO
-
+    #print(dataframe)
     dataframe = dataframe.drop(columns=['seniority_days'])
 
     columnas_ordenadas = ['evaluator_id','evaluator_name', 'department'] + [col for col in dataframe.columns if col not in ['evaluator_name', 'department']]
@@ -262,8 +264,8 @@ def create_model_empleados(path_csv): # le paso el csv para el entreamiento
     #entrenamiento del modelo Isolation Forest
     model = IsolationForest(
         n_estimators=200,
-        contamination=0.07,
-        max_samples=100,
+        contamination=0.1,
+        max_samples="auto",
         max_features=0.8,
         random_state=42,
     )
@@ -480,10 +482,31 @@ def generate_small_training_csv(path_csv='small_training_employees.csv', n=30, s
 
 def dataframe_pruebas_sup(): # para pruebas
     data = pd.DataFrame({
-    'evaluator_id': [6, 7, 8, 9, 10, 11, 12],
-    'total_requests': [0, 40, 28, 35, 50, 20, 30],
-    'approved_requests': [0, 35, 24, 18, 48, 3, 10],
-    'rejected_requests': [0, 5, 4, 17, 2, 17, 20]
+    'evaluator_id':       [6,   7,     8,      9,    10  ],
+    'total_requests':     [0,   730,   180,   80,    1000],
+    'approved_requests':  [0,   730,   0,     70,    700],
+    'rejected_requests':  [0,   0,     180,    10,   300],
+    'seniority_days':     [365, 730,   180,     1,   1],
+    })
+
+    data['approval_rate'] = 0.0
+    data['rejection_rate'] = 0.0
+
+    data.loc[data['total_requests'] > 0, 'approval_rate'] = (
+        data.loc[data['total_requests'] > 0, 'approved_requests'] / data.loc[data['total_requests'] > 0, 'total_requests']
+    )
+
+    data.loc[data['total_requests'] > 0, 'rejection_rate'] = (
+        data.loc[data['total_requests'] > 0, 'rejected_requests'] / data.loc[data['total_requests'] > 0, 'total_requests']
+    )
+    return data
+def dataframe_pruebas_sup_not(): # para pruebas
+    data = pd.DataFrame({
+    'evaluator_id':       [6,     7,     8,    9,    10,    11],
+    'total_requests':     [360,  730,   10,   1,    2,   0],
+    'approved_requests':  [252,  511,   7,   1,    2,    0],
+    'rejected_requests':  [108,  219,   3,    0,   1,    0],
+    'seniority_days':     [365, 730,   10,    1,   2,      0],
     })
 
     data['approval_rate'] = 0.0
@@ -500,11 +523,11 @@ def dataframe_pruebas_sup(): # para pruebas
 
 def dataframe_pruebas_emp(): # para pruebas
     data = pd.DataFrame({
-        'employee_id':      [0, 1, 2, 3, 4, 5, 6, 7],
-        'total_requests':   [30, 0, 10, 5, 15, 30, 20, 0],
-        'required_days':    [30, 0, 12, 5, 120, 60, 20, 0],
-        'seniority_days':   [365, 730, 180, 90, 1095, 3650, 20, 0],
-        'mon_fri_requests': [30, 0, 0, 0,30, 1, 0, 0]  # <-- nueva métrica
+        'employee_id':      [0,    1,  2,   3,   4,    5,    6, 7],
+        'total_requests':   [30,   0, 10,   5,   15,   30,   0, 0],
+        'required_days':    [54,   0, 30,   15,   180, 108,   0, 0],
+        'seniority_days':   [365, 10, 180,  90, 1095,  730, 20, 0],
+        'mon_fri_requests': [10,   0, 0,    5,   30,  1,    0, 0]  # <-- nueva métrica
     })
 
     # Calcular métricas derivadas
@@ -522,15 +545,16 @@ def dataframe_pruebas_emp(): # para pruebas
 #print(get_supervisor_anomalies())
 
 #generate_supervisors_csv()
-#create_model_supervisor('supervisors_data_1000.csv')
+#create_model_supervisor('supervisors.csv')
 #print(anomalies_supervisors(dataframe_pruebas_sup()))
-#print(get_supervisor_anomalies())
+#print(anomalies_supervisors(dataframe_pruebas_sup_not()))
+#get_supervisor_anomalies()
 #print()
 #pruebas emp-------------------------------------------------------------------------------------------------------
 
 #generate_employees_csv()
 #generate_small_training_csv()
-#create_model_empleados('small_training_employees.csv')
+#create_model_empleados('employees.csv')
 #print(anomalies_employees(dataframe_pruebas_emp()))
 
 #print(create_dataFrame_empleados())
