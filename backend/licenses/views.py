@@ -555,7 +555,8 @@ def upload_base64_file(request):
 
         text= base64_to_text(base64_string,is_image)
         license_type_prediction = predict_license_types(text)
-        evaluation_prediction = predict_evaluation(text)
+        #aca necesito recibir el tipo de licencia o la licencia del front.
+        evaluation_prediction = predict_evaluation(text,'enfermedad')
 
         result = {
             "is_approved": bool(evaluation_prediction["approved"]),
