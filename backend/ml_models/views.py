@@ -55,7 +55,7 @@ def train_models(request):
     valid_models = {'CLASSIFICATION', 'LICENSE_APPROVAL', 'REJECTION_REASON'}
 
     if model not in valid_models:
-        return JsonResponse({"error": f"Modelos inválidos: {model}"}, status=400)
+        return JsonResponse({"error": f"Modelo inválido: {model}"}, status=400)
 
     try:
         if model =='CLASSIFICATION':

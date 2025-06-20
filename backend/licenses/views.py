@@ -544,10 +544,13 @@ def upload_base64_file(request):
         body_unicode = request.body.decode('utf-8')
         body = json.loads(body_unicode)
         base64_string = body.get("file_base64")
+        license_id=body.get("license_id", None)
 
+        if not license_id:
+            return JsonResponse({"error": "El campo 'license_id' es obligatorio"}, status=400)
         if not base64_string:
             return JsonResponse({"error": "El campo 'file_base64' es obligatorio"}, status=400)
-
+        license=License.objects.get(license_id=license_id)
         is_image=False
 
         if is_pdf_image(base64_string):
@@ -555,8 +558,7 @@ def upload_base64_file(request):
 
         text= base64_to_text(base64_string,is_image)
         license_type_prediction = predict_license_types(text)
-        #aca necesito recibir el tipo de licencia o la licencia del front.
-        evaluation_prediction = predict_evaluation(text,'enfermedad')
+        evaluation_prediction = predict_evaluation(text,license.type.group)
 
         result = {
             "is_approved": bool(evaluation_prediction["approved"]),
