@@ -8,6 +8,8 @@ from .risk_utils import generate_risk_dataframe, generate_employ_risk_dataframe
 import joblib
 from pathlib import Path
 from functools import lru_cache
+from ml_models.models import MLModel
+from datetime import datetime
 
 # Obtenemos la ruta base del proyecto
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -56,6 +58,14 @@ def train_and_save_model():
     # Guardar el modelo y scaler
     joblib.dump(model, MODEL_PATH)
     joblib.dump(scaler, SCALER_PATH)
+
+    MLModel.objects.create(
+        model_type= 'HEALTH_RISK',
+        name= 'Modelo de prediccion de riesgo de salud',
+        algorithm= 'LOGISTIC_REGRESSION',
+        is_active= True,
+        training_date = datetime.now(),
+    )
     
     return model,scaler 
     
