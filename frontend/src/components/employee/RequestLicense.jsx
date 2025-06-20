@@ -407,7 +407,7 @@ useEffect(() => {
               selectedEmployee={formData.selectedEmployee}
               onEmployeeSelected={(value) => setFormData(prev => ({ ...prev, selectedEmployee: value }))}
               initialEmployees={employees}
-              roles={['employee']}
+              roles={['employee', 'analyst']}
             />
           )}
           
