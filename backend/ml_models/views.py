@@ -50,23 +50,22 @@ def all_models(request):
 @permission_classes([IsAuthenticated])
 def train_models(request):
     data = json.loads(request.body)
-    models = data.get('models', [])  # Esperamos una lista de modelos
+    model = data.get('model', None)  # Esperamos una lista de modelos
 
     valid_models = {'CLASSIFICATION', 'LICENSE_APPROVAL', 'REJECTION_REASON'}
-    invalid_models = [m for m in models if m not in valid_models]
 
-    if invalid_models:
-        return JsonResponse({"error": f"Modelos inválidos: {invalid_models}"}, status=400)
+    if model not in valid_models:
+        return JsonResponse({"error": f"Modelos inválidos: {model}"}, status=400)
 
     try:
-        if 'CLASSIFICATION' in models:
+        if model =='CLASSIFICATION':
             train_and_save_coherence_model()
-        if 'LICENSE_APPROVAL' in models:
+        if model=='LICENSE_APPROVAL':
             train_and_save_approval_model()
-        if 'REJECTION_REASON' in models:
+        if model=='REJECTION_REASON':
             train_and_save_rejection_reason_model()
 
     except Exception as e:
-        return JsonResponse({"error": f"Error al entrenar los modelos: {str(e)}"}, status=500)
+        return JsonResponse({"error": f"Error al entrenar el modelo: {str(e)}"}, status=500)
 
-    return JsonResponse({"message": f"Modelos entrenados correctamente: {models}"}, status=200)
+    return JsonResponse({"message": f"Modelo entrenado correctamente: {model}"}, status=200)
