@@ -7,7 +7,8 @@ import {
   FiPlus,
   FiHelpCircle,
   FiActivity,
-  FiMail
+  FiMail,
+  FiGitBranch
 } from 'react-icons/fi';
 import { useContext } from 'react';
 import { AuthContext } from '../../context/AuthContext';
@@ -26,6 +27,7 @@ const Sidebar = ({ isOpen, onItemClick }) => {
       { text: 'Predicciones', icon: <FiActivity className="h-5 w-5 text-primary-border" />, path: '/predictions' },
       { text: 'Mis Datos', icon: <FiUser className="h-5 w-5 text-primary-border" />, path: '/my-data' },
       { text: 'Mensajería', icon: <FiMail className="h-5 w-5 text-primary-border" />, path: '/messaging' },
+      { text: 'Versiones ML', icon: <FiGitBranch className="h-5 w-5 text-primary-border" />, path: '/machine-learning' },
       { text: 'Configuración', icon: <Settings className="h-5 w-5 text-primary-border" />, path: '/settings' },
       { text: 'Ayuda', icon: <FiHelpCircle className="h-5 w-5 text-primary-border" />, path: '/guide' },
     ],
@@ -57,6 +59,7 @@ const Sidebar = ({ isOpen, onItemClick }) => {
       { text: 'Predicciones', icon: <FiActivity className="h-5 w-5 text-primary-border" />, path: '/predictions' },
       { text: 'Mis Datos', icon: <FiUser className="h-5 w-5 text-primary-border" />, path: '/my-data' },
       { text: 'Mensajería', icon: <FiMail className="h-5 w-5 text-primary-border" />, path: '/messaging' },
+      { text: 'Versiones ML', icon: <FiGitBranch className="h-5 w-5 text-primary-border" />, path: '/machine-learning' },
       { text: 'Configuración', icon: <Settings className="h-5 w-5 text-primary-border" />, path: '/settings' },
       { text: 'Ayuda', icon: <FiHelpCircle className="h-5 w-5 text-primary-border" />, path: '/guide' },
     ]

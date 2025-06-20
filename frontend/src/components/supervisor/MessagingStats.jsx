@@ -143,6 +143,8 @@ const MessagingStats = ({ stats, events, loading, onRefresh, onPageChange, pagin
                                 ? 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-100' :
                               event.event === 'requests'
                                 ? 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200' :
+                              event.event === 'deferred'
+                                ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100' :
                               'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
                             }`}>
                               {event.event === 'delivered' ? 'Entregado' :
@@ -151,6 +153,7 @@ const MessagingStats = ({ stats, events, loading, onRefresh, onPageChange, pagin
                               event.event === 'blocked' ? 'Bloqueado' :
                               event.event === 'softBounces' ? 'Rebote suave' :
                               event.event === 'requests' ? 'Solicitado' :
+                              event.event === 'deferred' ? 'Aplazado' :
                               event.event}
                             </span>
                           </div>

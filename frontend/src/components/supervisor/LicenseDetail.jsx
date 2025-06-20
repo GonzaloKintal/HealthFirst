@@ -282,7 +282,7 @@ const handleReject = async () => {
         : license.certificate.file;
       
       const [response] = await Promise.all([
-        analyzeCertificate(base64String),
+        analyzeCertificate(base64String, id),
         new Promise(resolve => setTimeout(resolve, 2000))
       ]);
       
