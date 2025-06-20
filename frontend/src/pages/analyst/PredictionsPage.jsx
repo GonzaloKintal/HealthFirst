@@ -7,7 +7,7 @@ const PredictionsPage = () => {
   const [expandedSection, setExpandedSection] = useState('');
 
   return (
-    <div className="bg-background p-6">
+    <div className="bg-background p-6 rounded-lg shadow text-foreground">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-xl sm:text-2xl font-bold flex items-center text-foreground">
           <FiActivity className="mr-2" />
