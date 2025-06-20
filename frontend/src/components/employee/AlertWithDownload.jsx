@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { FiDownload } from 'react-icons/fi';
+import { downloadCertificateTemplate } from '../../services/licenseService';
 
 const AlertWithDownload = ({ onDownload }) => {
   const [disabled, setDisabled] = useState(false);
@@ -11,30 +12,18 @@ const AlertWithDownload = ({ onDownload }) => {
   setDisabled(true);
 
   try {
-    const response = await fetch('http://localhost:8000/licenses/certificate/code');
-
-    if (!response.ok) {
-      throw new Error('Error al obtener el archivo');
+      const result = await downloadCertificateTemplate();
+      
+      if (result.success && onDownload) {
+        onDownload();
+      } else if (!result.success) {
+        throw new Error(result.error || 'Error al descargar el formato');
+      }
+    } catch (error) {
+      console.error("Error al descargar el formato:", error);
+    } finally {
+      setDisabled(false);
     }
-
-    const blob = await response.blob();
-    const url = window.URL.createObjectURL(blob);
-
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'Formato_Certificado_HealthFirst.pdf';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    window.URL.revokeObjectURL(url);
-
-    if (onDownload) {
-      onDownload();
-    }
-  } catch (error) {
-    console.error("Error al descargar el formato:", error);
-    setDisabled(false);
-  }
 };
 
   return (

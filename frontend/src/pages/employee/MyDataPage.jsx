@@ -115,7 +115,7 @@ const MyDataPage = () => {
   const shouldShowUpdateMessage = ['employee', 'supervisor', 'analyst'].includes(userData?.role);
 
   return (
-    <div className="p-6 bg-background">
+    <div className="bg-background p-6 rounded-lg shadow text-foreground">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-xl sm:text-2xl font-bold flex items-center text-foreground">
           <FiUser className="mr-2" />

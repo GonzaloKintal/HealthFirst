@@ -65,12 +65,16 @@ const EmployeeAnomalies = () => {
 
       const limit = params.limit || pagination.limit;
       const offset = params.offset !== undefined ? params.offset : pagination.offset;
-      const start_date = params.start_date || appliedFilters.start_date ? appliedFilters.start_date.toISOString().split('T')[0] : null;
-      const end_date = params.end_date || appliedFilters.end_date ? appliedFilters.end_date.toISOString().split('T')[0] : null;
-      const employee_id = params.employee_id || appliedFilters.employee_id || null;
-      const is_anomaly = params.is_anomaly || appliedFilters.is_anomaly || null;
+      
+      const activeFilters = params.filters || appliedFilters;
+      
+      const start_date = activeFilters.start_date ? activeFilters.start_date.toISOString().split('T')[0] : null;
+      const end_date = activeFilters.end_date ? activeFilters.end_date.toISOString().split('T')[0] : null;
+      
+      const employee_id = activeFilters.employee_id || null;
+      
+      const is_anomaly = activeFilters.is_anomaly !== '' ? activeFilters.is_anomaly : null;
 
-      // Fetch global anomalies data if not already fetched
       if (!globalAnomaliesData) {
         const globalResult = await getEmployeeAnomalies({
           limit: 1000,
@@ -85,7 +89,6 @@ const EmployeeAnomalies = () => {
         setGlobalAnomaliesData(transformedGlobalData);
       }
 
-      // Fetch filtered anomalies data
       const filteredResult = await getEmployeeAnomalies({
         start_date,
         end_date,
@@ -327,9 +330,10 @@ const EmployeeAnomalies = () => {
   const applyFilters = () => {
     setAppliedFilters({ ...filters });
     setShowFilters(false);
-    if (hasAnalyzed) {
-      handleAnalyzeAnomalies({ offset: 0 });
-    }
+    handleAnalyzeAnomalies({ 
+      offset: 0,
+      filters: { ...filters }
+    });
   };
 
   const chartData = getChartData();

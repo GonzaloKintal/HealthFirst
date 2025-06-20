@@ -23,6 +23,7 @@ import NotFoundPage from '../pages/shared/NotFoundPage';
 import PredictionsPage from '../pages/analyst/PredictionsPage';
 import MessagingPage from '../pages/admin/MessagingPage';
 import UserMessagesPage from '../pages/employee/UserMesaggesPage';
+import MachineLearningPage from '../pages/analyst/MachineLearningPage';
 
 const AppRoutes = () => {
   return (
@@ -209,6 +210,15 @@ const AppRoutes = () => {
           element={
             <ProtectedRoute allowedRoles={['admin', 'analyst', 'employee', 'supervisor']}>
               <GuidePage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/machine-learning" 
+          element={
+            <ProtectedRoute allowedRoles={['admin', 'analyst']}>
+              <MachineLearningPage />
             </ProtectedRoute>
           }
         />

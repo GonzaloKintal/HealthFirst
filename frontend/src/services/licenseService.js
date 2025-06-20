@@ -173,10 +173,11 @@ export const addCertificateToLicense = async (licenseId, base64File) => {
 };
 
 // Verificar coherencia de certificado
-export const analyzeCertificate = async (base64File) => {
+export const analyzeCertificate = async (base64File, id) => {
   try {
     const response = await api.post('/licenses/certificate/coherence', {
-      file_base64: base64File
+      file_base64: base64File,
+      license_id: id
     });
     
     return {
@@ -304,6 +305,40 @@ export const getEmployeeAnomalies = async (filters = {}) => {
       count: 0,
       next: null,
       previous: null
+    };
+  }
+};
+
+
+// Descargar formato de certificado
+export const downloadCertificateTemplate = async () => {
+  try {
+    const response = await api.get('/licenses/certificate/code', {
+      responseType: 'blob'
+    });
+
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'Formato_Certificado_HealthFirst.pdf');
+    document.body.appendChild(link);
+    link.click();
+    
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+
+    return {
+      success: true
+    };
+  } catch (error) {
+    console.error('Error downloading certificate template:', {
+      message: error.message,
+      response: error.response?.data,
+      config: error.config
+    });
+    return {
+      success: false,
+      error: error.response?.data?.error || 'Error al descargar el formato de certificado'
     };
   }
 };
