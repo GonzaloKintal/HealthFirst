@@ -16,7 +16,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from ml_models.utils.file_utils import *
 from messaging.services.brevo_email import *
-from .health_risk.risk_model import predict_employ_risk, predict_risk
+from ml_models.health_risk.risk_model import predict_employ_risk, predict_risk
 from django.views.decorators.csrf import csrf_exempt
 from django.core.cache import cache
 from rest_framework.pagination import LimitOffsetPagination

@@ -4,9 +4,8 @@ from datetime import datetime, timedelta
 from django.utils.timezone import now
 from django.contrib.auth import get_user_model
 from xmlrpc.client import NOT_WELLFORMED_ERROR
-
+from ml_models.models import LicenseDatasetEntry
 from messaging.services.messenger import MessengerService
-
 from ml_models.anomalies.isolation_forest import get_employee_anomalies, get_supervisor_anomalies
 from messaging.services.brevo_email import *
 from .models import *
@@ -440,6 +439,13 @@ def evaluate_license(request, id):
             text= base64_to_text(base64_certificate,is_image)
             text_normalize=normalize_text(text)
 
+            LicenseDatasetEntry.objects.create(
+                text=text_normalize,
+                type=license.type.group,
+                status=license.status.name,
+                reason=license.status.evaluation_comment
+            )
+
 
         return JsonResponse({'message': 'Licencia evaluada correctamente.','evaluator': evaluator}, status=200)
 
@@ -538,10 +544,13 @@ def upload_base64_file(request):
         body_unicode = request.body.decode('utf-8')
         body = json.loads(body_unicode)
         base64_string = body.get("file_base64")
+        license_id=body.get("license_id", None)
 
+        if not license_id:
+            return JsonResponse({"error": "El campo 'license_id' es obligatorio"}, status=400)
         if not base64_string:
             return JsonResponse({"error": "El campo 'file_base64' es obligatorio"}, status=400)
-
+        license=License.objects.get(license_id=license_id)
         is_image=False
 
         if is_pdf_image(base64_string):
@@ -549,7 +558,7 @@ def upload_base64_file(request):
 
         text= base64_to_text(base64_string,is_image)
         license_type_prediction = predict_license_types(text)
-        evaluation_prediction = predict_evaluation(text)
+        evaluation_prediction = predict_evaluation(text,license.type.group)
 
         result = {
             "is_approved": bool(evaluation_prediction["approved"]),
