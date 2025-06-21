@@ -12,6 +12,7 @@ from .spanish_stopwords import SPANISH_STOPWORDS
 from ml_models.models import MLModel
 from datetime import datetime
 from ml_models.models import LicenseDatasetEntry
+from django.utils import timezone
 # Paths
 MODEL_PATH = Path(__file__).resolve().parent / 'modelo_clasificador.joblib'
 DATASET_PATH = Path(__file__).resolve().parent / 'coherence_license_type_dataset.csv'
@@ -76,7 +77,7 @@ def train_and_save_coherence_model():
         name= 'Modelo de coherencia de certificados',
         algorithm= 'RANDOM_FOREST',
         is_active= True,
-        training_date = datetime.now(),
+        training_date = timezone.now(),
         first_training_id= first_id,
         last_training_id= last_id
         )

@@ -5,7 +5,7 @@ from messaging.services.messenger import MessengerService
 from licenses.models import License, Status
 import logging
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('check_licenses_expired')
 
 class Command(BaseCommand):
     help = 'Actualiza licencias vencidas'
@@ -34,7 +34,7 @@ class Command(BaseCommand):
                 if expired_time == today:
                     MessengerService.send_last_day_to_upload_certificate_message(license)
                     logger.info(f"Se notifico al usuario que solicito la licencia {license.license_id} que el ultimo dia para cargar el certificado es hoy")
-                    licenses_expiring_today=+1
+                    licenses_expiring_today+=1
 
                 if expired_time < today:
                     license.status.name = Status.StatusChoices.EXPIRED
