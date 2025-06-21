@@ -190,6 +190,19 @@ LOGGING = {
             'filename': os.path.join(BASE_DIR, 'logs', 'models_training.log'),
             'formatter': 'verbose',
         },
+        'licenses_evaluation': {  
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs', 'licenses_evaluation.log'),
+            'formatter': 'verbose',
+        },
+        'licenses_requests': {  
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs', 'licenses_requests.log'),
+            'formatter': 'verbose',
+        },
+
     },
     'loggers': {
         'check_licenses_expired': {
@@ -199,6 +212,16 @@ LOGGING = {
         },
         'automatic_models_training': {  
             'handlers': ['console', 'training_file'],  
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'licenses_evaluation': {  
+            'handlers': ['console', 'licenses_evaluation'],  
+            'level': 'INFO',
+            'propagate': False,
+        },
+          'licenses_requests': {  
+            'handlers': ['console', 'licenses_requests'],  
             'level': 'INFO',
             'propagate': False,
         },
