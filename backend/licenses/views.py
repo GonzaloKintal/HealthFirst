@@ -28,7 +28,11 @@ from django.db import connection
 import csv
 from rest_framework.pagination import LimitOffsetPagination
 from ml_models.utils.evaluation_model import predict_evaluation
+import logging
 
+
+logger_evaluation = logging.getLogger('licenses_evaluation')
+logger_requests= logging.getLogger('licenses_requests')
 
 
 # LICENSES API
@@ -201,6 +205,7 @@ def create_license(request):
             #    MessengerService.send_upload_license_without_certificate_message(license)
             #else:
             #    MessengerService.send_upload_license_message(license)
+        logger_requests.info(f'Licencia con id  {license.license_id} solicitada por {request.user.first_name} {request.user.last_name} con id: {request.user.id}')
 
         return JsonResponse({'message': 'Licencia solicitada exitosamente.'}, status=200)
 
@@ -323,7 +328,8 @@ def update_license(request, id):
                         license.status.name = Status.StatusChoices.PENDING
                     
                     license.status.save()
-                
+
+                logger_requests.info(f"Usuario {request.user.first_name} {request.user.last_name} con id {request.user.id} edito la licencia {id}") 
                 return JsonResponse({'message': 'Licencia actualizada exitosamente.'}, status=200)
 
     except Exception as e:
@@ -388,8 +394,8 @@ def add_certificate(request, id):
 @permission_classes([IsAuthenticated])
 def evaluate_license(request, id):
     try:
+        logger_evaluation.info(f"Evaluando licencia {id}")
         data = json.loads(request.body)
-
         license_status = data.get("license_status")
         comment = data.get("evaluation_comment", "")
 
@@ -445,6 +451,7 @@ def evaluate_license(request, id):
                 status=license.status.name,
                 reason=license.status.evaluation_comment
             )
+        logger_evaluation.info(f"Licencia  {id} evaluada correctamente. estado: {license_status}, comentario: {comment}, evaluador: {evaluator} id: {license.evaluator.id}")
 
 
         return JsonResponse({'message': 'Licencia evaluada correctamente.','evaluator': evaluator}, status=200)
