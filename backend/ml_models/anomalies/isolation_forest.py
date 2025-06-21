@@ -46,9 +46,6 @@ def create_model_supervisor(path_csv,base_name): # le paso el csv para el entrea
     name=get_next_model_path(base_name)
     joblib.dump(model,name)
 
-    return model # NO deberia retornarlo, pero por ahora para pruebas lo dejo así
-
-
 def anomalies_supervisors(data,base_name): #recibe un dataframe
     #Cargo el modelo previamente guardado
     model_path = get_latest_model_path(base_name)
@@ -106,7 +103,6 @@ def create_dataframe_supervisor(start_date=None, end_date=None): # esto para lo 
 
     df['seniority_days'] = df['employment_start_date'].apply(lambda d: (today - d).days if d else 0)
     df.drop(columns=['employment_start_date'], inplace=True)
-    #print(df)
     return df
 
 
@@ -172,7 +168,8 @@ def get_supervisor_anomalies(start_date=None, end_date=None): #FUNCION PRINCIPAL
     if model_path and os.path.exists(model_path):
         dataframe = anomalies_supervisors(df, base_name)
     else:
-        create_model_supervisor('supervisors.csv', base_name=base_name)
+        csv_path = os.path.join(BASE_DIR, 'supervisors.csv')
+        create_model_supervisor(csv_path, base_name=base_name)
         dataframe = anomalies_supervisors(df, base_name)
 
     
@@ -207,7 +204,6 @@ def get_supervisor_anomalies(start_date=None, end_date=None): #FUNCION PRINCIPAL
     dataframe['approval_rate_diff'] = (dataframe['approval_rate_diff']*100).map("{:+.2f}%".format) #NUEVA INFO
     dataframe['rejection_rate_diff'] = (dataframe['rejection_rate_diff']*100).map("{:+.2f}%".format) #NUEVA INFO
     dataframe['total_requests_percent'] = (dataframe['total_requests_percent']*100).map("{:.2f}%".format)#NUEVA INFO
-    #print(dataframe)
     dataframe = dataframe.drop(columns=['seniority_days'])
 
     columnas_ordenadas = ['evaluator_id','evaluator_name', 'department'] + [col for col in dataframe.columns if col not in ['evaluator_name', 'department']]
@@ -374,7 +370,8 @@ def get_employee_anomalies(start_date=None, end_date=None): #FUNCION PRINCIPAL Q
     if model_path and os.path.exists(model_path):
         dataframe = anomalies_employees(df, base_name)
     else:
-        create_model_empleados('employees.csv', base_name=base_name)
+        csv_path = os.path.join(BASE_DIR, 'employees.csv')
+        create_model_empleados(csv_path, base_name=base_name)
         dataframe = anomalies_employees(df,base_name)
 
     names = []
@@ -578,12 +575,3 @@ def get_latest_model_path(base_name):
     
     versiones.sort(key=lambda x: x[0], reverse=True)
     return os.path.join(BASE_DIR, versiones[0][1])
-    
-#-pruebas sup------------------------------------------------------------------------------------------------------
-#create_model_supervisor('supervisors.csv')
-#print(anomalies_supervisors(dataframe_pruebas_sup(),"isolation_forest_sup_model"))
-#print(anomalies_supervisors(dataframe_pruebas_sup_not(),"isolation_forest_sup_model"))
-#print(get_supervisor_anomalies())
-print(get_supervisor_anomalies())
-#pruebas emp-------------------------------------------------------------------------------------------------------
-print(get_employee_anomalies())
