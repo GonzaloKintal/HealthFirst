@@ -12,7 +12,7 @@ from ml_models.models import MLModel
 from ml_models.utils.file_utils import normalize_text
 from .spanish_stopwords import SPANISH_STOPWORDS
 from sklearn.model_selection import cross_val_score, StratifiedKFold
-from datetime import datetime
+from django.utils import timezone
 from ml_models.models import LicenseDatasetEntry
 
 
@@ -349,7 +349,7 @@ def train_and_save_approval_model():
         name='Modelo de aprobación de licencias',
         algorithm='LGBM',
         is_active=True,
-        training_date=datetime.now(),
+        training_date = timezone.now(),
         first_training_id=first_id,
         last_training_id=last_id
     )
@@ -431,7 +431,7 @@ def train_and_save_rejection_reason_model():
         name='Modelo de clasificacion de motivos de rechazo',
         algorithm='LGBM',
         is_active=True,
-        training_date=datetime.now(),
+        training_date = timezone.now(),
         first_training_id=first_id,
         last_training_id=last_id
     )
