@@ -9,6 +9,9 @@ import re
 import django
 from django.db.models import Sum,Count,OuterRef,Subquery ,IntegerField,Value
 from django.db.models.functions import Coalesce
+from ml_models.models import MLModel
+from django.utils import timezone
+
 
 
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
@@ -45,6 +48,14 @@ def create_model_supervisor(path_csv,base_name): # le paso el csv para el entrea
     #joblib.dump(model, MODEL_PATH_SUP)
     name=get_next_model_path(base_name)
     joblib.dump(model,name)
+    MLModel.objects.create(
+        model_type='SUPERVISOR_ANOMALY_DETECTION',
+        name='Modelo de detección de anomalías de supervisores',
+        algorithm='ISOLATION_FOREST',
+        is_active=True,
+        training_date = timezone.now(),
+        )
+    
 
 def anomalies_supervisors(data,base_name): #recibe un dataframe
     #Cargo el modelo previamente guardado
@@ -273,7 +284,14 @@ def create_model_empleados(path_csv,base_name): # le paso el csv para el entream
     name = get_next_model_path(base_name)
     #se guardan el modelo en un archivo
     joblib.dump(model, name)
-
+    MLModel.objects.create(
+    model_type='EMPLOYEE_ANOMALY_DETECTION',
+    name='Modelo de detección de anomalías de empleados',
+    algorithm='ISOLATION_FOREST',
+    is_active=True,
+    training_date = timezone.now(),
+        )
+    
 def create_dataFrame_empleados(start_date=None, end_date=None):
     employees = HealthFirstUser.objects.filter(role__name='employee', is_deleted=False)
 

@@ -40,7 +40,8 @@ class LicenseDatasetEntry(models.Model):
 
 class MLModel(models.Model):
     MODEL_TYPES = [
-        ('ANOMALY_DETECTION', 'Detección de anomalías'),
+        ('EMPLOYEE_ANOMALY_DETECTION', 'Detección de anomalías de empleados'),
+        ('SUPERVISOR_ANOMALY_DETECTION', 'Detección de anomalías'),
         ('CLASSIFICATION', 'Coherencia de certificados'),
         ('REGRESSION', 'Regresión'),
         ('HEALTH_RISK', 'Predicción de riesgo de salud'),
