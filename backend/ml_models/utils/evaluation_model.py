@@ -14,6 +14,7 @@ from .spanish_stopwords import SPANISH_STOPWORDS
 from sklearn.model_selection import cross_val_score, StratifiedKFold
 from django.utils import timezone
 from ml_models.models import LicenseDatasetEntry
+import re
 
 
 # Paths
@@ -530,8 +531,12 @@ def predict_evaluation(text, license_type):
         'probability_of_approval': f"{prob_approved * 100:.1f}%",
         'probability_of_rejection': f"{prob_rejected * 100:.1f}%",
         'license_type': license_type,
-        'reason_of_rejection': None
+        'reason_of_rejection': None,
     }
+    has_code=False
+    if license_type == 'enfermedad':
+        has_code = has_hfcode(normalized_text)
+        result['has_code'] = has_code
     
     if not result['approved']:
         rejection_model, _ = get_rejection_model()
@@ -556,3 +561,12 @@ def predict_evaluation(text, license_type):
                 result['error'] = str(e)
     
     return result
+
+
+
+
+def has_hfcode(texto):
+    # Busca el patrón 'hfcod' seguido de 1 o más dígitos (\d+)
+    patron = r"hfcod\d+"
+    return bool(re.search(patron, texto))
+
