@@ -573,8 +573,10 @@ def upload_base64_file(request):
             "probability_of_rejection": evaluation_prediction["probability_of_rejection"],
             "reason_of_rejection": evaluation_prediction["reason_of_rejection"] if evaluation_prediction["reason_of_rejection"] else "",
             "top_reasons": evaluation_prediction["top_reasons"] if "top_reasons" in evaluation_prediction else "",
-            "license_types": license_type_prediction
+            "license_types": license_type_prediction,
         }
+        if license.type.group=='enfermedad':
+            result["has_code"] = evaluation_prediction["has_code"]
 
         parsed_result = json.loads(json.dumps(result))
  
