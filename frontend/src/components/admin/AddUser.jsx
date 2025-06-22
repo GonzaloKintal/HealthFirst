@@ -14,6 +14,8 @@ import {
   validatePassword,
   validateEmail
 } from '../utils/Validations';
+import Select from 'react-select';
+import { customStyles } from '../../components/utils/utils';
 
 const AddUser = () => {
   const navigate = useNavigate();
@@ -233,6 +235,19 @@ const AddUser = () => {
     }
   };
 
+  const departmentOptions = [
+    { value: '', label: 'Seleccionar departamento' },
+    ...departments.map(dept => ({
+      value: dept.name,
+      label: dept.name
+    }))
+  ];
+
+  const roleOptions = roles.map(role => ({
+    value: role.value,
+    label: role.label
+  }));
+
   return (
     <div className="p-6 max-w-3xl mx-auto relative">
       {notification && (
@@ -388,20 +403,20 @@ const AddUser = () => {
             
             <div>
               <label className="block text-sm font-medium text-foreground mb-1">Departamento *</label>
-              <select
-                name="department"
-                value={formData.department}
-                onChange={handleChange}
+              <Select
+                options={departmentOptions}
+                value={departmentOptions.find(option => option.value === formData.department)}
+                onChange={(selectedOption) => handleChange({ target: { name: 'department', value: selectedOption.value } })}
+                styles={customStyles}
+                isSearchable={false}
+                className="w-full text-sm"
+                classNamePrefix="select"
+                menuPlacement="auto"
+                menuPosition="fixed"
+                isLoading={departments.length === 0}
+                isDisabled={departments.length === 0}
                 required
-                className="w-full px-3 py-2 border border-border rounded-md focus:ring-primary-border focus:border-primary-border bg-background text-foreground"
-              >
-                <option value="">Seleccionar departamento</option>
-                {departments.map(dept => (
-                  <option key={dept.department_id} value={dept.name}>
-                    {dept.name}
-                  </option>
-                ))}
-              </select>
+              />
             </div>
 
             <div>
@@ -500,17 +515,18 @@ const AddUser = () => {
           
           <div>
             <label className="block text-sm font-medium text-foreground mb-1">Rol del Usuario *</label>
-            <select
-              name="role_name"
-              value={formData.role_name}
-              onChange={handleChange}
+            <Select
+              options={roleOptions}
+              value={roleOptions.find(option => option.value === formData.role_name)}
+              onChange={(selectedOption) => handleChange({ target: { name: 'role_name', value: selectedOption.value } })}
+              styles={customStyles}
+              isSearchable={false}
+              className="w-full text-sm"
+              classNamePrefix="select"
+              menuPlacement="auto"
+              menuPosition="fixed"
               required
-              className="w-full px-3 py-2 border border-border rounded-md focus:ring-primary-border focus:border-primary-border bg-background text-foreground"
-            >
-              {roles.map(role => (
-                <option key={role.value} value={role.value}>{role.label}</option>
-              ))}
-            </select>
+            />
             <p className="mt-1 text-xs text-foreground">
               Seleccione el nivel de acceso que tendrá este usuario
             </p>

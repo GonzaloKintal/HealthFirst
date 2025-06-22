@@ -1,3 +1,5 @@
+
+
 import { FiLock, FiUser, FiEye, FiEyeOff, FiSun, FiMoon } from 'react-icons/fi';
 import { useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -156,42 +158,48 @@ const LoginPage = () => {
         </div>
 
         {/* Sección derecha - Formulario (siempre visible) */}
-        <div className="flex-1 flex items-center justify-center m-10 p-4 pt-16 lg:pt-0">
-          <div className="w-full max-w-lg bg-background dark:bg-card p-8 rounded-lg shadow-lg border-2 border-border dark:border-border">
-            <div className="flex justify-end lg:hidden">
+        <div className="flex-1 flex items-center justify-center px-4 py-6 lg:p-10">
+          <div className="w-full max-w-md lg:max-w-lg bg-background dark:bg-card p-6 lg:p-8 rounded-lg shadow-lg border-2 border-border dark:border-border">
+            {/* Toggle de tema - Solo visible en mobile */}
+            <div className="flex justify-end lg:hidden mb-4">
               <button 
                 onClick={toggleDarkMode}
                 className="p-2 text-foreground dark:text-foreground rounded-full hover:bg-card dark:hover:bg-background focus:outline-none"
                 aria-label={darkMode ? 'Activar light mode' : 'Activar dark mode'}
               >
-                {darkMode ? <FiSun className="h-5 w-5" /> : <FiMoon className="h-5 w-5" />}
+                {darkMode ? <FiSun className="h-4 w-4" /> : <FiMoon className="h-4 w-4" />}
               </button>
             </div>
             
-            <div className="mb-8 text-center">
+            {/* Header del formulario */}
+            <div className="mb-6 lg:mb-8 text-center">
               <img
                 src="/logo2.svg"
                 alt="Logo ProHealth"
-                className="h-20 w-auto mx-auto lg:hidden mb-4"
+                className="h-12 sm:h-16 lg:h-20 w-auto mx-auto lg:hidden mb-3 lg:mb-4"
               />
-              <h2 className="text-2xl font-bold text-foreground dark:text-foreground">Iniciar sesión</h2>
-              <p className="text-foreground dark:text-foreground opacity-80 mt-2">Ingresa tus credenciales para acceder al sistema</p>
+              <h2 className="text-xl sm:text-2xl font-bold text-foreground dark:text-foreground">Iniciar sesión</h2>
+              <p className="text-sm sm:text-base text-foreground dark:text-foreground opacity-80 mt-1 lg:mt-2">
+                Ingresa tus credenciales para acceder al sistema
+              </p>
             </div>
 
+            {/* Error message */}
             {error && (
-              <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded dark:bg-red-900 dark:border-red-700 dark:text-red-100">
+              <div className="mb-4 p-3 lg:p-4 bg-red-100 border border-red-400 text-red-700 rounded text-sm dark:bg-red-900 dark:border-red-700 dark:text-red-100">
                 {error}
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-6" autoComplete='off'>
+            {/* Formulario */}
+            <form onSubmit={handleSubmit} className="space-y-4 lg:space-y-6" autoComplete='off'>
               <div>
                 <label htmlFor="username" className="block text-sm font-medium text-foreground dark:text-foreground mb-1">
                   Usuario
                 </label>
                 <div className="relative rounded-lg shadow-sm">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <FiUser className="h-5 w-5 text-gray-400 dark:text-gray-500" />
+                    <FiUser className="h-4 w-4 lg:h-5 lg:w-5 text-gray-400 dark:text-gray-500" />
                   </div>
                   <input
                     id="username"
@@ -200,7 +208,7 @@ const LoginPage = () => {
                     required
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    className="block w-full pl-10 pr-3 py-2 border border-border dark:border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary bg-background dark:bg-card text-foreground dark:text-foreground"
+                    className="block w-full pl-9 lg:pl-10 pr-3 py-2 lg:py-2.5 border border-border dark:border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary bg-background dark:bg-card text-foreground dark:text-foreground text-sm lg:text-base"
                     placeholder="Ingrese su usuario"
                   />
                 </div>
@@ -212,7 +220,7 @@ const LoginPage = () => {
                 </label>
                 <div className="relative rounded-lg shadow-sm">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <FiLock className="h-5 w-5 text-gray-400 dark:text-gray-500" />
+                    <FiLock className="h-4 w-4 lg:h-5 lg:w-5 text-gray-400 dark:text-gray-500" />
                   </div>
                   <input
                     id="password"
@@ -221,7 +229,7 @@ const LoginPage = () => {
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="block w-full pl-10 pr-10 py-2 border border-border dark:border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary bg-background dark:bg-card text-foreground dark:text-foreground"
+                    className="block w-full pl-9 lg:pl-10 pr-9 lg:pr-10 py-2 lg:py-2.5 border border-border dark:border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary bg-background dark:bg-card text-foreground dark:text-foreground text-sm lg:text-base"
                     placeholder="Ingrese su contraseña"
                   />
                   <button
@@ -229,16 +237,16 @@ const LoginPage = () => {
                     className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400"
                     onClick={() => setShowPassword(!showPassword)}
                   >
-                    {showPassword ? <FiEyeOff className="h-5 w-5" /> : <FiEye className="h-5 w-5" />}
+                    {showPassword ? <FiEyeOff className="h-4 w-4 lg:h-5 lg:w-5" /> : <FiEye className="h-4 w-4 lg:h-5 lg:w-5" />}
                   </button>
                 </div>
               </div>
 
-              <div>
+              <div className="pt-2">
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full flex justify-center items-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full flex justify-center items-center py-2.5 lg:py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm lg:text-base font-medium text-white bg-primary hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isLoading ? (
                     <>
@@ -253,12 +261,13 @@ const LoginPage = () => {
               </div>
             </form>
 
+            {/* Botón de desarrollo */}
             {import.meta.env.DEV && (
-              <div className="mt-6 pt-6 border-t border-border dark:border-border">
+              <div className="mt-4 lg:mt-6 pt-4 lg:pt-6 border-t border-border dark:border-border">
                 <button
                   onClick={handleQuickAdminAccess}
                   disabled={isLoading}
-                  className="w-full flex justify-center items-center py-2 px-4 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full flex justify-center items-center py-2.5 lg:py-3 px-4 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm lg:text-base"
                 >
                   {isLoading ? (
                     <>
@@ -276,10 +285,13 @@ const LoginPage = () => {
               </div>
             )}
 
-            <p className="text-foreground dark:text-foreground opacity-80 text-center mt-8">
-              ¿No tienes una cuenta?<br />
-              Contacta con el <strong className="text-primary dark:text-primary-text">administrador</strong> para obtener acceso.
-            </p>
+            {/* Footer */}
+            <div className="text-center mt-6 lg:mt-8">
+              <p className="text-xs sm:text-sm text-foreground dark:text-foreground opacity-80">
+                ¿No tienes una cuenta?<br />
+                Contacta con el <strong className="text-primary dark:text-primary-text">administrador</strong> para obtener acceso.
+              </p>
+            </div>
           </div>
         </div>
       </div>

@@ -8,7 +8,7 @@ export const getAllMLModels = async ({ page, limit }) => {
     
     return {
       success: true,
-      data: response.data.models
+      data: response.data
     };
   } catch (error) {
     console.error('Error fetching all ML models:', error);
@@ -26,13 +26,33 @@ export const getActiveMLModels = async () => {
 
     return {
       success: true,
-      data: response.data.models
+      data: response.data
     };
   } catch (error) {
     console.error('Error fetching active ML models:', error);
     return {
       success: false,
       error: error.response?.data?.error || 'Error al obtener los modelos activos de ML'
+    };
+  }
+};
+
+// Reentrena un modelo de machine learning por su tipo
+export const retrainMLModel = async (modelType) => {
+  try {
+    const response = await api.post('/ml_models/training', { 
+      model: modelType 
+    });
+    
+    return {
+      success: true,
+      data: response.data
+    };
+  } catch (error) {
+    console.error('Error retraining ML model:', error);
+    return {
+      success: false,
+      error: error.response?.data?.error || 'Error al reentrenar el modelo de ML'
     };
   }
 };

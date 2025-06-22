@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { FiCheck, FiX, FiEdit, FiEye, FiUser, FiCalendar, FiFileText, FiArrowLeft, FiPlus } from 'react-icons/fi';
+import { FiCheck, FiX, FiEdit, FiEye, FiUser, FiCalendar, FiFileText, FiArrowLeft, FiPlus, FiActivity } from 'react-icons/fi';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { FormattedDate } from '../../components/utils/FormattedDate';
 import Confirmation from '../../components/utils/Confirmation';
@@ -8,7 +8,8 @@ import useAuth from '../../hooks/useAuth';
 import Notification from '../../components/utils/Notification';
 import UploadCertificateModal from '../employee/UploadCertificateModal';
 import LicenseDetailSkeleton from './LicenseDetailSkeleton';
-import { set } from 'date-fns';
+import Select from 'react-select';
+import { customStyles } from '../../components/utils/utils';
 
 const LicenseDetail = () => {
   const { id } = useParams();
@@ -31,6 +32,8 @@ const LicenseDetail = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [showOtherReasonInput, setShowOtherReasonInput] = useState(false);
+  const [otherReason, setOtherReason] = useState('');
 
   useEffect(() => {
     const fetchLicense = async () => {
@@ -148,7 +151,8 @@ const LicenseDetail = () => {
 const handleReject = async () => {
   try {
     setIsProcessing(true);
-    const response = await evaluateLicense(id, 'rejected', rejectionReason);
+    const finalReason = rejectionReason === "Otro" ? otherReason : rejectionReason;
+    const response = await evaluateLicense(id, 'rejected', finalReason);
     
     if (response.success) {
       setNotification({
@@ -262,7 +266,9 @@ const handleReject = async () => {
 
   const resetRejectionForm = () => {
     setRejectionReason('');
+    setOtherReason('');
     setShowRejectionInput(false);
+    setShowOtherReasonInput(false);
   };
 
   const handleAnalyzeCertificate = async () => {
@@ -355,6 +361,20 @@ const handleReject = async () => {
     }
   };
 
+  const options = [
+    { value: '', label: 'Seleccione un motivo de rechazo...' },
+    { value: 'Certificado sin fechas', label: 'Certificado sin fechas' },
+    { value: 'Certificado sin datos/vacío/ilegible', label: 'Certificado sin datos/vacío/ilegible' },
+    { value: 'Certificado de enfermedad sin código o con datos faltantes', label: 'Certificado de enfermedad sin código o con datos faltantes' },
+    { value: 'Certificado de enfermedad sin datos del profesional', label: 'Certificado de enfermedad sin datos del profesional' },
+    { value: 'Certificado de enfermedad sin información de empleado', label: 'Certificado de enfermedad sin información de empleado' },
+    { value: 'Certificado de enfermedad sin días de reposo', label: 'Certificado de enfermedad sin días de reposo' },
+    { value: 'Certificado de estudios sin información de la institución', label: 'Certificado de estudios sin información de la institución' },
+    { value: 'Certificado no acorde a la licencia solicitada', label: 'Certificado no acorde a la licencia solicitada' },
+    { value: 'Certificado con datos sensibles', label: 'Certificado con datos sensibles' },
+    { value: 'Otro', label: 'Otro' },
+  ];
+
   if (error) {
     return (
       <div className="p-6">
@@ -415,28 +435,49 @@ const handleReject = async () => {
 
               {showRejectionInput && (
               <div className="space-y-2">
-                <select
-                  value={rejectionReason}
-                  onChange={(e) => setRejectionReason(e.target.value)}
-                  className="w-full mt-2 mb-2 p-2 border bg-background border-border rounded-md focus:ring-primary-border focus:border-primary-border text-foreground"
+                <Select
+                  options={options}
+                  value={options.find(option => option.value === rejectionReason) || null}
+                  onChange={(selectedOption) => {
+                    setRejectionReason(selectedOption.value);
+                    setShowOtherReasonInput(selectedOption.value === 'Otro');
+                  }}
+                  styles={customStyles}
+                  isSearchable={false}
+                  className="w-full text-sm"
+                  classNamePrefix="select"
+                  menuPlacement="auto"
+                  menuPosition="absolute"
+                  placeholder="Seleccione un motivo de rechazo..."
                   required
-                >
-                  <option value="">Seleccione un motivo de rechazo...</option>
-                  <option value="Certificado falso">Certificado falso</option>
-                  <option value="Certificado con inconsistencias evidentes">Certificado con inconsistencias evidentes</option>
-                  <option value="Certificado ilegible">Certificado ilegible</option>
-                  <option value="Certificado incompleto">Certificado incompleto</option>
-                  <option value="Fecha del certificado fuera del período solicitado">Fecha del certificado fuera del período solicitado</option>
-                  <option value="Duración de la licencia no respaldada por el certificado médico">Duración de la licencia no respaldada por el certificado médico</option>
-                  <option value="Motivo no justificado en el documento adjuntado">Motivo no justificado en el documento adjuntado</option>
-                  <option value="Tipo de licencia no respaldado por la documentación">Tipo de licencia no respaldado por la documentación</option>
-                  <option value="Inconsistencias entre datos del empleado y lo declarado en el certificado">Inconsistencias entre datos del empleado y lo declarado en el certificado</option>
-                </select>
+                />
+
+                {showOtherReasonInput && (
+                  <textarea
+                    value={otherReason}
+                    onChange={(e) => setOtherReason(e.target.value)}
+                    placeholder="Por favor especifique el motivo de rechazo..."
+                    className="resize-none w-full mt-2 p-2 border bg-background border-border rounded-md focus:ring-primary-border focus:border-primary-border text-foreground text-sm"
+                    rows={3}
+                    required
+                  />
+                )}
 
                 <div className="flex space-x-2">
                   <button
                     onClick={() => {
-                      if (!rejectionReason.trim()) {
+                      let finalReason = rejectionReason;
+                      if (rejectionReason === "Otro") {
+                        if (!otherReason.trim()) {
+                          setNotification({
+                            show: true,
+                            type: 'error',
+                            message: 'Por favor especifique el motivo de rechazo'
+                          });
+                          return;
+                        }
+                        finalReason = otherReason;
+                      } else if (!rejectionReason.trim()) {
                         setNotification({
                           show: true,
                           type: 'error',
@@ -444,6 +485,7 @@ const handleReject = async () => {
                         });
                         return;
                       }
+                      setRejectionReason(finalReason);
                       setShowRejectConfirmation(true);
                     }}
                     className="px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 text-sm cursor-pointer"
@@ -492,7 +534,7 @@ const handleReject = async () => {
                 </div>
                 <div>
                   <p className="text-sm text-foreground">Email</p>
-                  <p className="font-medium text-foreground">{license.email}</p>
+                  <p className="font-medium text-foreground break-all">{license.email}</p>
                 </div>
                 <div>
                   <p className="text-sm text-foreground">Teléfono</p>
@@ -628,8 +670,17 @@ const handleReject = async () => {
                   </>
                 )}
               </div>
+            </div>
+          </div>
 
-              {(user?.role === 'admin' || user?.role === 'supervisor') && license.certificate?.file && license.status === 'pending' && (
+          {/* Sección de Análisis de Coherencia */}
+          {(user?.role === 'admin' || user?.role === 'supervisor') && license.certificate?.file && license.status === 'pending' && (
+            <div className="bg-card p-4 rounded-lg shadow">
+              <h3 className="font-medium text-lg mb-3 flex items-center text-foreground">
+                <FiActivity className="mr-2" /> Coherencia
+              </h3>
+              
+              <div className="space-y-4">
                 <button
                   onClick={handleAnalyzeCertificate}
                   disabled={isAnalyzing}
@@ -645,35 +696,111 @@ const handleReject = async () => {
                     </>
                   ) : (
                     <>
-                      <FiFileText className="mr-2" />
+                      <FiActivity className="mr-2" />
                       Analizar coherencia
                     </>
                   )}
                 </button>
-              )}
 
-              {analysis && (
-                <div className="bg-card p-3 rounded-md">
-                  <h4 className="font-medium mb-2 text-foreground">Resultados del análisis:</h4>
-                  <div className="border border-border rounded overflow-hidden max-w-md">
-                    {Object.entries(analysis).map(([key, value]) => (
-                      <div key={key} className="flex border-b border-border last:border-b-0">
-                        <div className="w-2/3 py-1 px-2 border-r border-border">
-                          <span className="text-sm capitalize text-foreground">{key.replace(/_/g, ' ')}</span>
-                        </div>
-                        <div className="w-1/3 py-1 px-2 text-right">
-                          <span className="text-sm font-medium text-foreground">
-                            {typeof value === 'number' ? `${Math.round(value * 100)}%` : value.toString()}
+                <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/30 border-l-4 border-blue-400 rounded">
+                  <p className="text-blue-800 dark:text-blue-200 text-sm">
+                    <strong className="font-medium">Aviso:</strong> Los resultados son una recomendación predictiva generada por IA. 
+                    La evaluación final y decisión corresponde al supervisor responsable.
+                  </p>
+                </div>
+
+                {analysis && (
+                  <div className="bg-card p-4 rounded-lg border border-border">
+                    <h4 className="font-medium text-lg mb-3 text-foreground">Resultados del análisis</h4>
+                    
+                    <div className="space-y-4">
+                      {/* Recomendación del modelo */}
+                      <div className="flex items-center">
+                        <span className="text-foreground font-medium">
+                          Recomendación del modelo:{" "}
+                          <span className={`font-semibold ${
+                            parseFloat(analysis.probability_of_approval) > parseFloat(analysis.probability_of_rejection) 
+                              ? 'text-green-600' 
+                              : 'text-red-600 dark:text-red-400'
+                          }`}>
+                            {parseFloat(analysis.probability_of_approval) > parseFloat(analysis.probability_of_rejection) 
+                              ? 'Aprobar' 
+                              : 'Rechazar'}
                           </span>
+                        </span>
+                      </div>
+
+                      {/* Probabilidades */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="bg-background p-3 rounded-md">
+                          <p className="text-sm text-foreground">Probabilidad de aprobación</p>
+                          <p className="text-green-600 font-medium text-lg">
+                            {analysis.probability_of_approval}
+                          </p>
+                        </div>
+                        <div className="bg-background p-3 rounded-md">
+                          <p className="text-sm text-foreground">Probabilidad de rechazo</p>
+                          <p className="text-red-600 dark:text-red-400 font-medium text-lg">
+                            {analysis.probability_of_rejection}
+                          </p>
                         </div>
                       </div>
-                    ))}
-                  </div>
-                </div>
-              )}
 
+                      {/* Razones de rechazo (solo si la recomendación es rechazar) */}
+                      {parseFloat(analysis.probability_of_approval) <= parseFloat(analysis.probability_of_rejection) && (
+                        <div className="space-y-3">
+                          <div className="bg-background p-3 rounded-md">
+                            <p className="text-sm text-foreground">Motivo principal</p>
+                            <p className="text-foreground font-medium capitalize">{analysis.reason_of_rejection}</p>
+                          </div>
+                          
+                          <div className="bg-background p-3 rounded-md">
+                            <p className="text-sm text-foreground mb-2">Razones detectadas</p>
+                            <div className="space-y-2">
+                              {analysis.top_reasons.map((reason, index) => (
+                                <div key={index} className="flex items-start">
+                                  <span className="text-foreground mr-2">•</span>
+                                  <span className="text-foreground capitalize">{reason}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Tipos de licencia */}
+                      <div className="bg-background p-3 rounded-md">
+                        <p className="text-sm text-foreground mb-2">Tipos de licencia detectados</p>
+                        <div className="border border-border rounded overflow-hidden">
+                          <table className="w-full">
+                            <thead className="bg-gray-100 dark:bg-gray-700">
+                              <tr>
+                                <th className="py-2 px-3 text-left text-sm font-medium text-foreground">Tipo</th>
+                                <th className="py-2 px-3 text-right text-sm font-medium text-foreground">Probabilidad</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {analysis.license_types.map(([type, probability], index) => (
+                                <tr 
+                                  key={index} 
+                                  className={`${
+                                    index % 2 === 0 ? 'bg-background' : 'bg-gray-50 dark:bg-gray-800'
+                                  }`}
+                                >
+                                  <td className="py-2 px-3 text-foreground capitalize">{type.replace(/_/g, ' ')}</td>
+                                  <td className="py-2 px-3 text-foreground text-right">{probability}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Botones de acción */}
           <div className="flex justify-end space-x-3 pt-4 border-t border-border">
@@ -712,7 +839,9 @@ const handleReject = async () => {
         onClose={() => setShowRejectConfirmation(false)}
         onConfirm={handleReject}
         title="Rechazar Licencia"
-        message={`¿Estás seguro que deseas rechazar esta licencia con el siguiente motivo?\n\n"${rejectionReason}"`}
+        message={`¿Estás seguro que deseas rechazar esta licencia con el siguiente motivo?\n\n"${
+          rejectionReason === "Otro" ? otherReason : rejectionReason
+        }"`}
         confirmText="Confirmar Rechazo"
         cancelText="Cancelar"
         type="danger"

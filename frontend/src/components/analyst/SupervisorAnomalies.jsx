@@ -6,6 +6,8 @@ import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearSca
 import { Pie, Scatter } from 'react-chartjs-2';
 import { getSupervisorAnomalies } from '../../services/licenseService';
 import StyledDatePicker from '../utils/StyledDatePicker';
+import Select from 'react-select';
+import { customStyles } from '../../components/utils/utils';
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, PointElement, ScatterController);
 
@@ -340,6 +342,12 @@ const SupervisorAnomalies = () => {
 
   const chartData = getChartData();
 
+  const statusOptions = [
+    { value: '', label: 'Todos' },
+    { value: 'true', label: 'Solo anomalías' },
+    { value: 'false', label: 'Solo normales' }
+  ];
+
   return (
     <div className="pt-2">
       <div className="flex flex-col sm:flex-row justify-between items-start mt-4 gap-4">
@@ -373,7 +381,7 @@ const SupervisorAnomalies = () => {
             onClick={() => setShowInfoModal(!showInfoModal)}
             className="p-2 rounded-xl bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 border border-gray-300 dark:border-gray-600 transition-colors duration-200"
           >
-            <FiInfo className="text-gray-700 dark:text-gray-200 text-lg" />
+            <FiInfo className="text-gray-700 dark:text-gray-200 text-xl" />
           </button>
         </div>
 
@@ -381,11 +389,11 @@ const SupervisorAnomalies = () => {
           <button
             onClick={() => setShowFilters(!showFilters)}
             disabled={!hasAnalyzed}
-            className={`px-4 py-2 rounded-md flex items-center border ${
+            className={`px-4 py-2 rounded-md flex items-center justify-center border ${
               hasAnalyzed
-                ? 'bg-card dark:bg-card-dark text-foreground hover:bg-card-hover dark:hover:bg-card-hover-dark border-border dark:border-border-dark cursor-pointer'
+                ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border-gray-200 dark:border-gray-600'
                 : 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 border-gray-200 dark:border-gray-600 cursor-not-allowed'
-            }`}
+            } w-full sm:w-auto`}
           >
             <FiFilter className="mr-2" />
             Filtros
@@ -395,8 +403,10 @@ const SupervisorAnomalies = () => {
           </button>
 
           {showFilters && hasAnalyzed && (
-            <div className="absolute right-0 mt-2 w-72 bg-card dark:bg-card-dark rounded-lg shadow-lg border border-border dark:border-border-dark z-10 p-4">
-              <div className="flex justify-between items-center mb-3">
+            <div className={`absolute mt-2 w-60 sm:w-72 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-600 z-10 p-4 ${
+              window.innerWidth < 640 ? 'left-0' : 'right-0'
+            }`}>
+             <div className="flex justify-between items-center mb-3">
                 <h3 className="font-medium text-foreground">Filtrar resultados</h3>
                 <button onClick={() => setShowFilters(false)} className="text-foreground">
                   <FiX />
@@ -406,16 +416,17 @@ const SupervisorAnomalies = () => {
               <div className="space-y-3">
                 <div>
                   <label className="block text-sm font-medium mb-1 text-foreground">Estado</label>
-                  <select
-                    name="is_anomaly"
-                    value={filters.is_anomaly}
-                    onChange={handleFilterChange}
-                    className="w-full p-2 border border-border dark:border-border-dark rounded bg-background dark:bg-background-dark text-foreground"
-                  >
-                    <option value="">Todos</option>
-                    <option value="true">Solo anomalías</option>
-                    <option value="false">Solo normales</option>
-                  </select>
+                  <Select
+                    options={statusOptions}
+                    value={statusOptions.find(option => option.value === filters.is_anomaly)}
+                    onChange={(selectedOption) => handleFilterChange({ target: { name: 'is_anomaly', value: selectedOption.value } })}
+                    styles={customStyles}
+                    isSearchable={false}
+                    className="w-full text-sm"
+                    classNamePrefix="select"
+                    menuPlacement="auto"
+                    menuPosition="fixed"
+                  />
                 </div>
 
                 <div>
