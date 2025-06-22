@@ -153,12 +153,14 @@ REST_FRAMEWORK = {
     )
 }
 
+
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),  # Token de acceso dura 15 minutos
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),     # Refresh token dura 1 día
+    # 'ACCESS_TOKEN_LIFETIME': timedelta(seconds=70),  # Expira en 30 segundos
+    # 'REFRESH_TOKEN_LIFETIME': timedelta(minutes=2),  # Expira en 2 minutos
     'ALGORITHM': 'HS256',
-    'SIGNING_KEY': SECRET_KEY, 
-    'TOKEN_OBTAIN_SERIALIZER': 'users.serializers.CustomTokenObtainPairSerializer',
+    'SIGNING_KEY': SECRET_KEY,
 }
 
 
