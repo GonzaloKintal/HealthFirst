@@ -398,6 +398,7 @@ def evaluate_license(request, id):
         data = json.loads(request.body)
         license_status = data.get("license_status")
         comment = data.get("evaluation_comment", "")
+        other_comment = data.get("other_evaluation_comment", "")
 
         if license_status not in ["approved", "rejected", "missing_doc"]:
             return JsonResponse({'error': 'Estado inválido. Debe ser "approved" o "rejected".'}, status=400)
@@ -421,6 +422,7 @@ def evaluate_license(request, id):
         status_obj.name = license_status
         status_obj.evaluation_date = now().date()
         status_obj.evaluation_comment = comment
+        status_obj.other_evaluation_comment= other_comment
         status_obj.save()
 
         # Actualizar fecha de cierre de la licencia
@@ -444,13 +446,13 @@ def evaluate_license(request, id):
 
             text= base64_to_text(base64_certificate,is_image)
             text_normalize=normalize_text(text)
-
-            LicenseDatasetEntry.objects.create(
-                text=text_normalize,
-                type=license.type.group,
-                status=license.status.name,
-                reason=license.status.evaluation_comment
-            )
+            if comment!='Otro':
+                LicenseDatasetEntry.objects.create(
+                    text=text_normalize,
+                    type=license.type.group,
+                    status=license.status.name,
+                    reason=license.status.evaluation_comment.lower()
+                )
         logger_evaluation.info(f"Licencia  {id} evaluada correctamente. estado: {license_status}, comentario: {comment}, evaluador: {evaluator} id: {license.evaluator.id}")
 
 
@@ -506,6 +508,7 @@ def get_license_detail(request, id):
                 "name": license.status.name,
                 "evaluation_date": license.status.evaluation_date,
                 "evaluation_comment": license.status.evaluation_comment,
+                "other_evaluation_comment": license.status.other_evaluation_comment if license.status.other_evaluation_comment else "",
             }
 
         # Certificado relacionado
