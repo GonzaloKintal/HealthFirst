@@ -62,6 +62,7 @@ const LicenseDetail = () => {
             phone: response.data.user?.phone || '',
             dateOfBirth: response.data.user?.date_of_birth || '',
             rejectionReason: status === 'rejected' ? response.data.status?.evaluation_comment || '' : '',
+            otherRejectionReason: status === 'rejected' ? response.data.status?.other_evaluation_comment || '' : '',
             evaluator: response.data.license?.evaluator || '',
             evaluatorRole: response.data.license?.evaluator_role || '',
             evaluationDate: response.data.status?.evaluation_date || ''
@@ -116,6 +117,7 @@ const LicenseDetail = () => {
           phone: licenseResponse.data.user?.phone || '',
           dateOfBirth: licenseResponse.data.user?.date_of_birth || '',
           rejectionReason: status === 'rejected' ? licenseResponse.data.status?.evaluation_comment || '' : '',
+          otherRejectionReason: status === 'rejected' ? response.data.status?.other_evaluation_comment || '' : '',
           evaluator: licenseResponse.data.license?.evaluator || '',
           evaluatorRole: licenseResponse.data.license?.evaluator_role || '',
           evaluationDate: licenseResponse.data.status?.evaluation_date || ''
@@ -151,8 +153,13 @@ const LicenseDetail = () => {
 const handleReject = async () => {
   try {
     setIsProcessing(true);
-    const finalReason = rejectionReason === "Otro" ? otherReason : rejectionReason;
-    const response = await evaluateLicense(id, 'rejected', finalReason);
+
+    // Determinar si es "Otro" o no
+    const isOtherReason = rejectionReason === "Otro";
+    const evaluationComment = isOtherReason ? "Otro" : rejectionReason;
+    const otherEvaluationComment = isOtherReason ? otherReason : '';
+    
+    const response = await evaluateLicense(id, 'rejected', evaluationComment, otherEvaluationComment);
     
     if (response.success) {
       setNotification({
@@ -184,6 +191,7 @@ const handleReject = async () => {
           phone: licenseResponse.data.user?.phone || '',
           dateOfBirth: licenseResponse.data.user?.date_of_birth || '',
           rejectionReason: status === 'rejected' ? licenseResponse.data.status?.evaluation_comment || '' : '',
+          otherRejectionReason: status === 'rejected' ? response.data.status?.other_evaluation_comment || '' : '',
           evaluator: licenseResponse.data.license?.evaluator || '',
           evaluatorRole: licenseResponse.data.license?.evaluator_role || '',
           evaluationDate: licenseResponse.data.status?.evaluation_date || ''
@@ -338,6 +346,7 @@ const handleReject = async () => {
           phone: response.data.user?.phone || '',
           dateOfBirth: response.data.user?.date_of_birth || '',
           rejectionReason: status === 'rejected' ? response.data.status?.evaluation_comment || '' : '',
+          otherRejectionReason: status === 'rejected' ? response.data.status?.other_evaluation_comment || '' : '',
           evaluator: response.data.license?.evaluator || '',
           evaluatorRole: response.data.license?.evaluator_role || '',
           evaluationDate: response.data.status?.evaluation_date || ''
@@ -466,7 +475,6 @@ const handleReject = async () => {
                 <div className="flex space-x-2">
                   <button
                     onClick={() => {
-                      let finalReason = rejectionReason;
                       if (rejectionReason === "Otro") {
                         if (!otherReason.trim()) {
                           setNotification({
@@ -476,7 +484,6 @@ const handleReject = async () => {
                           });
                           return;
                         }
-                        finalReason = otherReason;
                       } else if (!rejectionReason.trim()) {
                         setNotification({
                           show: true,
@@ -485,7 +492,6 @@ const handleReject = async () => {
                         });
                         return;
                       }
-                      setRejectionReason(finalReason);
                       setShowRejectConfirmation(true);
                     }}
                     className="px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 text-sm cursor-pointer"
@@ -509,7 +515,12 @@ const handleReject = async () => {
           {license.status === 'rejected' && license.rejectionReason && (
             <div className="bg-rejected p-3 rounded-md">
               <p className="text-sm text-foreground">Motivo de rechazo</p>
-              <p className="text-rejected whitespace-pre-line">{license.rejectionReason}</p>
+              <p className="text-rejected whitespace-pre-line">
+                {license.rejectionReason === 'Otro' && license.otherRejectionReason 
+                  ? `Otro: ${license.otherRejectionReason}`
+                  : license.rejectionReason
+                }
+              </p>
             </div>
           )}
           
@@ -730,7 +741,7 @@ const handleReject = async () => {
                         </span>
                       </div>
 
-                      {analysis.license_types[0]?.[0] === 'enfermedad' && (
+                      {license.type.toLowerCase() === 'enfermedad' && (
                         <div className={`p-3 rounded-md ${
                           analysis.has_code 
                             ? 'bg-green-100 dark:bg-green-900/30 border-l-4 border-green-400' 

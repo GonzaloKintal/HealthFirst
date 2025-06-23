@@ -125,12 +125,15 @@ export const updateLicense = async (id, licenseData) => {
 };
 
 // Evaluar una licencia (aprobar/rechazar)
-export const evaluateLicense = async (licenseId, status, comment = '') => {
+export const evaluateLicense = async (licenseId, status, evaluationComment = '', otherEvaluationComment = '') => {
   try {
-    const response = await api.put(`/licenses/${licenseId}/evaluation`, {
+    const requestData = {
       license_status: status,
-      evaluation_comment: comment
-    });
+      evaluation_comment: evaluationComment,
+      other_evaluation_comment: otherEvaluationComment
+    };
+
+    const response = await api.put(`/licenses/${licenseId}/evaluation`, requestData);
     
     return {
       success: true,
