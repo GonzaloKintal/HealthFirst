@@ -14,6 +14,8 @@ import { format } from 'date-fns';
 import es from 'date-fns/locale/es';
 import { formatArgentinaDate } from '../utils/FormattedDate';
 import AlertWithDownload from './AlertWithDownload';
+import Select from 'react-select';
+import { customStyles } from '../../components/utils/utils';
 
 const RequestLicense = () => {
   const { user } = useAuth();
@@ -376,7 +378,13 @@ useEffect(() => {
       }
   };
   
-  
+  const licenseTypeOptions = [
+    { value: '', label: 'Seleccionar tipo' },
+    ...licenseTypes.map(type => ({
+      value: type.id.toString(),
+      label: type.name
+    }))
+  ];
 
   return (
     <div className="p-6 max-w-3xl mx-auto relative">
@@ -407,7 +415,7 @@ useEffect(() => {
               selectedEmployee={formData.selectedEmployee}
               onEmployeeSelected={(value) => setFormData(prev => ({ ...prev, selectedEmployee: value }))}
               initialEmployees={employees}
-              roles={['employee']}
+              roles={['employee', 'analyst']}
             />
           )}
           
@@ -485,18 +493,20 @@ useEffect(() => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-foreground mb-1">Tipo de Licencia *</label>
-            <select
-              name="licenseTypeId"
-              value={formData.licenseTypeId}
-              onChange={handleChange}
+            <Select
+              options={licenseTypeOptions}
+              value={licenseTypeOptions.find(option => option.value === formData.licenseTypeId.toString())}
+              onChange={(selectedOption) => handleChange({ target: { name: 'licenseTypeId', value: selectedOption.value } })}
+              styles={customStyles}
+              isSearchable={false}
+              className="w-full text-sm"
+              classNamePrefix="select"
+              menuPlacement="auto"
+              menuPosition="fixed"
+              isLoading={licenseTypes.length === 0}
+              isDisabled={licenseTypes.length === 0}
               required
-              className="w-full px-3 py-2 border border-border rounded-md focus:ring-primary-border focus:border-primary-border bg-background text-foreground"
-            >
-              <option value="">Seleccionar tipo</option>
-              {licenseTypes.map(type => (
-                <option key={type.id} value={type.id}>{type.name}</option>
-              ))}
-            </select>
+            />
           </div>
             
             <div>

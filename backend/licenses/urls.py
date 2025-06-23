@@ -15,7 +15,8 @@ urlpatterns = [
     path('get_licenses_types', get_licenses_types, name='get_licenses_types'),
 
     path('certificate/coherence', upload_base64_file,name='upload_base64_file'),
+    path('certificate/code', generate_certificate_code, name='generate_certificate_code'),
 
     path('anomalies/supervisor', supervisor_anomalies, name='get_supervisor_anomalies_view'),
-    path('anomalies/employee', employee_anomalies, name='get_employee_anomalies_view')         
+    path('anomalies/employee', employee_anomalies, name='get_employee_anomalies_view'),       
 ]

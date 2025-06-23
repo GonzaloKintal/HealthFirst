@@ -61,6 +61,7 @@ INSTALLED_APPS = [
     'licenses',
     'metabase',
     'messaging',
+    'ml_models',
 ]
 
 MIDDLEWARE = [
@@ -152,12 +153,14 @@ REST_FRAMEWORK = {
     )
 }
 
+
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),  # Token de acceso dura 15 minutos
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),     # Refresh token dura 1 día
+    # 'ACCESS_TOKEN_LIFETIME': timedelta(seconds=70),  # Expira en 30 segundos
+    # 'REFRESH_TOKEN_LIFETIME': timedelta(minutes=2),  # Expira en 2 minutos
     'ALGORITHM': 'HS256',
-    'SIGNING_KEY': SECRET_KEY, 
-    'TOKEN_OBTAIN_SERIALIZER': 'users.serializers.CustomTokenObtainPairSerializer',
+    'SIGNING_KEY': SECRET_KEY,
 }
 
 
@@ -183,10 +186,44 @@ LOGGING = {
             'filename': os.path.join(BASE_DIR, 'logs', 'licenses.log'),
             'formatter': 'verbose',
         },
+        'training_file': {  
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs', 'models_training.log'),
+            'formatter': 'verbose',
+        },
+        'licenses_evaluation': {  
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs', 'licenses_evaluation.log'),
+            'formatter': 'verbose',
+        },
+        'licenses_requests': {  
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs', 'licenses_requests.log'),
+            'formatter': 'verbose',
+        },
+
     },
     'loggers': {
-        'licenses.management.commands.check_licenses_expired': {
+        'check_licenses_expired': {
             'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'automatic_models_training': {  
+            'handlers': ['console', 'training_file'],  
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'licenses_evaluation': {  
+            'handlers': ['console', 'licenses_evaluation'],  
+            'level': 'INFO',
+            'propagate': False,
+        },
+          'licenses_requests': {  
+            'handlers': ['console', 'licenses_requests'],  
             'level': 'INFO',
             'propagate': False,
         },
