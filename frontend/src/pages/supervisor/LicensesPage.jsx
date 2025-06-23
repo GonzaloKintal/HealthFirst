@@ -1,13 +1,15 @@
 
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FiSearch, FiFilter, FiDownload, FiEdit, FiTrash2, FiEye, FiPlus, FiFileText, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
+import { FiSearch, FiFilter, FiDownload, FiEdit, FiTrash2, FiEye, FiPlus, FiFileText, FiChevronLeft, FiChevronRight, FiUser, FiCalendar, FiClock, FiTag } from 'react-icons/fi';
 import useAuth from '../../hooks/useAuth';
 import Confirmation from '../../components/utils/Confirmation';
 import { Link } from 'react-router-dom';
 import { getLicenses, deleteLicense, exportLicensesToCSV, getLicenseTypes } from '../../services/licenseService';
 import Notification from '../../components/utils/Notification';
 import { formatSimpleDate } from '../../components/utils/FormattedDate';
+import Select from 'react-select';
+import { customStyles } from '../../components/utils/utils';
 
 const LicensesPage = () => {
   const { user } = useAuth();
@@ -352,38 +354,59 @@ const LicensesPage = () => {
     return statusMap[status] || status;
   };
 
+  // Define options for status filter
+  const statusFilterOptions = [
+    { value: 'all', label: 'Todas' },
+    { value: 'pending', label: 'Pendientes' },
+    { value: 'approved', label: 'Aprobadas' },
+    { value: 'rejected', label: 'Rechazadas' },
+    { value: 'missing_doc', label: 'Falta certificado' },
+    { value: 'expired', label: 'Expiradas' }
+  ];
+
+  // Define options for type filter
+  const typeFilterOptions = [
+    { value: 'all', label: 'Todos los tipos' },
+    ...licenseTypes.map(type => ({
+      value: type.name,
+      label: type.name
+    }))
+  ];
+
   return (
-    <div className="p-6 relative">
-      {/* Contenido principal - siempre visible */}
+    <div className="p-3 sm:p-6">
+      {/* Encabezado y contador */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-3 md:gap-0">
-        {/* Título - siempre a la izquierda */}
-        <h1 className="text-xl sm:text-2xl font-bold flex items-center text-foreground">
+        <h1 className="text-xl sm:text-2xl text-foreground font-bold flex items-center">
           <FiFileText className="mr-2" />
           Gestión de Licencias
         </h1>
 
-        {/* Contenedor derecho - horizontal siempre */}
-        <div className="flex flex-row items-center gap-3 w-full md:w-auto flex-wrap">
-          {/* Botón Solicitar Nueva */}
-          <Link
-            to="/request-license"
-            className="flex items-center px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-hover whitespace-nowrap"
-          >
-            <FiPlus className="mr-2" />
-            Solicitar Nueva
-          </Link>
-
-          {/* Botón Exportar */}
-          {(user?.role === 'admin' || user?.role === 'supervisor') && (
-            <button 
-              onClick={handleExportClick}
-              className="flex items-center px-4 py-2 bg-primary text-white font-medium rounded-md cursor-pointer hover:bg-primary-hover transition duration-200 whitespace-nowrap"
-              disabled={licenses.length === 0 || loading}
+        {/* Contenedor derecho - se apila en mobile */}
+        <div className="flex flex-col xs:flex-row md:flex-row items-start md:items-center gap-3 w-full md:w-auto">
+          
+          {/* En mobile: primero los botones */}
+          <div className="flex flex-row gap-3 order-1 md:order-none">
+            <Link
+              to="/request-license"
+              className="bg-primary text-white px-4 py-2 rounded-md flex items-center cursor-pointer hover:bg-primary-hover transition duration-200 text-sm sm:text-base"
             >
-              <FiDownload className="mr-2" />
-              Exportar
-            </button> 
-          )}
+              <FiPlus className="mr-2" />
+              Solicitar Nueva
+            </Link>
+
+            {/* Botón Exportar */}
+            {(user?.role === 'admin' || user?.role === 'supervisor') && (
+              <button 
+                onClick={handleExportClick}
+                className="bg-primary text-white px-4 py-2 rounded-md flex items-center cursor-pointer hover:bg-primary-hover transition duration-200 text-sm sm:text-base"
+                disabled={licenses.length === 0 || loading}
+              >
+                <FiDownload className="mr-2" />
+                Exportar
+              </button> 
+            )}
+          </div>
         </div>
       </div>
 
@@ -405,24 +428,26 @@ const LicensesPage = () => {
   
       {/* Barra de búsqueda y filtro */}
       <div className="bg-background rounded-lg shadow overflow-hidden mb-6">
-        <div className="p-4 border-b border-border flex flex-col md:flex-row md:items-center space-y-3 md:space-y-0 md:space-x-4">
+        <div className="p-4 border-b border-border flex flex-col space-y-3 md:space-y-0 md:flex-row md:items-center md:space-x-4">
           {(user?.role === 'admin' || user?.role === 'supervisor') && (
-            <div className="relative flex-grow flex">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <FiSearch className="text-gray-400" />
+            <div className="relative flex-grow flex flex-col sm:flex-row">
+              <div className="relative flex-grow">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <FiSearch className="text-gray-400" />
+                </div>
+                <input
+                  type="text"
+                  placeholder="Buscar empleado por nombre o apellido..."
+                  className="block w-full pl-10 pr-3 py-2 border border-border rounded-md sm:rounded-l-md sm:rounded-r-none focus:outline-none text-foreground bg-background text-sm"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  disabled={loading}
+                />
               </div>
-              <input
-                type="text"
-                placeholder="Buscar empleado por nombre o apellido..."
-                className="block w-full pl-10 pr-3 py-2 border border-border rounded-l-md focus:outline-none text-foreground bg-background"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                onKeyDown={handleKeyDown}
-                disabled={loading}
-              />
               <button
                 onClick={handleSearch}
-                className="px-4 py-2 border border-l-0 border-border rounded-r-md bg-primary text-white hover:bg-primary-hover transition duration-200 cursor-pointer"
+                className="mt-2 sm:mt-0 px-4 py-2 border border-t-0 sm:border-t sm:border-l-0 border-border rounded-md sm:rounded-l-none sm:rounded-r-md bg-primary text-white hover:bg-primary-hover transition duration-200 cursor-pointer text-sm"
                 disabled={loading}
               >
                 Buscar
@@ -430,55 +455,57 @@ const LicensesPage = () => {
             </div>
           )}
           
-          <div className="flex flex-wrap md:flex-nowrap items-center gap-4">
-            <div className="flex items-center space-x-2">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+            <div className="flex items-center space-x-2 text-foreground w-auto">
               <FiFilter className="text-gray-400" />
-              <select 
-                className="border border-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-border focus:border-primary-border text-foreground bg-background"
-                value={typeFilter}
-                onChange={(e) => {
-                  setTypeFilter(e.target.value);
+              <Select
+                options={typeFilterOptions}
+                value={typeFilterOptions.find(option => option.value === typeFilter)}
+                onChange={(selectedOption) => {
+                  setTypeFilter(selectedOption.value);
                   setPagination(prev => ({ ...prev, currentPage: 1 }));
                 }}
-                disabled={loading || licenseTypes.length === 0}
-              >
-                <option value="all">Todos los tipos</option>
-                {licenseTypes.map(type => (
-                  <option key={type.id} value={type.name}>{type.name}</option>
-                ))}
-              </select>
+                styles={customStyles}
+                isSearchable={false}
+                className="w-full sm:w-48 text-sm"
+                classNamePrefix="select"
+                menuPlacement="auto"
+                menuPosition="fixed"
+                isLoading={loading || licenseTypes.length === 0}
+                isDisabled={loading || licenseTypes.length === 0}
+              />
             </div>
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2 text-foreground w-auto">
               <FiFilter className="text-gray-400" />
-              <select 
-                className="border border-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-border focus:border-primary-border text-foreground bg-background"
-                value={filter}
-                onChange={(e) => {
-                  setFilter(e.target.value);
+              <Select
+                options={statusFilterOptions}
+                value={statusFilterOptions.find(option => option.value === filter)}
+                onChange={(selectedOption) => {
+                  setFilter(selectedOption.value);
                   setPagination(prev => ({ ...prev, currentPage: 1 }));
                 }}
-                disabled={loading}
-              >
-                <option value="all">Todas</option>
-                <option value="pending">Pendientes</option>
-                <option value="approved">Aprobadas</option>
-                <option value="rejected">Rechazadas</option>
-                <option value="missing_doc">Falta certificado</option>
-                <option value="expired">Expiradas</option>
-              </select>
+                styles={customStyles}
+                isSearchable={false}
+                className="w-full sm:w-48 text-sm"
+                classNamePrefix="select"
+                menuPlacement="auto"
+                menuPosition="fixed"
+                isLoading={loading}
+                isDisabled={loading}
+              />
             </div>
           </div>
         </div>
-  
-        <div className="overflow-x-auto">
-          {loading ? (
-            // Mostrar spinner centrado en el área de la tabla
-            <div className="flex justify-center items-center min-h-[300px]">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-            </div>
-          ) : (
-            // Mostrar tabla cuando no está loading
-            <>
+
+        {/* Vista de tabla para desktop y cards para mobile */}
+        {loading ? (
+          <div className="flex justify-center items-center min-h-[300px]">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+          </div>
+        ) : (
+          <>
+            {/* Vista de tabla - Solo visible en md y superiores */}
+            <div className="hidden md:block overflow-x-auto">
               <table className="min-w-full divide-y divide-border">
                 <thead className="bg-card">
                   <tr>
@@ -560,10 +587,98 @@ const LicensesPage = () => {
                   )}
                 </tbody>
               </table>
-  
-            </>
-          )}
-        </div>
+            </div>
+
+            {/* Vista de cards - Solo visible en pantallas pequeñas */}
+            <div className="md:hidden">
+              {licenses.length > 0 ? (
+                <div className="divide-y divide-border">
+                  {licenses.map((license) => (
+                    <div key={license.id} className="p-4 hover:bg-card transition-colors">
+                      <div className="flex items-start space-x-3">
+                        {/* Avatar con estado */}
+                        <div 
+                          className={`flex-shrink-0 h-12 w-12 rounded-full flex items-center justify-center ${
+                            getStatusColors(license.status).bg
+                          } ${getStatusColors(license.status).text}`}
+                        >
+                          <FiFileText className="text-lg" />
+                        </div>
+                        
+                        {/* Contenido principal */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex flex-col sm:flex-row justify-between items-start mb-2">
+                            <h3 className="text-sm font-semibold text-foreground truncate pr-2">
+                              {license.employee}
+                            </h3>
+                            <span className={`px-2 py-1 text-xs font-medium rounded-full flex-shrink-0 
+                              ${getStatusColors(license.status).bg} ${getStatusColors(license.status).text}`}>
+                              {translateStatus(license.status)}
+                            </span>
+                          </div>
+                          
+                          {/* Información de la licencia */}
+                          <div className="space-y-1">
+                            <div className="flex items-center text-xs text-foreground opacity-75">
+                              <FiTag className="mr-2 flex-shrink-0" />
+                              <span className="truncate capitalize">{license.type}</span>
+                            </div>
+                            <div className="flex items-center text-xs text-foreground opacity-75">
+                              <FiCalendar className="mr-2 flex-shrink-0" />
+                              <span className="truncate">{license.startDate} al {license.endDate}</span>
+                            </div>
+                            <div className="flex items-center text-xs text-foreground opacity-75">
+                              <FiClock className="mr-2 flex-shrink-0" />
+                              <span className="truncate">{license.days} días</span>
+                            </div>
+                          </div>
+                          
+                          {/* Acciones */}
+                          <div className="flex justify-end space-x-3 mt-3">
+                            <button
+                              onClick={() => handleViewDetails(license.id)}
+                              className="text-primary-text hover:text-primary-hover p-2 rounded-md hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                              title="Ver detalle"
+                            >
+                              <FiEye className="text-base" />
+                            </button>
+                            
+                            {canShowActions && (
+                              <>
+                                <Link
+                                  to={`/edit-license/${license.id}`}
+                                  className="text-primary-text hover:text-primary-hover p-2 rounded-md hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                                >
+                                  <FiEdit className="text-base" />
+                                </Link>
+
+                                {user?.role === 'admin' && (
+                                  <button 
+                                    onClick={() => handleDelete(license.id)}
+                                    className="text-red-500 hover:text-red-700 p-2 rounded-md hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                                    title="Eliminar"
+                                  >
+                                    <FiTrash2 className="text-base" />
+                                  </button>
+                                )}
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="p-8 text-center text-foreground">
+                  {searchQuery || filter !== 'all' || typeFilter !== 'all' 
+                    ? 'No se encontraron licencias que coincidan con los filtros'
+                    : 'No hay licencias registradas'}
+                </div>
+              )}
+            </div>
+          </>
+        )}
       </div>
       
       {/* Paginación */}

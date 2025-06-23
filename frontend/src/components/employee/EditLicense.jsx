@@ -10,6 +10,8 @@ import { format } from 'date-fns';
 import es from 'date-fns/locale/es';
 import StyledDatePicker from '../utils/StyledDatePicker';
 import { formatArgentinaDate } from '../utils/FormattedDate';
+import Select from 'react-select';
+import { customStyles } from '../../components/utils/utils';
 
 const EditLicense = () => {
   const { id } = useParams();
@@ -262,6 +264,14 @@ useEffect(() => {
     setExistingDocument(null);
   };
 
+  const licenseTypeOptions = [
+    { value: '', label: 'Seleccionar tipo' },
+    ...licenseTypes.map(type => ({
+      value: type.id.toString(),
+      label: type.name
+    }))
+  ];
+
   return (
     <div className="p-6 max-w-3xl mx-auto relative">
       {notification && (
@@ -273,9 +283,6 @@ useEffect(() => {
         />
       )}
       
-      {/* <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Editar Licencia</h1>
-      </div> */}
       <h1 className="text-xl sm:text-2xl mb-6 font-bold flex items-center text-foreground">
         <FiEdit className="mr-2" />
         Editar Licencia
@@ -360,18 +367,20 @@ useEffect(() => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-foreground mb-1">Tipo de Licencia *</label>
-              <select
-                name="licenseTypeId"
-                value={formData.licenseTypeId}
-                onChange={handleChange}
+              <Select
+                options={licenseTypeOptions}
+                value={licenseTypeOptions.find(option => option.value === formData.licenseTypeId.toString())}
+                onChange={(selectedOption) => handleChange({ target: { name: 'licenseTypeId', value: selectedOption.value } })}
+                styles={customStyles}
+                isSearchable={false}
+                className="w-full text-sm"
+                classNamePrefix="select"
+                menuPlacement="auto"
+                menuPosition="fixed"
+                isLoading={licenseTypes.length === 0}
+                isDisabled={licenseTypes.length === 0}
                 required
-                className="w-full px-3 py-2 border border-border rounded-md focus:ring-primary-border focus:border-primary-border text-foreground bg-background"
-              >
-                <option value="">Seleccionar tipo</option>
-                {licenseTypes.map(type => (
-                  <option key={type.id} value={type.id}>{type.name}</option>
-                ))}
-              </select>
+              />
             </div>
             
             <div>

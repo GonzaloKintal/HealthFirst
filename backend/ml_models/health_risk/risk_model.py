@@ -6,9 +6,10 @@ from sklearn.metrics import accuracy_score
 from sklearn.preprocessing import StandardScaler
 from .risk_utils import generate_risk_dataframe, generate_employ_risk_dataframe
 import joblib
-import os
 from pathlib import Path
 from functools import lru_cache
+from ml_models.models import MLModel
+from datetime import datetime
 
 # Obtenemos la ruta base del proyecto
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -17,24 +18,21 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 FILE_DIR = BASE_DIR / 'health_risk'
 MODEL_PATH= FILE_DIR/'model.joblib'
 SCALER_PATH=FILE_DIR/'standard_scaler.pkl'
-RESULTS_PATH=FILE_DIR/'results_real_vs_prediction.csv'
-
+DATASET_PATH=FILE_DIR/'dataset_risk.csv'
 
 # @lru_cache(maxsize=1)
 
-def get_model():
+def get_models():
     """Obtener el modelo o crearlo si no existe"""
-    if MODEL_PATH.exists():
-        return joblib.load(MODEL_PATH)
+    if MODEL_PATH.exists() and SCALER_PATH.exists():
+        return joblib.load(MODEL_PATH),joblib.load(SCALER_PATH)
     else:
-        model=LogisticRegression()
-        joblib.dump(model,MODEL_PATH)
-        return model
+        return train_and_save_model()
 
-def training_model(df):
+def train_and_save_model():
     """Entrenar el modelo"""
-    model=get_model()
-
+    model=LogisticRegression()
+    df = pd.read_csv(DATASET_PATH)
     # Separamos datos en variables independientes (X) y objetivo (y)
     X = df[["age", "sickness_license_count", "accident_license_count",
             "in_high_risk_department"]]
@@ -60,38 +58,22 @@ def training_model(df):
     # Guardar el modelo y scaler
     joblib.dump(model, MODEL_PATH)
     joblib.dump(scaler, SCALER_PATH)
+
+    MLModel.objects.create(
+        model_type= 'HEALTH_RISK',
+        name= 'Modelo de prediccion de riesgo de salud',
+        algorithm= 'LOGISTIC_REGRESSION',
+        is_active= True,
+        training_date = datetime.now(),
+    )
     
-    print(f"Modelo guardado")
-    print(f"Scaler guardado")
-
-    #Guardamos los resultados de prueba (20% del dataset)
-    pd.DataFrame({"Real": y_test, "Predicho": y_pred}).to_csv(RESULTS_PATH, index=False)
-    print(f"Resultados guardados")
-
-    return precision 
-
-# Método para cargar el modelo entrenado y los transformadores
-def load_trained_model():
-    """Carga el modelo entrenado y los transformadores desde archivos"""
-    try:
-
-        if not os.path.exists(MODEL_PATH):
-            print("Modelo no encontrado en:", MODEL_PATH)
-            return None, None
-            
-        model = joblib.load(MODEL_PATH)
-        scaler = joblib.load(SCALER_PATH)
-        return model, scaler
-
-    except Exception as e:
-        print(f"Error al cargar el modelo: {str(e)}")
-        return None, None
+    return model,scaler 
     
 
 def predict_employ_risk(employ_id):
     """Devuelve el riesgo asociado a empleado consultado"""
     df=generate_employ_risk_dataframe(employ_id)
-    model, scaler=load_trained_model()
+    model, scaler=get_models()
     X = df[["age", "sickness_license_count", "accident_license_count",
               "in_high_risk_department"]].copy()
     
@@ -114,7 +96,7 @@ def predict_risk():
     df=generate_risk_dataframe() #Obtenemos el dataframe con la informacion de la base de datos
 
     #Cargamos el scaler y el modelo de prediccion
-    model, scaler = load_trained_model()
+    model, scaler = get_models()
 
     #Hacemos copia del dataframe original, atributos que sirven para la prediccion
     X = df[["age", "sickness_license_count", "accident_license_count",
@@ -134,9 +116,3 @@ def predict_risk():
 
     print(json_results)
     return json_results
-
-
-
-    # df_training=pd.read_csv("HealthFirst/backend/users/health_risk/dataset_risk.csv")
-    # training_model(df_training)
-    #predict_risk()

@@ -4,10 +4,9 @@ from datetime import datetime, timedelta
 from django.utils.timezone import now
 from django.contrib.auth import get_user_model
 from xmlrpc.client import NOT_WELLFORMED_ERROR
-
+from ml_models.models import LicenseDatasetEntry
 from messaging.services.messenger import MessengerService
-
-from .anomalies.isolation_forest import get_employee_anomalies, get_supervisor_anomalies
+from ml_models.anomalies.isolation_forest import get_employee_anomalies, get_supervisor_anomalies
 from messaging.services.brevo_email import *
 from .models import *
 from django.http import JsonResponse, HttpResponse
@@ -22,12 +21,18 @@ import magic
 import img2pdf
 from django.db import transaction
 from .analisis import license_analysis
-from licenses.utils.file_utils import *
-from licenses.utils.coherence_model_ml import predict_top_3
+from ml_models.utils.file_utils import *
+from ml_models.utils.coherence_model_ml import predict_license_types
 from django.db.models import Q
+from django.db import connection
 import csv
 from rest_framework.pagination import LimitOffsetPagination
+from ml_models.utils.evaluation_model import predict_evaluation
+import logging
 
+
+logger_evaluation = logging.getLogger('licenses_evaluation')
+logger_requests= logging.getLogger('licenses_requests')
 
 
 # LICENSES API
@@ -168,26 +173,39 @@ def create_license(request):
 
             if certificate_data:
                 try:
-                    file_data = process_certificate(certificate_data)
+                    file_data, certificate_obj = process_certificate(certificate_data)
                 except Exception as e:
                     raise Exception(f'Error en certificado: {str(e)}')
-            
-            
 
-                Certificate.objects.create(
-                    license=license,
-                    file=file_data,
-                    validation=certificate_data.get('validation', False),
-                    upload_date=datetime.now(),
-                    is_deleted=False,
-                    deleted_at=None
-                )
+                validation = certificate_data.get('validation', False)
+
+                if certificate_obj:
+                    # Certificado HFCOD ya existente y válido
+                    certificate_obj.license = license
+                    certificate_obj.file = file_data
+                    certificate_obj.validation = validation
+                    certificate_obj.upload_date = datetime.now()
+                    certificate_obj.is_deleted = False
+                    certificate_obj.deleted_at = None
+                    certificate_obj.save()
+                else:
+                    # Certificado nuevo sin HFCOD
+                    Certificate.objects.create(
+                        license=license,
+                        certificate_id=None,
+                        file=file_data,
+                        validation=validation,
+                        upload_date=datetime.now(),
+                        is_deleted=False,
+                        deleted_at=None
+                    )
 
             license.assign_status()
-            if license.type and license.type.certificate_require and certificate_data is None:
-                MessengerService.send_upload_license_without_certificate_message(license)
-            else:
-                MessengerService.send_upload_license_message(license)
+            #if license.type and license.type.certificate_require and certificate_data is None:
+            #    MessengerService.send_upload_license_without_certificate_message(license)
+            #else:
+            #    MessengerService.send_upload_license_message(license)
+        logger_requests.info(f'Licencia con id  {license.license_id} solicitada por {request.user.first_name} {request.user.last_name} con id: {request.user.id}')
 
         return JsonResponse({'message': 'Licencia solicitada exitosamente.'}, status=200)
 
@@ -258,14 +276,25 @@ def update_license(request, id):
                 # Actualizar certificado
                 if certificate_data:
                     try:
-                        file_data = process_certificate(certificate_data)
+                        file_data, certificate_obj = process_certificate_update_certificate(certificate_data, license)
                     except Exception as e:
                         raise Exception(f'Error en certificado: {str(e)}')
                         
                     validation = certificate_data.get('validation', False)
 
                     if file_data:
-                        if hasattr(license, 'certificate'):
+                        if certificate_obj:
+                            # Reutilizar el certificado ya existente
+                            cert = certificate_obj
+                            cert.license = license  # Asegurar que esté vinculado correctamente
+                            cert.file = file_data
+                            cert.validation = validation
+                            cert.upload_date = datetime.now()
+                            cert.is_deleted = False
+                            cert.deleted_at = None
+                            cert.save()
+                        elif license.certificate:
+                            # Si ya tiene uno que no es HFCOD, se actualiza
                             cert = license.certificate
                             cert.file = file_data
                             cert.validation = validation
@@ -274,6 +303,7 @@ def update_license(request, id):
                             cert.deleted_at = None
                             cert.save()
                         else:
+                            # Si no hay ninguno, se crea
                             Certificate.objects.create(
                                 license=license,
                                 file=file_data,
@@ -281,7 +311,7 @@ def update_license(request, id):
                                 upload_date=datetime.now(),
                                 is_deleted=False,
                                 deleted_at=None
-                        )
+                            )
                 if license.status.name not in [Status.StatusChoices.APPROVED, Status.StatusChoices.REJECTED]:
                     try:
                         certificate=license.certificate
@@ -298,7 +328,8 @@ def update_license(request, id):
                         license.status.name = Status.StatusChoices.PENDING
                     
                     license.status.save()
-                
+
+                logger_requests.info(f"Usuario {request.user.first_name} {request.user.last_name} con id {request.user.id} edito la licencia {id}") 
                 return JsonResponse({'message': 'Licencia actualizada exitosamente.'}, status=200)
 
     except Exception as e:
@@ -311,11 +342,12 @@ def update_license(request, id):
 def add_certificate(request, id):
     status_code = 200
     response_data = {}
-    
+
     try:
         data = json.loads(request.body)
         certificate_data = data.get('certificate', None)
 
+        # Validar que la LICENCIA a editar EXISTE
         try:
             license = License.objects.get(license_id=id, is_deleted=False)
         except License.DoesNotExist:
@@ -323,28 +355,26 @@ def add_certificate(request, id):
 
         if not license.type.certificate_require:
             raise Exception('El tipo de licencia no requiere certificado.')
-        
+
         try:
-            file_data = process_certificate(certificate_data)
+            file_data, certificate_obj = process_certificate_add_certificate(certificate_data)
         except Exception as e:
             raise Exception(f'Error en certificado: {str(e)}')
 
-        if file_data:
-            Certificate.objects.create(
-                license=license,
-                file=file_data,
-                validation=False,
-                upload_date=datetime.now(),
-                is_deleted=False,
-                deleted_at=None
-            )
+        # Asociar y guardar el certificado existente
+        certificate_obj.license = license
+        certificate_obj.file = file_data
+        certificate_obj.validation = False
+        certificate_obj.upload_date = datetime.now()
+        certificate_obj.is_deleted = False
+        certificate_obj.deleted_at = None
+        certificate_obj.save()
 
-            license.status.name = Status.StatusChoices.PENDING
-            license.status.save()
-            response_data = {'message': 'Certificado agregado exitosamente.'}
-        else:
-            status_code = 400
-            response_data = {'error': 'No se pudo procesar el certificado.'}
+        # Cambiar estado de la licencia
+        license.status.name = Status.StatusChoices.PENDING
+        license.status.save()
+
+        response_data = {'message': 'Certificado agregado exitosamente.'}
 
     except Exception as e:
         status_code = 500
@@ -364,10 +394,11 @@ def add_certificate(request, id):
 @permission_classes([IsAuthenticated])
 def evaluate_license(request, id):
     try:
+        logger_evaluation.info(f"Evaluando licencia {id}")
         data = json.loads(request.body)
-
         license_status = data.get("license_status")
         comment = data.get("evaluation_comment", "")
+        other_comment = data.get("other_evaluation_comment", "")
 
         if license_status not in ["approved", "rejected", "missing_doc"]:
             return JsonResponse({'error': 'Estado inválido. Debe ser "approved" o "rejected".'}, status=400)
@@ -391,6 +422,7 @@ def evaluate_license(request, id):
         status_obj.name = license_status
         status_obj.evaluation_date = now().date()
         status_obj.evaluation_comment = comment
+        status_obj.other_evaluation_comment= other_comment
         status_obj.save()
 
         # Actualizar fecha de cierre de la licencia
@@ -404,6 +436,25 @@ def evaluate_license(request, id):
             MessengerService.send_approved_license_message(license)
 
         evaluator= f"{request.user.first_name} {request.user.last_name}"
+
+        if license.type.certificate_require:
+            base64_certificate = license.certificate.file
+            is_image=False
+
+            if is_pdf_image(base64_certificate):
+                is_image=True
+
+            text= base64_to_text(base64_certificate,is_image)
+            text_normalize=normalize_text(text)
+            if comment!='Otro':
+                LicenseDatasetEntry.objects.create(
+                    text=text_normalize,
+                    type=license.type.group,
+                    status=license.status.name,
+                    reason=license.status.evaluation_comment.lower()
+                )
+        logger_evaluation.info(f"Licencia  {id} evaluada correctamente. estado: {license_status}, comentario: {comment}, evaluador: {evaluator} id: {license.evaluator.id}")
+
 
         return JsonResponse({'message': 'Licencia evaluada correctamente.','evaluator': evaluator}, status=200)
 
@@ -457,6 +508,7 @@ def get_license_detail(request, id):
                 "name": license.status.name,
                 "evaluation_date": license.status.evaluation_date,
                 "evaluation_comment": license.status.evaluation_comment,
+                "other_evaluation_comment": license.status.other_evaluation_comment if license.status.other_evaluation_comment else "",
             }
 
         # Certificado relacionado
@@ -502,18 +554,34 @@ def upload_base64_file(request):
         body_unicode = request.body.decode('utf-8')
         body = json.loads(body_unicode)
         base64_string = body.get("file_base64")
+        license_id=body.get("license_id", None)
 
+        if not license_id:
+            return JsonResponse({"error": "El campo 'license_id' es obligatorio"}, status=400)
         if not base64_string:
             return JsonResponse({"error": "El campo 'file_base64' es obligatorio"}, status=400)
-
+        license=License.objects.get(license_id=license_id)
         is_image=False
 
         if is_pdf_image(base64_string):
             is_image=True
 
         text= base64_to_text(base64_string,is_image)
-        result = predict_top_3(text)
-        parsed_result = {item[0]: item[1] for item in result}
+        license_type_prediction = predict_license_types(text)
+        evaluation_prediction = predict_evaluation(text,license.type.group)
+
+        result = {
+            "is_approved": bool(evaluation_prediction["approved"]),
+            "probability_of_approval": evaluation_prediction["probability_of_approval"],
+            "probability_of_rejection": evaluation_prediction["probability_of_rejection"],
+            "reason_of_rejection": evaluation_prediction["reason_of_rejection"] if evaluation_prediction["reason_of_rejection"] else "",
+            "top_reasons": evaluation_prediction["top_reasons"] if "top_reasons" in evaluation_prediction else "",
+            "license_types": license_type_prediction,
+        }
+        if license.type.group=='enfermedad':
+            result["has_code"] = evaluation_prediction["has_code"]
+
+        parsed_result = json.loads(json.dumps(result))
  
 
         if "error" in result:
@@ -532,6 +600,101 @@ def process_certificate(certificate_data):
             raise ValueError('Archivo del certificado no encontrado.')
         
         file_decoded = base64.b64decode(file_data)
+
+        """ Validacíon de código unico """
+        certificate_id = extract_certificate_id_from_pdf_base64(file_data)
+        print("El codigo de certficiado es: ", certificate_id)
+        """ FIN Validación de codigo unico """
+        
+        certificate_obj = None
+
+        # Detectar tipo de archivo
+        mime = magic.Magic(mime=True)
+        file_type = mime.from_buffer(file_decoded)
+        
+        allowed_types = ['image/jpeg', 'image/png', 'application/pdf']
+        if file_type not in allowed_types:
+            raise ValueError('Tipo de archivo no permitido. Solo se aceptan JPG, PNG o PDF.')
+        
+        if file_type in ['image/jpeg', 'image/png']:
+            file_decoded = img2pdf.convert(file_decoded)
+
+
+        # Si encontro certificate_id significa que es HFCOD, debe existir el certificado en la BD:
+        if certificate_id: 
+            try:
+                certificate_obj = Certificate.objects.get(certificate_id=certificate_id)
+            except Certificate.DoesNotExist:
+                raise ValueError("El código de certificado no existe en la dB.")
+
+            # Validar que el CERTIFICADO NO ESTE relacionado a la LICENCIA.
+            if certificate_obj.license is not None:
+                raise ValueError("El certificado ya fue utilizado.")
+        
+        file_encoded = base64.b64encode(file_decoded).decode('utf-8')
+
+        return file_encoded, certificate_obj
+
+
+
+
+def process_certificate_add_certificate(certificate_data):
+        file_data = certificate_data.get('file', None)
+        if not file_data:
+            raise ValueError('Archivo del certificado no encontrado.')
+        
+        file_decoded = base64.b64decode(file_data)
+
+        """ Validacíon de código unico """
+        certificate_id = extract_certificate_id_from_pdf_base64(file_data)
+        print("El codigo de certficiado es: ", certificate_id)
+        """ FIN Validación de codigo unico """
+        
+        # Detectar tipo de archivo
+        mime = magic.Magic(mime=True)
+        file_type = mime.from_buffer(file_decoded)
+        
+        allowed_types = ['image/jpeg', 'image/png', 'application/pdf']
+        if file_type not in allowed_types:
+            raise ValueError('Tipo de archivo no permitido. Solo se aceptan JPG, PNG o PDF.')
+        
+        #if file_type in ['image/jpeg', 'image/png']:
+        #    file_decoded = img2pdf.convert(file_decoded)
+
+
+        # Si el código existe
+        if certificate_id:
+            try:
+                certificate_obj = Certificate.objects.get(certificate_id=certificate_id)
+                print(f"Usando certificado existente con ID {certificate_obj.certificate_id}")    
+            except Certificate.DoesNotExist:
+                raise ValueError(f"El certificado con ID {certificate_id} no existe.")
+
+            # Validar que el código del certificado no esté relacionado con otra licencia
+            if certificate_obj.license is not None:
+                raise ValueError("El certificado ya fue utilizado.")
+        else:
+            # Si no tiene el prefijo HFCOD, simplemente generamos un nuevo certificado "genérico"
+            certificate_obj = Certificate()
+
+        # Codificamos nuevamente el archivo para guardar
+        file_encoded = base64.b64encode(file_decoded).decode('utf-8')
+        return file_encoded, certificate_obj
+
+
+def process_certificate_update_certificate(certificate_data, current_license):
+        file_data = certificate_data.get('file', None)
+        if not file_data:
+            raise ValueError('Archivo del certificado no encontrado.')
+        
+        file_decoded = base64.b64decode(file_data)
+
+        """ Validacíon de código unico """
+        certificate_id = extract_certificate_id_from_pdf_base64(file_data)
+        print("El codigo de certficiado es: ", certificate_id)
+        certificate_obj = None
+        """ FIN Validación de codigo unico """
+        
         
         # Detectar tipo de archivo
         mime = magic.Magic(mime=True)
@@ -543,10 +706,35 @@ def process_certificate(certificate_data):
         
         if file_type in ['image/jpeg', 'image/png']:
             file_decoded = img2pdf.convert(file_decoded)
+
+
+         # Buscar el certificado en la base de datos
+        if certificate_id:
+            try:
+                certificate_obj = Certificate.objects.get(certificate_id=certificate_id)
+            except Certificate.DoesNotExist:
+                raise ValueError("El código de certificado no existe en el sistema.")
+
+            # Validar si está asignado a otra licencia
+            if certificate_obj.license and certificate_obj.license.pk != current_license.pk:
+                raise ValueError("Este certificado ya está asignado a otra licencia.")
+
+            # Si la licencia ya tiene un certificado, se valida que sea el mismo código
+            certificate = getattr(current_license, 'certificate', None)
+            if certificate:
+                current_certificate_id = str(current_license.certificate.certificate_id)
+                if str(certificate_id) != current_certificate_id:
+                    raise ValueError("No se puede reemplazar el certificado: el código no coincide con el actual.")
+            else:
+                raise ValueError("La licencia no posee un certificado actual para validar el código.")
+        else:
+            # No tiene HFCOD entonces no se valida el código, se permite continuar
+            certificate_obj = None    
         
         file_encoded = base64.b64encode(file_decoded).decode('utf-8')
 
-        return file_encoded
+        return file_encoded, certificate_obj
+
 
 @api_view(['POST'])
 @authentication_classes([JWTAuthentication])
@@ -625,6 +813,7 @@ def export_licenses_to_csv(request):
 
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
+        
 
 
 ##################### API Anomalias #########################
@@ -695,6 +884,51 @@ def employee_anomalies(request):
         paginated_data = paginator.paginate_queryset(data, request)
 
         return paginator.get_paginated_response(paginated_data)
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+
+
+
+def get_next_certificate_id():
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT nextval(pg_get_serial_sequence('licenses_certificate', 'certificate_id'))")
+        row = cursor.fetchone()
+    return row[0] if row else None
+
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def generate_certificate_code(request):
+    try:
+        # Obtener proximo id de tabla certificate
+        next_id = get_next_certificate_id()
+        if not next_id:
+            return JsonResponse({'error': 'No se pudo obtener el próximo ID de certificado.'}, status=500)
+
+        # Crear el codigo
+        code = f"HFCOD{next_id}"
+
+        # Crear el Certificate sin licencia relacionada
+        Certificate.objects.create(
+            certificate_id=next_id,
+            license=None,
+            file=None,
+            validation=False,
+            upload_date=datetime.now(),
+            is_deleted=False,
+            deleted_at=None
+        )
+
+        template_path = os.path.join(settings.BASE_DIR, 'public', 'templates', 'standard_format.pdf')
+
+        modified_pdf = insert_code_to_pdf_return_bytes(template_path, code)
+
+        response = HttpResponse(modified_pdf, content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="Formato_Certificado_HealthFirst.pdf"'
+        return response
 
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)

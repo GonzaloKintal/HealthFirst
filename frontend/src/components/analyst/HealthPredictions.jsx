@@ -17,8 +17,9 @@ import {
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import { Doughnut } from 'react-chartjs-2';
 import { getHealthRiskPredictions } from '../../services/userService';
-import EmployeeSelector from '../supervisor/EmployeeSelector';
 import IndividualEmployeeAnalysis from './IndividualEmployeeAnalysis';
+import Select from 'react-select';
+import { customStyles } from '../../components/utils/utils';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -152,18 +153,6 @@ const HealthPredictions = ({ isHealthSectionExpanded }) => {
     }
   };
 
-  // const handlePrevPage = () => {
-  //   const newOffset = Math.max(0, Number(pagination.offset) - pagination.limit);
-  //   fetchHealthData({ offset: newOffset });
-  // };
-
-  // const handleNextPage = () => {
-  //   if (pagination.next) {
-  //     const url = new URL(pagination.next);
-  //     const offset = Number(url.searchParams.get('offset') || pagination.offset + pagination.limit);
-  //     fetchHealthData({ offset });
-  //   }
-  // };
   const handlePrevPage = () => {
   const newOffset = Math.max(0, Number(pagination.offset) - pagination.limit);
   fetchHealthData({ 
@@ -384,6 +373,12 @@ const handleNextPage = () => {
   const metrics = getMetrics();
   const chartData = getChartData();
 
+  const riskLevelOptions = [
+    { value: '', label: 'Todos' },
+    { value: 'healthy', label: 'Bajo riesgo' },
+    { value: 'critical', label: 'Alto riesgo' }
+  ];
+
   return (
     <div className="overflow-y-auto pt-2">
       <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
@@ -433,18 +428,18 @@ const handleNextPage = () => {
             className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 border border-gray-300 dark:border-gray-600"
             aria-label="Información de riesgo"
           >
-            <FiInfo className="text-gray-700 dark:text-gray-200 text-lg" />
+            <FiInfo className="text-gray-700 dark:text-gray-200 text-xl" />
           </button>
         </div>
         <div className="relative">
           <button
             onClick={() => setShowFilters(!showFilters)}
             disabled={!hasAnalyzed}
-            className={`px-4 py-2 rounded-md flex items-center border ${
+            className={`px-4 py-2 rounded-md flex items-center justify-center border ${
               hasAnalyzed
                 ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border-gray-200 dark:border-gray-600'
                 : 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 border-gray-200 dark:border-gray-600 cursor-not-allowed'
-            }`}
+            } w-full sm:w-auto`}
           >
             <FiFilter className="mr-2" />
             Filtros
@@ -453,7 +448,9 @@ const handleNextPage = () => {
             )}
           </button>
           {showFilters && hasAnalyzed && (
-            <div className="absolute right-0 mt-2 w-72 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-600 z-10 p-4">
+            <div className={`absolute mt-2 w-60 sm:w-72 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-600 z-10 p-4 ${
+              window.innerWidth < 640 ? 'left-0' : 'right-0'
+            }`}>
               <div className="flex justify-between items-center mb-3">
                 <h3 className="font-medium text-gray-900 dark:text-gray-300">Filtrar resultados</h3>
                 <button
@@ -469,16 +466,17 @@ const handleNextPage = () => {
                   <label className="block text-sm font-medium mb-1 text-gray-900 dark:text-gray-300">
                     Nivel de riesgo
                   </label>
-                  <select
-                    name="risk_level"
-                    value={filters.risk_level}
-                    onChange={handleFilterChange}
-                    className="w-full p-2 border border-gray-200 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-300"
-                  >
-                    <option value="">Todos los niveles</option>
-                    <option value="healthy">Bajo Riesgo</option>
-                    <option value="critical">Alto Riesgo</option>
-                  </select>
+                  <Select
+                    options={riskLevelOptions}
+                    value={riskLevelOptions.find(option => option.value === filters.risk_level)}
+                    onChange={(selectedOption) => handleFilterChange({ target: { name: 'risk_level', value: selectedOption.value } })}
+                    styles={customStyles}
+                    isSearchable={false}
+                    className="w-full text-sm"
+                    classNamePrefix="select"
+                    menuPlacement="auto"
+                    menuPosition="fixed"
+                  />
                 </div>
                 <div className="flex justify-between pt-2">
                   <button

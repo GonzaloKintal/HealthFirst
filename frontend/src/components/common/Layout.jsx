@@ -1,7 +1,9 @@
 
+
 import { useState, useEffect } from 'react';
 import Header from './Header';
 import Sidebar from './Sidebar';
+import SessionTimeout from './SessionTimeout';
 
 const Layout = ({ children }) => {
   const [isMobile, setIsMobile] = useState(false);
@@ -49,6 +51,9 @@ const Layout = ({ children }) => {
         <main className="flex-1 overflow-y-auto p-6 mt-16">
           {children}
         </main>
+        
+        {/* Componente de timeout de sesión */}
+        <SessionTimeout />
       </div>
     </div>
   );

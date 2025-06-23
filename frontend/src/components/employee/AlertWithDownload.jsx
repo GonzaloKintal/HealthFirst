@@ -1,29 +1,30 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { FiDownload } from 'react-icons/fi';
+import { downloadCertificateTemplate } from '../../services/licenseService';
 
 const AlertWithDownload = ({ onDownload }) => {
-  const handleDownload = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const [disabled, setDisabled] = useState(false);
 
-    try {
-      const fileUrl = '/documents/standard_format.pdf';
+  const handleDownload = async (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+
+  setDisabled(true);
+
+  try {
+      const result = await downloadCertificateTemplate();
       
-      const link = document.createElement('a');
-      link.href = fileUrl;
-      link.download = 'Formato_Certificado_HealthFirst.pdf';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      
-      if (onDownload) {
+      if (result.success && onDownload) {
         onDownload();
+      } else if (!result.success) {
+        throw new Error(result.error || 'Error al descargar el formato');
       }
-      
     } catch (error) {
       console.error("Error al descargar el formato:", error);
+    } finally {
+      setDisabled(false);
     }
-  };
+};
 
   return (
     <div className="bg-yellow-50 dark:bg-yellow-700 dark:bg-opacity-20 border-l-4 border-yellow-400 dark:border-yellow-500 p-4 mb-4 rounded-md">
@@ -46,7 +47,14 @@ const AlertWithDownload = ({ onDownload }) => {
             <button
               type='button'
               onClick={handleDownload}
-              className="inline-flex items-center px-3 py-1 border border-yellow-400 dark:border-yellow-600 rounded-md shadow-sm text-sm font-medium text-yellow-700 dark:text-yellow-200 bg-yellow-100 dark:bg-yellow-800 hover:bg-yellow-200 dark:hover:bg-yellow-700 focus:outline-none"
+              disabled={disabled}
+              className={`inline-flex items-center px-3 py-1 border rounded-md shadow-sm text-sm font-medium
+                ${
+                  disabled
+                    ? 'border-gray-300 bg-gray-200 text-gray-500 cursor-not-allowed dark:border-gray-600 dark:bg-gray-700 dark:text-gray-400'
+                    : 'border-yellow-400 text-yellow-700 bg-yellow-100 hover:bg-yellow-200 dark:border-yellow-600 dark:text-yellow-200 dark:bg-yellow-800 dark:hover:bg-yellow-700'
+                }
+              `}
             >
               <FiDownload className="mr-2" />
               Descargar formato
