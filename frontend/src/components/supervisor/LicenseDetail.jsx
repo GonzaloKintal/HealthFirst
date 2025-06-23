@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { FiCheck, FiX, FiEdit, FiEye, FiUser, FiCalendar, FiFileText, FiArrowLeft, FiPlus, FiActivity } from 'react-icons/fi';
+import { FiCheck, FiX, FiEdit, FiEye, FiUser, FiCalendar, FiFileText, FiArrowLeft, FiPlus, FiActivity, FiAlertTriangle } from 'react-icons/fi';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { FormattedDate } from '../../components/utils/FormattedDate';
 import Confirmation from '../../components/utils/Confirmation';
@@ -729,6 +729,35 @@ const handleReject = async () => {
                           </span>
                         </span>
                       </div>
+
+                      {analysis.license_types[0]?.[0] === 'enfermedad' && (
+                        <div className={`p-3 rounded-md ${
+                          analysis.has_code 
+                            ? 'bg-green-100 dark:bg-green-900/30 border-l-4 border-green-400' 
+                            : 'bg-yellow-100 dark:bg-yellow-900/30 border-l-4 border-yellow-400'
+                        }`}>
+                          <div className="flex items-start gap-2">
+                            {analysis.has_code 
+                              ? <FiCheck className="flex-shrink-0 mt-0.5 text-green-600 dark:text-green-300" />
+                              : <FiAlertTriangle className="flex-shrink-0 mt-0.5 text-yellow-600 dark:text-yellow-300" />
+                            }
+                            <p className={`font-base text-sm ${
+                              analysis.has_code 
+                                ? 'text-green-800 dark:text-green-200' 
+                                : 'text-yellow-800 dark:text-yellow-200'
+                            }`}>
+                              {analysis.has_code 
+                                ? 'Este certificado de enfermedad incluye el código de unicidad válido.'
+                                : 'Atención: Este certificado de enfermedad NO posee el código de unicidad.'}
+                            </p>
+                          </div>
+                          {!analysis.has_code && (
+                            <p className="text-sm mt-1 pl-6 text-yellow-800 dark:text-yellow-200">
+                              Recomendamos al supervisor analizar con cuidado el certificado.
+                            </p>
+                          )}
+                        </div>
+                      )}
 
                       {/* Probabilidades */}
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
