@@ -278,10 +278,6 @@ const UsersPage = () => {
 
         {/* Contenedor derecho - se apila en mobile */}
         <div className="flex flex-col xs:flex-row md:flex-row items-start md:items-center gap-3 w-full md:w-auto">
-          {/* En mobile: luego el contador */}
-          <span className="text-sm text-foreground order-2 md:order-none">
-            Mostrando {users.length} de {pagination.totalUsers} usuarios
-          </span>
 
           {/* En mobile: primero el botón */}
           <Link

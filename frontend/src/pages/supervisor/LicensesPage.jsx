@@ -384,11 +384,7 @@ const LicensesPage = () => {
 
         {/* Contenedor derecho - se apila en mobile */}
         <div className="flex flex-col xs:flex-row md:flex-row items-start md:items-center gap-3 w-full md:w-auto">
-          {/* En mobile: luego el contador */}
-          <span className="text-sm text-foreground order-2 md:order-none">
-            Mostrando {licenses.length} de {pagination.totalLicenses} licencias
-          </span>
-
+          
           {/* En mobile: primero los botones */}
           <div className="flex flex-row gap-3 order-1 md:order-none">
             <Link
