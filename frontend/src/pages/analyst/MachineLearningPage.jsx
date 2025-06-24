@@ -321,7 +321,7 @@ const MachineLearningPage = () => {
           </h2>
 
           {/* Filtros */}
-          <div className="flex items-center space-x-2 text-foreground mb-4 w-full sm:w-52">
+          <div className="flex items-center space-x-2 text-foreground mb-4 w-fit">
             <FiFilter className="text-gray-400" />
             <Select
               options={filterOptions}
@@ -329,7 +329,7 @@ const MachineLearningPage = () => {
               onChange={(selectedOption) => handleFilterChange(selectedOption.value)}
               styles={customStyles}
               isSearchable={false}
-              className="text-sm"
+              className="text-sm w-auto"
               classNamePrefix="select"
               menuPlacement="auto"
               menuPosition="fixed"
