@@ -372,15 +372,14 @@ const handleReject = async () => {
 
   const options = [
     { value: '', label: 'Seleccione un motivo de rechazo...' },
+    { value: "Certificado de enfermedad sin datos", label: "Certificado de enfermedad sin datos" },
     { value: 'Certificado sin fechas', label: 'Certificado sin fechas' },
     { value: 'Certificado sin datos/vacío/ilegible', label: 'Certificado sin datos/vacío/ilegible' },
-    { value: 'Certificado de enfermedad sin código o con datos faltantes', label: 'Certificado de enfermedad sin código o con datos faltantes' },
     { value: 'Certificado de enfermedad sin datos del profesional', label: 'Certificado de enfermedad sin datos del profesional' },
     { value: 'Certificado de enfermedad sin información de empleado', label: 'Certificado de enfermedad sin información de empleado' },
     { value: 'Certificado de enfermedad sin días de reposo', label: 'Certificado de enfermedad sin días de reposo' },
     { value: 'Certificado de estudios sin información de la institución', label: 'Certificado de estudios sin información de la institución' },
     { value: 'Certificado no acorde a la licencia solicitada', label: 'Certificado no acorde a la licencia solicitada' },
-    { value: 'Certificado con datos sensibles', label: 'Certificado con datos sensibles' },
     { value: 'Otro', label: 'Otro' },
   ];
 
@@ -453,7 +452,7 @@ const handleReject = async () => {
                   }}
                   styles={customStyles}
                   isSearchable={false}
-                  className="w-full text-sm"
+                  className="w-auto text-sm"
                   classNamePrefix="select"
                   menuPlacement="auto"
                   menuPosition="absolute"

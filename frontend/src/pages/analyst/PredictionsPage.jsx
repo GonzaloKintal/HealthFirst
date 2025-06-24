@@ -23,7 +23,7 @@ const PredictionsPage = () => {
         >
           <div className="flex items-center">
             <FiAlertTriangle className="mr-2 text-blue-500" />
-            <h2 className="text-lg sm:text-xl font-semibold text-foreground">Análisis de Anomalías</h2>
+            <h2 className="text-md sm:text-lg font-semibold text-foreground">Análisis de Anomalías</h2>
           </div>
           <span className="text-foreground">
             {expandedSection === 'anomalies' ? <FiChevronUp /> : <FiChevronDown />}
@@ -47,7 +47,7 @@ const PredictionsPage = () => {
         >
           <div className="flex items-center">
             <FiHeart className="mr-2 text-green-500" />
-            <h2 className="text-lg sm:text-xl font-semibold text-foreground">Predicciones de Salud Laboral</h2>
+            <h2 className="text-md sm:text-lg font-semibold text-foreground">Predicciones de Salud Laboral</h2>
           </div>
           <span className="text-foreground">
             {expandedSection === 'health' ? <FiChevronUp /> : <FiChevronDown />}

@@ -324,7 +324,7 @@ const UsersPage = () => {
             </button>
           </div>
           
-          <div className="flex items-center space-x-2 text-foreground w-40">
+          <div className="flex items-center space-x-2 text-foreground min-w-40">
             <FiFilter className="text-gray-400" />
             <Select
               options={filterOptions}
@@ -335,7 +335,7 @@ const UsersPage = () => {
               }}
               styles={customStyles}
               isSearchable={false}
-              className="text-sm"
+              className="text-sm w-auto"
               classNamePrefix="select"
               menuPlacement="auto"
               menuPosition="fixed"
