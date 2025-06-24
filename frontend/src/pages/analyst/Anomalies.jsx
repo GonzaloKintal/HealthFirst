@@ -21,7 +21,7 @@ const AnomaliesPage = () => {
 
       {user?.role === 'admin' && (
         <div className="mt-6 p-4 bg-special-light dark:bg-special-dark border-l-4 border-primary-border rounded">
-          <p className="text-primary-text">
+          <p className="text-primary-text text-sm sm:text-base">
             <strong className="text-primary-text">Nota:</strong> Esta herramienta analiza los patrones de aprobación/rechazo de los supervisores y solicitudes de los empleados para detectar posibles anomalías.
           </p>
         </div>

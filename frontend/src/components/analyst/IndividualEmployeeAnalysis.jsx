@@ -115,7 +115,7 @@ const IndividualEmployeeAnalysis = ({
         <div className="bg-white dark:bg-gray-700/50 p-6 rounded-lg shadow-sm border border-gray-100 dark:border-gray-600">
           <div className="bg-special-light dark:bg-special-dark p-3 rounded border-l-4 border-primary-border">
             <p className="text-primary-text text-sm">
-              <strong className="text-primary-text">Nota:</strong> Este apartado permite analizar la salud de un empleado individualmente.
+              <strong className="text-primary-text text-sm sm:text-base">Nota:</strong> Este apartado permite analizar la salud de un empleado individualmente.
             </p>
           </div>
           
