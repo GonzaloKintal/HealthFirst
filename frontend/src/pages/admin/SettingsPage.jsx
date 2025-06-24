@@ -31,7 +31,7 @@ const SettingsPage = () => {
         {/* Otras secciones de configuración que vayamos a tener */}
         <div className="bg-background p-6 rounded-lg shadow">
           <h2 className="text-xl font-bold text-foreground mb-4">Otra sección</h2>
-          <p className="text-foreground">Contenido pendiente...</p>
+          <p className="text-foreground">Coming soon...</p>
         </div>
       </div>
     </div>
