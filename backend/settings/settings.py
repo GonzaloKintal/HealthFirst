@@ -39,7 +39,8 @@ DATABASES = {
         'PASSWORD': 'psw',  # Not used with sqlite3.
         'HOST': 'localhost',  # Set to empty string for localhost. Not used with sqlite3.
         'PORT': '5432',  # Set to empty string for default. Not used with sqlite3.
-        'ATOMIC_REQUESTS':True
+        'ATOMIC_REQUESTS':True,
+	'CONN_MAX_AGE': 120,
     },
 }
 
