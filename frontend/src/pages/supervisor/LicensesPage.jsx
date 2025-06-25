@@ -9,7 +9,7 @@ import { getLicenses, deleteLicense, exportLicensesToCSV, getLicenseTypes } from
 import Notification from '../../components/utils/Notification';
 import { formatSimpleDate } from '../../components/utils/FormattedDate';
 import Select from 'react-select';
-import { customStyles } from '../../components/utils/utils';
+import { customStyles, getThreeConsecutivePages } from '../../components/utils/utils';
 
 const LicensesPage = () => {
   const { user } = useAuth();
@@ -17,10 +17,6 @@ const LicensesPage = () => {
   const [licenses, setLicenses] = useState([]);
   const [licenseTypes, setLicenseTypes] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filter, setFilter] = useState('all');
-  const [typeFilter, setTypeFilter] = useState('all');
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [showExportConfirmation, setShowExportConfirmation] = useState(false);
   const [licenseToDelete, setLicenseToDelete] = useState(null);
@@ -31,9 +27,19 @@ const LicensesPage = () => {
     type: '',
     message: ''
   });
+
+  // Agrega esto al inicio de tu componente, antes de los useState
+  const savedFilters = sessionStorage.getItem('licenseFilters');
+  const initialFilters = savedFilters ? JSON.parse(savedFilters) : null;
+
+  // Modifica tus estados iniciales para usar los valores guardados
+  const [searchTerm, setSearchTerm] = useState(initialFilters?.searchTerm || '');
+  const [searchQuery, setSearchQuery] = useState(initialFilters?.searchQuery || '');
+  const [filter, setFilter] = useState(initialFilters?.filter || 'all');
+  const [typeFilter, setTypeFilter] = useState(initialFilters?.typeFilter || 'all');
   const [pagination, setPagination] = useState({
     totalPages: 1,
-    currentPage: 1,
+    currentPage: initialFilters?.currentPage || 1,
     totalLicenses: 0
   });
 
@@ -138,6 +144,15 @@ const LicensesPage = () => {
   
     if (user?.id) {
       fetchLicenses();
+
+      // Guardar filtros en sessionStorage
+      sessionStorage.setItem('licenseFilters', JSON.stringify({
+        searchTerm,
+        searchQuery,
+        filter,
+        typeFilter,
+        currentPage: pagination.currentPage
+      }));
     }
   }, [user, filter, typeFilter, pagination.currentPage, searchQuery]);
 
@@ -372,6 +387,7 @@ const LicensesPage = () => {
       label: type.name
     }))
   ];
+
 
   return (
     <div className="p-3 sm:p-6">
@@ -692,21 +708,21 @@ const LicensesPage = () => {
             >
               <FiChevronLeft className="mr-1" /> Anterior
             </button>
-            
-            {Array.from({ length: pagination.totalPages }, (_, i) => (
+
+            {getThreeConsecutivePages(pagination.currentPage, pagination.totalPages).map((page) => (
               <button
-                key={i + 1}
-                onClick={() => handlePageChange(i + 1)}
+                key={page}
+                onClick={() => handlePageChange(page)}
                 className={`px-3 py-2 border-t border-b border-border text-sm font-medium transition-colors duration-200 ${
-                  pagination.currentPage === i + 1
+                  pagination.currentPage === page
                     ? 'bg-special-light dark:bg-special-dark text-primary-text hover:bg-primary-hover/20 dark:hover:bg-primary-hover/30'
                     : 'bg-background text-foreground hover:bg-card'
                 }`}
               >
-                {i + 1}
+                {page}
               </button>
             ))}
-            
+
             <button
               onClick={() => handlePageChange(pagination.currentPage + 1)}
               disabled={pagination.currentPage === pagination.totalPages}

@@ -7,20 +7,13 @@ import Confirmation from '../../components/utils/Confirmation';
 import { deleteUser, getUsersByFilter } from '../../services/userService';
 import Notification from '../../components/utils/Notification';
 import Select from 'react-select';
-import { customStyles } from '../../components/utils/utils';
+import { customStyles, getThreeConsecutivePages } from '../../components/utils/utils';
 
 const UsersPage = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filter, setFilter] = useState('all');
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [userToDelete, setUserToDelete] = useState(null);
-  const [pagination, setPagination] = useState({
-    totalPages: 1,
-    currentPage: 1,
-    totalUsers: 0
-  });
   const [error, setError] = useState(null);
   const [notification, setNotification] = useState({
     show: false,
@@ -32,6 +25,19 @@ const UsersPage = () => {
   const user = authData ? JSON.parse(authData).user : null;
   const currentUserId = user?.id;
 
+  const savedFilters = sessionStorage.getItem('userFilters');
+  const initialFilters = savedFilters ? JSON.parse(savedFilters) : null;
+
+  const [searchTerm, setSearchTerm] = useState(initialFilters?.searchTerm || '');
+  const [filter, setFilter] = useState(initialFilters?.filter || 'all');
+  const [pagination, setPagination] = useState({
+    totalPages: 1,
+    currentPage: initialFilters?.currentPage || 1,
+    totalUsers: 0
+  });
+
+  const [searchQuery, setSearchQuery] = useState(initialFilters?.searchQuery || '');
+
   // Obtener usuarios del backend
   useEffect(() => {
     const fetchUsers = async () => {
@@ -41,8 +47,8 @@ const UsersPage = () => {
         
         const response = await getUsersByFilter(
           pagination.currentPage, 
-          '',
-          10,
+          searchQuery,
+          5,
           filter
         );
         
@@ -74,44 +80,27 @@ const UsersPage = () => {
         setLoading(false);
       }
     };
-  
+
     fetchUsers();
-  }, [pagination.currentPage, filter]);
+
+    // Guardar filtros en sessionStorage
+    sessionStorage.setItem('userFilters', JSON.stringify({
+      searchTerm,
+      searchQuery,
+      filter,
+      currentPage: pagination.currentPage
+    }));
+  }, [pagination.currentPage, filter, searchQuery]);
 
   // Función para búsqueda manual (con Enter o botón)
   const handleSearch = async () => {
     try {
-      setLoading(true);
       setError(null);
+      setSearchQuery(searchTerm);
       setPagination(prev => ({ ...prev, currentPage: 1 }));
-      
-      const response = await getUsersByFilter(
-        1,
-        searchTerm,
-        5,
-        filter
-      );
-      
-      const transformedUsers = response.users.map(user => ({
-        id: user.id,
-        name: user.first_name + ' ' + user.last_name,
-        dni: user.dni,
-        email: user.email,
-        department: user.department || '',
-        role: user.role
-      }));
-      
-      setUsers(transformedUsers);
-      setPagination({
-        totalPages: response.total_pages || 1,
-        currentPage: 1,
-        totalUsers: response.total_users || 0
-      });
     } catch (err) {
       console.error('Error en búsqueda:', err);
       setError('Error al realizar la búsqueda');
-    } finally {
-      setLoading(false);
     }
   };
   
@@ -266,6 +255,7 @@ const UsersPage = () => {
     { value: 'analyst', label: 'Analista' },
     { value: 'employee', label: 'Empleado' }
   ];
+
 
   return (
     <div className="p-3 sm:p-6">
@@ -532,21 +522,21 @@ const UsersPage = () => {
               <FiChevronLeft className="mr-1" /> 
               <span className="hidden sm:inline">Anterior</span>
             </button>
-            
-            {Array.from({ length: pagination.totalPages }, (_, i) => (
+
+            {getThreeConsecutivePages(pagination.currentPage, pagination.totalPages).map((page) => (
               <button
-                key={i + 1}
-                onClick={() => handlePageChange(i + 1)}
+                key={page}
+                onClick={() => handlePageChange(page)}
                 className={`px-2 sm:px-3 py-2 border-t border-b border-border text-xs sm:text-sm font-medium transition-colors duration-200 ${
-                  pagination.currentPage === i + 1
+                  pagination.currentPage === page
                     ? 'bg-special-light dark:bg-special-dark text-primary-text hover:bg-primary-hover/20 dark:hover:bg-primary-hover/30'
                     : 'bg-background text-foreground hover:bg-card'
                 }`}
               >
-                {i + 1}
+                {page}
               </button>
             ))}
-            
+
             <button
               onClick={() => handlePageChange(pagination.currentPage + 1)}
               disabled={pagination.currentPage === pagination.totalPages}
