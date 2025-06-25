@@ -15,7 +15,7 @@ import Confirmation from '../../components/utils/Confirmation';
 import Notification from '../../components/utils/Notification';
 import MLModelsSkeleton from '../../components/analyst/MLModelSkeleton';
 import Select from 'react-select';
-import { customStyles } from '../../components/utils/utils';
+import { customStyles, getThreeConsecutivePages } from '../../components/utils/utils';
 
 // Función auxiliar para simular un retraso mínimo
 const withMinDelay = async (promise, minDelay = 1000) => {
@@ -219,6 +219,7 @@ const MachineLearningPage = () => {
     { value: 'all', label: 'Todas las versiones' },
     { value: 'active', label: 'Solo versiones activas' }
   ];
+  
 
   if (loading) {
     return <MLModelsSkeleton />;
@@ -471,22 +472,22 @@ const MachineLearningPage = () => {
                 <FiChevronLeft className="mr-1" />
                 <span className="hidden sm:inline">Anterior</span>
               </button>
-              
-              {Array.from({ length: pagination.totalPages }, (_, i) => (
+
+              {getThreeConsecutivePages(pagination.currentPage, pagination.totalPages).map((page) => (
                 <button
-                  key={i + 1}
-                  onClick={() => handlePageChange(i + 1)}
+                  key={page}
+                  onClick={() => handlePageChange(page)}
                   className={`px-2 sm:px-3 py-2 border-t border-b border-border text-xs sm:text-sm font-medium transition-colors duration-200 ${
-                    pagination.currentPage === i + 1
+                    pagination.currentPage === page
                       ? 'bg-special-light dark:bg-special-dark text-primary-text hover:bg-primary-hover/20 dark:hover:bg-primary-hover/30'
                       : 'bg-background text-foreground hover:bg-card'
                   } ${tableLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
                   disabled={tableLoading}
                 >
-                  {i + 1}
+                  {page}
                 </button>
               ))}
-              
+
               <button
                 onClick={() => handlePageChange(pagination.currentPage + 1)}
                 disabled={pagination.currentPage === pagination.totalPages || tableLoading}
