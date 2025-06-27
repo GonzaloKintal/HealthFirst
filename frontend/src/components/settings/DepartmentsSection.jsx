@@ -236,7 +236,7 @@ const DepartmentsSection = () => {
         ) : (
           <>
             {/* Vista de tabla - Solo visible en md y superiores */}
-            <div className="hidden md:block overflow-x-auto">
+            <div className="hidden xl:block overflow-x-auto">
               <table className="min-w-full divide-y divide-border">
                 <thead className="bg-card">
                   <tr>
@@ -311,7 +311,7 @@ const DepartmentsSection = () => {
             </div>
 
             {/* Vista de cards - Solo visible en pantallas pequeñas */}
-            <div className="md:hidden">
+            <div className="xl:hidden">
               {departments.length > 0 ? (
                 <div className="divide-y divide-border">
                   {departments.map((department) => (
