@@ -71,7 +71,7 @@ const SendMessageForm = ({ onSuccess, onError }) => {
       <EmployeeSelector 
         selectedEmployee={formData.selectedEmployee}
         onEmployeeSelected={(value) => setFormData(prev => ({ ...prev, selectedEmployee: value }))}
-        roles={['employee']}
+        roles={['employee', 'admin', 'supervisor', 'analyst']}
       />
 
       <div>
