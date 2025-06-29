@@ -27,6 +27,7 @@ dist-ssr
 __pycache__/
 *.vscode
 local.py
+settings.py
 backend/env/
 backend/venv/
 modelo_clasificador.joblib
