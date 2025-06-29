@@ -12,6 +12,7 @@ dist
 dist-ssr
 *.local
 
+.env
 
 # Editor directories and files
 .vscode/*
@@ -27,7 +28,6 @@ dist-ssr
 __pycache__/
 *.vscode
 local.py
-settings.py
 backend/env/
 backend/venv/
 modelo_clasificador.joblib
