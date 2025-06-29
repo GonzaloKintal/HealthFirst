@@ -5,7 +5,7 @@
 HealthFirst es un sistema de gestión de licencias diseñado para optimizar el proceso de solicitud, aprobación y seguimiento de licencias laborales, integrando funcionalidades avanzadas basadas en machine learning. Este sistema permite a los empleados gestionar solicitudes digitales, a los supervisores aprobar o rechazar solicitudes, y al área de Recursos Humanos (RRHH) realizar un seguimiento eficiente. Además, incorpora análisis de anomalías en solicitudes y aprobaciones, detección de riesgos de salud laboral, y validación automática de certificados médicos, garantizando un enfoque moderno y eficiente para la gestión de salud y bienestar ocupacional. 🌟
 
 ## Equipo de Desarrollo 👥
-
+- **Product Owner (docente)**: Leandro Dikenstein Hidalgo
 - **Scrum Master**: Franco Mendoza 🧑‍💼
 - **Líder Técnico**: Gonzalo Kintal 💻
 - **Desarrolladores backend**: Fabián Hunt, Sergio Irala ⚙️
