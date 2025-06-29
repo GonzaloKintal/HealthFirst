@@ -26,7 +26,7 @@ HealthFirst utiliza un stack tecnológico moderno y escalable para garantizar un
   - Frontend: Playwright 🎭
 - **Pruebas de APIs**: Postman 📡
 - **Integración de Analíticas**: Metabase 📈
-- **Machine Learning**: Scikit-learn. Modelos para detección de anomalías, predicción de requerimientos documentales y análisis de riesgos de salud 🤖
+- **Machine Learning**: Scikit-learn. Modelos para detección de anomalías, análisis de riesgos de salud y análisis inteligente de certificados 🤖
 
 ## Funcionalidades ✨
 
